@@ -2,7 +2,6 @@ package opRgaf;
 
 
 
-
 import java.awt.Cursor;
 import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
@@ -323,7 +322,7 @@ public class OpRgaf implements WindowListener{
 		sqlInfo.setFrame(jFrame);
 		jFrame.addWindowListener(this);
 		jFrame.setSize(1000,675);
-		jFrame.setTitle("Thera-Pi  Rezeptgebührrechnung/Ausfallrechnung/Mahnwesen  [IK: "+aktIK+"] "+"[Server-IP: "+dbIpAndName+"]");
+		jFrame.setTitle("Thera-Pi  Rezeptgebühr-/Ausfall-/Verkaufsrechnungen ausbuchen u. Mahnwesen  [IK: "+aktIK+"] "+"[Server-IP: "+dbIpAndName+"]");
 		jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		jFrame.setLocationRelativeTo(null);
 		otab = new OpRgafTab();

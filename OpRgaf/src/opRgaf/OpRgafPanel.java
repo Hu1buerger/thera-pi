@@ -1,11 +1,12 @@
-package opRgaf;
-
+﻿package opRgaf;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigDecimal;
@@ -26,7 +27,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -69,7 +72,23 @@ import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
 import io.RehaIOMessages;
 
-public class OpRgafPanel extends JXPanel implements TableModelListener{
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+interface IfCbxCallBack
+{
+	/**
+	 * Callbackfunktionen, die bei Änderung der CheckBox-Auswahl in RgAfVkSelect aufgerufen werden
+	 * 
+	 * @author McM
+	 */
+	   void useRGR(boolean rgr);
+	   void useAFR(boolean afr);
+	   void useVKR(boolean vkr);
+}
+
+public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCallBack {
 
 	/**
 	 *
@@ -80,6 +99,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 	JRtaTextField offen = null;
 	JRtaTextField[] tfs = {null,null,null,null};
 	JButton[] buts = {null,null,null};
+	enum btIdx {ausbuchen,suchen,dummy};
+	int btAusbuchen = btIdx.ausbuchen.ordinal();
+	int btSuchen = btIdx.suchen.ordinal();
 	JRtaComboBox combo = null;
 	JXPanel content = null;
 	KeyListener kl = null;
@@ -92,26 +114,44 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 	JLabel summeGesamtOffen;
 	JLabel anzahlSaetze;
 	JRtaCheckBox bar = null;
-
+	JRtaCheckBox ChkRGR = null;
+	JRtaCheckBox ChkAFR = null;
+	JRtaCheckBox ChkVKR = null;
+	
 	JButton kopie;
 
 	BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
 	BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
 	BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
+
 	DecimalFormat dcf = new DecimalFormat("###0.00");
 
 	int ccount = -2;
 
 	private HashMap<String,String> hmRezgeb = new HashMap<String,String>();
-	final String stmtString =
+	final String stmtString = 
+/*
 		"select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y'))," +
 		"t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "+
 		"from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "+
 		"left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
+*/
+		"SELECT concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(t2.geboren,'%d.%m.%Y')),t1.rnr,t1.rdatum,t1.rgesamt," +
+		"t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id,t1.pat_id " +
+		"FROM (SELECT v_nummer as rnr,v_datum as rdatum,v_betrag as rgesamt,v_offen as roffen,'' as rpbetrag," +
+		"v_bezahldatum as rbezdatum,mahndat1 as rmahndat1,mahndat2 as rmahndat2,'' as reznr,verklisteid as id,pat_id as pat_id " +
+		"FROM verkliste where v_nummer like 'VR-%' " +
+		"UNION SELECT rnr,rdatum,rgesamt,roffen,rpbetrag,rbezdatum,rmahndat1,rmahndat2,reznr,id as id,pat_intern as pat_id " +
+		"FROM rgaffaktura ) t1 LEFT JOIN pat5 AS t2 ON (t1.pat_id = t2.pat_intern) LEFT JOIN kass_adr AS t3 ON ( t2.kassenid = t3.id )";
+
 	int gefunden;
 	String[] spalten = {"Name,Vorname,Geburtstag","Rechn.Nr.","Rechn.Datum","Gesamtbetrag","Offen","Bearb.Gebühr","bezahlt am","1.Mahnung","2.Mahnung","Krankenkasse","RezeptNr.","id"};
 	String[] colnamen ={"nix","rnr","rdatum","rgesamt","roffen","rpbetrag","rbezdatum","rmahndat1","rmahndat2","nix","nix","id"};
 	OpRgafTab eltern = null;
+
+	private RgAfVkSelect selPan;
+	private RgAfVkGesamt sumPan;
+
 	public OpRgafPanel(OpRgafTab xeltern){
 		super();
 		this.eltern = xeltern;
@@ -136,18 +176,21 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		});
 	}
 
-	private JXPanel getContent(){
-		content = new JXPanel();
-		//				 1     2     3    4      5      6      7    8       9    10    11   12   13   14    15
-		String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,  p,1dlu,50dlu:g,2dlu,50dlu,5dlu,50dlu,5dlu,50dlu,2dlu,50dlu,2dlu,50dlu,10dlu";
-		//				 1     2  3     4       5    6      7
-		String ywerte = "10dlu,p,2dlu,150dlu:g,5dlu,80dlu,0dlu";
-		FormLayout lay = new FormLayout(xwerte,ywerte);
+	private JPanel getContent(){
+		FormLayout lay = new FormLayout(
+		//        1     2     3    4     5     6 7    8       9     10    11   12    13   14    15   16    17   18    19
+				 "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,50dlu:g,10dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,2dlu,50dlu,10dlu",	// xwerte,
+		//        1     2 3     4        5    6 7     8    9 10   11
+				 "15dlu,p,15dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,8dlu,0dlu"															// ywerte
+				);
+		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
-		content.setLayout(lay);
 
-		JLabel lab = new JLabel("Suchkriterium");
-		content.add(lab,cc.xy(2,2));
+		int colCnt=2, rowCnt=2;
+		
+		builder.addLabel("Suchkriterium", cc.xy(colCnt++, rowCnt));			// 2,2
 
 		String[] args = {"Rechnungsnummer =","Rechnungsnummer enthält",
 				"Rechnungsbetrag =","Rechnungsbetrag >=","Rechnungsbetrag <=",
@@ -160,38 +203,31 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		//int vorauswahl =  Arrays.asList(args).indexOf("Noch offen >=");
 		int vorauswahl =  0;
 		combo = new JRtaComboBox(args);
-		combo.setSelectedIndex( vorauswahl );
-		content.add(combo,cc.xy(4,2));
+		combo.setSelectedIndex( vorauswahl ); 
+		builder.add(combo, cc.xy(++colCnt,rowCnt));							// 4,2
 
-		lab = new JLabel("finde:");
-		content.add(lab,cc.xy(6,2));
+		++colCnt;
+		builder.addLabel("finde:", cc.xy(++colCnt, rowCnt));				// 6,2
+		
+		++colCnt;
 		suchen = new JRtaTextField("nix",true);
 		suchen.setName("suchen");
 		suchen.addKeyListener(kl);
-		content.add(suchen,cc.xy(8,2,CellConstraints.FILL,CellConstraints.DEFAULT));
+		builder.add(suchen,cc.xy(++colCnt, rowCnt,CellConstraints.FILL,CellConstraints.DEFAULT));	// 8,2
+		
+		// Auswahl RGR/AFR/Verkauf
+		++colCnt;
+		selPan = new RgAfVkSelect("suche in: ");							// Subpanel mit Checkboxen anlegen
+		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
+		//selPan.ask("Tabellen:");
+		selPan.setCallBackObj(this);										// callBack registrieren
+		// Ende Auswahl
 
-		buts[1] = ButtonTools.macheButton("suchen", "suchen", al);
-		buts[1].setMnemonic('s');
-		content.add(buts[1],cc.xy(10,2));
+		buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
+		buts[btSuchen].setMnemonic('s');
+		builder.add(buts[btSuchen],cc.xy(18,rowCnt));
 
-		bar = new JRtaCheckBox("bar in Kasse");
-		if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
-			bar.setSelected(true);
-		}
-		content.add(bar,cc.xy(12,2));
-
-		lab = new JLabel("Geldeingang:");
-		content.add(lab,cc.xy(14,2));
-		tfs[0] = new JRtaTextField("F",true,"6.2","");
-		tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
-		tfs[0].setText("0,00");
-		tfs[0].setName("offen");
-		tfs[0].addKeyListener(kl);
-		content.add(tfs[0],cc.xy(16,2));
-
-		content.add((buts[0] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),cc.xy(18,2));
-		buts[0].setMnemonic('a');
-
+//**********************
 		while(!OpRgaf.DbOk){
 
 		}
@@ -235,53 +271,56 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 
 
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
-		content.add(jscr,cc.xyw(2,4,17));
+		rowCnt +=2;
+		builder.add(jscr,cc.xyw(2,rowCnt,17));		// 2,4
+//**********************
 
-		JXPanel auswertung = new JXPanel();
-		//                 1        2   3    4        5     6  7
-		String xwerte2 = "10dlu,150dlu,5dlu,100dlu,150dlu:g,p,10dlu";
-		String ywerte2 = "0dlu,p,2dlu,p,2dlu,p,2dlu,p,10dlu";
-		FormLayout lay2 = new FormLayout(xwerte2,ywerte2);
-		CellConstraints cc2 = new CellConstraints();
-		auswertung.setLayout(lay2);
-		lab = new JLabel("Offene Posten gesamt:");
-		auswertung.add(lab,cc2.xy(2,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeGesamtOffen = new JLabel("0,00");
-		summeGesamtOffen.setForeground(Color.RED);
-		auswertung.add(summeGesamtOffen,cc2.xy(4, 2));
+		rowCnt +=2;									// 6
+		colCnt = 4;
+		builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));		// 4,6
+		colCnt = 12;
+		builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));										// 12,6
 
-		lab = new JLabel("Offene Posten der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,4,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeOffen = new JLabel("0,00");
-		summeOffen.setForeground(Color.BLUE);
-		auswertung.add(summeOffen,cc2.xy(4,4));
+		++colCnt;
+		tfs[0] = new JRtaTextField("F",true,"6.2","");
+		tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
+		tfs[0].setText("0,00");
+		tfs[0].setName("offen");
+		tfs[0].addKeyListener(kl);
+		builder.add(tfs[0],cc.xy(++colCnt,rowCnt));														// 14,6
 
-		lab = new JLabel("Summe Rechnunsbetrag der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,6,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeRechnung = new JLabel("0,00");
-		summeRechnung.setForeground(Color.BLUE);
-		auswertung.add(summeRechnung,cc2.xy(4,6));
+		++colCnt;
+		bar = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
+		if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
+			bar.setSelected(true);
+		}
+		
+		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(18,6));
+//**********************
 
-		lab = new JLabel("Anzahl Datensätze der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,8,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		anzahlSaetze = new JLabel("0");
-		anzahlSaetze.setForeground(Color.BLUE);
-		auswertung.add(anzahlSaetze,cc2.xy(4,8));
+		rowCnt +=2;
+		colCnt = 1;
+		builder.add(new JSeparator(SwingConstants.HORIZONTAL), cc.xyw(colCnt,rowCnt++,19));
 
-		auswertung.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc2.xy(6,2));
-		content.add(auswertung,cc.xyw(1,6,17));
-		content.validate();
+		sumPan = new RgAfVkGesamt();
+		builder.add(sumPan.getPanel(),cc.xyw(colCnt, rowCnt,2,CellConstraints.LEFT,CellConstraints.TOP));	//2,2
+
+		calcGesamtOffen();
+		
+		return builder.getPanel();
+	}
+	
+	private void calcGesamtOffen() {
 		new SwingWorker<Void,Void>(){
 			@Override
 			protected Void doInBackground() throws Exception {
-				ermittleGesamtOffen();
+				sumPan.ermittleGesamtOffen(selPan.useRGR(), selPan.useAFR(), selPan.useVKR());
 				return null;
 			}
 
 		}.execute();
-
-		return content;
 	}
+	
 	private OpRgafPanel getInstance(){
 		return this;
 	}
@@ -392,15 +431,15 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 					schreibeAbfrage();
 					tabmod.addTableModelListener(getInstance());
 					suchen.setEnabled(true);
-					buts[0].setEnabled(true);
+					buts[btAusbuchen].setEnabled(true);
 
 				}catch(Exception ex){
 					ex.printStackTrace();
-					JOptionPane.showMessageDialog(null,"Fehler beim einlesen der Datensätze");
+					JOptionPane.showMessageDialog(null,"Fehler beim Einlesen der Datensätze");
 					OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 					setzeFocus();
 					suchen.setEnabled(true);
-					buts[0].setEnabled(true);
+					buts[btAusbuchen].setEnabled(true);
 				}
 				OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 				setzeFocus();
@@ -471,25 +510,27 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		tfs[0].setText("0,00");
 	}
 
+/*  ==> RgAfVkGesamt
 	private void ermittleGesamtOffen(){
 		Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(roffen) from rgaffaktura where roffen > '0.00'");
 		gesamtOffen = BigDecimal.valueOf( Double.parseDouble(offen.get(0).get(0)) );
-		schreibeGesamtOffen();
+		sumPan.schreibeGesamtOffen(dcf.format(gesamtOffen));
 	}
+*/
 	private void schreibeAbfrage(){
-		schreibeGesamtOffen();
-		summeOffen.setText(dcf.format(suchOffen));
-		summeRechnung.setText(dcf.format(suchGesamt));
-		anzahlSaetze.setText(Integer.toString(gefunden));
-	}
-	private void schreibeGesamtOffen(){
-		summeGesamtOffen.setText( dcf.format(gesamtOffen) );
+		sumPan.schreibeGesamtOffen();
+		sumPan.setSuchOffen(suchOffen);
+		sumPan.schreibeSuchOffen();
+		sumPan.setSuchGesamt(suchGesamt);
+		sumPan.schreibeSuchGesamt();
+		sumPan.setAnzRec(gefunden);
+		sumPan.schreibeAnzRec();
 	}
 
-
-	public void sucheRezept(String rezept){
+	public void sucheRezept(String rezept){		// <- nutzt das jemand?
 		suchen.setText(rezept);
-		combo.setSelectedIndex(10);
+		//combo.setSelectedIndex(8);
+		combo.setSelectedItem("Rezeptnummer =");
 		doSuchen();
 	}
 
@@ -498,61 +539,68 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 
 			return;
 		}
-		//tab.setRowSorter(null);
 		int suchart = combo.getSelectedIndex();
+		//String suchVal = combo.getItemAt(combo.getSelectedIndex()).toString();
+		//System.out.println("OpRgafPanel-doSuchen-suche: " +'"' + suchVal + '"' + "(" + suchart + ")");  // s. String[] args
 		String cmd = "";
-		try{
-		switch(suchart){
-		case 0:
-			cmd = stmtString+" where rnr ='"+suchen.getText().trim()+"'";
-			break;
-		case 1:					// Rechnungsnummer enthält
-			cmd = stmtString+" where rnr like'%"+suchen.getText().trim()+"%' order by t1.id";
-			break;
-		case 2:					// Rechnungsbetrag =
-			cmd = stmtString+" where rgesamt ='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 3:					//  >=
-			cmd = stmtString+" where rgesamt >='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 4:					//  <=
-			cmd = stmtString+" where rgesamt <='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 5:					// Noch offen =
-			cmd = stmtString+" where roffen ='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 6:					//  >=
-			cmd = stmtString+" where roffen >='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 7:					//  <=
-			cmd = stmtString+" where roffen <='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
-			break;
-		case 8:					// Nachname beginnt mit
-			cmd = stmtString+" where t2.n_name like'"+suchen.getText().trim()+"%' order by t1.id";
-			break;
-		case 9:					// Rezeptnummer =
-			cmd = stmtString+" where t1.reznr ='"+suchen.getText().trim()+"'";
-			break;
-		case 10:					// Rechnungsdatum =
-			cmd = stmtString+" where rdatum ='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
-			break;
-		case 11:				//  >=
-			cmd = stmtString+" where rdatum >='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
-			break;
-		case 12:				//  <=
-			cmd = stmtString+" where rdatum <='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
-			break;
-		case 13:				// Krankenkasse enthält
-			cmd = stmtString+" where t3.kassen_nam1 like'%"+suchen.getText().trim()+"%'";
-			break;
+		String tmpStr = selPan.bills2search("rnr");
+		String whereToSearch = " WHERE ";
+		if(tmpStr.length() > 0){
+			whereToSearch = whereToSearch + " ( " + tmpStr + " ) AND ";
 		}
 
+		try{
+//			switch(suchVal){		// <- funktioniert erst ab Java 1.7
+			switch(suchart){
+			case 0:
+				cmd = stmtString+" where rnr ='"+suchen.getText().trim()+"'";
+				break;
+			case 1:					// Rechnungsnummer enthält
+				cmd = stmtString+ whereToSearch + " rnr like'%"+suchen.getText().trim()+"%' order by t1.id";
+				break;
+			case 2:					// Rechnungsbetrag =
+				cmd = stmtString+ whereToSearch + " rgesamt ='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 3:					//  >=
+				cmd = stmtString+ whereToSearch + " rgesamt >='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 4:					//  <=
+				cmd = stmtString+ whereToSearch + " rgesamt <='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 5:					// Noch offen =
+				cmd = stmtString+ whereToSearch + " roffen ='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 6:					//  >=
+				cmd = stmtString+ whereToSearch + " t1.roffen >='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 7:					//  <=
+				cmd = stmtString+ whereToSearch + " roffen <='"+suchen.getText().trim().replace(",", ".")+"' order by t1.id";
+				break;
+			case 8:					// Nachname beginnt mit
+				cmd = stmtString+ whereToSearch + " t2.n_name like'"+suchen.getText().trim()+"%' order by t1.id";
+				break;
+			case 9:					// Rezeptnummer =
+				cmd = stmtString+ whereToSearch + " t1.reznr ='"+suchen.getText().trim()+"'";
+				break;
+			case 10:					// Rechnungsdatum =
+				cmd = stmtString+ whereToSearch + " rdatum ='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
+				break;
+			case 11:				//  >=
+				cmd = stmtString+ whereToSearch + " rdatum >='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
+				break;
+			case 12:				//  <=
+				cmd = stmtString+ whereToSearch + " rdatum <='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
+				break;
+			case 13:				// Krankenkasse enthält
+				cmd = stmtString+ whereToSearch + " t3.kassen_nam1 like'%"+suchen.getText().trim()+"%'";
+				break;
+			}
 		}catch(Exception ex){
 			//ex.printStackTrace();
 		}
 
 		if(!cmd.equals("")){
-			buts[0].setEnabled(false);
+			buts[btAusbuchen].setEnabled(false);
 			suchen.setEnabled(false);
 			try{
 			starteSuche(cmd);
@@ -563,7 +611,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 			OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 
 			suchen.setEnabled(true);
-			buts[0].setEnabled(true);
+			buts[btAusbuchen].setEnabled(true);
 			setzeFocus();
 		}
 
@@ -571,8 +619,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 
 
 	class MyOpRgafTableModel extends DefaultTableModel{
-		   /**
-		 *
+		/**
+		 * 
 		 */
 		private static final long serialVersionUID = 1L;
 
@@ -626,14 +674,16 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 			e.printStackTrace();
 		}
 		try{
-
-
+			
 			rs = stmt.executeQuery(sstmt);
 			Vector<Object> vec = new Vector<Object>();
 			int durchlauf = 0;
-			suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-			suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
-			gefunden = 0;
+			sumPan.delSuchGesamt();
+			sumPan.delSuchOffen();
+			sumPan.delAnzRec();
+			suchGesamt = sumPan.getSuchGesamt();
+			suchOffen = sumPan.getSuchOffen();
+			gefunden = sumPan.getAnzRec();
 			ResultSetMetaData rsMetaData = null;
 			while(rs.next()){
 				vec.clear();
@@ -957,4 +1007,19 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 
 			OpRgaf.thisFrame.setCursor(OpRgaf.thisClass.normalCursor);
 	}
+	@Override
+	public void useRGR(boolean rgr) {
+		calcGesamtOffen();
+	}
+	@Override
+	public void useAFR(boolean afr) {
+		calcGesamtOffen();
+		
+	}
+	@Override
+	public void useVKR(boolean vkr) {
+		calcGesamtOffen();
+		
+	}
+
 }
