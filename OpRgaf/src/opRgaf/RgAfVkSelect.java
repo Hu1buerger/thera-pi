@@ -66,17 +66,11 @@ public class RgAfVkSelect implements ItemListener{
 		chkAFR = (JRtaCheckBox) builder.add(chkAFR,cc.xy(4,2));
 		chkVKR = (JRtaCheckBox) builder.add(chkVKR,cc.xy(4,3));
 		
-/*
- 		// letzte Auswahl wiederherstellen (Bsp.) - muß 'ne Methode werden
- 		if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
-			rgr.setSelected(true);
-		}
-		// stattdessen erstmal bisher. Zustand als default:
- */
-		chkRGR.setSelected(true);
-		chkAFR.setSelected(true);
+		chkRGR.setSelected(OpRgaf.iniOpRgAf.getIncRG()); 		// letzte Auswahl wiederherstellen
+		chkAFR.setSelected(OpRgaf.iniOpRgAf.getIncAR());
+		chkVKR.setSelected(OpRgaf.iniOpRgAf.getIncVK());
 
-		chkRGR.addItemListener(this);			// Listener registrieren (setzt 'implements ... ItemListener' in class definition voraus)
+		chkRGR.addItemListener(this);							// Listener registrieren (setzt 'implements ... ItemListener' in class definition voraus)
 		chkAFR.addItemListener(this);
 		chkVKR.addItemListener(this);		
 

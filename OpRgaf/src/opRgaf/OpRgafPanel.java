@@ -1,12 +1,9 @@
 ﻿package opRgaf;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.math.BigDecimal;
@@ -114,9 +111,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 	JLabel summeGesamtOffen;
 	JLabel anzahlSaetze;
 	JRtaCheckBox bar = null;
-	JRtaCheckBox ChkRGR = null;
-	JRtaCheckBox ChkAFR = null;
-	JRtaCheckBox ChkVKR = null;
+//	JRtaCheckBox ChkRGR = null;
+//	JRtaCheckBox ChkAFR = null;
+//	JRtaCheckBox ChkVKR = null;
 	
 	JButton kopie;
 
@@ -200,8 +197,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 				"Rechnungsdatum =","Rechnungsdatum >=","Rechnungsdatum <=",
 				"Krankenkasse enthält"};
 
-		//int vorauswahl =  Arrays.asList(args).indexOf("Noch offen >=");
-		int vorauswahl =  0;
+		int vorauswahl =  OpRgaf.iniOpRgAf.getVorauswahl();
 		combo = new JRtaComboBox(args);
 		combo.setSelectedIndex( vorauswahl ); 
 		builder.add(combo, cc.xy(++colCnt,rowCnt));							// 4,2
@@ -291,9 +287,10 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 
 		++colCnt;
 		bar = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
-		if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
-			bar.setSelected(true);
+		if(OpRgaf.iniOpRgAf.getWohinBuchen().equals("Kasse")){
+			bar.setSelected(true);			
 		}
+
 		
 		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(18,6));
 //**********************
@@ -510,13 +507,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 		tfs[0].setText("0,00");
 	}
 
-/*  ==> RgAfVkGesamt
-	private void ermittleGesamtOffen(){
-		Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(roffen) from rgaffaktura where roffen > '0.00'");
-		gesamtOffen = BigDecimal.valueOf( Double.parseDouble(offen.get(0).get(0)) );
-		sumPan.schreibeGesamtOffen(dcf.format(gesamtOffen));
-	}
-*/
+//	private void ermittleGesamtOffen(){  ==> RgAfVkGesamt
+
 	private void schreibeAbfrage(){
 		sumPan.schreibeGesamtOffen();
 		sumPan.setSuchOffen(suchOffen);
@@ -540,6 +532,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 			return;
 		}
 		int suchart = combo.getSelectedIndex();
+		OpRgaf.iniOpRgAf.setVorauswahl(suchart);		// Auswahl merken
 		//String suchVal = combo.getItemAt(combo.getSelectedIndex()).toString();
 		//System.out.println("OpRgafPanel-doSuchen-suche: " +'"' + suchVal + '"' + "(" + suchart + ")");  // s. String[] args
 		String cmd = "";
@@ -1009,15 +1002,18 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 	}
 	@Override
 	public void useRGR(boolean rgr) {
+		OpRgaf.iniOpRgAf.setIncRG(rgr);
 		calcGesamtOffen();
 	}
 	@Override
 	public void useAFR(boolean afr) {
+		OpRgaf.iniOpRgAf.setIncAR(afr);
 		calcGesamtOffen();
 		
 	}
 	@Override
 	public void useVKR(boolean vkr) {
+		OpRgaf.iniOpRgAf.setIncVK(vkr);
 		calcGesamtOffen();
 		
 	}
