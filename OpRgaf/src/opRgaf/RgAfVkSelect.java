@@ -171,3 +171,15 @@ public class RgAfVkSelect implements ItemListener{
 	}
 
 }
+
+interface IfCbxCallBack
+{
+	/**
+	 * Callbackfunktionen, die bei Änderung der CheckBox-Auswahl in RgAfVkSelect aufgerufen werden
+	 * 
+	 * @author McM
+	 */
+	   void useRGR(boolean rgr);
+	   void useAFR(boolean afr);
+	   void useVKR(boolean vkr);
+}

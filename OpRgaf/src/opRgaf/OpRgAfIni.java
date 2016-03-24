@@ -177,15 +177,22 @@ public class OpRgAfIni {
 	public int getVorauswahl(){
 		return vorauswahlSuchkriterium;
 	}
-	
-
-	public HashMap<String,Object> getMahnParameter (){
+		public HashMap<String,Object> getMahnParameter (){
 		return mahnParam;
 	}
-	
 	public String getWohinBuchen (){
 		return (String) mahnParam.get("inkasse");
 	}
+	public String getFormNb (int lfdNb){
+		return (String) mahnParam.get("FormularMahnung"+lfdNb);
+	}
+	public int getFrist(int lfdNb){
+		return (Integer) mahnParam.get("frist"+lfdNb);
+	}
+	public String getDrucker (){
+		return (String) mahnParam.get("drucker");
+	}
+	
 
 	
 	

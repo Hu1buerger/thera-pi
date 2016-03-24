@@ -70,20 +70,9 @@ import ag.ion.noa.NOAException;
 import io.RehaIOMessages;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-
-interface IfCbxCallBack
-{
-	/**
-	 * Callbackfunktionen, die bei Änderung der CheckBox-Auswahl in RgAfVkSelect aufgerufen werden
-	 * 
-	 * @author McM
-	 */
-	   void useRGR(boolean rgr);
-	   void useAFR(boolean afr);
-	   void useVKR(boolean vkr);
-}
 
 public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCallBack {
 
@@ -212,7 +201,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 		builder.add(suchen,cc.xy(++colCnt, rowCnt,CellConstraints.FILL,CellConstraints.DEFAULT));	// 8,2
 		
 		// Auswahl RGR/AFR/Verkauf
-		++colCnt;
+		colCnt += 2;
 		selPan = new RgAfVkSelect("suche in: ");							// Subpanel mit Checkboxen anlegen
 		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
 		//selPan.ask("Tabellen:");
@@ -1009,13 +998,11 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 	public void useAFR(boolean afr) {
 		OpRgaf.iniOpRgAf.setIncAR(afr);
 		calcGesamtOffen();
-		
 	}
 	@Override
 	public void useVKR(boolean vkr) {
 		OpRgaf.iniOpRgAf.setIncVK(vkr);
 		calcGesamtOffen();
-		
 	}
 
 }

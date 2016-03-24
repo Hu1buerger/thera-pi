@@ -27,6 +27,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -65,8 +66,14 @@ import ag.ion.bion.officelayer.text.ITextField;
 import ag.ion.bion.officelayer.text.ITextFieldService;
 import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
+import ag.ion.noa.internal.printing.PrintProperties;
 
-public class OpRgafMahnungen extends JXPanel{
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+public class OpRgafMahnungen extends JXPanel implements IfCbxCallBack{
 
 	/**
 	 * 
@@ -109,6 +116,7 @@ public class OpRgafMahnungen extends JXPanel{
 	String[] spalten = {"Name,Vorname,Geburtstag","Rechn.Nr.","Rechn.Datum","Gesamtbetrag","Offen","Bearb.Gebühr","Bezahldatum","Mahndatum1","Mahndatum2","Krankenkasse","RezeptNr.","id"};
 	String[] colnamen ={"nix","rnr","rdatum","rgesamt","roffen","rpbetrag","rbezdatum","rmahndat1","rmahndat2","nix","RezeptNr.","id"};
 	
+	private RgAfVkSelect selPan;
 	
 	public OpRgafMahnungen(OpRgafTab xeltern){
 		super();
@@ -121,7 +129,7 @@ public class OpRgafMahnungen extends JXPanel{
 	}
 	
 	private JXPanel getContent(){
-		String xwerte = "fill:0:grow(0.5),fill:0:grow(0.5),2dlu";
+		String xwerte = "fill:0:grow(0.5),fill:0:grow(0.5),9dlu";
 		//                 1  2  3   4  5   6      7
 		String ywerte = "0dlu,p,0dlu,p,0dlu,p,fill:0:grow(1.0)";
 		content = new JXPanel();
@@ -129,7 +137,8 @@ public class OpRgafMahnungen extends JXPanel{
 		CellConstraints cc = new CellConstraints();
 		content.setLayout(lay);
 		
-		content.add(getRadioPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
+//		content.add(getRadioPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
+		content.add(getSuchEinstellungPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
 		content.add(getRechnungDatenPanel(),cc.xy(1,4));
 		content.add(getTablePanel(),cc.xy(2,4,CellConstraints.FILL,CellConstraints.FILL));
 		content.add(getButtonPanel(),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
@@ -291,6 +300,82 @@ public class OpRgafMahnungen extends JXPanel{
 		return rechnungpan;
 
 	}
+	
+	private JPanel getSuchEinstellungPanel(){
+		FormLayout lay = new FormLayout(
+		//        1    2      3    4     5    6       7    8      9    10    11    
+				"15dlu,140dlu,2dlu,60dlu,2dlu,60dlu:g,2dlu,164dlu,2dlu,50dlu,1dlu",		// xwerte,
+		//        1   2 3  
+				"15dlu,p,15dlu"															// ywerte
+				);
+		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+		builder.getPanel().setOpaque(false);
+		CellConstraints cc = new CellConstraints();
+
+		int colCnt=2, rowCnt=2;
+
+		builder.addLabel("Bitte die gewünschte Mahnstufe einstellen:", cc.xy(colCnt++, rowCnt));			// 2,2
+		
+		/********/
+		JXPanel pan = new JXPanel();
+		//pan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		//                1     2     3    4    5     6    7     8     9    10    11   12     13
+		String xwerte2 = "2dlu,p,2dlu";
+		//                1     2  3
+//		String ywerte2 = "3dlu,p,p,p";		// 3 Einträge
+		String ywerte2 = "9dlu,p,p,p";
+		FormLayout lay2 = new FormLayout(xwerte2,ywerte2);
+		CellConstraints cc2 = new CellConstraints();
+		pan.setLayout(lay2);
+
+		rbMahnart[0] = new JRtaRadioButton("1. Mahnung");
+		rbMahnart[0].setSelected(true);
+		rbMahnart[0].setName("mahnung1");
+		rbMahnart[0].addActionListener(al);
+		bgroup.add(rbMahnart[0]);
+		pan.add(rbMahnart[0],cc2.xy(2,2));
+		rbMahnart[1] = new JRtaRadioButton("2. Mahnung");
+		rbMahnart[1].setName("mahnung2");
+		rbMahnart[1].addActionListener(al);
+		bgroup.add(rbMahnart[1]);
+		pan.add(rbMahnart[1],cc2.xy(2,3));
+/*		rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
+		rbMahnart[3].setName("mahnung4");
+		rbMahnart[3].addActionListener(al);
+		bgroup.add(rbMahnart[3]);
+		pan.add(rbMahnart[3],cc2.xy(2,4));
+*/
+		pan.validate();
+		++colCnt;
+		builder.add(pan,cc.xywh(colCnt++, rowCnt-1,1,3,CellConstraints.FILL,CellConstraints.FILL));			// 4,1..3
+		
+		// dummys:
+		rbMahnart[4] = new JRtaRadioButton("nur Ausfallrechnungen");
+		rbMahnart[5] = new JRtaRadioButton("nur Rezeptgebührrech.");
+		rbMahnart[6] = new JRtaRadioButton("beide Rechn.Arten");
+
+		/********/
+		
+		colCnt += 2;
+		// Auswahl RGR/AFR/Verkauf
+		selPan = new RgAfVkSelect("suche in: ");							// Subpanel mit Checkboxen anlegen
+		builder.add(selPan.getPanel(),cc.xywh(colCnt++, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//8..10,1..3
+		
+		//selPan.ask("Tabellen:");
+		selPan.setCallBackObj(this);										// callBack registrieren
+		// Ende Auswahl
+
+		colCnt += 2;
+
+		suchen = ButtonTools.macheButton("suchen", "suchen", al);
+		suchen.setMnemonic('s');
+		builder.add(suchen,cc.xy(colCnt, rowCnt));
+		
+		return builder.getPanel();
+	}
+
+	
 	private JXPanel getRadioPanel(){
 		JXPanel radiopan = new JXPanel();
 		radiopan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
@@ -298,7 +383,7 @@ public class OpRgafMahnungen extends JXPanel{
 		//                1     2     3    4    5     6    7     8     9    10       11   12     13
 		String xwerte = "15dlu,150dlu,2dlu,60dlu,2dlu,60dlu,2dlu,60dlu,2dlu,60dlu:g,10dlu,30dlu,0dlu:g,5dlu";
 		//                1    2  3
-		String ywerte = "10dlu,p,10dlu";
+		String ywerte = "5dlu,p,5dlu";
 		FormLayout lay = new FormLayout(xwerte,ywerte);
 		CellConstraints cc = new CellConstraints();
 		radiopan.setLayout(lay);
@@ -306,28 +391,9 @@ public class OpRgafMahnungen extends JXPanel{
 		JLabel lab = new JLabel("Bitte die gewünschte Mahnstufe einstellen");
 		radiopan.add(lab,cc.xy(2,2));
 		
-		rbMahnart[0] = new JRtaRadioButton("1. Mahnung");
-		rbMahnart[0].setSelected(true);
-		rbMahnart[0].setName("mahnung1");
-		rbMahnart[0].addActionListener(al);
-		bgroup.add(rbMahnart[0]);
-		radiopan.add(rbMahnart[0],cc.xy(4,2));
-		
-		rbMahnart[1] = new JRtaRadioButton("2. Mahnung");
-		rbMahnart[1].setName("mahnung2");
-		rbMahnart[1].addActionListener(al);
-		bgroup.add(rbMahnart[1]);
-		radiopan.add(rbMahnart[1],cc.xy(6,2));
-
-		
-		rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
-		rbMahnart[3].setName("mahnung4");
-		rbMahnart[3].addActionListener(al);
-		bgroup.add(rbMahnart[3]);
-		radiopan.add(rbMahnart[3],cc.xy(8,2));
 		/********/
 		JXPanel pan = new JXPanel();
-		pan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		//pan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		//                1     2     3    4    5     6    7     8     9    10    11   12     13
 		String xwerte2 = "2dlu,p,2dlu";
 		//                1    2  3
@@ -336,27 +402,57 @@ public class OpRgafMahnungen extends JXPanel{
 		CellConstraints cc2 = new CellConstraints();
 		pan.setLayout(lay2);
 
+		rbMahnart[0] = new JRtaRadioButton("1. Mahnung");
+		rbMahnart[0].setSelected(true);
+		rbMahnart[0].setName("mahnung1");
+		rbMahnart[0].addActionListener(al);
+		bgroup.add(rbMahnart[0]);
+		pan.add(rbMahnart[0],cc2.xy(2,1));
+		rbMahnart[1] = new JRtaRadioButton("2. Mahnung");
+		rbMahnart[1].setName("mahnung2");
+		rbMahnart[1].addActionListener(al);
+		bgroup.add(rbMahnart[1]);
+		pan.add(rbMahnart[1],cc2.xy(2,2));
+		rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
+		rbMahnart[3].setName("mahnung4");
+		rbMahnart[3].addActionListener(al);
+		bgroup.add(rbMahnart[3]);
+		pan.add(rbMahnart[3],cc2.xy(2,3));
+		pan.validate();
+		radiopan.add(pan,cc.xy(4,2,CellConstraints.FILL,CellConstraints.FILL));
+		/********/
+		/*
+		JXPanel pan2 = new JXPanel();
+		pan2.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		//                1     2     3    4    5     6    7     8     9    10    11   12     13
+		String xwerte3 = "2dlu,p,2dlu";
+		//                1    2  3
+		String ywerte3 = "p,p,p";
+		FormLayout lay3 = new FormLayout(xwerte2,ywerte2);
+		CellConstraints cc3 = new CellConstraints();
+		pan2.setLayout(lay3);
+
 		rbMahnart[4] = new JRtaRadioButton("nur Ausfallrechnungen");
 		rbMahnart[4].setName("nuraf5");
 		//rbMahnart[4].addActionListener(al);
 		artgroup.add(rbMahnart[4]);
 		rbMahnart[4].setSelected(true);
-		pan.add(rbMahnart[4],cc2.xy(2,1));
+		pan2.add(rbMahnart[4],cc3.xy(2,1));
 		rbMahnart[5] = new JRtaRadioButton("nur Rezeptgebührrech.");
 		rbMahnart[5].setName("nurrg6");
 		//rbMahnart[5].addActionListener(al);
 		artgroup.add(rbMahnart[5]);
-		pan.add(rbMahnart[5],cc2.xy(2,2));
+		pan2.add(rbMahnart[5],cc3.xy(2,2));
 		rbMahnart[6] = new JRtaRadioButton("beide Rechn.Arten");
 		rbMahnart[6].setName("beides7");
 		//rbMahnart[6].addActionListener(al);
 		artgroup.add(rbMahnart[6]);
-		pan.add(rbMahnart[6],cc2.xy(2,3));
-		pan.validate();
-		radiopan.add(pan,cc.xy(10,2,CellConstraints.FILL,CellConstraints.FILL));
+		pan2.add(rbMahnart[6],cc3.xy(2,3));
+		pan2.validate();
+		radiopan.add(pan2,cc.xy(10,2,CellConstraints.FILL,CellConstraints.FILL));
 		/********/
-		
-		suchen = new JButton("los..");
+				
+		suchen = new JButton("suchen");
 		suchen.setActionCommand("suchen");
 		suchen.addActionListener(al);
 		radiopan.add(suchen,cc.xy(12,2));
@@ -453,8 +549,7 @@ public class OpRgafMahnungen extends JXPanel{
 		mahnParameter.put("<Mmahndat1>", (rtfs[8].getText().trim().length()==10 ? rtfs[8].getText().trim() : ""));
 		mahnParameter.put("<Mmahndat2>", (rtfs[9].getText().trim().length()==10 ? rtfs[9].getText().trim() : ""));
 		//mahnParameter.put("<Mmahndat3>", (rtfs[10].getText().trim().length()==10 ? rtfs[8].getText().trim() : ""));
-		String datei = (String)OpRgaf.mahnParameter.get("formular"+Integer.toString(aktuelleMahnstufe));
-		//String datei = OpRgaf.progHome+"vorlagen/"+OpRgaf.aktIK+"/RGAFMahnung"+Integer.toString(aktuelleMahnstufe)+".ott";
+		String datei = OpRgaf.iniOpRgAf.getFormNb(aktuelleMahnstufe);
 		try{
 			starteMahnDruck(datei);
 			if(textDocument != null){
@@ -524,12 +619,13 @@ public class OpRgafMahnungen extends JXPanel{
 	}
 	private void doSuchen(){
 		String nichtvorDatum = eltern.getNotBefore();
-		int frist1 = (Integer) OpRgaf.mahnParameter.get("frist1");
-		int frist2 = (Integer) OpRgaf.mahnParameter.get("frist2");
-		int frist3 = (Integer) OpRgaf.mahnParameter.get("frist3");
-		//int frist1 = eltern.getFrist(1);
-		//int frist2 = eltern.getFrist(2);
-		//int frist3 = eltern.getFrist(3);
+		//int frist1 = (Integer) OpRgaf.mahnParameter.get("frist1");
+		//int frist2 = (Integer) OpRgaf.mahnParameter.get("frist2");
+		//int frist3 = (Integer) OpRgaf.mahnParameter.get("frist3");
+		int frist1 = OpRgaf.iniOpRgAf.getFrist(1);
+		int frist2 = OpRgaf.iniOpRgAf.getFrist(2);
+		int frist3 = OpRgaf.iniOpRgAf.getFrist(3);
+
 		if(frist1 < 0 || frist2 < 0 || frist3 < 0){
 			return;
 		}
@@ -569,9 +665,29 @@ public class OpRgafMahnungen extends JXPanel{
 			return " and rnr like 'AFR-%'";
 		}else if(this.rbMahnart[5].isSelected()){
 			return " and rnr like 'RGR-%'";
+		}else if(this.rbMahnart[6].isSelected()){
+			return " and rnr like 'VKR-%'";
 		}
 		return "";
 	}
+
+	@Override
+	public void useRGR(boolean rgr) {
+		this.rbMahnart[5].setSelected(rgr);		
+		
+	}
+
+	@Override
+	public void useAFR(boolean afr) {
+		this.rbMahnart[4].setSelected(afr);		
+	}
+
+	@Override
+	public void useVKR(boolean vkr) {
+		this.rbMahnart[4].setSelected(vkr);		
+		
+	}
+	
 	private void starteSuche(String sstmt){
 		tabmod.setRowCount(0);
 		tab.validate();
@@ -853,7 +969,9 @@ public class OpRgafMahnungen extends JXPanel{
 			e.printStackTrace();
 		}
 		textDocument = (ITextDocument)document;
-		OOTools.druckerSetzen(textDocument, (String)OpRgaf.mahnParameter.get("drucker"));
+		//OOTools.druckerSetzen(textDocument, (String)OpRgaf.mahnParameter.get("drucker"));
+		OOTools.druckerSetzen(textDocument, OpRgaf.iniOpRgAf.getDrucker());
+
 		ITextFieldService textFieldService = textDocument.getTextFieldService();
 		ITextField[] placeholders = null;
 		try {
@@ -888,4 +1006,5 @@ public class OpRgafMahnungen extends JXPanel{
 		
 
 	}
+
 }

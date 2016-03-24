@@ -85,7 +85,7 @@ public class OpRgafTab extends JXPanel implements ChangeListener{
 		
 		vectitel.add("Mahnwesen");
 		vecdescript.add("<html>Hier erzeugen Sie Mahnungen für noch nicht bezahlte Rechnungen.<br><br>" +
-                "Button <b>[los..]</b> listet die Rechnungen der gewählten Kategorie, bei denen noch <br>" +
+                "Button <b>[suchen]</b> listet die Rechnungen der gewählten Kategorie, bei denen noch <br>" +
 				"ein Betrag offen ist und die in der eingestellten Mahnstufe noch nicht gemahnt wurden.</html>");
 		ss = System.getProperty("user.dir")+File.separator+"icons"+File.separator+"Mahnung.png";
 		ico = new ImageIcon(ss);
