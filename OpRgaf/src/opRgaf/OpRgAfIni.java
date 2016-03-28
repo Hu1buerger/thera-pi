@@ -18,7 +18,7 @@ public class OpRgAfIni {
 
 	
 	/**
-	 * öffnet 'oprgaf.ini'
+	 * liest Einträge aus 'oprgaf.ini' 
 	 * @param args pfad, ik
 	 */
 	//args[0],"ini/",args[1],"/oprgaf.ini"
@@ -36,16 +36,7 @@ public class OpRgAfIni {
 		readMahnParam();
 	}
 
-	/**
-	 * 
-	 * @return liefert Instanz mit akt. Werten der 'oprgaf.ini' zurück
-	 */
-	/*
-	public INIFile getOpRgAfIni (){
-		return inif;
-	}
-	*/
-	
+
 	/**
 	 * liest die zuletzt verwandten (Checkbox-)Einstellungen aus der oprgaf.ini
 	 * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
@@ -67,6 +58,7 @@ public class OpRgAfIni {
 			vorauswahlSuchkriterium = 0;
 		}
 	}
+
 	
 	/**
 	 * liest die Mahnparameter aus der oprgaf.ini
@@ -184,7 +176,7 @@ public class OpRgAfIni {
 		return (String) mahnParam.get("inkasse");
 	}
 	public String getFormNb (int lfdNb){
-		return (String) mahnParam.get("FormularMahnung"+lfdNb);
+		return (String) mahnParam.get("formular"+lfdNb);
 	}
 	public int getFrist(int lfdNb){
 		return (Integer) mahnParam.get("frist"+lfdNb);
@@ -192,12 +184,8 @@ public class OpRgAfIni {
 	public String getDrucker (){
 		return (String) mahnParam.get("drucker");
 	}
-	
 
-	
-	
-	
-	
+
 	/**
 	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die oprgaf.ini
 	 */

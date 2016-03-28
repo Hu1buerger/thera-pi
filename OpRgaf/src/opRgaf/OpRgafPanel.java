@@ -202,7 +202,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 		
 		// Auswahl RGR/AFR/Verkauf
 		colCnt += 2;
-		selPan = new RgAfVkSelect("suche in: ");							// Subpanel mit Checkboxen anlegen
+		selPan = new RgAfVkSelect("suche in  ");							// Subpanel mit Checkboxen anlegen
 		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
 		//selPan.ask("Tabellen:");
 		selPan.setCallBackObj(this);										// callBack registrieren

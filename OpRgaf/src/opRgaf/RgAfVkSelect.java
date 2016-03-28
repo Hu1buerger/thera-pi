@@ -44,9 +44,9 @@ public class RgAfVkSelect implements ItemListener{
 
 		FormLayout lay = new FormLayout(
 		//       1    2     3    4 5
-				"2dlu,30dlu,5dlu,p,2dlu",	// xwerte,
+				"2dlu,p,5dlu,p,2dlu",	// xwerte,
 		//       1 2 3
-				"p,p,p"						// ywerte
+				"p,p,p"					// ywerte
 				);
 		PanelBuilder builder = new PanelBuilder(lay);
 		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
@@ -91,6 +91,10 @@ public class RgAfVkSelect implements ItemListener{
 		return (chkVKR.isSelected());
 	}
 	
+	public void disableVKR() {
+		chkVKR.setEnabled(false);
+	}
+
 	public Component getPanel() {
 		return checkBoxArea;
 	}
