@@ -121,13 +121,12 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		String[] args = {"Rechnungsnummer =","Rechnungsnummer >=","Rechnungsnummer <=",
 				"Rechnungsbetrag =","Rechnungsbetrag >=","Rechnungsbetrag <=",
 				"Noch offen =","Noch offen >=","Noch offen <=",
-				"Kasse enthält",
 				"Name enthält",
+				"Rezeptnummer =",
 				"Rechnungsdatum =","Rechnungsdatum >=","Rechnungsdatum <=",
-				"Rezeptnummer ="};
+				"Krankenkasse enthält",};
 
-		//int vorauswahl =  Arrays.asList(args).indexOf("Noch offen >=");
-		int vorauswahl = 0;
+		int vorauswahl = OffenePosten.getVorauswahl(args.length);
 		combo = new JRtaComboBox(args);
 		combo.setSelectedIndex( vorauswahl ); 
 		content.add(combo,cc.xy(4,2));
@@ -385,6 +384,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 			return;
 		}
 		int suchart = combo.getSelectedIndex();
+		OffenePosten.setVorauswahl(suchart);		// Auswahl merken
 		String cmd = "";
 		try{
 		switch(suchart){
@@ -415,11 +415,11 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		case 8:					// offen <=
 			cmd = "select * from rliste where r_offen <='"+suchen.getText().trim().replace(",", ".")+"'";
 			break;
-		case 9:					// Kasse enthält
-			cmd = "select * from rliste where r_kasse like'%"+suchen.getText()+"%'";
-			break;
-		case 10:				// Name enthält
+		case 9:					// Name enthält
 			cmd = "select * from rliste where r_name like'%"+suchen.getText().trim()+"%'";
+			break;
+		case 10:				// Rezeptnummer =
+			cmd = "select * from rliste where r_nummer = (select rnummer from faktura where rez_nr = '"+suchen.getText().trim()+"'  LIMIT 1)";
 			break;
 		case 11:				// Rechnungsdatum = 
 			cmd = "select * from rliste where r_datum ='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
@@ -430,8 +430,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		case 13:				// Rechnungsdatum <= 
 			cmd = "select * from rliste where r_datum <='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
 			break;
-		case 14:				// Rezeptnummer =
-			cmd = "select * from rliste where r_nummer = (select rnummer from faktura where rez_nr = '"+suchen.getText().trim()+"'  LIMIT 1)";
+		case 14:				// Krankenkasse enthält
+			cmd = "select * from rliste where r_kasse like'%"+suchen.getText()+"%'";
 			break;
 
 		}

@@ -8,14 +8,16 @@ import CommonTools.INITool;
 
 
 public class OpRgAfIni {
-	//INIFile inif;
-	String path2IniFile;
-	boolean incRG = false, incAR = false, incVK = false, settingsLocked = false;
-	int vorauswahlSuchkriterium, suchkriteriumSaved = 0;
 	public static HashMap<String,Object> mahnParam;
-	String progHome, aktIK;
 	public HashMap getMahnParameter;
 
+	//INIFile inif;
+	private String path2IniFile;
+	private String path2TemplateFiles;
+	private String iniFile;
+	private boolean incRG = false, incAR = false, incVK = false, settingsLocked = false;
+	private int vorauswahlSuchkriterium;
+	private String progHome, aktIK;
 	
 	/**
 	 * liest Einträge aus 'oprgaf.ini' 
@@ -25,15 +27,20 @@ public class OpRgAfIni {
 	public OpRgAfIni(String home, String subPath, String IK, String file) {
 		progHome = home;
 		aktIK = IK;
-		path2IniFile = progHome+subPath+aktIK+file;
-		INIFile inif = new INIFile (path2IniFile);		// wenn keine Direktzugriffe aus ext. Modulen (mehr) erfolgen -> iniFile nur noch lokal öffnen
-		//inif = new INIFile (path2IniFile);
+//		path2IniFile = progHome+subPath+aktIK+file;
+//		inif = new INIFile (path2IniFile);
+		this.path2IniFile = progHome+subPath+aktIK;
+		this.path2TemplateFiles = progHome+"vorlagen/"+aktIK;
+		INITool.init(path2IniFile+"/");
+		this.iniFile = file;
+		INIFile inif = INITool.openIni (path2IniFile,iniFile);		// wenn keine Direktzugriffe aus ext. Modulen (mehr) erfolgen -> iniFile nur noch lokal öffnen
 		if ( inif.getStringProperty("offenePosten","lockSettings") != null ){
 			settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
 		}
 		mahnParam = new HashMap<String,Object>();
-		readLastSelection();
-		readMahnParam();
+		readLastSelectRgAfVk(inif);
+		INITool.readMahnParamCommon(inif, mahnParam);
+		readMahnParamRgAfVk(inif, mahnParam,path2TemplateFiles);
 	}
 
 
@@ -41,9 +48,8 @@ public class OpRgAfIni {
 	 * liest die zuletzt verwandten (Checkbox-)Einstellungen aus der oprgaf.ini
 	 * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
 	 */
-	private void readLastSelection(){
+	private void readLastSelectRgAfVk(INIFile inif){
 		String section = "offenePosten";
-		INIFile inif = new INIFile (path2IniFile);
 		if ( inif.getStringProperty(section, "Rezeptgebuehren") != null ){					// Eintraege in ini vorhanden (alle oder keiner)
 			incRG = inif.getBooleanProperty(section, "Rezeptgebuehren") ;
 			incAR = inif.getBooleanProperty(section, "Ausfallrechnungen") ;
@@ -60,62 +66,12 @@ public class OpRgAfIni {
 	}
 
 	
+	
 	/**
-	 * liest die Mahnparameter aus der oprgaf.ini
+	 * liest RgAfVk-spezif. Mahnparameter aus der ini-Datei
 	 * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
 	 */
-	private void readMahnParam(){
-		INIFile inif = new INIFile (path2IniFile);
-		if ( inif.getIntegerProperty("General","TageBisMahnung1") != null ){				// Eintrag in ini vorhanden?
-			mahnParam.put("frist1", (Integer) inif.getIntegerProperty("General","TageBisMahnung1") );
-		}else{
-			mahnParam.put("frist1", (Integer) 31 );
-		}
-		if ( inif.getIntegerProperty("General","TageBisMahnung1") != null ){
-			mahnParam.put("frist2", (Integer) inif.getIntegerProperty("General","TageBisMahnung2") );
-		}else{
-			mahnParam.put("frist2", (Integer) 11 );
-		}
-		if ( inif.getIntegerProperty("General","TageBisMahnung3") != null ){
-			mahnParam.put("frist3", (Integer) inif.getIntegerProperty("General","TageBisMahnung3") );
-		}else{
-			mahnParam.put("frist3", (Integer) 11 );
-		}
-		if ( inif.getIntegerProperty("General","EinzelMahnung") != null ){
-			mahnParam.put("einzelmahnung", (Boolean) (inif.getIntegerProperty("General","EinzelMahnung").equals("1") ? Boolean.TRUE : Boolean.FALSE) );
-		}else{
-			mahnParam.put("einzelmahnung", Boolean.FALSE );
-		}
-		if ( inif.getStringProperty("General","MahnungDrucker") != null ){
-			mahnParam.put("drucker", (String) inif.getStringProperty("General","MahnungDrucker") );
-		}else{
-			mahnParam.put("drucker", (String) "" );
-		}
-		if ( inif.getIntegerProperty("General","MahnungExemplare") != null ){
-			mahnParam.put("exemplare", (Integer) inif.getIntegerProperty("General","MahnungExemplare") );
-		}else{
-			mahnParam.put("einzelmahnung", (Integer) 2 );
-		}
-		if ( inif.getStringProperty("General","InOfficeStarten") != null ){
-			mahnParam.put("inofficestarten", (Boolean) (inif.getIntegerProperty("General","InOfficeStarten").equals("1") ? Boolean.TRUE : Boolean.FALSE) );
-		}else{
-			mahnParam.put("inofficestarten", Boolean.TRUE  );
-		}
-		if ( inif.getStringProperty("General","AuswahlErstAb") != null ){
-			mahnParam.put("erstsuchenab", (String) inif.getStringProperty("General","AuswahlErstAb") );
-		}else{
-			mahnParam.put("erstsuchenab", (String) "2016-01-01" );
-		}
-		addFormNb (inif,"General","FormularMahnung", "RGAFMahnung",1);
-		addFormNb (inif,"General","FormularMahnung", "RGAFMahnung",2);
-		addFormNb (inif,"General","FormularMahnung", "RGAFMahnung",3);
-		addFormNb (inif,"General","FormularMahnung", "RGAFMahnung",4);
-		/*
-		System.out.println(mahnParameter.get("formular1"));
-		System.out.println(mahnParameter.get("formular2"));
-		System.out.println(mahnParameter.get("formular3"));
-		System.out.println(mahnParameter.get("formular4"));
-		*/
+	private void readMahnParamRgAfVk(INIFile inif, HashMap<String,Object> mahnParam, String path2Templates){
 		if ( inif.getStringProperty("General","DirAlteRechnungen") != null ){
 			mahnParam.put("diralterechnungen", (String) inif.getStringProperty("General","DirAlteRechnungen") );
 		}else{
@@ -126,8 +82,12 @@ public class OpRgAfIni {
 		}else{
 			mahnParam.put("inkasse", (String)"Bank" );
 		}
+		for(int i = 1; i <=4;i++){
+			INITool.addFormNb (inif,"General","FormularMahnung", "RGAFMahnung", i,mahnParam,path2Templates);
+		}
 	}
 	
+/*
 	private void addFormNb (INIFile inif,String section, String entry, String defaultName, int lfdNb){
 		if ( inif.getStringProperty(section,entry+lfdNb) != null ){
 			mahnParam.put("formular"+lfdNb, getForm4aktIk(inif,section,entry+lfdNb));
@@ -143,6 +103,7 @@ public class OpRgAfIni {
 		}
 		return progHome+"vorlagen/"+aktIK+"/"+forms;
 	}
+*/
 	
 	public void setIncRG(boolean value){
 		incRG = value;
@@ -166,10 +127,10 @@ public class OpRgAfIni {
 	public void setVorauswahl(int value){
 		vorauswahlSuchkriterium = value;
 	}
-	public int getVorauswahl(){
-		return vorauswahlSuchkriterium;
+	public int getVorauswahl(int max){
+		return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
 	}
-		public HashMap<String,Object> getMahnParameter (){
+	public HashMap<String,Object> getMahnParameter (){
 		return mahnParam;
 	}
 	public String getWohinBuchen (){
@@ -190,7 +151,7 @@ public class OpRgAfIni {
 	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die oprgaf.ini
 	 */
 	public void saveLastSelection(){
-		INIFile inif = new INIFile (path2IniFile);
+		INIFile inif = INITool.openIni (path2IniFile,iniFile);
 		String section = "offenePosten", comment = null;
 		if ( ! settingsLocked ){																	// ini-Einträge  dürfen aktualisiert werden
 			if ( (incRG != inif.getBooleanProperty(section, "Rezeptgebuehren") ) || 

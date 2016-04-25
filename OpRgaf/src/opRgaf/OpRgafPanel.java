@@ -186,7 +186,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 				"Rechnungsdatum =","Rechnungsdatum >=","Rechnungsdatum <=",
 				"Krankenkasse enthält"};
 
-		int vorauswahl =  OpRgaf.iniOpRgAf.getVorauswahl();
+		int vorauswahl =  OpRgaf.iniOpRgAf.getVorauswahl(args.length);
 		combo = new JRtaComboBox(args);
 		combo.setSelectedIndex( vorauswahl ); 
 		builder.add(combo, cc.xy(++colCnt,rowCnt));							// 4,2
