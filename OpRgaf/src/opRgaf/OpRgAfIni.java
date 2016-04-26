@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import CommonTools.INIFile;
 import CommonTools.INITool;
+import CommonTools.OpCommon;
 
 
 
@@ -39,7 +40,7 @@ public class OpRgAfIni {
 		}
 		mahnParam = new HashMap<String,Object>();
 		readLastSelectRgAfVk(inif);
-		INITool.readMahnParamCommon(inif, mahnParam);
+		OpCommon.readMahnParamCommon(inif, mahnParam);
 		readMahnParamRgAfVk(inif, mahnParam,path2TemplateFiles);
 	}
 
@@ -83,7 +84,8 @@ public class OpRgAfIni {
 			mahnParam.put("inkasse", (String)"Bank" );
 		}
 		for(int i = 1; i <=4;i++){
-			INITool.addFormNb (inif,"General","FormularMahnung", "RGAFMahnung", i,mahnParam,path2Templates);
+			//addFormNb (inif,"General","FormularMahnung", "RGAFMahnung", i);
+			OpCommon.addFormNb (inif,"General","FormularMahnung", "RGAFMahnung", i,mahnParam,path2Templates);
 		}
 	}
 	
@@ -164,7 +166,7 @@ public class OpRgAfIni {
 					comment = "offenePosten RgAfVk beruecksichtigt";
 				}else{comment = null;}
 				inif.setBooleanProperty("offenePosten", "Rezeptgebuehren", incRG, comment);
-				inif.setBooleanProperty("offenePosten", "Ausfallrechnungen", incVK, null);
+				inif.setBooleanProperty("offenePosten", "Ausfallrechnungen", incAR, null);
 				inif.setBooleanProperty("offenePosten", "Verkaeufe", incVK, null);
 
 				if ( inif.getStringProperty("offenePosten", "Suchkriterium") == null ){

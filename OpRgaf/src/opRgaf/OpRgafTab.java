@@ -116,8 +116,10 @@ public class OpRgafTab extends JXPanel implements ChangeListener{
         try{
         	if(sel==0){
         		//oppanel.setzeFocus();
+        		opRgafPanel.initSelection();
         	}else if(sel==1){
         		//rehaBillPanel.setzeFocus();
+        		opRgafMahnungen.initSelection();
         	}
         }catch(Exception ex){
         	

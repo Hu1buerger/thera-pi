@@ -21,6 +21,7 @@ import org.jdesktop.swingworker.SwingWorker;
 
 import CommonTools.INIFile;
 import CommonTools.INITool;
+import CommonTools.OpCommon;
 import CommonTools.SqlInfo;
 import CommonTools.StartOOApplication;
 import CommonTools.Verschluesseln;
@@ -165,7 +166,7 @@ public class OffenePosten implements WindowListener{
 						}
 						iniFile = "offeneposten.ini";
 						INIFile oinif = INITool.openIni(path2IniFile, iniFile);
-						INITool.readMahnParamCommon(oinif, mahnParameter);
+						OpCommon.readMahnParamCommon(oinif, mahnParameter);
 /*
 						mahnParameter.put("frist1", (Integer) oinif.getIntegerProperty("General","TageBisMahnung1") );
 						mahnParameter.put("frist2", (Integer) oinif.getIntegerProperty("General","TageBisMahnung2") );
@@ -177,7 +178,7 @@ public class OffenePosten implements WindowListener{
 						mahnParameter.put("erstsuchenab", (String) oinif.getStringProperty("General","AuswahlErstAb") );
 */						
 						for(int i = 1; i <=4;i++){
-							INITool.addFormNb (oinif,"General","FormularMahnung", "Mahnung", i,mahnParameter,path2TemplateFiles);
+							OpCommon.addFormNb (oinif,"General","FormularMahnung", "Mahnung", i,mahnParameter,path2TemplateFiles);
 						}
 /*
 						String forms = oinif.getStringProperty("General","FormularMahnung1") ;

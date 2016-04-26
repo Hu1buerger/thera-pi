@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -54,6 +55,7 @@ import CommonTools.JRtaRadioButton;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.OOTools;
+import CommonTools.OpCommon;
 import CommonTools.SqlInfo;
 import CommonTools.TableTool;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
@@ -89,7 +91,6 @@ public class OffenepostenMahnungen extends JXPanel{
 	MyMahnungenTableModel tabmod = null;
 	JXTable tab = null;
 	
-	JButton[] mahnbuts = {null,null,null};
 
 	DBFReader dbfreader = null;
 	File f = null;
@@ -122,24 +123,11 @@ public class OffenepostenMahnungen extends JXPanel{
 		content.add(getRadioPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
 		content.add(getRechnungDatenPanel(),cc.xy(1,4));
 		content.add(getTablePanel(),cc.xy(2,4,CellConstraints.FILL,CellConstraints.FILL));
-		content.add(getButtonPanel(),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
+		content.add(OpCommon.getMahnButtonPanel(al),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
 		content.validate();
 		return content;
 	}
-	private JXPanel getButtonPanel(){
-		JXPanel buttonpan = new JXPanel();
-		//                     1            2          3            4           5           6          7
-		String xwerte = "fill:0:grow(0.25),80dlu,fill:0:grow(0.25),80dlu,fill:0:grow(0.25),80dlu,fill:0:grow(0.25)";
-		String ywerte = "15dlu,p,15dlu";
-		FormLayout lay = new FormLayout(xwerte,ywerte);
-		CellConstraints cc = new CellConstraints();
-		buttonpan.setLayout(lay);
-		buttonpan.add((mahnbuts[0] = ButtonTools.macheButton("Mahnung drucken", "mahnungstarten", al)),cc.xy(2,2));
-		buttonpan.add((mahnbuts[1] = ButtonTools.macheButton(" << ", "vorheriger", al)),cc.xy(4,2));
-		buttonpan.add((mahnbuts[2] = ButtonTools.macheButton(" >> ", "naechster", al)),cc.xy(6,2));
-		buttonpan.validate();
-		return buttonpan;
-	}
+
 	private JXPanel getTablePanel(){
 		JXPanel tablepan = new JXPanel();
 		String xwerte = "fill:0:grow(1.0)";

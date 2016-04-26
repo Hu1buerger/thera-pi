@@ -205,9 +205,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		selPan = new RgAfVkSelect("suche in  ");							// Subpanel mit Checkboxen anlegen
 		//selPan.ask("Tabellen:");
 		selPan.setCallBackObj(this);										// callBack registrieren
-		selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());					 		// letzte Auswahl wiederherstellen
-		selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
-		selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+		initSelection();
 		
 		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
 		// Ende Auswahl
@@ -298,6 +296,17 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		calcGesamtOffen();
 		
 		return builder.getPanel();
+	}
+	/**
+	 * letzte Checkbox-Auswahl wiederherstellen
+	 */
+	public void initSelection() {
+		selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());	
+		selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
+		selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+		if (!selPan.useRGR() && !selPan.useAFR() && !selPan.useVKR()){
+			selPan.setRGR(Boolean.TRUE);	// einer sollte immer ausgewählt sein 
+		}
 	}
 	
 	private void calcGesamtOffen() {

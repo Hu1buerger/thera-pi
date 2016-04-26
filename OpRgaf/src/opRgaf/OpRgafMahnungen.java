@@ -47,6 +47,7 @@ import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
+import CommonTools.OpCommon;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaRadioButton;
@@ -98,10 +99,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 	MyMahnungenTableModel tabmod = null;
 	JXTable tab = null;
 	
-	JButton[] mahnbuts = {null,null,null};
-	boolean searchRG = true, searchAR = false, searchVK = false;
-
-
 	File f = null;
 	Font fontfett = new Font("Tahoma",Font.BOLD,10);
 	
@@ -156,31 +153,11 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 		content.add(getSuchEinstellungPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
 		content.add(getRechnungDatenPanel(),cc.xy(1,4));
 		content.add(getTablePanel(),cc.xy(2,4,CellConstraints.FILL,CellConstraints.FILL));
-		content.add(getMahnButtonPanel(),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
+		content.add(OpCommon.getMahnButtonPanel(al),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
 		content.validate();
 		return content;
 	}
-	private JPanel getMahnButtonPanel(){
-		FormLayout lay = new FormLayout(
-		//       1                 2     3                 4     5                 6     7     
-				"15dlu,65dlu,fill:0:grow(0.5),2dlu,fill:0:grow(0.5),15dlu,80dlu,15dlu",		// xwerte,
-		//        1   2 3  
-				"15dlu,p,15dlu"																// ywerte
-				);
-		PanelBuilder builder = new PanelBuilder(lay);
-		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());				// debug mode
-		builder.getPanel().setOpaque(false);
-		CellConstraints cc = new CellConstraints();
 
-		int colCnt=3, rowCnt=2;
-
-		builder.add((mahnbuts[1] = ButtonTools.macheButton(" << ", "vorheriger", al)),cc.xy(colCnt++,2));
-		colCnt++;
-		builder.add((mahnbuts[2] = ButtonTools.macheButton(" >> ", "naechster", al)),cc.xy(colCnt++,2));
-		colCnt++;
-		builder.add((mahnbuts[0] = ButtonTools.macheButton("Mahnung drucken", "mahnungstarten", al)),cc.xy(colCnt++,2));
-		return builder.getPanel();
-	}
 	private JXPanel getTablePanel(){
 		JXPanel tablepan = new JXPanel();
 		String xwerte = "fill:0:grow(1.0)";
@@ -380,7 +357,8 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 		builder.add(selPan.getPanel(),cc.xywh(colCnt++, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//8..10,1..3
 		
 		selPan.setCallBackObj(this);										// callBack registrieren
-		selPan.disableVKR();												// !! nur solange VR nicht korrekt behandelt werden !!
+		//OpCommon.
+		initSelection();
 		// Ende Auswahl
 
 		colCnt += 2;
@@ -391,6 +369,23 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 		
 		return builder.getPanel();
 	}
+
+	/**
+	 * letzte Checkbox-Auswahl wiederherstellen
+	 * (bei Start des Moduls und bei Tab-Wechsel)
+	 */
+	public void initSelection() {
+		selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());
+		selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
+		selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+		selPan.disableVKR();												// !! nur solange VR nicht korrekt behandelt werden !!
+		if (OpRgaf.iniOpRgAf.getIncVK()){
+			selPan.setVKR(Boolean.FALSE);
+		}
+		if (selPan.useRGR() || selPan.useAFR() || selPan.useVKR()){
+			selPan.setRGR(Boolean.TRUE);	// einer sollte immer ausgewählt sein 
+		}
+	}
 	
 	private void activateActionListener(){
 		al = new ActionListener(){
@@ -400,6 +395,8 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 				if(arg0.getSource() instanceof JRtaRadioButton){
 					String componente = ((JComponent)arg0.getSource()).getName();
 					aktuelleMahnstufe = Integer.parseInt( componente.substring(componente.length()-1)  );
+					// Mahnstufe merken?
+					//OpRgaf.iniOpRgAf.set...
 					doAllesAufNull();
 					return;
 				}
@@ -559,6 +556,7 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 		int frist3 = OpRgaf.iniOpRgAf.getFrist(3);
 
 		if(frist1 < 0 || frist2 < 0 || frist3 < 0){
+			 System.out.println("error Mahnparameter: Frist < 0");
 			return;
 		}
 
@@ -591,14 +589,14 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 	}
 	private String testArt(){
 		String tmpStr = "";
-		if(searchRG){
+		if(OpRgaf.iniOpRgAf.getIncRG()){
 			tmpStr = " rnr like 'RGR-%'";
 		}
-		if(searchAR){
+		if(OpRgaf.iniOpRgAf.getIncAR()){
 			if ( tmpStr.length() > 0){tmpStr = tmpStr + " or ";}
 			tmpStr = tmpStr + " rnr like 'AFR-%'";
 		}
-		if(searchVK){
+		if(OpRgaf.iniOpRgAf.getIncVK()){
 			if ( tmpStr.length() > 0){tmpStr = tmpStr + " or ";}
 			tmpStr = tmpStr + " rnr like 'VR-%'";
 		}
@@ -612,17 +610,20 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 
 	@Override
 	public void useRGR(boolean rgr) {
-		searchRG = rgr;
+		OpRgaf.iniOpRgAf.setIncRG(rgr);
+		//searchRG = rgr;
 	}
 
 	@Override
 	public void useAFR(boolean afr) {
-		searchAR = afr;
+		OpRgaf.iniOpRgAf.setIncAR(afr);
+		//searchAR = afr;
 	}
 
 	@Override
 	public void useVKR(boolean vkr) {
-		searchVK = 	vkr;
+		OpRgaf.iniOpRgAf.setIncVK(vkr);
+		//searchVK = 	vkr;
 	}
 	
 	private void starteSuche(String sstmt){
