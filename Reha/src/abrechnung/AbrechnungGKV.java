@@ -218,7 +218,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		setEncryptTitle();
 		//cmbDiszi.setSelectedItem(SystemConfig.initRezeptKlasse);
 		disziSelect.setCurrDiszi(SystemConfig.initRezeptKlasse);	// Kassentree füllen
-
+		jry.setAbrRezInstance(abrRez);							    // JAbrechnungInternal mitteilen, welche Instanz cleanup() enthält
 	}
 	public void setEncryptTitle(){
 		this.jry.setzeTitel(originalTitel+ " [Abrechnung für IK: "+Reha.getAktIK()+" - Zertifikat von IK: "+zertifikatVon.replace("IK","")+"]");
@@ -405,7 +405,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		//System.out.println(RezTools.putRezNrGetDisziplin(neueReznr));
 		if(neueReznr != null){
 			if( ! aktDisziplin.equals(RezTools.putRezNrGetDisziplin(neueReznr)) ){
-				doEinlesen(null,neueReznr);
+				doEinlesen(null,neueReznr);			// andere Disziplin -> Kassenbaum neu aufbauen
 			}else{
 				directCall = true;
 				//treeKasse.getSelectionModel().removeTreeSelectionListener(this);
@@ -443,6 +443,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		String kas = vecKassen.get(0).get(0).trim().toUpperCase();
 		String ktraeger = vecKassen.get(0).get(1).trim();
 		String ikkasse = vecKassen.get(0).get(2).trim();
+		String ikpapier = vecKassen.get(0).get(4).trim();
 		int aeste = rootKasse.getChildCount();
 		int aktuellerAst = 0;
 		boolean neuerKnoten = true;
@@ -457,15 +458,9 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 			}
 		}
 		if(neuerKnoten){
-			KnotenObjekt knoten = new KnotenObjekt(kas,"",false,"","");
-			knoten.ktraeger = ktraeger;
-			knoten.ikkasse = ikkasse;
-			node = new JXTTreeNode(knoten,true);
-			treeModelKasse.insertNodeInto(node, rootKasse, rootKasse.getChildCount());
-			treeKasse.validate();
-			aktuellerAst = aeste;
-		}
-
+			node = astAnhaengen(kas,ktraeger,ikkasse,ikpapier);
+			}
+		
 		cmd = "select rez_nr,pat_intern,ediok,ikkasse from fertige where rez_nr='"+neueReznr+"' Limit 1";
 		vecKassen = SqlInfo.holeFelder(cmd);
 		JXTTreeNode meinitem = null;
@@ -565,10 +560,10 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 					String dsz = disziSelect.getCurrRezClass();
 
 					//String cmd = "select name1,ikktraeger,ikkasse,id from fertige where rezklasse='"+dsz+"' ORDER BY ikktraeger , id";
-					// McM: das Gleiche sortiert nach Papierannahmestellen:
+					// das Gleiche, sortiert nach Papierannahmestellen:
 					String cmd = "SELECT t1.name1,t1.ikktraeger,t1.ikkasse,t1.id,t2.ik_papier " +
 								 "FROM fertige AS t1 LEFT JOIN kass_adr AS t2 ON t1.ikkasse = t2.ik_kasse " +
-								 "WHERE rezklasse='"+dsz+"' ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id";
+								 "WHERE rezklasse='"+dsz+"' GROUP by ikktraeger ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id";
 
 					Vector <Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
 
@@ -583,13 +578,13 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 					String ikkasse = vecKassen.get(0).get(2).trim();
 					String ikpapier = vecKassen.get(0).get(4).trim();
 					existiertschon.add(ktraeger);
-					//customIconList.add(ktraeger); neee, der erste bleibt 'original'
-					toggleIcons = 0;
-					KeepIkPap myIkPap = new KeepIkPap(ikpapier);
+//					//customIconList.add(ktraeger); neee, der erste bleibt 'original'
+//					toggleIcons = 0;
+//					KeepIkPap myIkPap = new KeepIkPap(ikpapier);
 
 					int aeste = 0;
-					astAnhaengen(kas,ktraeger,ikkasse);
-					rezepteAnhaengen(0);
+					KnotenObjekt newNode = astAnhaengen(kas,ktraeger,ikkasse,ikpapier).getObject();
+					rezepteAnhaengen(aeste);
 					/*
 					System.out.println(ktraeger);
 					System.out.println(((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.titel);
@@ -598,25 +593,26 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 					aeste++;
 
 					for(int i = 0; i < vecKassen.size();i++){
-						if(! existiertschon.contains(vecKassen.get(i).get(1).trim().toUpperCase())){
+						ktraeger = vecKassen.get(i).get(1).trim();
+						if(! existiertschon.contains(ktraeger)){
 							kas = vecKassen.get(i).get(0).trim().toUpperCase();
-							ktraeger = vecKassen.get(i).get(1);
+							//ktraeger = vecKassen.get(i).get(1);
 							ikkasse = vecKassen.get(i).get(2);
 							ikpapier = vecKassen.get(i).get(4).trim();
 							existiertschon.add(ktraeger);
-							astAnhaengen(kas,ktraeger,ikkasse);
+							astAnhaengen(kas,ktraeger,ikkasse,ikpapier);
 							rezepteAnhaengen(aeste);
-							if (myIkPap.newIkPap(ikpapier)){
-								// Hintergrund- oder Icon-Farbe ändern
-								toggleIcons = (++toggleIcons)&1;
+//							if (myIkPap.newIkPap(ikpapier)){
+//								// Hintergrund- oder Icon-Farbe ändern
+//								toggleIcons = (++toggleIcons)&1;
 								/*
 								System.out.println("Wechsel IK-Papier: "+ikpapier+" Hintergrund oder Icon-Farbe ändern @: "+
 								((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.titel);
 								*/
-							}
-							if (toggleIcons == 1 ){
-								customIconList.add(ktraeger);
-							}
+//							};
+//							if (toggleIcons == 1 ){
+//								customIconList.add(ktraeger);								
+//							}
 							/*
 							System.out.println(ktraeger);
 							System.out.println(((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.titel);
@@ -624,14 +620,15 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 							*/
 							aeste++;
 
-							treeKasse.repaint();
+//							treeKasse.repaint();
 						}
 					}
+					kassenIconsNeuAnzeigen();
+
 					treeKasse.validate();
 					treeKasse.setRootVisible(true);
 
 					treeKasse.expandRow(0);
-
 
 					treeKasse.repaint();
 				}catch(Exception ex){
@@ -650,30 +647,30 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		String cmd = "select rez_nr,pat_intern,ediok,ikkasse from fertige where rezklasse='"+dsz+"' AND ikktraeger='"+
 		ktraeger+"' ORDER BY id,pat_intern";
 
-		Vector <Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
+		Vector <Vector<String>> vecRezepte = SqlInfo.holeFelder(cmd);
 
 		JXTTreeNode node = (JXTTreeNode) rootKasse.getChildAt(knoten);
 		//JXTTreeNode treeitem = null;
 
 		JXTTreeNode meinitem = null;
-		for(int i = 0;i<vecKassen.size();i++){
+		for(int i = 0;i<vecRezepte.size();i++){
 			try{
 				cmd = "select n_name from pat5 where pat_intern='"+
-				vecKassen.get(i).get(1)+"' LIMIT 1";
+				vecRezepte.get(i).get(1)+"' LIMIT 1";
 
 				String name = SqlInfo.holeFelder(cmd).get(0).get(0);
-				cmd = "select preisgruppe from verordn where rez_nr='"+vecKassen.get(i).get(0)+"' LIMIT 1";
+				cmd = "select preisgruppe from verordn where rez_nr='"+vecRezepte.get(i).get(0)+"' LIMIT 1";;
 				////System.out.println(cmd);
 				String preisgr = SqlInfo.holeEinzelFeld(cmd);
 				////System.out.println("Preisgruppe="+preisgr);
 
-				KnotenObjekt rezeptknoten = new KnotenObjekt(vecKassen.get(i).get(0)+"-"+name,
-						vecKassen.get(i).get(0),
-						(vecKassen.get(i).get(2).equals("T")? true : false),
-						vecKassen.get(i).get(3),
+				KnotenObjekt rezeptknoten = new KnotenObjekt(vecRezepte.get(i).get(0)+"-"+name,
+						vecRezepte.get(i).get(0),
+						(vecRezepte.get(i).get(2).equals("T")? true : false),
+						vecRezepte.get(i).get(3),
 						preisgr);
 				rezeptknoten.ktraeger = ktraeger;
-				rezeptknoten.pat_intern = vecKassen.get(i).get(1);
+				rezeptknoten.pat_intern = vecRezepte.get(i).get(1);
 				meinitem = new JXTTreeNode(rezeptknoten,true);
 
 				treeModelKasse.insertNodeInto(meinitem,node,node.getChildCount());
@@ -684,13 +681,15 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		}
 
 	}
-	private void astAnhaengen(String ast,String ktraeger,String ikkasse){
+	private JXTTreeNode astAnhaengen(String ast,String ktraeger,String ikkasse, String ikpapier){
 		KnotenObjekt knoten = new KnotenObjekt(ast,"",false,"","");
 		knoten.ktraeger = ktraeger;
 		knoten.ikkasse = ikkasse;
+		knoten.setIkPap(ikpapier);
 		JXTTreeNode node = new JXTTreeNode(knoten,true);
 		treeModelKasse.insertNodeInto(node, rootKasse, rootKasse.getChildCount());
 		treeKasse.validate();
+		return (node);
 	}
 	private void kassenBaumLoeschen(){
 		try{
@@ -756,13 +755,109 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 			JOptionPane.showMessageDialog(null, "Kritische Situation bei Aktion aufschließen des Rezeptes");
 		}
 		this.aktuellerKassenKnoten.getNextNode();
-		int anzahlrez = this.aktuellerKassenKnoten.getChildCount();
-		if(anzahlrez==0){
-			treeModelKasse.removeNodeFromParent(this.aktuellerKassenKnoten);
-		}else{
+//		int anzahlrez = this.aktuellerKassenKnoten.getChildCount();
+		if(!removeKassenNode(this.aktuellerKassenKnoten)){
 			this.rechneKasse(this.aktuellerKassenKnoten);
 		}
+/*		
+		else{
+			treeModelKasse.removeNodeFromParent(this.aktuellerKassenKnoten);
+		}
+ */
 		this.abrRez.setRechtsAufNull();
+	}
+	private boolean removeKassenNode(JXTTreeNode aktKassNode) {
+		if (aktKassNode.getChildCount() > 0) {
+			return Boolean.FALSE;
+		}
+		JXTTreeNode nodeWithSameIK = sameIkPap(aktKassNode);
+		JXTTreeNode prevKNode = getPrevKassenKnoten(aktKassNode);
+		JXTTreeNode nextKNode = getNextKassenKnoten(aktKassNode);
+		treeModelKasse.removeNodeFromParent(aktKassNode);
+		if(nodeWithSameIK != null) {										// Nachfolger o. Vorgänger hat gleiches IKpapier -> icons können bleiben
+			aktKassNode = nodeWithSameIK;									// ... wird aktueller Knoten
+			int aktNodeIdx = 1+ treeModelKasse.getIndexOfChild(rootKasse, aktKassNode);
+			treeKasse.setSelectionInterval(aktNodeIdx, aktNodeIdx);			// neuen akt. Knoten selektieren
+			//treeKasse.validate();
+			treeKasse.repaint();											// Anzeige aktualisieren
+		} else if (!prevKNode.equals(null) && !nextKNode.equals(null)) {
+			//doEinlesen(null,null);											// Vorgänger u. Nachfolger haben gleiche Farbe -> Tree neu aufbauen
+			kassenIconsNeuAnzeigen();										// neu anzeigen - ist schneller als neu aufbauen
+		}
+		return Boolean.TRUE;
+	}
+	private JXTTreeNode sameIkPap (JXTTreeNode aktNode){
+		/* Testkram ...
+		JXTTreeNode prevKassenNode, nextKassenNode;
+		String tmpK = aktNode.getObject().titel;	//ok
+		String tmpIK = ((KnotenObjekt)aktNode.getUserObject()).ikkasse;	// auch
+		System.out.println("Akt Node = "+tmpK+" "+tmpIK);
+		prevKassenNode = (JXTTreeNode) aktNode.getPreviousSibling();
+		if(prevKassenNode != null) {
+			tmpK = (prevKassenNode.getObject().titel);
+			tmpIK = ((KnotenObjekt)prevKassenNode.getUserObject()).ikkasse;
+			System.out.println("Prev Node = "+tmpK+" "+tmpIK);			
+		} else {
+			System.out.println("Prev Node = empty ");						
+		}
+		nextKassenNode =(JXTTreeNode)aktNode.getNextSibling(); 
+		if(nextKassenNode != null) {
+			tmpK = nextKassenNode.getObject().titel;
+			tmpIK = ((KnotenObjekt)nextKassenNode.getUserObject()).ikkasse;
+			System.out.println("Next Node = "+tmpK+" "+tmpIK);
+		} else {
+			System.out.println("Next Node = empty ");						
+		}
+		// ... Ende Testkram */
+
+		JXTTreeNode prevKNode = getPrevKassenKnoten(aktNode);
+		JXTTreeNode nextKNode = getNextKassenKnoten(aktNode);
+		if (nextKNode != null) {
+			if (nextKNode.knotenObjekt.getIkPap().equals(aktNode.knotenObjekt.getIkPap())) {	// nächster Knoten hat gleiches IKpapier
+				return nextKNode;
+			}
+		}
+		if (prevKNode != null) {
+			if (prevKNode.knotenObjekt.getIkPap().equals(aktNode.knotenObjekt.getIkPap())) {	// Vorläuferknoten hat gleiches IKpapier
+				return prevKNode;
+			}
+		}
+		return null;
+	}
+	private JXTTreeNode getPrevKassenKnoten (JXTTreeNode aktNode){
+		return (JXTTreeNode) aktNode.getPreviousSibling();
+	}
+	private JXTTreeNode getNextKassenKnoten (JXTTreeNode aktNode){
+		return (JXTTreeNode) aktNode.getNextSibling();
+	}
+	private void kassenIconsNeuAnzeigen(){
+		JXTTreeNode rootNode = (JXTTreeNode) treeModelKasse.getRoot();
+		JXTTreeNode aktKasse = (JXTTreeNode) rootNode.getChildAt(0);
+		KnotenObjekt knAktKasse = aktKasse.getObject();
+		
+		if (customIconList.contains(knAktKasse.ktraeger)){	
+			toggleIcons = 1;
+		}else{
+			toggleIcons = 0;
+		}
+		customIconList.clear();
+		
+		KeepIkPap myIkPap = new KeepIkPap(knAktKasse.ikpapier);
+		while (aktKasse != null) {
+			knAktKasse = aktKasse.getObject();
+			if (myIkPap.newIkPap(knAktKasse.ikpapier)){
+				// Hintergrund- oder Icon-Farbe ändern
+				toggleIcons = (++toggleIcons)&1;
+				// System.out.println("Wechsel IK-Papier: "+knAktKasse.ikpapier+" Hintergrund oder Icon-Farbe ändern @: "+ knAktKasse.titel);
+			};
+			if (toggleIcons == 1 ){
+				customIconList.add(knAktKasse.ktraeger);								
+			}
+			aktKasse = (JXTTreeNode) aktKasse.getNextSibling();
+		}
+
+		treeKasse.validate();
+		treeKasse.repaint();
 	}
 	@Override
 	public void valueChanged(TreeSelectionEvent arg0) {
@@ -1242,8 +1337,9 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 			doUebertragen();
 			abrDlg.setzeLabel("organisiere Abrechnungsprogramm");
 		}
-		doLoescheRezepteAusTree();
+		loescheFertigeRezepteAusKassenNode();
 		Reha.instance.progressStarten(false);
+
 		abrDlg.setVisible(false);
 		abrDlg.dispose();
 		abrDlg = null;
@@ -1323,7 +1419,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		}
 	}
 	/********************************************************************/
-	private void doLoescheRezepteAusTree(){
+	private void loescheFertigeRezepteAusKassenNode(){
 		try{
 			int lang = aktuellerKassenKnoten.getChildCount();
 			JXTTreeNode node;
@@ -1331,14 +1427,19 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 				node = (JXTTreeNode) aktuellerKassenKnoten.getChildAt(i);
 				if(node.knotenObjekt.fertig){
 					//////System.out.println("Lösche KindKnoten an "+i);
-					//aktuellerKassenKnoten.remove(node);
 					treeModelKasse.removeNodeFromParent(node);
 				}
 			}
+			removeKassenNode(this.aktuellerKassenKnoten);
+/*
 			if(aktuellerKassenKnoten.getChildCount() <= 0){
-				//rootKasse.remove(aktuellerKassenKnoten);
+				JXTTreeNode newKNode = sameIkPap(this.aktuellerKassenKnoten);
 				treeModelKasse.removeNodeFromParent(aktuellerKassenKnoten);
+				if(newKNode != null) {
+					doEinlesen(null,newKNode.getObject().rez_num);
+				}
 			}
+ */
 			treeKasse.validate();
 			this.treeKasse.repaint();
 		}catch(Exception ex){
@@ -1589,7 +1690,11 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	AbrechnungGKV getInstance(){
 		return this;
 	}
-
+	
+	public AbrechnungRezept getInstanceAbrechnungRezept (){
+		return abrRez;
+	}
+	
 	/***************************************************************/
 
 	private String holeNameKostentraeger(){
@@ -2172,13 +2277,20 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		public String ohnepauschale;
 		public boolean langfrist;
 		public String langfristaz;
-
+		private String ikpapier;
+		
 		public KnotenObjekt(String titel,String rez_num,boolean fertig,String ikkasse,String preisgruppe){
 			this.titel = titel;
 			this.fertig = fertig;
 			this.rez_num = rez_num;
 			this.ikkasse = ikkasse;
 			this.preisgruppe = preisgruppe;
+		}
+		public void setIkPap (String ikpapier){
+			this.ikpapier = ikpapier;
+		}
+		public String getIkPap (){
+			return this.ikpapier;
 		}
 	}
 	/*************************************/
@@ -2325,7 +2437,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	}
 	@Override
 	public void mousePressed(MouseEvent e) {
-		if(e.getButton()==3){
+		if(e.getButton()==3){					// Rechtsklick auf Rezept im Tree
 			TreePath tp =  treeKasse.getSelectionPath();
 
 			//kontrollierteRezepte = 0;

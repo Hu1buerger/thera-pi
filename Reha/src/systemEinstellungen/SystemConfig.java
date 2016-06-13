@@ -1775,6 +1775,15 @@ public class SystemConfig {
 		}
 		hmAbrechnung.put("autoOk302", inif.getStringProperty("HMGKVRechnung", "AutoOKwenn302offen"));
 
+		if ( inif.getStringProperty("HMGKVRechnung", "keepTageTreeSize") == null ){			// kein Eintrag in ini -> default anlegen
+			inif.setIntegerProperty("HMGKVRechnung", "keepTageTreeSize",1,"Groesse des Fensters fuer versch. Anz. Behandlungstage merken") ;
+			inif.setIntegerProperty("HMGKVRechnung", "maxTage",24,"maximale Anz. Behandlungstage") ;
+			inif.setIntegerProperty("HMGKVRechnung", "lockSettings",0, "Aktualisieren der Eintraege gesperrt");
+			mustsave=true;
+		}
+		hmAbrechnung.put("keepTTSize", inif.getStringProperty("HMGKVRechnung", "keepTageTreeSize"));
+		hmAbrechnung.put("TTSizeLocked", inif.getStringProperty("HMGKVRechnung", "lockSettings"));
+
 		String sask = inif.getStringProperty("GemeinsameParameter", "FragenVorEmail");
 		if(sask==null){
 			System.out.println("Erstelle Parameter 'FrageVorEmail'");
