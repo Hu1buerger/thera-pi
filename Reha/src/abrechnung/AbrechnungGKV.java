@@ -173,7 +173,9 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	public static String zertifikatVon = SystemConfig.hmAbrechnung.get("hmkeystoreusecertof");
 	public static String originalTitel = "";
 	public static boolean lOwnCert = (SystemConfig.hmAbrechnung.get("hmkeystoreusecertof").equals(SystemConfig.hmAbrechnung.get("hmkeystorealias")) ? true : false);
-
+	
+	final String sucheFertige = "SELECT t1.name1,t1.ikktraeger,t1.ikkasse,t1.id,t2.ik_papier FROM fertige AS t1 LEFT JOIN kass_adr AS t2 ON t1.ikkasse = t2.ik_kasse ";
+	
 	public static boolean directCall = false;
 
 	public Disziplinen disziSelect = null;
@@ -217,7 +219,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		originalTitel = this.jry.getTitel();
 		setEncryptTitle();
 		//cmbDiszi.setSelectedItem(SystemConfig.initRezeptKlasse);
-		disziSelect.setCurrDiszi(SystemConfig.initRezeptKlasse);	// Kassentree füllen
+		disziSelect.setCurrDiszi(SystemConfig.initRezeptKlasse);
 		jry.setAbrRezInstance(abrRez);							    // JAbrechnungInternal mitteilen, welche Instanz cleanup() enthält
 	}
 	public void setEncryptTitle(){
@@ -262,9 +264,13 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		return SystemConfig.certNotFound;
 	}
 	/**********
+<<<<<<< HEAD
 	 *
 	 *
 	 *
+=======
+	 * 
+>>>>>>> fd1bd68... source cleanup
 	 * Linke Seite
 	 */
 	private void mandantenCheck(){
@@ -403,11 +409,11 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		}
 		//System.out.println("aktDisziplin");
 		//System.out.println(RezTools.putRezNrGetDisziplin(neueReznr));
-		if(neueReznr != null){
+		if(neueReznr != null){						// Rezept zum Baum hinzufügen
 			if( ! aktDisziplin.equals(RezTools.putRezNrGetDisziplin(neueReznr)) ){
 				doEinlesen(null,neueReznr);			// andere Disziplin -> Kassenbaum neu aufbauen
 			}else{
-				directCall = true;
+				directCall = true;					// in Baum der akt. Disziplin einsortieren
 				//treeKasse.getSelectionModel().removeTreeSelectionListener(this);
 				final int xindex = doEinlesenEinzeln(neueReznr);
 				SwingUtilities.invokeLater(new Runnable(){
@@ -424,20 +430,16 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 				});
 				//treeKasse.getSelectionModel().addTreeSelectionListener(this);
 			}
-		}else{
+		}else{										// Rezept aus Baum entfernen
 			doEinlesen(null,neueReznr);
 		}
 
 	}
-	/*
-	private void setPreisVec(int pos){
-		String[] reznr = {"KG","MA","ER","LO"};
-		//abrRez.setPreisVec(reznr[pos]);
-		JOptionPane.showMessageDialog(null, "Aufruf von setPreisVec in AbrechnungGKV");
-	}
-	*/
+
 	public int doEinlesenEinzeln(String neueReznr){
-		String cmd = "select name1,ikktraeger,ikkasse,id from fertige where rez_nr='"+neueReznr+"' Limit 1";
+		//String cmd = "select name1,ikktraeger,ikkasse,id from fertige where rez_nr='"+neueReznr+"' Limit 1";
+		// das Gleiche, mit Papierannahmestelle:
+		String cmd = sucheFertige + "WHERE rez_nr='"+neueReznr+"' Limit 1";
 		Vector <Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
 		treeKasse.setEnabled(true);
 		String kas = vecKassen.get(0).get(0).trim().toUpperCase();
@@ -561,9 +563,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 
 					//String cmd = "select name1,ikktraeger,ikkasse,id from fertige where rezklasse='"+dsz+"' ORDER BY ikktraeger , id";
 					// das Gleiche, sortiert nach Papierannahmestellen:
-					String cmd = "SELECT t1.name1,t1.ikktraeger,t1.ikkasse,t1.id,t2.ik_papier " +
-								 "FROM fertige AS t1 LEFT JOIN kass_adr AS t2 ON t1.ikkasse = t2.ik_kasse " +
-								 "WHERE rezklasse='"+dsz+"' GROUP by ikktraeger ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id";
+					String cmd = sucheFertige + "WHERE rezklasse='"+dsz+"' GROUP by ikktraeger ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id";
 
 					Vector <Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
 
@@ -602,22 +602,6 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 							existiertschon.add(ktraeger);
 							astAnhaengen(kas,ktraeger,ikkasse,ikpapier);
 							rezepteAnhaengen(aeste);
-//							if (myIkPap.newIkPap(ikpapier)){
-//								// Hintergrund- oder Icon-Farbe ändern
-//								toggleIcons = (++toggleIcons)&1;
-								/*
-								System.out.println("Wechsel IK-Papier: "+ikpapier+" Hintergrund oder Icon-Farbe ändern @: "+
-								((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.titel);
-								*/
-//							};
-//							if (toggleIcons == 1 ){
-//								customIconList.add(ktraeger);								
-//							}
-							/*
-							System.out.println(ktraeger);
-							System.out.println(((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.titel);
-							System.out.println(((JXTTreeNode)rootKasse.getChildAt(aeste)).knotenObjekt.rez_num);
-							*/
 							aeste++;
 
 //							treeKasse.repaint();
@@ -731,14 +715,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 			return;
 
 	}
-	/*******************************************/
-	/*
-	private void doAufraeumen(){
-		butLinks[0].removeActionListener(this);
-		cmbDiszi.removeActionListener(this);
-		treeKasse.getSelectionModel().removeTreeSelectionListener(this);
-	}
-	*/
+	/*******************************************/	
 	public void loescheKnoten(){
 		//rezept aus fertige löschen
 		//Verschluß des Rezeptes aufheben
@@ -1497,12 +1474,19 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 
 
 			/***
+<<<<<<< HEAD
 			 *
 			 *
 			 * In der Echtfunktion muß das Löschen in der rezept-Datenbank eingeschaltet werden
 			 * und das sofortige Löschen aus der Historie auscheschaltet werden
 			 *
 			 *
+=======
+			 * 
+			 * In der Echtfunktion muß das Löschen in der rezept-Datenbank eingeschaltet werden
+			 * und das sofortige Löschen aus der Historie auscheschaltet werden
+			 *  
+>>>>>>> fd1bd68... source cleanup
 			 */
 
 			//SqlInfo.sqlAusfuehren("delete from lza where rez_nr='"+abgerechneteRezepte.get(i2)+"' LIMIT 1");
