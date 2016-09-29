@@ -2221,7 +2221,7 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 
 				int currow = tabaktrez.getSelectedRow();
 				if(currow < 0){return;}
-				if(dtblm.getValueAt(currow,5)==null){		// kein Status-Icon gesetzt
+				if(dtblm.getValueAt(currow,5)==null){		// kein Status-Icon (mehr) gesetzt 
 					Reha.instance.abrechnungpanel.einlesenErneuern(null);
 				}else{
 //					String aktDisziplin = diszis[Reha.instance.abrechnungpanel.cmbDiszi.getSelectedIndex()];

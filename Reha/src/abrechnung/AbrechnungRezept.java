@@ -596,20 +596,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 
         jXTreeTable.setOpaque(true);
         jXTreeTable.setRootVisible(false);
-        /*
-        datePick.addPopupMenuListener(this);
-        datePick.addActionListener(new ActionListener() {
-        	public void actionPerformed(ActionEvent e) {
-        		////System.out.println("DatePicker Event = "+datePick.getDate().toString());
-        	}
-        });
-        //DatePicker von Datum
-
-        MyTableStringDatePicker myDate = new MyTableStringDatePicker(datePick);
-        jXTreeTable.getColumnModel().getColumn(1).setCellEditor(myDate);
-        */
-
-
+        
       //ComboBox von Behandlungsart
         mycomb2 = new MyTableComboBox();
         ((JRtaComboBox)mycomb2.getComponent()).setActionCommand("kuerzel");
@@ -1132,9 +1119,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 						ex.printStackTrace();
 					}
 				}
-				parseHTML(vec_rez.get(0).get(1).trim());
-
-
+				parseHTML(vec_rez.get(0).get(1).trim());	
 			}
 			if(SystemConfig.certState > 0){
 				tbbuts[3].setEnabled(true);
@@ -1152,7 +1137,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 						ex.printStackTrace();
 					}
 				}
-				int waitTimes = 100;
+				int waitTimes = 20;
 				int maxWait = waitTimes;
 				while((vec_rez_valid == false) && (maxWait > 0)){		// sucheRezept() ist noch nicht fertig...
 					try {
@@ -1165,9 +1150,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 				if(maxWait == 0) {
 					System.out.println("AbrechnungRezept: sucheRezept() ohne Ergebnis");					
 				}
+				/*
 				if(maxWait < waitTimes) {
-					//System.out.println("AbrechnungRezept: maxWait: "+maxWait);					
+					System.out.println("AbrechnungRezept: maxWait: "+maxWait);					
 				}
+				*/
 				parseHTML(vec_rez.get(0).get(1).trim());	
 			}
 			if(SystemConfig.certState > 0){
@@ -1249,9 +1236,10 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		//          13          14      15         16      	
 				"t2.nachname,t2.bsnr,t2.arztnum,t3.kassen_nam1 from pat5 t1,arzt t2,kass_adr t3 where t1.pat_intern='"+
 				vec_rez.get(0).get(0)+"' AND t2.id ='"+vec_rez.get(0).get(16)+"' AND t3.id='"+vec_rez.get(0).get(37)+"' LIMIT 1";
-		//                                       0         1         2             3     4       5 
 		////System.out.println(cmd);
 		vec_pat = SqlInfo.holeFelder(cmd);
+		////System.out.println(vec_pat);
+
 		int barcodeform = 0;
 		try{
 			barcodeform = Integer.parseInt(vec_rez.get(0).get(46));
@@ -1259,7 +1247,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 
 		}
 		this.tbcombo.setSelectedIndex(barcodeform <= 1 ? barcodeform : 0);
-		////System.out.println(vec_pat);
+
 		if(vec_pat.size() <= 0){
 			JOptionPane.showMessageDialog(null, "Diesem Rezept ist eine unbrauchbare Kasse und/oder Arzt zugeordnet. Bitte korrigieren");
 			return;
@@ -1470,10 +1458,14 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		}
 	}
 	/******************************
+<<<<<<< HEAD
 	 *
 	 *
 	 *
 	 *
+=======
+	 * 
+>>>>>>> fd1bd68... source cleanup
 	 */
 	private void doGebuehren(){
 		zuZahlungsIndex = 	zzpflicht[3];
@@ -1684,7 +1676,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 
 		///// Jetzt der Tarifwchsel-Check
 		// erst einlesen ab wann der Tarif gültig ist
-		// dann testen ob Rzeptdatum nach diesem Datum liegt wenn ja sind Preise o.k.
+		// dann testen ob Rezeptdatum nach diesem Datum liegt wenn ja sind Preise o.k.
 		// wenn nein -> testen welche Anwendungsregel gilt und entsprechend in einer
 		// for next Schleife die Preise anpassen!
 		// bevor jetzt weitergemacht werden kann muß der Vector für die Behandlungen erstellt werden!!!!!
@@ -2113,10 +2105,14 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	}
 
 	/*******************************
+<<<<<<< HEAD
 	 *
 	 *
 	 *
 	 *
+=======
+	 * 
+>>>>>>> fd1bd68... source cleanup
 	 */
 	/*******************************/
 
@@ -3067,14 +3063,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			isUpdating = false;
 
 		}
-
-
-
+	 
 	}
 
 /*************************
- *
- *
+ * 
  */
 	private class TageTreeTableModel extends DefaultTreeTableModel {
 		//SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
@@ -4378,9 +4371,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	// ComponentListener methods (handle window resize) McM 1606 
 	@Override
 	public void componentResized(ComponentEvent e) {
-//		String tmp = e.getComponent().getName().toString();
-//		tmp = e.getComponent().getName();
-        //System.out.println("Component resize detected ");
+		//String tmp = e.getComponent().getName();
+        //System.out.println("Component "+tmp+" resize detected ");
 		keepDayTreeSize(jSplitOU);
 		jSplitOU.setDividerLocation(tts.getCurrTageTreeSize());
 	}
