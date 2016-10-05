@@ -531,15 +531,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					doTreeRezeptWertermitteln();
 
 					regleAbrechnungsModus();
-					while(inParseHtml){
-						try {
-							Thread.sleep(25);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					parseHTML(rez.trim());
-
+					parseHTMLuniq(rez);
+					
 					doPositionenErmitteln();
 				}else{
 					JOptionPane.showMessageDialog(null,"Fehler im EDIFACT dieses Rezeptes");
@@ -565,6 +558,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		*/
 		return true;
 	}
+
 	/******
 	 *
 	 *
@@ -641,6 +635,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 				getVectorFromNodes();					
 				doTreeRezeptWertermitteln();
 //				doPositionenErmitteln();
+/*
 				while(inParseHtml){
 					try {
 						Thread.sleep(25);
@@ -649,8 +644,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					}
 				}
 				parseHTML(aktRezept.getRezNb());	
-
-
+ */
+	    		parseHTMLuniq(aktRezept.getRezNb());
 			}
 			@Override
 			public void editingCanceled(ChangeEvent e) {
@@ -726,6 +721,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		jXTreeTable.repaint();
 		//aktualisiereTree();
 		doTreeRezeptWertermitteln();
+/*
 		while(inParseHtml){
 			try {
 				Thread.sleep(25);
@@ -734,8 +730,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			}
 		}
 		parseHTML(aktRezept.getRezNb());	
-		
-		
+ */
+		parseHTMLuniq(aktRezept.getRezNb());
 	}
 
 	public void ZeigePopupMenu(int x, int y, int x2,int y2){
@@ -1117,6 +1113,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			if(this.jXTreeTable.getRowCount() > 0){
 				String ivkasse = aktRezept.getKtraeger();
 				macheHashMapIV(ivkasse);
+/*
 				while(inParseHtml){
 					try {
 						Thread.sleep(25);
@@ -1125,6 +1122,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					}
 				}
 				parseHTML(aktRezept.getRezNb());	
+ */
+	    		parseHTMLuniq(aktRezept.getRezNb());
 			}
 			if(SystemConfig.certState > 0){
 				tbbuts[3].setEnabled(true);
@@ -1135,13 +1134,6 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			tog.setIcon(SystemConfig.hmSysIcons.get("abrdreizwei"));
 			//eltern.hmAlternativeKasse.clear();
 			if(this.jXTreeTable.getRowCount() > 0){
-				while(inParseHtml){
-					try {
-						Thread.sleep(25);
-					} catch (InterruptedException ex) {
-						ex.printStackTrace();
-					}
-				}
 				int waitTimes = 20;
 				int maxWait = waitTimes;
 				while((vec_rez_valid == false) && (maxWait > 0)){		// sucheRezept() ist noch nicht fertig...
@@ -1155,12 +1147,22 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 				if(maxWait == 0) {
 					System.out.println("AbrechnungRezept: sucheRezept() ohne Ergebnis");					
 				}
-				/*
+/*
 				if(maxWait < waitTimes) {
 					System.out.println("AbrechnungRezept: maxWait: "+maxWait);					
 				}
-				*/
+ */
+/*
+				while(inParseHtml){
+					try {
+						Thread.sleep(25);
+					} catch (InterruptedException ex) {
+						ex.printStackTrace();
+					}
+				}
 				parseHTML(aktRezept.getRezNb());	
+ */
+	    		parseHTMLuniq(aktRezept.getRezNb());
 			}
 			if(SystemConfig.certState > 0){
 				tbbuts[3].setEnabled(false);
@@ -1307,15 +1309,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		}
 		doPositionenErmitteln();
 		doTreeRezeptWertermitteln();
-		while(inParseHtml){
-			try {
-				Thread.sleep(25);
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
-			}
-		}
-
-		parseHTML(rez_nr.trim());
+		parseHTMLuniq(rez_nr);	
 		try{
 
 			if(rezeptWert <= zuzahlungWert){
@@ -2450,7 +2444,20 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			this.tarifkennzeichen = "";
 		}
 	}
-
+	
+	/**
+	 * @param rez
+	 */
+	public void parseHTMLuniq(String rez) {
+		while(inParseHtml){
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
+		parseHTML(rez.trim());
+	}
 	private void parseHTML(String rez_nr){
 		inParseHtml = true;
 		try{
@@ -2789,7 +2796,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	    		doNeueKasseFuerIV();
 	    	}
 
-	    	if(event.getURL().toString().contains("tagedrucken.de")){
+	    	if(event.getURL().toString().contains("tagedrucken.de")){		// toggle Druck d. Behandlungstage
+/*
 	    		if(!this.tagedrucken){
 	    			this.tagedrucken = true;
 	    			while(inParseHtml){
@@ -2812,6 +2820,15 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					}
 				}
 	    		parseHTML(aktRezept.getRezNb());
+	    		htmlPaneScrollToEnd();
+	    		return;
+ */
+	    		if(this.tagedrucken){
+		    		this.tagedrucken = false;	    			
+	    		} else {
+	    			this.tagedrucken = true;	    			
+	    		}
+	    		parseHTMLuniq(aktRezept.getRezNb());
 	    		htmlPaneScrollToEnd();
 	    		return;
 	    	}
@@ -2852,6 +2869,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		if(!aKasse[2].getText().trim().equals(suchegleichnach[1]) && !aKasse[2].getText().trim().equals("")){
 			////System.out.println("Es wurde eine neue Kasse gewählt");
 			macheHashMapIV(aKasse[2].getText().trim());
+/*
 			while(inParseHtml){
 				try {
 					Thread.sleep(25);
@@ -2860,7 +2878,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 				}
 			}
 			parseHTML(aktRezept.getRezNb());
-
+ */
+    		parseHTMLuniq(aktRezept.getRezNb());
 		}else{
 			////System.out.println("kasse ist gleich geblieben");
 		}
@@ -2923,6 +2942,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		rgeb.setLocation(location.x-50,location.y-50);
 		rgeb.pack();
 		rgeb.setVisible(true);
+/*
 		while(inParseHtml){
 			try {
 				Thread.sleep(25);
@@ -2931,7 +2951,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			}
 		}
 		parseHTML(aktRezNum.getText());
-
+ */
+		parseHTMLuniq(aktRezept.getRezNb());
 		//this.aktRezNum.getText()
 		//Positionenvec_poskuerzel.get(i)
 		//vec_posanzahl.get(i)
@@ -3315,6 +3336,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					getVectorFromNodes();
 					doTreeRezeptWertermitteln();
 					doPositionenErmitteln();
+/*
 					while(inParseHtml){
 						try {
 							Thread.sleep(25);
@@ -3323,6 +3345,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 						}
 					}
 					parseHTML(aktRezept.getRezNb());
+ */
+		    		parseHTMLuniq(aktRezept.getRezNb());
 				}
 			});
 			return;
@@ -3346,6 +3370,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					if(aktRow < 0){return;}
 					doAkttarif((String) ((JRtaComboBox)arg0X.getSource()).getSelectedItem());
 					doTreeRezeptWertermitteln();
+/*
 					while(inParseHtml){
 						try {
 							Thread.sleep(25);
@@ -3354,7 +3379,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 						}
 					}					
 					parseHTML(aktRezept.getRezNb());
-
+ */
+		    		parseHTMLuniq(aktRezept.getRezNb());
 				}
 			});
 			return;
@@ -3538,6 +3564,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 				doTitelRepair();
 				jXTreeTable.repaint();
 				doPositionenErmitteln();
+/*
 				while(inParseHtml){
 					try {
 						Thread.sleep(25);
@@ -3546,7 +3573,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 					}
 				}
 				parseHTML(aktRezept.getRezNb());
-				
+ */
+	    		parseHTMLuniq(aktRezept.getRezNb());
 				return null;
 			}
 		}.execute();
