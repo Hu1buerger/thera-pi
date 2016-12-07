@@ -104,9 +104,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	JLabel summeGesamtOffen;
 	Component kopieButton;
 	JRtaCheckBox bar = null;
-//	JRtaCheckBox ChkRGR = null;
-//	JRtaCheckBox ChkAFR = null;
-//	JRtaCheckBox ChkVKR = null;
 	
 	JButton kopie;
 
@@ -169,9 +166,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	private JPanel getContent(){
 		FormLayout lay = new FormLayout(
 		//        1     2     3    4     5     6 7    8       9     10    11   12    13   14    15   16    17   18    19
-				 "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,50dlu:g,10dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,2dlu,50dlu,10dlu",	// xwerte,
+				 "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,40dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p",	// xwerte,
 		//        1     2 3     4        5    6 7     8    9 10   11
-				 "15dlu,p,15dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,8dlu,0dlu"															// ywerte
+				 "15dlu,p,15dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,8dlu,0dlu"														// ywerte
 				);
 		PanelBuilder builder = new PanelBuilder(lay);
 		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
@@ -216,7 +213,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
 		buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
 		buts[btSuchen].setMnemonic('s');
-		builder.add(buts[btSuchen],cc.xy(18,rowCnt));
+		builder.add(buts[btSuchen],cc.xy(17,rowCnt));
 
 //**********************
 		while(!OpRgaf.DbOk){
@@ -269,7 +266,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		rowCnt +=2;									// 6
 		colCnt = 4;
 		kopieButton = builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));		// 4,6
-		colCnt = 12;
+		colCnt = 11;
 		builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));										// 12,6
 
 		++colCnt;
@@ -287,7 +284,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		}
 
 		
-		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(18,6));
+		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(17,6));
 //**********************
 
 		rowCnt +=2;
@@ -473,15 +470,10 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		gesamtOffen = gesamtOffen.subtract(eingang);
 
 		String cmd = "";
-		//einen größeren Schwachsinn für den praktische Einsatz kann man sich schwerlich vorstellen.
-		//Der logische Wert muß über die CheckBox bar.isSelected() bestimmt werden alles andere ist völlig Scheiße
-		//ich habe mich dafür bereits mehrfach(!!) in den Arsch gebissen
-		//if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
-		String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 10).toString();
+		String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 10).toString(); 
 		String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 1).toString();
+
 		if(bar.isSelected()){
-			//BigDecimal einnahme = BigDecimal.valueOf((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 4));
-			//einnahme = einnahme.subtract(BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) ));
 			cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', datum='"+
 			DatFunk.sDatInSQL(DatFunk.sHeute())+"', ktext='"+
 			rgaf_rechnum+","+
@@ -498,7 +490,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			SqlInfo.sqlAusfuehren("update lza set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");
 		}
 
-
 		int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), 11);
 		cmd = "update rgaffaktura set roffen='"+dcf.format(restbetrag).replace(",", ".")+"', rbezdatum='"+
 		DatFunk.sDatInSQL(DatFunk.sHeute())+"' where id ='"+Integer.toString(id)+"' LIMIT 1";
@@ -507,7 +498,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			SqlInfo.sqlAusfuehren(cmd);
 		}
 		*/
-		//hier rein die Kasseneinnahme
 		SqlInfo.sqlAusfuehren(cmd);
 		schreibeAbfrage();
 		tfs[0].setText("0,00");
@@ -669,7 +659,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			stmt =  OpRgaf.thisClass.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
 			            ResultSet.CONCUR_UPDATABLE );
 		} catch (SQLException e) {
-
 			e.printStackTrace();
 		}
 		try{
@@ -747,6 +736,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			}
 		}
 	}
+
 	/*****************************************************/
 	class OPListSelectionHandler implements ListSelectionListener {
 
@@ -988,23 +978,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			      }
 			    }
 		}
-		//if(SystemConfig.hmAbrechnung.get("hmallinoffice").equals("1")){
-			textDocument.getFrame().getXFrame().getContainerWindow().setVisible(true);
-		/*
-		}else{
-			PrintProperties printprop = new PrintProperties ((short) 2 ,null);
-			textDocument.getPrintService().print(printprop);
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			textDocument.close();
-			textDocument = null;
-		}
-		*/
-
-			OpRgaf.thisFrame.setCursor(OpRgaf.thisClass.normalCursor);
+		textDocument.getFrame().getXFrame().getContainerWindow().setVisible(true);
+		OpRgaf.thisFrame.setCursor(OpRgaf.thisClass.normalCursor);
 	}
 	@Override
 	public void useRGR(boolean rgr) {

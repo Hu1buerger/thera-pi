@@ -42,6 +42,7 @@ import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
 import CommonTools.JCompTools;
+import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
@@ -91,6 +92,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	OffenepostenTab eltern = null;
 
 	private OpShowGesamt sumPan;
+
+	private JRtaCheckBox bar = null;
 	
 	public OffenepostenPanel(OffenepostenTab xeltern){
 		super();
@@ -118,11 +121,10 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	
 	private JPanel getContent(){
 		FormLayout lay = new FormLayout(
-		//  1     2     3    4     5     6     7    8      9    10    11   12    13   14    15    16    17
-		 "10dlu,50dlu,2dlu,90dlu,10dlu,30dlu,1dlu,40dlu:g,2dlu,50dlu,2dlu,40dlu,5dlu,40dlu,10dlu,50dlu,10dlu",	// xwerte,
+		// 1    2     3    4     5    6  7    8       9     10   11    12   13    14   15    16   17    18   19
+		"10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,40dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p",	// xwerte,
 		//  1   2  3     4       5   6  7     8   9  10   11
-		 "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,0dlu,0dlu"																// ywerte
-//		 "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,30dlu,0dlu,0dlu"																// ywerte
+		 "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,0dlu,0dlu"														// ywerte
 		);
 		PanelBuilder builder = new PanelBuilder(lay);
 		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
@@ -156,8 +158,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 
 		buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
 		buts[btSuchen].setMnemonic('s');
-		colCnt +=8;
-		builder.add(buts[btSuchen],cc.xy(colCnt,rowCnt));
+		colCnt +=9;
+		builder.add(buts[btSuchen],cc.xy(colCnt,rowCnt));					// 17,2
 
 		while(!OffenePosten.DbOk){
 			
@@ -190,9 +192,10 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 				
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
 		rowCnt +=2;
-		builder.add(jscr,cc.xyw(2,rowCnt++,15));		// 2,4
+		builder.add(jscr,cc.xyw(2,rowCnt++,17));		// 2,4
 
-		colCnt = 12;
+		colCnt = 11;
+		//colCnt = 13;	// ohne 'bar in Kasse'
 		builder.addLabel("Geldeingang:", cc.xy(colCnt++, ++rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));	// 12,6
 
 		tfs[0] = new JRtaTextField("F",true,"6.2","");
@@ -202,6 +205,13 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		tfs[0].addKeyListener(kl);
 		//content.add(tfs[0],cc.xy(14,2));
 		builder.add(tfs[0],cc.xy(++colCnt,rowCnt));																// 14,6
+
+		++colCnt;
+		bar  = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
+		bar.setEnabled(false);
+//		if(OpRgaf.iniOpRgAf.getWohinBuchen().equals("Kasse")){
+//			bar.setSelected(true);			
+//		}
 
 //		content.add((buts[btAusbuchen] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),cc.xy(16,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		colCnt +=2;
@@ -326,8 +336,11 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 			return;
 		}
 		suchOffen = suchOffen.subtract( eingang );
-		
 		gesamtOffen = gesamtOffen.subtract( eingang );
+		
+		if(bar.isSelected()){
+			// hier Buchung in Kasse 'rein
+		}
 		
 		tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 6);
 		tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), 7);
@@ -350,22 +363,17 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	}
 	private void schreibeAbfrage(){
 		schreibeGesamtOffen();
-		//summeOffen.setText(dcf.format(suchOffen));
 		sumPan.setSuchOffen(suchOffen);
 		sumPan.schreibeSuchOffen();
-		//summeRechnung.setText(dcf.format(suchGesamt));
 		sumPan.setSuchGesamt(suchGesamt);
 		sumPan.schreibeSuchGesamt();
-		//anzahlSaetze.setText(Integer.toString(gefunden));
 		sumPan.setAnzRec(gefunden);
 		sumPan.schreibeAnzRec();
 	}
 
 	private void schreibeGesamtOffen(){
-		//summeGesamtOffen.setText( dcf.format(gesamtOffen) );
 		sumPan.setGesamtOffen(gesamtOffen);
 		sumPan.schreibeGesamtOffen();
-
 	}
 	
 	private void doSuchen(){
@@ -530,8 +538,6 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 			e.printStackTrace();
 		}
 		try{
-			
-			
 			rs = stmt.executeQuery(sstmt);
 			Vector<Object> vec = new Vector<Object>();
 			int durchlauf = 0;
@@ -682,12 +688,9 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 			}catch(Exception ex){
 				JOptionPane.showMessageDialog(null,"Fehler in der Dateneingbe");
 			}
-			
-			
 			return;
 		}
 
 	}
-
 
 }
