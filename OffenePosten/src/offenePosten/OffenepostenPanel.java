@@ -208,12 +208,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 
 		++colCnt;
 		bar  = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
-		bar.setEnabled(false);
-//		if(OpRgaf.iniOpRgAf.getWohinBuchen().equals("Kasse")){
-//			bar.setSelected(true);			
-//		}
+		//bar.setEnabled(false);
 
-//		content.add((buts[btAusbuchen] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),cc.xy(16,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		colCnt +=2;
 		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(colCnt,rowCnt));
 		buts[btAusbuchen].setMnemonic('a');
@@ -340,6 +336,24 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		
 		if(bar.isSelected()){
 			// hier Buchung in Kasse 'rein
+			String op_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 0).toString();
+			String op_patId = tabmod.getValueAt(tab.convertRowIndexToModel(row), 13).toString();
+			if(op_patId.equals("")){				// wenn leer war's 'ne Rechnung an 'ne Kasse
+				JOptionPane.showMessageDialog(null,"Die Kasse hat bar gezahlt? - Glaub' ich nicht! \nAusbuchen abgebrochen!");
+				bar.setSelected(false);
+				return;				
+			}
+			String op_patient = tabmod.getValueAt(tab.convertRowIndexToModel(row), 2).toString(); 		// bei Privatrechng steht hier 'Name,Vorname'
+			String op_sparte = tabmod.getValueAt(tab.convertRowIndexToModel(row), 4).toString();
+			String op_reznum = SqlInfo.holeEinzelFeld("select rez_nr from faktura where rnummer='"+op_rechnum+"' LIMIT 1");
+
+			String cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', "
+					+ "datum='"+ DatFunk.sDatInSQL(DatFunk.sHeute())+"', " 
+					+ "ktext='R-"+ op_sparte + " " + op_rechnum+","+ op_patient +"', rez_nr='"+op_reznum+"'";
+			//System.out.println(cmd);
+			SqlInfo.sqlAusfuehren(cmd);
+
+			bar.setSelected(false);
 		}
 		
 		tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 6);
