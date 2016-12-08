@@ -334,8 +334,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		suchOffen = suchOffen.subtract( eingang );
 		gesamtOffen = gesamtOffen.subtract( eingang );
 		
-		if(bar.isSelected()){
-			// hier Buchung in Kasse 'rein
+		if(bar.isSelected()){			// Buchung in Bar-Kasse
 			String op_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 0).toString();
 			String op_patId = tabmod.getValueAt(tab.convertRowIndexToModel(row), 13).toString();
 			if(op_patId.equals("")){				// wenn leer war's 'ne Rechnung an 'ne Kasse

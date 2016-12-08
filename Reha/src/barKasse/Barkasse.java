@@ -1,4 +1,4 @@
-package barKasse;
+﻿package barKasse;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -16,13 +16,11 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
-
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.DatFunk;
 import CommonTools.INIFile;
@@ -41,6 +39,11 @@ import environment.Path;
 import hauptFenster.Reha;
 import rehaInternalFrame.JBarkassenInternal;
 import systemTools.ButtonTools;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 public class Barkasse extends JXPanel implements ItemListener{
 
@@ -62,13 +65,15 @@ public class Barkasse extends JXPanel implements ItemListener{
 
 	JCheckBox ChkRG = null;
 	JCheckBox ChkVerk = null;
-	boolean incRG = false, incVerk = false;
+	JCheckBox ChkPR = null;
+	boolean incRG = false, incVerk = false, incPR = false;
 
 	ActionListener al = null;
 	KeyListener kl = null;
 	ItemListener il = null;
 	
 	DecimalFormat dcf = new DecimalFormat("#######0.00");
+	private Boolean settingsLocked = false;
 	
 	public Barkasse(JBarkassenInternal bki){
 		super();
@@ -84,6 +89,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 				setzeFocus();
 			}
 		});
+		this.doLayout();
 	}
 	private void setzeFocus(){
 		SwingUtilities.invokeLater(new Runnable(){
@@ -93,12 +99,18 @@ public class Barkasse extends JXPanel implements ItemListener{
 			}
 		});
 	}
-	private JXPanel getContent(){//       1               2    3     4     5    6    7     8     9     10    11    12
-		FormLayout lay = new FormLayout("fill:0:grow(0.5),5dlu,22dlu,64dlu,5dlu,9dlu,20dlu,60dlu,11dlu,14dlu,60dlu,5dlu,fill:0:grow(0.5)",
-           // 1    2  3   4  5    6  7   8 9   10  11 12  13 14 15  16 17  18 19  20 21  22 23  24  25 26  27 28  29 30
-			"10dlu,p,3dlu,p,10dlu,p,2dlu,p,5dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p,5dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p");
+	private JPanel getContent(){
+		FormLayout lay = new FormLayout(
+				//  1              2    3     4     5    6    7     8     9     10    11    12    13
+				"fill:0:grow(0.5),5dlu,22dlu,64dlu,5dlu,9dlu,20dlu,11dlu,60dlu,14dlu,60dlu,5dlu,fill:0:grow(0.5)",					// xwerte,
+				//  1  2  3   4  5   6  7   8 9   10  11 12  13 14 15  16 17  18 19  20 21  22 23  24  25 26  27 28  29 30
+				"10dlu,p,3dlu,p,7dlu,p,2dlu,p,2dlu,p,7dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p,7dlu,p,2dlu,p,2dlu,p,2dlu,p,2dlu,p"	// ywerte
+		);
+		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
-		int rowCnt=2;
+
 		ChkRG = new JCheckBox();
 		if (incRG) {
 			ChkRG.setSelected(true);
@@ -109,117 +121,127 @@ public class Barkasse extends JXPanel implements ItemListener{
 			ChkVerk.setSelected(true);
 		}
 		ChkVerk.addItemListener(this);
+		ChkPR = new JCheckBox();
+		if (incPR) {
+			ChkPR.setSelected(true);
+		}
+		ChkPR.addItemListener(this);
 
-		content = new JXPanel();
-		// content = new FormDebugPanel(); <- tut nicht! - wie geht das?
+		int colLeft=3, colRight=8, rowCnt=2;
 
-		content.setLayout(lay);
 		lab = new JLabel("Erfassungszeitraum");
-		content.add(lab,cc.xyw(3,rowCnt++,5));
+		builder.add(lab,cc.xyw(colLeft,rowCnt++,5));		// 3,2
 		
 		lab = new JLabel("von...");
-		content.add(lab,cc.xy(3,++rowCnt));
+		builder.add(lab,cc.xy(colLeft,++rowCnt));			// 3,4 
 		tfs[0] = new JRtaTextField("DATUM",false);
 		tfs[0].setText(DatFunk.sHeute());
-		content.add(tfs[0],cc.xyw(4,rowCnt,2));
+		builder.add(tfs[0],cc.xyw(4,rowCnt,2));				// 4,4
 		
 		lab = new JLabel("bis...");
-		content.add(lab,cc.xy(7,rowCnt));
+		builder.add(lab,cc.xy(7,rowCnt));					// 7,4 
 		tfs[1] = new JRtaTextField("DATUM",false);
 		tfs[1].setText(DatFunk.sHeute());
-		content.add(tfs[1],cc.xyw(8,rowCnt++,2));
+		builder.add(tfs[1],cc.xyw(colRight,rowCnt++,2));	// 8,4 
+		
+		// checkbox Gebühren 
+		builder.add(ChkRG, cc.xy(colRight, ++rowCnt));		// 8,6
+		lab = new JLabel("Rezeptgebühren");
+		builder.add(lab,cc.xyw(9,rowCnt++,3));
 		
 		lab = new JLabel("berücksichtige Einnahmen aus");
-		content.add(lab,cc.xyw(3,++rowCnt,5));
-		rowCnt++;
-		lab = new JLabel("Rezeptgebühren");
-		content.add(lab,cc.xyw(3,++rowCnt,3));
-		// checkbox Gebühen (checked)
-		content.add(ChkRG, cc.xy(6, rowCnt));
-		lab = new JLabel("Verkauf");
-		content.add(lab,cc.xy(8,rowCnt));
-		// checkbox Verkauf (unchecked)
-		content.add(ChkVerk, cc.xy(9, rowCnt));
+		//builder.add(lab,cc.xyw(colLeft,++rowCnt,5));		// 3,8
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));		// 4,8
 
-		content.add((buts[0]=ButtonTools.macheButton("ermitteln", "ermitteln", al)),cc.xy(11,rowCnt++));
-		
+		// checkbox Verkauf 
+		builder.add(ChkVerk, cc.xy(colRight, rowCnt));		// 8,8
+		lab = new JLabel("Verkauf");
+		builder.add(lab,cc.xy(9,rowCnt++));
+
+		// checkbox Privatrechnung 
+		builder.add(ChkPR, cc.xy(colRight, ++rowCnt));		// 8,10
+		lab = new JLabel("(Privat-)Rechnung");
+		builder.add(lab,cc.xy(9,rowCnt));
+
+		builder.add((buts[0]=ButtonTools.macheButton("ermitteln", "ermitteln", al)),cc.xy(11,rowCnt++));
+
 		lab = new JLabel("ermittelte Einnahmen");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		
 		einlab = new JLabel("0,00");
 		einlab.setForeground(Color.BLUE);
-		content.add(einlab,cc.xyw(8,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(einlab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 
 		lab = new JLabel("ermittelte Ausgaben");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		
 		auslab = new JLabel("0,00");
 		auslab.setForeground(Color.BLUE);
-		content.add(auslab,cc.xyw(8,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(auslab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 
-		//
 		lab = new JLabel("Anfangsbestand");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		tfzahlen[0] = new JRtaTextField("FL",true,"6.2","RECHTS");
 		tfzahlen[0].setText("0,00");
-		content.add(tfzahlen[0],cc.xyw(8,rowCnt++,2));
+		builder.add(tfzahlen[0],cc.xyw(colRight,rowCnt++,2));
 
 		lab = new JLabel("zusätzliche Einnahmen");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		tfzahlen[1] = new JRtaTextField("FL",true,"6.2","RECHTS");
 		tfzahlen[1].setText("0,00");
-		content.add(tfzahlen[1],cc.xyw(8,rowCnt++,2));
+		builder.add(tfzahlen[1],cc.xyw(colRight,rowCnt++,2));
 		
 		lab = new JLabel("zusätzliche Ausgaben");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		tfzahlen[2] = new JRtaTextField("FL",true,"6.2","RECHTS");
 		tfzahlen[2].setText("0,00");
-		content.add(tfzahlen[2],cc.xyw(8,rowCnt++,2));
+		builder.add(tfzahlen[2],cc.xyw(colRight,rowCnt++,2));
 
 		lab = new JLabel("Wert der Scheckeinnahmen");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		tfzahlen[3] = new JRtaTextField("FL",true,"6.2","RECHTS");
 		tfzahlen[3].setText("0,00");
-		content.add(tfzahlen[3],cc.xyw(8,rowCnt++,2));
+		builder.add(tfzahlen[3],cc.xyw(colRight,rowCnt++,2));
 		
 		lab = new JLabel("gezählter Bargeldbestand (Ist)");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		tfzahlen[4] = new JRtaTextField("FL",true,"6.2","RECHTS");
 		tfzahlen[4].setText("0,00");
-		content.add(tfzahlen[4],cc.xyw(8,rowCnt++,2));
+		builder.add(tfzahlen[4],cc.xyw(colRight,rowCnt++,2));
 
 		lab = new JLabel("Kassenbestand Soll");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		kasselab = new JLabel("0,00");
 		kasselab.setForeground(Color.RED);
-		content.add(kasselab,cc.xyw(8,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(kasselab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 
 		lab = new JLabel("Bargeldbestand Soll");
 		lab.setForeground(Color.BLUE);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		barlab = new JLabel("0,00");
 		barlab.setForeground(Color.RED);
-		content.add(barlab,cc.xyw(8,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(barlab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		
 		lab = new JLabel("Differenz im Bargeldbestand!!!");
 		lab.setForeground(Color.RED);
-		content.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		differenzlab = new JLabel("0,00");
 		differenzlab.setForeground(Color.RED);
-		content.add(differenzlab,cc.xyw(8,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-
+		builder.add(differenzlab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add((buts[1]=ButtonTools.macheButton("drucken", "drucken", al)),cc.xy(11,++rowCnt));
 		
-		content.add((buts[1]=ButtonTools.macheButton("drucken", "drucken", al)),cc.xy(11,++rowCnt));
+		//builder.add(differenzlab,cc.xyw(colRight,rowCnt,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		//builder.add((buts[1]=ButtonTools.macheButton("drucken", "drucken", al)),cc.xywh(11,--rowCnt,1,3));
 		
-		return content;
+		return builder.getPanel();
 	}
 	private void makeListeners(){
 		al = new ActionListener(){
@@ -267,9 +289,12 @@ public class Barkasse extends JXPanel implements ItemListener{
 			JOptionPane.showMessageDialog(null, "Die Angaben von...bis... sind nicht korrekt");
 			return;
 		}
-
+		
 		if (ChkRG.isSelected()){	// zuerst die Rezeptgebühren ermitteln ...
-			Vector<Vector<String>> vec = SqlInfo.holeFelder("select sum(einnahme),sum(ausgabe) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"'");
+			Vector<Vector<String>> vec = SqlInfo.holeFelder(
+				"select sum(einnahme),sum(ausgabe) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
+				+ "AND ktext not like 'R-%'"
+				);
 			if(vec.get(0).get(0).trim() != ""){
 				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
 			}
@@ -277,8 +302,19 @@ public class Barkasse extends JXPanel implements ItemListener{
 				ausgaben = ausgaben + Double.parseDouble(vec.get(0).get(1).trim());
 			}
 		}
-		if (ChkVerk.isSelected()){	// ... dann die Verkaufserlöse
-			Vector<Vector<String>> vec = SqlInfo.holeFelder("select sum(v_betrag) from verkliste where v_datum>='"+dat1+"' AND v_datum<='"+dat2+"' AND v_nummer like 'VB-%'");
+		if (ChkVerk.isSelected()){	// ... dann die Verkaufserlöse ...
+ 			Vector<Vector<String>> vec = SqlInfo.holeFelder(
+ 					"select sum(v_betrag) from verkliste where v_datum>='"+dat1+"' AND v_datum<='"+dat2+"' AND v_nummer like 'VB-%'"
+ 					);
+			if(vec.get(0).get(0).trim() != ""){
+				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
+			}
+		}
+		if (ChkPR.isSelected()){	// ... und schließlich bar bezahlte Rechnungen
+			Vector<Vector<String>> vec = SqlInfo.holeFelder(
+				"select sum(einnahme) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
+				+ "AND ktext like 'R-%'"
+				);
 			if(vec.get(0).get(0).trim() != ""){
 				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
 			}
@@ -393,6 +429,12 @@ public class Barkasse extends JXPanel implements ItemListener{
 	        }else{
 	        }
 	    }
+	    if (source == ChkPR) {
+   	        if (e.getStateChange() == ItemEvent.DESELECTED) {
+   	        	// keine (Privat-)Rechnungen berücksichtigen
+   	        }else{
+   	        }
+   	    }
 	}	
 	/**
 	 * liest die zuletzt verwandten Checkbox-Einstellungen aus der bedienung.ini
@@ -403,21 +445,31 @@ public class Barkasse extends JXPanel implements ItemListener{
 		if ( inif.getStringProperty("BarKasse", "Rezeptgebuehren") != null ){					// Eintraege in ini vorhanden
 			incRG = inif.getBooleanProperty("BarKasse", "Rezeptgebuehren") ;
 			incVerk = inif.getBooleanProperty("BarKasse", "Verkaeufe");			
+			incPR = inif.getBooleanProperty("BarKasse", "privRechng");
+			settingsLocked = inif.getBooleanProperty("BarKasse", "lockSettings");
 		}else{
-			// Default-Werte setzen (Verhalten wie vor Erweiterung um Verkäufe)
+			// Default-Werte setzen (Verhalten wie vor Erweiterung um Verkäufe u. Privatrechnung)
 			incRG = true;
 			incVerk = false;
+			incPR = false;
 		}
 	}
 	/**
 	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die bedienung.ini
 	 */
 	private void saveLastSelection(){
-		if ( ( ChkRG.isSelected() != incRG ) || ( ChkVerk.isSelected() != incVerk ) ){
+		if ( ! settingsLocked ){																	// ini-Eintraege  duerfen aktualisiert werden
 			INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "bedienung.ini");
-			inif.setBooleanProperty("BarKasse", "Rezeptgebuehren", ChkRG.isSelected(), "Abrechnung Barkasse beruecksichtigt");
-			inif.setBooleanProperty("BarKasse", "Verkaeufe", ChkVerk.isSelected(), null);
-			INITool.saveIni(inif);
-		}
-	}
-}
+			if ( ( ChkRG.isSelected() != incRG ) || ( ChkVerk.isSelected() != incVerk ) || ( ChkPR.isSelected() != incPR ) ){
+				inif.setBooleanProperty("BarKasse", "Rezeptgebuehren", ChkRG.isSelected(), "Abrechnung Barkasse beruecksichtigt");
+				inif.setBooleanProperty("BarKasse", "Verkaeufe", ChkVerk.isSelected(), null);
+				inif.setBooleanProperty("BarKasse", "privRechng", ChkPR.isSelected(), null);
+				
+				if (inif.getStringProperty("BarKasse", "lockSettings") == null ){
+					inif.setBooleanProperty("BarKasse", "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
+				}
+				INITool.saveIni(inif);
+			}
+ 		}
+ 	}
+ }

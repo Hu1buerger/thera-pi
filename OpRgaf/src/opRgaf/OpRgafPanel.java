@@ -477,7 +477,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', datum='"+
 			DatFunk.sDatInSQL(DatFunk.sHeute())+"', ktext='"+
 			rgaf_rechnum+","+
-			tabmod.getValueAt(tab.convertRowIndexToModel(row), 0)+"',"+
+			tabmod.getValueAt(tab.convertRowIndexToModel(row), 0)+"',"+		// Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
 			"rez_nr='"+rgaf_reznum+"'";
 			//System.out.println(cmd);
 			SqlInfo.sqlAusfuehren(cmd);
