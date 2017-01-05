@@ -17,7 +17,7 @@ public class OpRgAfIni {
 	private String path2TemplateFiles;
 	private String iniFile;
 	private boolean incRG = false, incAR = false, incVK = false, settingsLocked = false;
-	private int vorauswahlSuchkriterium;
+	private int vorauswahlSuchkriterium = -1;
 	private String progHome, aktIK;
 	
 	/**
@@ -130,8 +130,21 @@ public class OpRgAfIni {
 		vorauswahlSuchkriterium = value;
 	}
 	public int getVorauswahl(int max){
+		int maxWait = 20;
+		int waitTimes = maxWait;
+		while((vorauswahlSuchkriterium < 0) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		if(waitTimes == 0) { 
+			System.out.println("OpRgaf getVorauswahl: " + 0 +"(Abbruch ini-read)");
+			return 0; }
+		//System.out.println("OpRgaf getVorauswahl: " + vorauswahlSuchkriterium +"(" + max + ")");
 		return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
-	}
+}
 	public HashMap<String,Object> getMahnParameter (){
 		return mahnParam;
 	}

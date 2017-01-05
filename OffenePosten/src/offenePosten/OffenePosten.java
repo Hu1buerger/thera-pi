@@ -92,7 +92,7 @@ public class OffenePosten implements WindowListener{
 	public boolean  isLibreOffice;
 	private static String path2IniFile;
 	private static String path2TemplateFiles;
-	private static int vorauswahlSuchkriterium;
+	private static int vorauswahlSuchkriterium = -1;
 	private static boolean settingsLocked = false;
 	private static String iniFile;
 
@@ -466,7 +466,7 @@ public class OffenePosten implements WindowListener{
 		if(OffenePosten.thisClass.conn != null){
 			try {
 				OffenePosten.thisClass.conn.close();
-				System.out.println("Datenbankverbindung wurde geschlossen");
+				System.out.println("OP: Datenbankverbindung wurde geschlossen");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -629,6 +629,20 @@ public class OffenePosten implements WindowListener{
 		vorauswahlSuchkriterium = value;
 	}
 	public static int getVorauswahl(int max){
+		int maxWait = 20;
+		int waitTimes = maxWait;
+		while((vorauswahlSuchkriterium < 0) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		if(waitTimes == 0) { 
+			System.out.println("OP getVorauswahl: " + 0 +"(Abbruch ini-read)");
+			return 0; 
+			}
+		//System.out.println("OP getVorauswahl: " + vorauswahlSuchkriterium +"(" + max + ")");
 		return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
 	}
 
@@ -639,12 +653,13 @@ public class OffenePosten implements WindowListener{
 	private static void readLastSelection(INIFile inif){
 		String section = "offenePosten";
 		if ( inif.getStringProperty(section, "lockSettings") != null ){					// Eintraege in ini vorhanden (alle oder keiner)
-			vorauswahlSuchkriterium = inif.getIntegerProperty(section, "Suchkriterium");	
+			//vorauswahlSuchkriterium = inif.getIntegerProperty(section, "Suchkriterium");	
+			setVorauswahl(inif.getIntegerProperty(section, "Suchkriterium"));
 			settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
 		}else{
-			// Default-Werte setzen 
-			vorauswahlSuchkriterium = 0;
+			setVorauswahl(0);			// Default-Wert setzen
 		}
+		System.out.println("OP readLastSel.: " + vorauswahlSuchkriterium);
 	}
     
 	/**
