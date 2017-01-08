@@ -88,16 +88,8 @@ public class SysUtilVerkauf extends JXPanel {
 	private JPanel getKnopfPanel(){
 		abbruch = ButtonTools.macheButton("abbrechen", "abbrechen", al);
 		speichern = ButtonTools.macheButton("speichern", "speicher", al);
-		/*
-		abbruch = new JButton("abbrechen");
-		abbruch.setActionCommand("abbrechen");
-		abbruch.addActionListener(al);
-		speichern = new JButton("speichern");
-		speichern.setActionCommand("speichern");
-		speichern.addActionListener(al);
-		*/
 									//      1.                      2.    3.    4.     5.     6.    7.      8.     9.
-		FormLayout jpanlay = new FormLayout("right:max(150dlu;p), 60dlu, 60dlu, 4dlu, 60dlu",
+		FormLayout jpanlay = new FormLayout("right:max(150dlu;p), 60dlu:g, 60dlu, 4dlu, 60dlu, 20dlu",
        //1.    2. 3.   4.   5.   6.     7.    8. 9.  10.  11. 12. 13.  14.  15. 16.  17. 18.  19.   20.    21.   22.   23.
 		"10dlu,p, 10dlu, p");
 		
@@ -124,8 +116,8 @@ public class SysUtilVerkauf extends JXPanel {
 		String ywerte = "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
 		//		"" 21  22  23  24   25  26   27  28  29    30  31   32  33  34   35   36  37  38  39   40 
 				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
-		//        41  42   43   44  45  46  47   48   49
-				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
+		//        41  42   43   44  45  46  47   48   49  50   51
+				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
 		FormLayout lay = new FormLayout(xwerte, ywerte);
 		CellConstraints cc = new CellConstraints();
 		//JXPanel pane = new JXPanel();
@@ -290,6 +282,9 @@ public class SysUtilVerkauf extends JXPanel {
 		
 		sofortDrucken = new JRtaCheckBox();
 		pane.add(sofortDrucken, cc.xy(5, 48));
+
+		pane.addSeparator("Vorlagen - Verwaltung", cc.xyw(1, 50, 5));
+
 		/*
 		speichern = new JXButton("speichern");
 		speichern.setActionCommand("speicher");

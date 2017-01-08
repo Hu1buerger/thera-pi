@@ -30,6 +30,8 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.sun.star.awt.Size;
 
+import CommonTools.SqlInfo;
+import systemEinstellungen.SystemConfig;
 import CommonTools.ButtonTools;
 import CommonTools.INIFile;
 import CommonTools.INITool;
@@ -68,9 +70,9 @@ public class VerkaufGUI extends JXPanel{
 	KeyListener kl = null;
 	FocusListener fl = null;
 	JRtaTextField[] edits = {null,null,null,null,null,null,null,null,null};
-	JRtaRadioButton[] rbuts = {null,null};
+	JRtaRadioButton[] rbuts = {null,null,null};
 	ButtonGroup group = new ButtonGroup();
-	JButton[] buts = {null,null,null,null, null};
+	JButton[] buts = {null,null,null,null, null, null};	// neu, Bar, Rechnung, delete, edit, Formulare
 	public JXTable vktab = null;
 	public DefaultTableModel vkmod = new DefaultTableModel();
 	JScrollPane jscr = null;
@@ -85,6 +87,8 @@ public class VerkaufGUI extends JXPanel{
 	INIFile settings = null;
 	VerkaufTab owner;
 	boolean debug = false;
+	Formulare forms = null;
+	private String customForm = null;
 	
 	
 	public VerkaufGUI(VerkaufTab owner){
@@ -97,6 +101,9 @@ public class VerkaufGUI extends JXPanel{
 		verkauf = new Verkauf();
 		df = new DecimalFormat("0.00");
 		settings = INITool.openIni(Path.Instance.getProghome() +"ini/"+ Reha.getAktIK() +"/", "verkauf.ini");
+		
+		forms = new Formulare();
+		forms.holeFormulare(settings);
 
 		SwingUtilities.invokeLater(new Runnable(){
 			@Override
@@ -105,7 +112,11 @@ public class VerkaufGUI extends JXPanel{
 			}
 		});
 
-
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				forms.makeDialog();
+			}
+		});
 	}
 	private void setzeFocus(){
 		SwingUtilities.invokeLater(new Runnable(){
@@ -275,12 +286,27 @@ public class VerkaufGUI extends JXPanel{
 		pan.add(rbuts[0],cc.xyw(2,8,5));
 		rbuts[1] = new JRtaRadioButton("Adresse von aktueller Kasse beziehen");
 		pan.add(rbuts[1],cc.xyw(2,10,5));
+		rbuts[2] = new JRtaRadioButton("Adresse von Hand eingeben");
+		pan.add(rbuts[2],cc.xyw(2,12,5));
 		rbuts[0].setOpaque(false);
 		rbuts[1].setOpaque(false);
+		rbuts[2].setOpaque(false);
 		group.add(rbuts[0]);
 		group.add(rbuts[1]);
+		group.add(rbuts[2]);
 		rbuts[0].setSelected(true);
 		/*************/
+
+		//pan.add( (buts[5] = new JButton()),cc.xy(2, 12));
+		pan.add( (buts[5] = new JButton()),cc.xywh(10, 8,1,2));
+		buts[5].setIcon(SystemConfig.hmSysIcons.get("print"));
+		buts[5].setToolTipText("anderes Formular verwenden");
+		buts[5].setActionCommand("verkFormulare");
+		buts[5].addActionListener(al);
+		buts[5].setOpaque(false);
+		buts[5].setBorderPainted(false);
+		buts[3].setMnemonic(KeyEvent.VK_F);
+
 		pan.validate();
 		//edits[0].requestFocus();
 		return pan;
@@ -397,7 +423,31 @@ public class VerkaufGUI extends JXPanel{
 				edits[1].requestFocus();
 			}
 			adlg = null; //neu
+		} else if(befehl == VerkaufTab.verkFormulare) {
+			selectFormular();
 		}
+	}
+	private void selectFormular() {
+		Point pt = buts[5].getLocationOnScreen();
+		int iformular = forms.showDialog(pt);
+
+		if(iformular < 0){
+			enableBarzahlung();
+			customForm = null;
+		}else{
+			disableBarzahlung();									// Custom-Formulare nur 'auf Rechnung'
+			customForm = forms.getFormular(iformular);
+		}
+	}
+	private void enableBarzahlung() {
+		buts[1].setEnabled(true);
+		buts[5].setBorderPainted(false);
+
+	}
+	private void disableBarzahlung() {
+		buts[1].setEnabled(false);
+		buts[5].setBorderPainted(true);
+		buts[2].requestFocus();
 	}
 	private void setzeTabellenWerte(String[][] tabDaten){
 		final String[][] tDaten = tabDaten;
@@ -659,17 +709,25 @@ public class VerkaufGUI extends JXPanel{
 			}
 			String propSection = "Rechnung";
 			String nummernkreis = "VR-"+ SqlInfo.erzeugeNummer("vrechnung");
-
-			
+			String url = null;
 			
 			IOfficeApplication application = Reha.officeapplication;
 			try {
 				IDocumentService service = application.getDocumentService();
 				IDocumentDescriptor descriptor = new DocumentDescriptor();
-				descriptor.setHidden(settings.getBooleanProperty(propSection, "SofortDrucken"));
+				if (rbuts[1].isSelected()){
+					descriptor.setHidden(false);			// Adressdaten müssen vor dem Druck eingegeben werden
+				}else{
+					descriptor.setHidden(settings.getBooleanProperty(propSection, "SofortDrucken"));					
+				}
 				descriptor.setAsTemplate(true);
 				
-				String url = Path.Instance.getProghome() + "vorlagen/"+ Reha.getAktIK() + "/" + settings.getStringProperty(propSection, "Vorlage");
+				if (customForm == null) {
+					url = Path.Instance.getProghome() + "vorlagen/"+ Reha.getAktIK() + "/" + settings.getStringProperty(propSection, "Vorlage");
+				}else{
+					url = Path.Instance.getProghome() + "vorlagen/"+ Reha.getAktIK() + "/" + customForm;
+					customForm = null;
+				}
 				IDocument document = service.loadDocument(url, descriptor);
 				ITextDocument doc = (ITextDocument) document;
 				
@@ -764,6 +822,7 @@ public class VerkaufGUI extends JXPanel{
 		} else {
 			JOptionPane.showMessageDialog(null, "Bitte erst Patientenfenster bzw. Kassenfenster öffnen und Patienten bzw. Kasse auswählen!");
 		}}
+		enableBarzahlung();	
 	}
 	
 	private void fuelleTabelle(ITextTable tabelle, String propSection) throws TextException {
