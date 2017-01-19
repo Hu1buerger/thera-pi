@@ -32,7 +32,7 @@ import CommonTools.JRtaTextField;
 import environment.Path;
 import hauptFenster.Reha;
 
-public class SysUtilVerkauf extends JXPanel {
+public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 
 	/**
 	 * 
@@ -46,7 +46,7 @@ public class SysUtilVerkauf extends JXPanel {
 	bonSpalte1, bonSpalte2, bonSpalte3, bonSpalte4, bonSpalte5, bonSpalte6, rechnungDrucker, bonDrucker, rechnungSpalten,
 	bonSpalten;
 	
-	private JButton rechnungVorlageB, bonVorlageB, speichern, abbruch;
+	private JButton rechnungVorlageB, bonVorlageB;
 	
 	private JRtaCheckBox bonAnpassen, sofortDrucken;
 	
@@ -56,7 +56,6 @@ public class SysUtilVerkauf extends JXPanel {
 	
 	private ActionListener al;
 	
-
 
 	SysUtilVerkauf() {
 		super(new BorderLayout());
@@ -81,10 +80,12 @@ public class SysUtilVerkauf extends JXPanel {
 		//add(getContent(),BorderLayout.CENTER);
 		ladeEinstellungen();
 		this.add(jscr,BorderLayout.CENTER);
-		this.add(getKnopfPanel(),BorderLayout.SOUTH);
+//		this.add(getKnopfPanel(),BorderLayout.SOUTH);
+		AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+		this.add(footer.getPanel(),BorderLayout.SOUTH);
 		System.out.println(getWidth()+"/"+getHeight());
 	}
-	
+/*	
 	private JPanel getKnopfPanel(){
 		abbruch = ButtonTools.macheButton("abbrechen", "abbrechen", al);
 		speichern = ButtonTools.macheButton("speichern", "speicher", al);
@@ -105,7 +106,7 @@ public class SysUtilVerkauf extends JXPanel {
 		jpan.getPanel().validate();
 		return jpan.getPanel();
 	}
-	
+ */	
 	
 	private JPanel getContent() {
 
@@ -407,22 +408,36 @@ public class SysUtilVerkauf extends JXPanel {
 
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
-				if(arg0.getActionCommand().equals("speicher")) {
-					speicherEinstellungen();
-				} else if(arg0.getActionCommand().equals("vorlageRechnung")) {
+				if(arg0.getActionCommand().equals("vorlageRechnung")) {
 					String sdummy = dateiWaehlen();
 					rechnungVorlage.setText((sdummy.equals("") ? rechnungVorlage.getText() : sdummy) );
 				} else if(arg0.getActionCommand().equals("vorlageBon")) {
 					String sdummy = dateiWaehlen();
 					bonVorlage.setText((sdummy.equals("") ? bonVorlage.getText() : sdummy) );
-				} else 	if(arg0.getActionCommand().equals("abbrechen")){
-					SystemInit.abbrechen();
-					return;
 				}
-
-				
 			}
-			
 		};
+	}
+
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();
+	}
+
+	@Override
+	public void Speichern() {
+		speicherEinstellungen();
+	}
+
+	@Override
+	public void AddEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void RemoveEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
 	}
 }
