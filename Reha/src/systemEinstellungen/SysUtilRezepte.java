@@ -1,4 +1,4 @@
-package systemEinstellungen;
+﻿package systemEinstellungen;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -51,8 +51,14 @@ import environment.Path;
 import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.TableTool;
+import CommonTools.INIFile;
+import CommonTools.INITool;
 
-public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListener {
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 	
 	JButton[] button = {null,null,null,null,null,null,null};
 	JRtaCheckBox[] heilmittel = {null,null,null,null,null,null,null,null};
@@ -91,7 +97,10 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 	     jscr.validate();
 	     
 	     add(jscr,BorderLayout.CENTER);
-	     add(getKnopfPanel(),BorderLayout.SOUTH);
+//	     add(getKnopfPanel(),BorderLayout.SOUTH);
+		AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+		this.add(footer.getPanel(),BorderLayout.SOUTH);
+
 			new SwingWorker<Void,Void>(){
 
 				@Override
@@ -161,7 +170,7 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 		voreinstellung = new JRtaComboBox(SystemConfig.rezeptKlassen);
 			
 		//                                      1.             2.     3.     4.     5.     6.    7. 
-		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 70dlu, 4dlu, 10dlu,0dlu",
+		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu,15dlu",
        //1.    2. 3.   4.   5.   6.  7.   8.  9.  10.  11. 12.  13.  14.  15. 16.   17. 18.   19.   20.  21. 22.     23. 24     25
 		"p, 2dlu, p,  2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p  ,2dlu, p  ,2dlu, p  ,10dlu, p, 10dlu, p, 10dlu, p, 10dlu, p,  10dlu ,  p, 10dlu,  p," +
        //26    27  28   29   30   31  32  33 34    35  36   37   38  39   40
@@ -278,18 +287,14 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 		
 		return builder.getPanel();
 	}
-
+/*
 	private JPanel getKnopfPanel(){
-		
-		
 		button[5] = new JButton("abbrechen");
 		button[5].setActionCommand("abbrechen");
 		button[5].addActionListener(this);
 		button[6] = new JButton("speichern");
 		button[6].setActionCommand("speichern");
 		button[6].addActionListener(this);		
-		
-
 									//      1.                      2.    3.    4.     5.     6.    7.      8.     9.
 		FormLayout jpanlay = new FormLayout("right:max(126dlu;p), 60dlu, 40dlu, 4dlu, 40dlu",
        //1.    2. 3.   4.   5.   6.     7.    8. 9.  10.  11. 12. 13.  14.  15. 16.  17. 18.  19.   20.    21.   22.   23.
@@ -304,10 +309,9 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 		jpan.add(button[6], jpancc.xy(5,3));
 		jpan.addLabel("Änderungen übernehmen?", jpancc.xy(1,3));
 		
-		
 		return jpan.getPanel();
 	}
-
+ */
 	@Override
 	public void keyPressed(KeyEvent e) {
 		
@@ -328,18 +332,7 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		
 		String cmd = e.getActionCommand();
-		if(cmd.equals("abbrechen")){
-			SystemInit.abbrechen();
-			//SystemUtil.thisClass.parameterScroll.requestFocus();
-		}
-		if(cmd.equals("speichern")){
-			//System.out.println("Es wird abgespeichert");
-			doSpeichern();
-			//JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei 'rezept.ini' erfolgreich gespeichert!");					
-
-		}
 		if(cmd.equals("vorlagenneu")){
 			setCursor(Cursors.wartenCursor);
 			String svorlage = dateiDialog(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
@@ -498,6 +491,24 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 			ex.printStackTrace();
 			JOptionPane.showMessageDialog(null,"Speichern der Konfiguration in rezept.ini fehlgeschlagen");
 		}
+	}
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();		
+	}
+	@Override
+	public void Speichern() {
+		doSpeichern();		
+	}
+	@Override
+	public void AddEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void RemoveEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
