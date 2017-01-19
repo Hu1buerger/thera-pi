@@ -36,6 +36,11 @@ import javax.swing.table.TableCellEditor;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 
+import CommonTools.JCompTools;
+import CommonTools.JRtaTextField;
+import CommonTools.INIFile;
+import CommonTools.INITool;
+
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -49,7 +54,7 @@ import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.TableTool;
 
-public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener {
+public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 	
 	/**
 	 * 
@@ -86,7 +91,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
 	     jscr.validate();
 	     
 	     add(jscr,BorderLayout.CENTER);
-	     add(getKnopfPanel(),BorderLayout.SOUTH);
+//	     add(getKnopfPanel(),BorderLayout.SOUTH);
+		AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+		this.add(footer.getPanel(),BorderLayout.SOUTH);
 
 	     new SwingWorker<Void,Void>(){
 				@Override
@@ -143,7 +150,7 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
 		
 
 	}	
-	
+/*
 private JPanel getKnopfPanel(){
 		
 		
@@ -170,7 +177,7 @@ private JPanel getKnopfPanel(){
 		
 		return jpan.getPanel();
 	}
-	
+ */	
 	/************** Beginn der Methode f�r die Objekterstellung und -platzierung *********/
 	private JPanel getVorlagenSeite(){
 		oben = new JRadioButton();
@@ -187,16 +194,13 @@ private JPanel getKnopfPanel(){
 		button[1].setActionCommand("neugruppen");
 		button[1].addActionListener(this);
 
-		button[2] = new JButton("entfernen"); //buttons 3-5 f�r Vorlagenverwaltung
-		button[2].setActionCommand("entfernenvorlage");
-		button[2].addActionListener(this);
+		//button[2] = new JButton("entfernen"); //buttons 3-5 f�r Vorlagenverwaltung
+		//button[2].setActionCommand("entfernenvorlage");
+		//button[2].addActionListener(this);
 		//button[3] = new JButton("ausw�hlen");
-		button[4] = new JButton("hinzufügen");
-		button[4].setActionCommand("neuvorlagen");
-		button[4].addActionListener(this);
-
-
-
+		//button[4] = new JButton("hinzufügen");
+		//button[4].setActionCommand("neuvorlagen");
+		//button[4].addActionListener(this);
 
 		modarzt = new MyVorlagenTableModel();
 		modarzt.setColumnIdentifiers(new String[] {"Arzt / Facharztgruppe"});
@@ -233,10 +237,12 @@ private JPanel getKnopfPanel(){
 		newgroup = new JRtaTextField("GROSS", true);
 		newdoc = new JRtaTextField("GROSS", true);
 		
-									//      1.           	  2.     3.     4.     5.     6.    7.      8.     9.
-		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu",
+//									//    1.                   2.     3.     4.     5.    6.    7.      8.     9.
+//		FormLayout lay = new FormLayout("right:max(130dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 20dlu",
+		//                                      1.             2.     3.     4.     5.     6.    7. 
+		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu, 15dlu",
        //1.   2.  3.  4.   5.   6.   7.   8.     9.    10. 11. 12.   13.  14.  15. 16.   17. 18.    19.    20.   21.   22.   23.     24  25     26   27
-		"p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 80dlu, 2dlu,p, 0dlu,0dlu, 2dlu, p, 10dlu, p, 10dlu, 80dlu, 2dlu, p,   0dlu , 0dlu, 0dlu, 0dlu, 2dlu, p");
+		"p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 80dlu, 2dlu,p, 0dlu,0dlu, 2dlu, p, 10dlu, p, 10dlu, 80dlu, 2dlu, p,   0dlu , 0dlu, 0dlu, 0dlu, 0dlu, 0dlu");
 		
 		PanelBuilder builder = new PanelBuilder(lay);
 		builder.setDefaultDialogBorder();
@@ -256,20 +262,23 @@ private JPanel getKnopfPanel(){
 		jscrPane.getVerticalScrollBar().setUnitIncrement(15);
 		jscrPane.validate();
 		builder.add(jscrPane, cc.xyw(1,9, 6));
-		
+/*		
 		builder.addLabel("aus Liste entfernen", cc.xy(1,11));
 		builder.add(button[0], cc.xy(6, 11));
 		//builder.addLabel("neuer Gruppenname", cc.xy(1, 13));
 		//builder.add(newgroup, cc.xyw(3, 13, 4));
 		builder.addLabel("zu Liste hinzufügen", cc.xy(1, 15));
 		builder.add(button[1], cc.xy(6, 15));
+ */
+		AddOrRemove addRemoveButtons = new AddOrRemove(this,1);
+		builder.add(addRemoveButtons.getPanel(), cc.xyw(1, 11, 6));
 
 		builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1, 17, 6));
 		jscrPane = JCompTools.getTransparentScrollPane(vorlagen);
 		jscrPane.getVerticalScrollBar().setUnitIncrement(15);
 		jscrPane.validate();
 		builder.add(jscrPane, cc.xyw(1,19,6));
-
+/*
 		builder.addLabel("aus Liste entfernen", cc.xy(1, 21));
 		builder.add(button[2], cc.xy(6, 21));
 		//builder.addLabel("Vorlagenbezeichnung", cc.xy(1, 23));
@@ -279,6 +288,9 @@ private JPanel getKnopfPanel(){
 		//builder.add(button[3], cc.xy(6,25));
 		builder.addLabel("zu Liste hinzufügen", cc.xy(1, 27));
 		builder.add(button[4], cc.xy(6,27));
+ */
+		AddOrRemove addRemoveButtons2 = new AddOrRemove(this,2);
+		builder.add(addRemoveButtons2.getPanel(), cc.xyw(1, 21, 6));
 		
 		return builder.getPanel();
 	}
@@ -306,90 +318,79 @@ private JPanel getKnopfPanel(){
 		String cmd = e.getActionCommand();
 		for(int i = 0;i < 1;i++){
 			if(cmd.equals("entfernengruppe")){
-				//int row = gruppen.convertRowIndexToModel(gruppen.getSelectedRow());
-				int row = gruppen.getSelectedRow();
-				int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
-				if(frage == JOptionPane.NO_OPTION){
-					return;
-				}
-				if(row >=0){
-					TableTool.loescheRowAusModel(gruppen, row);
-				}
+				loescheFachgebiet();
 				break;
 			}
 			if(cmd.equals("entfernenvorlage")){
-				int row = vorlagen.getSelectedRow();
-				int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
-				if(frage == JOptionPane.NO_OPTION){
-					return;
-				}
-				if(row >=0){
-					TableTool.loescheRow(vorlagen, row);
-				}
+				loescheVorlage();
 				break;
 			}
 			if(cmd.equals("neugruppen")){
-				Vector<String> vec = new Vector<String>();
-				vec.add("");
-				modarzt.addRow((Vector<?>)vec.clone());
-				gruppen.validate();
-				gruppen.setRowSelectionInterval(0, 0);
-				//int rows = gruppen.convertRowIndexToModel(gruppen.getSelectedRow());
-				//int rows = modarzt.getRowCount(); 
-				//final int xrows = rows;
-				SwingUtilities.invokeLater(new Runnable(){
-				 	   @Override
-                    public  void run(){
-				 		  gruppen.requestFocus();
-				 		  startCellEditing(gruppen,0);
-				 	   }
-				});
+				addFachgebiet();
 				break;
-				
-				
 			}
 			if(cmd.equals("neuvorlagen")){
-				setCursor(Cursors.wartenCursor);
-				String svorlage = dateiDialog(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
-				if(svorlage.equals("")){
-					return;
-				}
-
-
-				Vector<String> vec = new Vector<String>();
-				vec.add("");
-				vec.add(svorlage);
-				modvorl.addRow((Vector<?>)vec.clone());
-				vorlagen.validate();
-				int rows = modvorl.getRowCount(); 
-				final int xrows = rows -1;
-				SwingUtilities.invokeLater(new Runnable(){
-				 	   @Override
-                    public  void run(){
-				 		  vorlagen.requestFocus();
-				 		  vorlagen.setRowSelectionInterval(xrows, xrows);
-				 		  startCellEditing(vorlagen,xrows);
-				 	   }
-				});
+				neueVorlage();
 				break;
 			}
-			
-			if(cmd.equals("abbrechen")){
-				SystemInit.abbrechen();
-				//SystemUtil.thisClass.parameterScroll.requestFocus();
-			}
-			if(cmd.equals("speichern")){
-				//System.out.println("Es wird abgespeichert");
-				doSpeichern();
-				if(formok){
-					JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei 'arzt.ini' erfolgreich gespeichert!");					
-				}
+		}
+	}
+	private void addFachgebiet() {
+		Vector<String> vec = new Vector<String>();
+		vec.add("");
+		modarzt.addRow((Vector<?>)vec.clone());
+		gruppen.validate();
+		gruppen.setRowSelectionInterval(0, 0);
+		SwingUtilities.invokeLater(new Runnable(){
+		 	   public  void run(){
+		 		  gruppen.requestFocus();
+		 		  startCellEditing(gruppen,0);
+		 	   }
+		});
+	}
+	private void loescheFachgebiet() {
+		int row = gruppen.getSelectedRow();
+		int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+		if(frage == JOptionPane.NO_OPTION){
+			return;
+		}
+		if(row >=0){
+			TableTool.loescheRowAusModel(gruppen, row);
+		}
+	}
 
-			}
-			
+	private void loescheVorlage() {
+		int row = vorlagen.getSelectedRow();
+		int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+		if(frage == JOptionPane.NO_OPTION){
+			return;
+		}
+		if(row >=0){
+			TableTool.loescheRow(vorlagen, row);
+		}
+	}
+		
+	private void neueVorlage() {
+		Reha.getThisFrame().setCursor(Cursors.wartenCursor);
+		String svorlage = dateiDialog(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+		if(svorlage.equals("")){
+			return;
 		}
 
-		
+		Vector<String> vec = new Vector<String>();
+		vec.add("");
+		vec.add(svorlage);
+		modvorl.addRow((Vector<?>)vec.clone());
+		vorlagen.validate();
+		int rows = modvorl.getRowCount(); 
+		final int xrows = rows -1;
+		SwingUtilities.invokeLater(new Runnable(){
+		 	   public  void run(){
+		 		  vorlagen.requestFocus();
+		 		  vorlagen.setRowSelectionInterval(xrows, xrows);
+		 		  startCellEditing(vorlagen,xrows);
+		 	   }
+		});
 	}
 	
 	private void doSpeichern(){
@@ -432,7 +433,7 @@ private JPanel getKnopfPanel(){
 				inif.setStringProperty("ArztGruppen", "Gruppe"+(i+1),(String)gruppen.getValueAt(i, 0) , null);
 			}
 			INITool.saveIni(inif);
-			JOptionPane.showMessageDialog(null, "Konfiguration wurd erfolgreich in arzt.ini gespeichert.");
+			JOptionPane.showMessageDialog(null, "Konfiguration wurde erfolgreich in arzt.ini gespeichert.");
 		}catch(Exception ex){
 			JOptionPane.showMessageDialog(null, "Fehler beim speichern der Konfiguration!!!!");
 		}
@@ -580,10 +581,37 @@ private JPanel getKnopfPanel(){
 		public boolean startCellEditing() {
 	        return false;//super.startCellEditing();//false;
 		}
-
-		
 	}
 
-
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();
+	}
+	@Override
+	public void Speichern() {
+		doSpeichern();
+	}
+	@Override
+	public void AddEntry(int instance) {
+		switch (instance){
+		case 1:
+			addFachgebiet();
+			break;
+		case 2:
+			neueVorlage();
+			break;
+		}
+	}
+	@Override
+	public void RemoveEntry(int instance) {
+			switch (instance){
+			case 1:
+				loescheFachgebiet();
+				break;
+			case 2:
+				loescheVorlage();
+				break;
+			}
+	}
 
 }
