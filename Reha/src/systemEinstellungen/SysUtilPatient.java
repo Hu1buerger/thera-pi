@@ -1,4 +1,4 @@
-package systemEinstellungen;
+﻿package systemEinstellungen;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -39,6 +39,13 @@ import javax.swing.table.TableCellEditor;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.painter.CompoundPainter;
+import org.jdesktop.swingx.painter.MattePainter;
+
+import CommonTools.JCompTools;
+import CommonTools.JRtaTextField;
+import CommonTools.INIFile;
+import CommonTools.INITool;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -53,7 +60,7 @@ import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.TableTool;
 
-public class SysUtilPatient extends JXPanel implements KeyListener, ActionListener, CellEditorListener {
+public class SysUtilPatient extends JXPanel implements KeyListener, ActionListener, CellEditorListener, SysInitCommon_If {
 	
 		JButton[] button = {null,null,null,null,null,null,null,null,null,null,null};
 		JRtaTextField vorlage = null;
@@ -92,7 +99,9 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 	     jscr.validate();
 	     
 	     add(jscr,BorderLayout.CENTER);
-	     add(getKnopfPanel(),BorderLayout.SOUTH);
+//	     add(getKnopfPanel(),BorderLayout.SOUTH);
+			AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+			this.add(footer.getPanel(),BorderLayout.SOUTH);
 			new SwingWorker<Void,Void>(){
 
 				@Override
@@ -107,6 +116,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 
 		return;
 	}
+/*
 	private JPanel getKnopfPanel(){
 		
 	
@@ -134,6 +144,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		
 		return jpan.getPanel();
 	}
+ */
 	private void fuelleMitWerten(){
 		if(!formok){
 			return;
@@ -418,19 +429,6 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 				}
 				break;
 			}
-			if(cmd.equals("abbrechen")){
-				SystemInit.abbrechen();
-				//SystemUtil.thisClass.parameterScroll.requestFocus();
-			}
-			if(cmd.equals("speichern")){
-				//System.out.println("Es wird abgespeichert");
-				doSpeichern();
-				if(formok){
-					JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei 'patient.ini' erfolgreich gespeichert!");					
-				}
-
-			}
-			
 		}
 	}
 	private void startCellEditing(int row){
@@ -489,7 +487,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 				
 			}
 			INITool.saveIni(inif);
-			JOptionPane.showMessageDialog(null,"Konfiguration erfolgrein in patient.ini gespeichert.");
+			JOptionPane.showMessageDialog(null,"Konfiguration erfolgreich in patient.ini gespeichert.");
 		}catch(Exception ex){
 			JOptionPane.showMessageDialog(null,"Fehler beim speichern der Konfiguration in patient.ini!!!!");
 		}
@@ -632,6 +630,24 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 	public void editingStopped(ChangeEvent arg0) {
 		
 		//System.out.println("In Hauptprogramm-Listener editingStopped");
+	}
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();
+	}
+	@Override
+	public void Speichern() {
+		doSpeichern();
+	}
+	@Override
+	public void AddEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void RemoveEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
