@@ -45,6 +45,7 @@ import CommonTools.INIFile;
 import CommonTools.INITool;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -270,19 +271,22 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		
 		
         //                                      1.            2.     3.     4.     5.     6.    7.      8.     9.
-		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu",
-       //1.    2. 3.   4.  5.   6.   7.   8.     9.    10.  11.    12.   13.  14.   15.   16.    17.   18.  19.  20.    21.    22.   23.   24     25    26    27  28   29
+		//FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu",
+		//                                      1.             2.       3.     4.     5.     6.    7. 
+		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu, 15dlu",
+		//1.    2. 3.   4.  5.   6.   7.   8.     9.    10.  11.    12.   13.  14.   15.   16.    17.   18.  19.  20.    21.    22.   23.   24     25    26    27  28   29
 		"p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 0dlu, 0dlu, 0dlu,  0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 10dlu, p, 10dlu, 80dlu, 2dlu, p , 2dlu , 0dlu, 0dlu, p, 0dlu, p");
 		
-		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay);
+		PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
 		builder.setDefaultDialogBorder();
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
 		
 		builder.addLabel("Fenster startet im ..." , cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.BOTTOM));
-		builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken")+ " Container", cc.xyw(4, 1, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken")+ " Container", cc.xyw(3, 1, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
 		builder.add(oben, cc.xy(6, 1, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten")+ " Container", cc.xyw(4, 3, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten")+ " Container", cc.xyw(3, 3, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
 		builder.add(unten, cc.xy(6, 3, CellConstraints.RIGHT, CellConstraints.BOTTOM));
 		builder.addLabel("Fenstergröße automatisch optimieren", cc.xy(1, 5));
 		builder.add(optimize, cc.xy(6,5, CellConstraints.RIGHT, CellConstraints.BOTTOM));
