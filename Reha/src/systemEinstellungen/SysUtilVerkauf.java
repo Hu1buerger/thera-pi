@@ -55,6 +55,8 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 	private INIFile inif;
 	
 	private ActionListener al;
+
+	SysUtilVorlagen vorlagen = null;
 	
 
 	SysUtilVerkauf() {
@@ -74,8 +76,8 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 	     jscr.setViewportView(getContent());
 	     jscr.validate();
 	    
-	     inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "verkauf.ini");
-		
+	     //inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "verkauf.ini");
+	     inif = vorlagen.getInif();
 		
 		//add(getContent(),BorderLayout.CENTER);
 		ladeEinstellungen();
@@ -117,8 +119,8 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 		String ywerte = "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
 		//		"" 21  22  23  24   25  26   27  28  29    30  31   32  33  34   35   36  37  38  39   40 
 				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
-		//        41  42   43   44  45  46  47   48   49  50   51
-				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
+		//        41  42   43   44  45  46  47   48   49  50   51  52   53
+				"5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
 		FormLayout lay = new FormLayout(xwerte, ywerte);
 		CellConstraints cc = new CellConstraints();
 		//JXPanel pane = new JXPanel();
@@ -284,14 +286,16 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 		sofortDrucken = new JRtaCheckBox();
 		pane.add(sofortDrucken, cc.xy(5, 48));
 
-		pane.addSeparator("Vorlagen - Verwaltung", cc.xyw(1, 50, 5));
+		//pane.addSeparator("Vorlagen - Verwaltung", cc.xyw(1, 50, 5));
 
-		/*
-		speichern = new JXButton("speichern");
-		speichern.setActionCommand("speicher");
-		speichern.addActionListener(al);
-		pane.add(speichern, cc.xy(5, 50));
-		*/
+		vorlagen = new SysUtilVorlagen(this);
+		vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+		vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "verkauf.ini");
+		vorlagen.setLabels("Formulare","FormulareAnzahl","Formular");
+		vorlagen.activateEditing();
+		
+		pane.add(vorlagen.getPanel(), cc.xyw(1, 50, 6));
+		
 		pane.getPanel().validate();
 
 		return pane.getPanel();
@@ -359,6 +363,7 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 		
 		bonSeitenlaenge.setText(inif.getStringProperty("Bon", "ProArtikelSeitenLaenge"));
 		
+		vorlagen.readFromIni();
 	}
 	
 	private void speicherEinstellungen() {
@@ -395,6 +400,8 @@ public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 			
 			inif.setStringProperty("Bon", "ProArtikelSeitenLaenge", bonSeitenlaenge.getText(), null);
 			
+			boolean formok = vorlagen.saveToIni();
+
 			INITool.saveIni(inif);
 			JOptionPane.showMessageDialog(null,"Konfiguration erfolgreich in verkauf.ini gespeichert.");
 		}catch(Exception ex){

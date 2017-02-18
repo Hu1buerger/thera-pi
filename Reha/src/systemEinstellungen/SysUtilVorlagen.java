@@ -83,7 +83,7 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
 
-		builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1, 1, 2));
+		builder.addSeparator("Vorlagen - Verwaltung", cc.xyw(1, 1, 2));
 		JScrollPane jscrPane = JCompTools.getTransparentScrollPane(vorlagen);
 		jscrPane.getVerticalScrollBar().setUnitIncrement(15);
 		jscrPane.validate();
@@ -109,6 +109,12 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 	}
 
 	public INIFile getInif() {
+		if (inif == null){
+			if ((iniPfad == null) || (iniName == null)){
+				System.out.println("SysUtilVorlagen: inifile not set");				
+			}
+			setInif(INITool.openIni(iniPfad, iniName));
+		}
 		return inif;
 	}
 
@@ -246,19 +252,19 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 	}
 
 	public void readFromIni() {
-		if (getInif() == null){
+		if (inif == null){
 			//System.out.println("SysUtilVorlagen: inifile not set");
 			setInif(INITool.openIni(iniPfad, iniName));
 		}
 //		int forms = inif.getIntegerProperty("Formulare", "ArztFormulareAnzahl");
-		int forms = getInif().getIntegerProperty(sectionLabel, nbOfEntriesLabel);
+		int forms = inif.getIntegerProperty(sectionLabel, nbOfEntriesLabel);
 		Vector<String> vec = new Vector<String>();
 		for(int i = 1; i <= forms; i++){
 			vec.clear();
 //			vec.add(inif.getStringProperty("Formulare","AFormularText"+i));
 //			vec.add(inif.getStringProperty("Formulare","AFormularName"+i));
-			vec.add(getInif().getStringProperty(sectionLabel,entryTextLabel+i));
-			vec.add(getInif().getStringProperty(sectionLabel,entryNameLabel+i));
+			vec.add(inif.getStringProperty(sectionLabel,entryTextLabel+i));
+			vec.add(inif.getStringProperty(sectionLabel,entryNameLabel+i));
 			modvorl.addRow((Vector<?>)vec.clone());
 		}
 		if(modvorl.getRowCount() > 0){
@@ -268,7 +274,7 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 	}
 
 	public boolean saveToIni() {
-		if (getInif() == null){
+		if (inif == null){
 			System.out.println("SysUtilVorlagen:saveToIni: inifile not set");
 			//inif = INITool.openIni(iniPfad, iniName);
 		}
@@ -285,13 +291,13 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 				break;
 			}else{
 				formok = true;
-				getInif().setStringProperty(sectionLabel, nbOfEntriesLabel,Integer.valueOf(rows).toString() , null);				
+				inif.setStringProperty(sectionLabel, nbOfEntriesLabel,Integer.valueOf(rows).toString() , null);				
 			}
 		}
 		if(formok){
 			for(int i = 0;i<rows;i++){
-				getInif().setStringProperty(sectionLabel, entryTextLabel+(i+1),(String)vorlagen.getValueAt(i, 0) , null);
-				getInif().setStringProperty(sectionLabel, entryNameLabel+(i+1),(String)vorlagen.getValueAt(i, 1) , null);
+				inif.setStringProperty(sectionLabel, entryTextLabel+(i+1),(String)vorlagen.getValueAt(i, 0) , null);
+				inif.setStringProperty(sectionLabel, entryNameLabel+(i+1),(String)vorlagen.getValueAt(i, 1) , null);
 			}
 		}
 		return formok;
