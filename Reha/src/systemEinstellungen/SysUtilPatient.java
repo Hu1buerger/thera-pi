@@ -48,6 +48,7 @@ import CommonTools.INIFile;
 import CommonTools.INITool;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -66,16 +67,18 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		JRtaTextField vorlage = null;
 		JRtaTextField[] krit = {null,null,null,null,null,null};
 		JRtaTextField[] icon = {null,null,null,null,null,null};
-		JXTable vorlagen = null;
-		MyDefaultTableModel defvorlagen = new MyDefaultTableModel();
+		//JXTable vorlagen = null;
+//		MyDefaultTableModel defvorlagen = new MyDefaultTableModel();
 		JRadioButton oben = null;
 		JRadioButton unten = null;
 		JCheckBox optimize = null;
 		ButtonGroup bgroup = new ButtonGroup();
 		JLabel datLabel = null;
 		JLabel[] kritlab = {null,null,null,null,null,null};
+		SysUtilVorlagen vorlagen = null;
 		boolean formok = true;
-	public SysUtilPatient(){
+
+		public SysUtilPatient(){
 		super(new BorderLayout());
 		//System.out.println("Aufruf SysUtilPatient");
 		this.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 20));
@@ -109,11 +112,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 					fuelleMitWerten();
 					return null;
 				}
-				
 			}.execute();
-	     
-
-
 		return;
 	}
 /*
@@ -161,6 +160,10 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		}else{
 			optimize.setSelected(true);
 		}
+		
+		vorlagen.readFromIni();
+		INIFile inif = vorlagen.getInif(); 
+/*
 		INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/","patient.ini");
 		int forms = inif.getIntegerProperty("Formulare", "PatientFormulareAnzahl");
 		Vector<String> vec = new Vector<String>();
@@ -174,26 +177,24 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 			vorlagen.setRowSelectionInterval(0, 0);
 		}
 		vorlagen.validate();
-
-		for(int i = 0;i < 9;i++){
-			button[i].addActionListener(this);
-		}
+ */
 		for(int i = 0;i < 6;i++){
 			krit[i].setText(SystemConfig.vPatMerker.get(i));
 			String sico = ""; 
 			if(SystemConfig.vPatMerkerIcon.get(i)==null){
 				sico = "";
 			}else{
-				sico = inif.getStringProperty("Kriterien","Image"+(i+1));
+				sico = inif.getStringProperty("Kriterien","Image"+(i+1));	// Name aus .ini lesen (vPatMerkerIconFile enthält Pfad)
 				kritlab[i].setIcon(SystemConfig.vPatMerkerIcon.get(i));
 			}
 			icon[i].setText(sico);
 			icon[i].setEditable(false);
 		}
-		
-
+		for(int i = 0;i < 9;i++){
+			button[i].addActionListener(this);
+		}
 	}
-	/************** Beginn der Methode f�r die Objekterstellung und -platzierung *********/
+	/************** Beginn der Methode für die Objekterstellung und -platzierung *********/
 	private JPanel getVorlagenSeite(){
 		
 		oben = new JRadioButton();
@@ -201,6 +202,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		unten = new JRadioButton();
 		bgroup.add(unten);
 		optimize = new JCheckBox();
+/*
 		defvorlagen.setColumnIdentifiers(new String[] {"Titel der Vorlage","Vorlagendatei"});
 		vorlagen = new JXTable(defvorlagen);
 		vorlagen.addMouseListener(new MouseAdapter(){		
@@ -230,10 +232,17 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		vorlage = new JRtaTextField("NIX", true);
 		button[6] = new JButton("entfernen");
 		button[6].setActionCommand("entfernen");
-		button[7] = new JButton("auswählen");
-		button[7].setActionCommand("vorlagenwahl");
-		button[8] = new JButton("hinzufügen");
-		button[8].setActionCommand("vorlagenneu");
+ */
+		vorlagen = new SysUtilVorlagen(this);
+		vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+		vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "patient.ini");
+		vorlagen.setLabels("Formulare","PatientFormulareAnzahl","PFormular");
+		vorlagen.activateEditing();
+
+//		button[7] = new JButton("auswählen");
+//		button[7].setActionCommand("vorlagenwahl");
+//		button[8] = new JButton("hinzufügen");
+//		button[8].setActionCommand("vorlagenneu");
 		
 		krit[0] = new JRtaTextField("", true);
 		krit[1] = new JRtaTextField("", true);
@@ -266,28 +275,36 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		kritlab[4] = new JLabel("5. Icon");
 		kritlab[5] = new JLabel("6. Icon");
 										//      1.            2.     3.     4.     5.     6.    7.      8.     9.
-		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu,0dlu",
-       //1.    2. 3.   4.   5.   6.   7.  8.     9.     10.  11. 12.   13.     14.  15. 16.  17. 18.  19.    20. 21.  22.  23. 24   25  26   27  28  29  30   31   32   33  34   35  36   37 38   39    40  41  42  43  44
-		"p, 2dlu, p, 10dlu, p, 10dlu, p, 10dlu, 80dlu, 2dlu, p, 2dlu, 0dlu, 0dlu, 0dlu, 0dlu, p, 10dlu, p, 10dlu, p,  2dlu , p, 5dlu, p, 2dlu, p, 5dlu,p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 10dlu");
-		
+		//FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu,0dlu",
+		//                                      1.             2.     3.       4.     5.     6.    7. 
+		FormLayout lay = new FormLayout("right:max(120dlu;p), 15dlu, 40dlu:g, 4dlu, 45dlu, 4dlu, 10dlu, 15dlu",
+        //1. 2.   3.  4.    5.  6.    7.  8.     9.     10.  11. 12.   13.     14.  15. 16.  17. 18.  19.    20. 21.  22.  23. 24   25  26   27  28  29  30   31   32   33  34   35  36   37 38   39    40  41  42  43  44
+		//"p, 2dlu, p, 10dlu, p, 10dlu, p, 10dlu, p, 10dlu, p, 10dlu, p,  2dlu , p, 5dlu, p, 2dlu, p, 5dlu,p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 10dlu");
+		"p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 10dlu, p, 2dlu , p, 5dlu, p, 2dlu, p, 5dlu,p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 5dlu, p, 2dlu, p, 10dlu");
 		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+
 		builder.setDefaultDialogBorder();
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
+		int rowCnt=1;
 		
-		builder.addLabel("Fenster startet im ..." , cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.BOTTOM));
-		builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken")+ " Container", cc.xyw(4, 1, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.add(oben, cc.xy(6, 1, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten")+ " Container", cc.xyw(4, 3, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.add(unten, cc.xy(6, 3, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.addLabel("Fenstergröße automatisch optimieren", cc.xy(1, 5));
-		builder.add(optimize, cc.xy(6,5, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-		builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1,7,6));
+		builder.addLabel("Fenster startet im ..." , cc.xy(1, rowCnt, CellConstraints.LEFT, CellConstraints.BOTTOM));
+		builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken")+ " Container", cc.xyw(4, rowCnt, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.add(oben, cc.xy(7, rowCnt++, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten")+ " Container", cc.xyw(4, ++rowCnt, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.add(unten, cc.xy(7, rowCnt++, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+		builder.addLabel("Fenstergröße automatisch optimieren", cc.xy(1, ++rowCnt));
+		builder.add(optimize, cc.xy(7,rowCnt++, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+
+		builder.add(vorlagen.getPanel(), cc.xyw(1, ++rowCnt, 8));
+/*		
+		builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1,7,7));
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(vorlagen);
 		jscr.validate();
-		builder.add(jscr, cc.xyw(1,9,6));
+		builder.add(jscr, cc.xyw(1,9,7));
 		builder.addLabel("aus Liste entfernen", cc.xy(1, 11));
-		builder.add(button[6], cc.xy(6, 11));
+		builder.add(button[6], cc.xyw(5, 11, 3));
 		//builder.addLabel("Titel der neuen Vorlagen", cc.xy(1, 13));
 		//builder.add(vorlage, cc.xyw(3,13,4));
 		//builder.addLabel("Datei ausw�hlen", cc.xy(1, 15));
@@ -296,59 +313,59 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		//builder.add(datLabel, cc.xyw(3, 15, 2));
 		//builder.add(button[7], cc.xy(6, 15));
 		builder.addLabel("neue Vorlagendatei hinzufügen", cc.xy(1, 17));
-		builder.add(button[8], cc.xy(6, 17));
-		builder.addSeparator("Kriteriendefinitionen / Icons", cc.xyw(1, 19, 6));
-		builder.addLabel("1. Kriterium", cc.xy(1, 21));
-		builder.add(krit[0], cc.xyw(3, 21, 4));
-		builder.add(kritlab[0], cc.xy(1, 23));
-		builder.add(icon[0], cc.xyw(3, 23, 2));
-		builder.add(button[0], cc.xy(6, 23));
-		builder.addLabel("2. Kriterium", cc.xy(1, 25));
-		builder.add(krit[1], cc.xyw(3, 25, 4));
-		builder.add(kritlab[1], cc.xy(1, 27));
-		builder.add(icon[1], cc.xyw(3, 27, 2));
-		builder.add(button[1], cc.xy(6, 27));
-		builder.addLabel("3. Kriterium", cc.xy(1, 29));
-		builder.add(krit[2], cc.xyw(3, 29, 4));
-		builder.add(kritlab[2], cc.xy(1, 31));
-		builder.add(icon[2], cc.xyw(3, 31, 2));
-		builder.add(button[2], cc.xy(6, 31));
-		builder.addLabel("4. Kriterium", cc.xy(1, 33));
-		builder.add(krit[3], cc.xyw(3, 33, 4));
-		builder.add(kritlab[3], cc.xy(1, 35));
-		builder.add(icon[3], cc.xyw(3, 35, 2));
-		builder.add(button[3], cc.xy(6, 35));
-		builder.addLabel("5. Kriterium", cc.xy(1, 37));
-		builder.add(krit[4], cc.xyw(3, 37, 4));
-		builder.add(kritlab[4], cc.xy(1, 39));
-		builder.add(icon[4], cc.xyw(3, 39, 2));
-		builder.add(button[4], cc.xy(6, 39));
-		builder.addLabel("6. Kriterium", cc.xy(1, 41));
-		builder.add(krit[5], cc.xyw(3, 41, 4));
-		builder.add(kritlab[5], cc.xy(1, 43));
-		builder.add(icon[5], cc.xyw(3, 43, 2));
-		builder.add(button[5], cc.xy(6, 43));
+		builder.add(button[8], cc.xyw(5, 17,3));
+ */
+		rowCnt = 9;
+		builder.addSeparator("Kriteriendefinitionen / Icons", cc.xyw(1, rowCnt++, 7));
+		builder.addLabel("1. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[0], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[0], cc.xy(1, ++rowCnt));
+		builder.add(icon[0], cc.xy(3, rowCnt));
+		builder.add(button[0], cc.xyw(5, rowCnt++, 3));
 		
+		builder.addLabel("2. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[1], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[1], cc.xy(1, ++rowCnt));
+		builder.add(icon[1], cc.xy(3, rowCnt));
+		builder.add(button[1], cc.xyw(5, rowCnt++, 3));
 		
+		builder.addLabel("3. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[2], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[2], cc.xy(1, ++rowCnt));
+		builder.add(icon[2], cc.xy(3, rowCnt));
+		builder.add(button[2], cc.xyw(5, rowCnt++, 3));
+
+		builder.addLabel("4. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[3], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[3], cc.xy(1, ++rowCnt));
+		builder.add(icon[3], cc.xy(3, rowCnt));
+		builder.add(button[3], cc.xyw(5, rowCnt++, 3));
+		
+		builder.addLabel("5. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[4], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[4], cc.xy(1, ++rowCnt));
+		builder.add(icon[4], cc.xy(3, rowCnt));
+		builder.add(button[4], cc.xyw(5, rowCnt++, 3));
+		
+		builder.addLabel("6. Kriterium", cc.xy(1, ++rowCnt));
+		builder.add(krit[5], cc.xyw(3, rowCnt++, 5));
+		builder.add(kritlab[5], cc.xy(1, ++rowCnt));
+		builder.add(icon[5], cc.xy(3, rowCnt));
+		builder.add(button[5], cc.xyw(5, rowCnt++, 3));
+
 		return builder.getPanel();
 	}
 
 	@Override
-	public void keyPressed(KeyEvent e) {
-		
-		
+	public void keyPressed(KeyEvent e) {		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		
-		
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		
-		
 	}
 
 	@Override
@@ -356,6 +373,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		
 		String cmd = e.getActionCommand();
 		for(int i = 0;i < 1;i++){
+/*
 			if(cmd.equals("entfernen")){
 				int row = vorlagen.getSelectedRow();
 				int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
@@ -388,7 +406,6 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 					break;
 				}
 
-
 				if(vorlage.getText().equals("") || datLabel.getText().equals("")){
 					JOptionPane.showMessageDialog(null,"Geben Sie jetzt einen Titel für die neue Text-Vorlage ein");
 					//return;
@@ -415,7 +432,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 				//datLabel.setText("");
 				break;
 			}
-			
+ */			
 			if(cmd.contains("iwahl")){
 				int wahl = Integer.valueOf(cmd.substring(cmd.length()-1));
 				setCursor(Cursors.wartenCursor);
@@ -431,6 +448,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 			}
 		}
 	}
+/*
 	private void startCellEditing(int row){
 		final int xrows = row;
 		SwingUtilities.invokeLater(new Runnable(){
@@ -440,11 +458,13 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 		 	   }
 		});
 	}
-	
+ */
 	private void doSpeichern(){
 		try{
 			String wert = "";
-			INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/","patient.ini");
+			INIFile inif = vorlagen.getInif();
+			//INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/","patient.ini");
+			//System.out.println(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/patient.ini");
 			wert = (unten.isSelected() ? "1" : "0");
 			SystemConfig.hmContainer.put("Patient", Integer.valueOf(wert));
 			inif.setStringProperty("Container", "StarteIn",wert , null);
@@ -453,6 +473,8 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 			SystemConfig.hmContainer.put("PatientOpti",Integer.valueOf(wert));
 			inif.setStringProperty("Container", "ImmerOptimieren",wert , null);
 
+			formok = vorlagen.saveToIni();
+/*
 			int rows = vorlagen.getRowCount();
 			
 			formok = true;
@@ -475,6 +497,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 					inif.setStringProperty("Formulare", "PFormularName"+(i+1),(String)vorlagen.getValueAt(i, 1) , null);
 				}
 			}
+ */
 			for(int i = 0;i<6;i++){
 				wert = krit[i].getText();
 				inif.setStringProperty("Kriterien", "Krit"+(i+1),wert , null);
@@ -492,7 +515,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 			JOptionPane.showMessageDialog(null,"Fehler beim speichern der Konfiguration in patient.ini!!!!");
 		}
 	}	
-	
+
 	private String dateiDialog(String pfad){
 		String sret = "";
 		final JFileChooser chooser = new JFileChooser("Verzeichnis wählen");
@@ -532,11 +555,11 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 
         return sret;
 	}
-	
+/*	
 	class MyDefaultTableModel extends DefaultTableModel{
 		   /**
 		 * 
-		 */
+		 */ /*
 		private static final long serialVersionUID = 1L;
 
 		@Override
@@ -554,7 +577,7 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 	    }
 		   
 	}
-	
+ */
 	/**********************************************/
 	class TitelEditor extends AbstractCellEditor implements TableCellEditor{
 		Object value;
@@ -642,12 +665,10 @@ public class SysUtilPatient extends JXPanel implements KeyListener, ActionListen
 	@Override
 	public void AddEntry(int instanceNb) {
 		// TODO Auto-generated method stub
-		
 	}
 	@Override
 	public void RemoveEntry(int instanceNb) {
 		// TODO Auto-generated method stub
-		
 	}
 	
 }
