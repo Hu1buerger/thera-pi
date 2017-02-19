@@ -34,6 +34,7 @@ import jxTableTools.TableTool;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 
+import verkauf.Formulare;
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.JCompTools;
@@ -256,15 +257,23 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 			//System.out.println("SysUtilVorlagen: inifile not set");
 			setInif(INITool.openIni(iniPfad, iniName));
 		}
-//		int forms = inif.getIntegerProperty("Formulare", "ArztFormulareAnzahl");
+		
+		Formulare forms = new Formulare();
+		forms.setLabels(sectionLabel, nbOfEntriesLabel, entryTextLabel,entryNameLabel);
+		forms.holeFormulare(inif);
+/*
+		//		int forms = inif.getIntegerProperty("Formulare", "ArztFormulareAnzahl");
 		int forms = inif.getIntegerProperty(sectionLabel, nbOfEntriesLabel);
+ */
 		Vector<String> vec = new Vector<String>();
-		for(int i = 1; i <= forms; i++){
+		Vector<String> liste = forms.getListe();
+//		for(int i = 1; i <= forms; i++){
+		for(int i = 0; i < liste.size(); i++){
 			vec.clear();
 //			vec.add(inif.getStringProperty("Formulare","AFormularText"+i));
 //			vec.add(inif.getStringProperty("Formulare","AFormularName"+i));
-			vec.add(inif.getStringProperty(sectionLabel,entryTextLabel+i));
-			vec.add(inif.getStringProperty(sectionLabel,entryNameLabel+i));
+			vec.add(liste.get(i));
+			vec.add(forms.getFormular(i));
 			modvorl.addRow((Vector<?>)vec.clone());
 		}
 		if(modvorl.getRowCount() > 0){
@@ -289,12 +298,10 @@ public class SysUtilVorlagen extends JXPanel implements ActionListener, SysInitC
 				JOptionPane.showMessageDialog(null,msg);
 				formok = false;
 				break;
-			}else{
-				formok = true;
-				inif.setStringProperty(sectionLabel, nbOfEntriesLabel,Integer.valueOf(rows).toString() , null);				
 			}
 		}
 		if(formok){
+			inif.setStringProperty(sectionLabel, nbOfEntriesLabel,Integer.valueOf(rows).toString() , null);				
 			for(int i = 0;i<rows;i++){
 				inif.setStringProperty(sectionLabel, entryTextLabel+(i+1),(String)vorlagen.getValueAt(i, 0) , null);
 				inif.setStringProperty(sectionLabel, entryNameLabel+(i+1),(String)vorlagen.getValueAt(i, 1) , null);
