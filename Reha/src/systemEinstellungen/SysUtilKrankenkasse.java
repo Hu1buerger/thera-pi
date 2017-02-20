@@ -60,13 +60,13 @@ import jxTableTools.TableTool;
 
 public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 	
-	JButton[] button = {null,null,null,null,null,null,null};
+//	JButton[] button = {null,null,null,null,null,null,null};
 	JRtaTextField newgroup = null;
 	JRtaTextField newdoc = null;
 	MyTarifeTableModel modtarife = new MyTarifeTableModel();
-	JXTable tarife = null;
+//	JXTable tarife = null;
 	MyVorlagenTableModel modvorlagen = new MyVorlagenTableModel();
-	JXTable vorlagen = null;
+//	JXTable vorlagen = null;
 
 	JRadioButton oben = null;
 	JRadioButton unten = null;
@@ -76,7 +76,9 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 	String[] zzregel = null;
 	String[] zzart = null;
 	boolean formok = true;
-	
+
+	SysUtilVorlagen vorlagen = null;
+
 	/***Neuer Kommentar
 	 * 
 	 */
@@ -132,6 +134,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 			}else{
 				optimize.setSelected(true);
 			}
+/*
 			INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "kasse.ini");
 			int forms = inif.getIntegerProperty("Formulare", "KassenFormulareAnzahl");
 			Vector<String> vec = new Vector<String>();
@@ -145,7 +148,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 				vorlagen.setRowSelectionInterval(0, 0);
 			}
 			vorlagen.validate();
-			/*
+ */			/*
 			vPreisGruppen.add(inif.getStringProperty("PreisGruppen","PGName"+i));
 			vZuzahlRegeln.add(inif.getIntegerProperty("ZuzahlRegeln","ZuzahlRegel"+i));
 			vNeuePreiseAb.add(inif.getStringProperty("PreisGruppen","NeuePreiseAb"+i));
@@ -172,7 +175,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 			}
 			tarife.validate();
 			*/
-			
+			vorlagen.readFromIni();			
 
 	}
 /*
@@ -210,7 +213,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		bgroup.add(unten);
 		
 		optimize = new JCheckBox();
-		
+		/*		
 		button[0] = new JButton("entfernen"); //buttons 1+2 f�r Gruppenverwaltung
 		button[1] = new JButton("hinzufügen");
 		button[2] = new JButton("entfernen"); //buttons 3-5 f�r Vorlagenverwaltung
@@ -222,7 +225,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		button[4] = new JButton("hinzufügen");
 		button[4].setActionCommand("neuvorlage");
 		button[4].addActionListener(this);
-		/*
+
 		modtarife.setColumnIdentifiers(new String[] {"Tarifgruppe","Zuzahlungsregel","Neue Preise ab","Anwendungsregel"});
 		tarife = new JXTable(modtarife);
 		TableColumn zuzahlColumn = tarife.getColumnModel().getColumn(1);
@@ -239,6 +242,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		//neuPreisDat.setCellEditor(new DatumTableCellEditor());
 		tarife.setSortable(false);
 		*/
+/*
 		modvorlagen.setColumnIdentifiers(new String[] {"Titel der Vorlage","Vorlagendatei"});
 		vorlagen = new JXTable(modvorlagen);
 		vorlagen.addMouseListener(new MouseAdapter(){
@@ -268,17 +272,17 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		newdoc = new JRtaTextField("GROSS", true);
 		
 		zuza = new JComboBox();
-		
+ */		
 		
         //                                      1.            2.     3.     4.     5.     6.    7.      8.     9.
 		//FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu",
-		//                                      1.             2.       3.     4.     5.     6.    7. 
+		//                                      1.             2.       3.     4.     5.    6.     7. 
 		FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu, 15dlu",
-		//1.    2. 3.   4.  5.   6.   7.   8.     9.    10.  11.    12.   13.  14.   15.   16.    17.   18.  19.  20.    21.    22.   23.   24     25    26    27  28   29
-		"p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 0dlu, 0dlu, 0dlu,  0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 10dlu, p, 10dlu, 80dlu, 2dlu, p , 2dlu , 0dlu, 0dlu, p, 0dlu, p");
+		//1. 2.   3.  4.   5.  6.    7.  8.     9.    10.   11.    12.   13.  14.    15.   16.   17.   18.  19.    
+		"p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 0dlu, 0dlu, 0dlu,  0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 0dlu, 10dlu, p");
 		
-		//PanelBuilder builder = new PanelBuilder(lay);
-		PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
 		builder.setDefaultDialogBorder();
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
@@ -313,7 +317,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		builder.add(button[1], cc.xy(6, 17));
 		*/
 		//// bis hierher abschalten
-
+/*
 		builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1, 19, 6));
 
 		JScrollPane jscrPane = JCompTools.getTransparentScrollPane(vorlagen);
@@ -330,12 +334,18 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		builder.addLabel("Dateiname", cc.xy(3,27,CellConstraints.RIGHT, CellConstraints.BOTTOM)); 
 		builder.add(button[3], cc.xy(6,27));
 		*/
-		builder.addLabel("zu Liste hinzufügen", cc.xy(1, 29));
+/*		builder.addLabel("zu Liste hinzufügen", cc.xy(1, 29));
 		builder.add(button[4], cc.xy(6,29));
-		
-		
-		
-		
+ */		
+
+		vorlagen = new SysUtilVorlagen(this);
+		vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+
+		vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "kasse.ini");
+		vorlagen.setLabels("Formulare","KassenFormulareAnzahl","KFormular");
+		vorlagen.activateEditing();
+
+		builder.add(vorlagen.getPanel(), cc.xyw(1, 19, 7));
 		return builder.getPanel();
 	}
 
@@ -362,6 +372,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		String cmd = e.getActionCommand();
 		//System.out.println(cmd);
 		for(int i = 0;i < 1;i++){
+/*
 			if(cmd.equals("entfernenvorlage")){
 				int row = vorlagen.getSelectedRow();
 				int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
@@ -398,7 +409,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 				});
 				break;
 			}
-			
+ */
 			if(cmd.equals("abbrechen")){
 				SystemInit.abbrechen();
 				//SystemUtil.thisClass.parameterScroll.requestFocus();
@@ -409,17 +420,16 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 				if(formok){
 					JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei 'kasse.ini' erfolgreich gespeichert!");					
 				}
-
 			}
-			
 		}
-
-		
 	}
 	
 	private void doSpeichern(){
 		String wert = "";
-		INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "kasse.ini");
+//		INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "kasse.ini");
+		INIFile inif = vorlagen.getInif();
+		//System.out.println(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/kasse.ini");
+
 		wert = (unten.isSelected() ? "1" : "0");
 		SystemConfig.hmContainer.put("Kasse", Integer.valueOf(wert));
 		inif.setStringProperty("Container", "StarteIn",wert , null);
@@ -427,7 +437,9 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 		wert = (optimize.isSelected() ? "1" : "0");
 		SystemConfig.hmContainer.put("KasseOpti",Integer.valueOf(wert));
 		inif.setStringProperty("Container", "ImmerOptimieren",wert , null);
-
+		
+		formok = vorlagen.saveToIni();
+/*
 		int rows = vorlagen.getRowCount();
 		
 		formok = true;
@@ -450,7 +462,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 				inif.setStringProperty("Formulare", "KFormularName"+(i+1),(String)vorlagen.getValueAt(i, 1) , null);
 			}
 		}
-		
+ */
 		INITool.saveIni(inif);
 		JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei 'kasse.ini' erfolgreich gespeichert!");					
 	}	
@@ -562,6 +574,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 	}
 	/**********************************************/
 	/**********************************************/
+/*
 	class TitelEditor extends AbstractCellEditor implements TableCellEditor{
 		Object value;
 		JComponent component = new JFormattedTextField();
@@ -627,6 +640,7 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 
 		
 	}
+ */
 	@Override
 	public void Abbruch() {
 		SystemInit.abbrechen();
@@ -639,14 +653,12 @@ public class SysUtilKrankenkasse extends JXPanel implements KeyListener, ActionL
 
 	@Override
 	public void AddEntry(int instanceNb) {
-		// TODO Auto-generated method stub
-		
+		// dummy (SysInitCommon_If)
 	}
 
 	@Override
 	public void RemoveEntry(int instanceNb) {
-		// TODO Auto-generated method stub
-		
+		// dummy (SysInitCommon_If)
 	}
 	
 }
