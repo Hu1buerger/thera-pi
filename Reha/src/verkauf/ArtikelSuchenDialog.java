@@ -63,7 +63,7 @@ public class ArtikelSuchenDialog extends RehaSmartDialog{
 		this.ean = ean;
 		this.search = initsearch;
 		this.activateListener();
-		this.setSize(300, 400);
+		this.setSize(400, 400);
 		this.setLocation(position);
 		this.setUndecorated(true);
 		
@@ -338,6 +338,7 @@ public class ArtikelSuchenDialog extends RehaSmartDialog{
 		if(tabellenModel.getRowCount() > 0){
 			tabelle.setRowSelectionInterval(0,0);
 		}
+		tabelle.packColumn(1, 5);
 		tabelle.repaint();
 	}
 	

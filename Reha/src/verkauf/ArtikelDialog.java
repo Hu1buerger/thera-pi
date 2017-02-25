@@ -154,6 +154,7 @@ public class ArtikelDialog extends RehaSmartDialog {
 		speichern.setActionCommand("speicher");
 		speichern.addActionListener(al);
 		pane.add(speichern, cc.xyw(2, 18, 3));
+		pane.addKeyListener(kl);
 		
 		return pane;
 	}
