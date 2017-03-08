@@ -2,6 +2,10 @@ package opRgaf;
 
 import java.util.HashMap;
 
+import javax.swing.JOptionPane;
+
+import org.jdesktop.swingworker.SwingWorker;
+
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.OpCommon;
@@ -19,6 +23,7 @@ public class OpRgAfIni {
 	private boolean incRG = false, incAR = false, incVK = false, settingsLocked = false;
 	private int vorauswahlSuchkriterium = -1;
 	private String progHome, aktIK;
+	private boolean allowCashSales = false, iniValuesValid = false;
 	
 	/**
 	 * liest Einträge aus 'oprgaf.ini' 
@@ -34,14 +39,23 @@ public class OpRgAfIni {
 		this.path2TemplateFiles = progHome+"vorlagen/"+aktIK;
 		INITool.init(path2IniFile+"/");
 		this.iniFile = file;
-		INIFile inif = INITool.openIni (path2IniFile,iniFile);		// wenn keine Direktzugriffe aus ext. Modulen (mehr) erfolgen -> iniFile nur noch lokal öffnen
-		if ( inif.getStringProperty("offenePosten","lockSettings") != null ){
-			settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
-		}
-		mahnParam = new HashMap<String,Object>();
-		readLastSelectRgAfVk(inif);
-		OpCommon.readMahnParamCommon(inif, mahnParam);
-		readMahnParamRgAfVk(inif, mahnParam,path2TemplateFiles);
+		new SwingWorker<Void,Void>(){
+			@Override
+			protected Void doInBackground() throws java.lang.Exception {
+				INIFile inif = INITool.openIni (path2IniFile,iniFile);		// keine Direktzugriffe aus ext. Modulen (mehr) erlaubt -> iniFile lokal öffnen
+				if ( inif.getStringProperty("offenePosten","lockSettings") != null ){
+					settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
+				}
+				mahnParam = new HashMap<String,Object>();
+				readLastSelectRgAfVk(inif);
+				OpCommon.readMahnParamCommon(inif, mahnParam);
+				readMahnParamRgAfVk(inif, mahnParam,path2TemplateFiles);
+				
+				allowCashSales = inif.getBooleanProperty("offenePosten", "erlaubeVRinBarkasse");
+				iniValuesValid = true;
+				return null;
+			}
+		}.execute();
 	}
 
 
@@ -106,23 +120,42 @@ public class OpRgAfIni {
 		return progHome+"vorlagen/"+aktIK+"/"+forms;
 	}
 */
-	
+	private boolean valuesValid(){
+		int maxWait = 20;
+		int waitTimes = maxWait;
+		while((!iniValuesValid) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		if(waitTimes == 0) {
+			System.out.println("OpRgaf: Abbruch ini-read");
+			return false;
+		}else{
+			return true;
+		}
+	}
 	public void setIncRG(boolean value){
 		incRG = value;
 	}
 	public boolean getIncRG(){
+		valuesValid();
 		return incRG;
 	}
 	public void setIncAR(boolean value){
 		incAR = value;
 	}
 	public boolean getIncAR(){
+		valuesValid();
 		return incAR;
 	}
 	public void setIncVK(boolean value){
 		incVK = value;
 	}
 	public boolean getIncVK(){
+		valuesValid();
 		return incVK;
 	}
 
@@ -130,35 +163,41 @@ public class OpRgAfIni {
 		vorauswahlSuchkriterium = value;
 	}
 	public int getVorauswahl(int max){
-		int maxWait = 20;
-		int waitTimes = maxWait;
-		while((vorauswahlSuchkriterium < 0) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
-			try {
-				Thread.sleep(25);
-			} catch (InterruptedException ex) {
-				ex.printStackTrace();
-			}
+		if (valuesValid()){
+			//System.out.println("OpRgaf getVorauswahl: " + vorauswahlSuchkriterium +"(" + max + ")");
+			return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;			
+		}else{
+			//System.out.println("OpRgaf getVorauswahl: " + 0 +"(Abbruch ini-read)");
+			return 0;
 		}
-		if(waitTimes == 0) { 
-			System.out.println("OpRgaf getVorauswahl: " + 0 +"(Abbruch ini-read)");
-			return 0; }
-		//System.out.println("OpRgaf getVorauswahl: " + vorauswahlSuchkriterium +"(" + max + ")");
-		return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
-}
+	}
 	public HashMap<String,Object> getMahnParameter (){
+		valuesValid();
 		return mahnParam;
 	}
 	public String getWohinBuchen (){
+		valuesValid();
 		return (String) mahnParam.get("inkasse");
 	}
 	public String getFormNb (int lfdNb){
+		valuesValid();
 		return (String) mahnParam.get("formular"+lfdNb);
 	}
 	public int getFrist(int lfdNb){
+		valuesValid();
 		return (Integer) mahnParam.get("frist"+lfdNb);
 	}
 	public String getDrucker (){
+		valuesValid();
 		return (String) mahnParam.get("drucker");
+	}
+	
+	public void setVrCashAllowed(boolean value){
+		allowCashSales = value;
+	}
+	public boolean getVrCashAllowed(){
+		valuesValid();
+		return allowCashSales;
 	}
 
 
@@ -172,7 +211,8 @@ public class OpRgAfIni {
 			if ( (incRG != inif.getBooleanProperty(section, "Rezeptgebuehren") ) || 
 					( incAR != inif.getBooleanProperty(section, "Ausfallrechnungen") ) ||
 					( incVK != inif.getBooleanProperty(section, "Verkaeufe") ) ||
-					(vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") )
+					(vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ) ||
+					(allowCashSales != inif.getBooleanProperty(section, "erlaubeVRinBarkasse") )
 				){
 
 				if ( inif.getStringProperty("offenePosten", "Rezeptgebuehren") == null ){			// Eintrag in ini noch nicht vorhanden
@@ -189,6 +229,9 @@ public class OpRgAfIni {
 
 				if ( inif.getStringProperty("offenePosten", "lockSettings") == null ){
 					inif.setBooleanProperty("offenePosten", "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
+				}
+				if ( inif.getStringProperty("offenePosten", "erlaubeVRinBarkasse") == null ){
+					inif.setBooleanProperty("offenePosten", "erlaubeVRinBarkasse",false, "Verkaeufe duerfen in Barkasse gebucht werden");
 				}
 				INITool.saveIni(inif);
 			}

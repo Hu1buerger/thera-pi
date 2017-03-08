@@ -104,7 +104,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	JLabel summeGesamtOffen;
 	Component kopieButton;
 	JRtaCheckBox bar = null;
-	
+	private boolean barWasSelected = false;
+
 	JButton kopie;
 
 	BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
@@ -491,8 +492,14 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		}
 
 		int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), 11);
-		cmd = "update rgaffaktura set roffen='"+dcf.format(restbetrag).replace(",", ".")+"', rbezdatum='"+
-		DatFunk.sDatInSQL(DatFunk.sHeute())+"' where id ='"+Integer.toString(id)+"' LIMIT 1";
+		if(rgaf_rechnum.startsWith("RGR-") || rgaf_rechnum.startsWith("AFR-")){		// aus rgaffaktura ausbuchen
+			cmd = "update rgaffaktura set roffen='"+dcf.format(restbetrag).replace(",", ".")+"', rbezdatum='"+
+					DatFunk.sDatInSQL(DatFunk.sHeute())+"' where id ='"+Integer.toString(id)+"' LIMIT 1";			
+		}
+		if(rgaf_rechnum.startsWith("VR-")){											// aus verkliste ausbuchen
+			cmd = "update verkliste set v_offen='"+dcf.format(restbetrag).replace(",", ".")+"', v_bezahldatum='"+
+					DatFunk.sDatInSQL(DatFunk.sHeute())+"' where verklisteID ='"+Integer.toString(id)+"' LIMIT 1";			
+		}
 		/*
 		if(!OpRgaf.testcase){
 			SqlInfo.sqlAusfuehren(cmd);
@@ -756,12 +763,30 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	                if (lsm.isSelectedIndex(i)) {
 	                	setzeBezahlBetrag(i);
 	                	String id = tab.getValueAt(i, 11).toString();
+	                	String rnr = tab.getValueAt(i, 1).toString();
 						String rez_nr = SqlInfo.holeEinzelFeld("select reznr from rgaffaktura where id='"+id+"' LIMIT 1");
 						String pat_intern = SqlInfo.holeEinzelFeld("select pat_intern from rgaffaktura where id='"+id+"' LIMIT 1");
 						new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,"OpRgaf#"+
 								RehaIOMessages.MUST_PATANDREZFIND+"#"+pat_intern+"#"+rez_nr);
 	                	//System.out.println("Satz "+i);
-
+						
+			            if (rnr.startsWith("VR-")){			// test ob VR -> bar ausbuchen enabled/disabled
+							if (!OpRgaf.iniOpRgAf.getVrCashAllowed()){
+								bar.setEnabled(false);
+								bar.setToolTipText("not allowed for VR (see System-Init)");
+								if (bar.isSelected()){		// falls 'bar in Kasse' gewählt war -> merken
+									bar.setSelected(false);
+									barWasSelected  = true;
+								}
+							}
+			            }else{
+							bar.setEnabled(true);
+							bar.setToolTipText("");
+							if (barWasSelected){			// // Status 'bar in Kasse' wieder herstellen
+								bar.setSelected(true);
+								barWasSelected  = false;
+							}
+						}
 	                    break;
 	                }
 	            }
@@ -834,7 +859,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		String rezgeb = SqlInfo.holeEinzelFeld("select rgbetrag from rgaffaktura where id='"+id+"' LIMIT 1");
 		String pauschale = SqlInfo.holeEinzelFeld("select rpbetrag from rgaffaktura where id='"+id+"' LIMIT 1");
 		String gesamt = SqlInfo.holeEinzelFeld("select rgesamt from rgaffaktura where id='"+id+"' LIMIT 1");
-		System.out.println("Rezeptnummer = "+rez_nr);
+		//System.out.println("Rezeptnummer = "+rez_nr);
 		new InitHashMaps();
 		/*
 		Vector<String> patDaten = SqlInfo.holeSatz("pat5", " * ", "pat_intern='"+pat_intern+"'", Arrays.asList(new String[] {}));
