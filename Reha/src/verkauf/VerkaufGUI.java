@@ -89,6 +89,7 @@ public class VerkaufGUI extends JXPanel{
 	boolean debug = false;
 	Formulare forms = null;
 	private String customForm = null;
+	private boolean useBon = false;
 	
 	
 	public VerkaufGUI(VerkaufTab owner){
@@ -104,6 +105,8 @@ public class VerkaufGUI extends JXPanel{
 		
 		forms = new Formulare();
 		forms.holeFormulare(settings);
+		useBon = settings.getBooleanProperty("Bon", "BonDruckErlaubt");
+		buts[1].setEnabled(useBon);
 
 		SwingUtilities.invokeLater(new Runnable(){
 			@Override
@@ -429,23 +432,24 @@ public class VerkaufGUI extends JXPanel{
 	}
 	private void selectFormular() {
 		Point pt = buts[5].getLocationOnScreen();
+		pt.setLocation(pt.x, pt.y-250);
 		int iformular = forms.showDialog(pt);
 
 		if(iformular < 0){
-			enableBarzahlung();
+			selectStandardForm();
 			customForm = null;
 		}else{
-			disableBarzahlung();									// Custom-Formulare nur 'auf Rechnung'
+			selectCustomForm();
 			customForm = forms.getFormular(iformular);
 		}
 	}
-	private void enableBarzahlung() {
-		buts[1].setEnabled(true);
+	private void selectStandardForm() {
+		buts[1].setEnabled(useBon);
 		buts[5].setBorderPainted(false);
 
 	}
-	private void disableBarzahlung() {
-		buts[1].setEnabled(false);
+	private void selectCustomForm() {
+		buts[1].setEnabled(false);									// Custom-Formulare nur 'auf Rechnung'
 		buts[5].setBorderPainted(true);
 		buts[2].requestFocus();
 	}
@@ -594,6 +598,9 @@ public class VerkaufGUI extends JXPanel{
 		wDialog.setModal(true);
 		wDialog.setVisible(true);
 		
+		if(!wDialog.processPayment()){
+			return;			// Abbruch ist mit ESC oder rotem Button möglich
+		}
 		wDialog = null;
 		
 		String propSection = "Bon";
@@ -712,14 +719,14 @@ public class VerkaufGUI extends JXPanel{
 			String url = null;
 			
 			IOfficeApplication application = Reha.officeapplication;
+			boolean hideOfficeInBackground = settings.getBooleanProperty(propSection, "SofortDrucken");
 			try {
 				IDocumentService service = application.getDocumentService();
 				IDocumentDescriptor descriptor = new DocumentDescriptor();
-				if (rbuts[1].isSelected()){
-					descriptor.setHidden(false);			// Adressdaten müssen vor dem Druck eingegeben werden
-				}else{
-					descriptor.setHidden(settings.getBooleanProperty(propSection, "SofortDrucken"));					
+				if (rbuts[2].isSelected()){
+					hideOfficeInBackground = false;				// Adressdaten müssen vor dem Druck eingegeben werden
 				}
+				descriptor.setHidden(hideOfficeInBackground);					
 				descriptor.setAsTemplate(true);
 				
 				if (customForm == null) {
@@ -776,7 +783,7 @@ public class VerkaufGUI extends JXPanel{
 					fuelleTabelle(tabelle, propSection);
 				}
 				
-				if(settings.getBooleanProperty(propSection, "SofortDrucken")) {
+				if(hideOfficeInBackground) {
 					String druckername = settings.getStringProperty(propSection, "Drucker");
 					IPrinter drucker = null;
 					if(druckername == null) {
@@ -821,8 +828,10 @@ public class VerkaufGUI extends JXPanel{
 			
 		} else {
 			JOptionPane.showMessageDialog(null, "Bitte erst Patientenfenster bzw. Kassenfenster öffnen und Patienten bzw. Kasse auswählen!");
-		}}
-		enableBarzahlung();	
+		}}else{
+			JOptionPane.showMessageDialog(this, "Keine Rechnungspositionen vorhanden!");
+		}
+		selectStandardForm();	
 	}
 	
 	private void fuelleTabelle(ITextTable tabelle, String propSection) throws TextException {
