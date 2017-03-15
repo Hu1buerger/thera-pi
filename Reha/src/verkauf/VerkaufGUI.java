@@ -1,6 +1,7 @@
 package verkauf;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Point;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
@@ -19,6 +20,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
@@ -89,6 +91,7 @@ public class VerkaufGUI extends JXPanel{
 	boolean debug = false;
 	Formulare forms = null;
 	private String customForm = null;
+	JLabel custFormName = new JLabel("");
 	private boolean useBon = false;
 	
 	
@@ -301,7 +304,7 @@ public class VerkaufGUI extends JXPanel{
 		/*************/
 
 		//pan.add( (buts[5] = new JButton()),cc.xy(2, 12));
-		pan.add( (buts[5] = new JButton()),cc.xywh(10, 8,1,2));
+		pan.add( (buts[5] = new JButton()),cc.xywh(9, 8,2,2));
 		buts[5].setIcon(SystemConfig.hmSysIcons.get("print"));
 		buts[5].setToolTipText("anderes Formular verwenden");
 		buts[5].setActionCommand("verkFormulare");
@@ -309,6 +312,11 @@ public class VerkaufGUI extends JXPanel{
 		buts[5].setOpaque(false);
 		buts[5].setBorderPainted(false);
 		buts[3].setMnemonic(KeyEvent.VK_F);
+
+		lab = new JLabel("              Vorlage:");
+		pan.add(lab,cc.xy(8,10));
+		selectStandardForm();
+		pan.add(custFormName,cc.xyw(9,10,2));
 
 		pan.validate();
 		//edits[0].requestFocus();
@@ -437,21 +445,25 @@ public class VerkaufGUI extends JXPanel{
 
 		if(iformular < 0){
 			selectStandardForm();
-			customForm = null;
 		}else{
-			selectCustomForm();
-			customForm = forms.getFormular(iformular);
+			selectCustomForm(iformular);
 		}
 	}
 	private void selectStandardForm() {
 		buts[1].setEnabled(useBon);
 		buts[5].setBorderPainted(false);
-
+		customForm = null;
+		custFormName.setText("Bon/Rechnung");
+		custFormName.setForeground(Color.BLACK);
+		rbuts[0].setSelected(true);
 	}
-	private void selectCustomForm() {
+	private void selectCustomForm(int iformular) {
 		buts[1].setEnabled(false);									// Custom-Formulare nur 'auf Rechnung'
 		buts[5].setBorderPainted(true);
 		buts[2].requestFocus();
+		customForm = forms.getFormular(iformular);
+		custFormName.setText("<html><b>Custom</b></html>");
+		custFormName.setForeground(Color.RED);
 	}
 	private void setzeTabellenWerte(String[][] tabDaten){
 		final String[][] tDaten = tabDaten;
@@ -825,13 +837,12 @@ public class VerkaufGUI extends JXPanel{
 			edits[7].setText("0,00");
 			edits[8].setText("0");
 			this.owner.aktiviereFunktion(VerkaufTab.reload);
-			
+			selectStandardForm();	
 		} else {
 			JOptionPane.showMessageDialog(null, "Bitte erst Patientenfenster bzw. Kassenfenster öffnen und Patienten bzw. Kasse auswählen!");
 		}}else{
 			JOptionPane.showMessageDialog(this, "Keine Rechnungspositionen vorhanden!");
 		}
-		selectStandardForm();	
 	}
 	
 	private void fuelleTabelle(ITextTable tabelle, String propSection) throws TextException {
