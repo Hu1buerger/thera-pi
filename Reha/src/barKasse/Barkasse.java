@@ -31,6 +31,7 @@ import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
+import ag.ion.bion.officelayer.document.DocumentException;
 import ag.ion.bion.officelayer.document.IDocument;
 import ag.ion.bion.officelayer.document.IDocumentService;
 import ag.ion.bion.officelayer.text.ITextDocument;
@@ -40,6 +41,12 @@ import ag.ion.noa.NOAException;
 import environment.Path;
 import hauptFenster.Reha;
 import rehaInternalFrame.JBarkassenInternal;
+import ag.ion.noa.internal.printing.PrintProperties;
+import ag.ion.noa.printing.IPrinter;
+
+import com.jgoodies.forms.debug.FormDebugPanel;
+
+import CommonTools.OOTools;
 import systemTools.ButtonTools;
 
 public class Barkasse extends JXPanel implements ItemListener{
@@ -62,7 +69,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 
 	JCheckBox ChkRG = null;
 	JCheckBox ChkVerk = null;
-	boolean incRG = false, incVerk = false;
+	boolean incRG = false, incVerk = false, incPR = false, hideOfficeInBackground = false;
 
 	ActionListener al = null;
 	KeyListener kl = null;
@@ -297,7 +304,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 		doRechnen();
 		
 	}
-	private void doDrucken(){
+	private void doDrucken() throws DocumentException{
 		try {
 			starteOO();
 		} catch (OfficeApplicationException e) {
@@ -332,8 +339,9 @@ public class Barkasse extends JXPanel implements ItemListener{
 		}
 		return Double.parseDouble(dbl.replace(",", "."));
 	}
-	private void starteOO() throws OfficeApplicationException, NOAException, TextException{
+	private void starteOO() throws OfficeApplicationException, NOAException, TextException, DocumentException{
 		IDocumentService documentService = null;
+		String url = null;
 		if(!Reha.officeapplication.isActive()){
 			Reha.starteOfficeApplication();
 		}
@@ -342,8 +350,11 @@ public class Barkasse extends JXPanel implements ItemListener{
 
 		DocumentDescriptor docdescript = new DocumentDescriptor();
 		docdescript.setAsTemplate(true);
-		docdescript.setHidden(true);
-		document = documentService.loadDocument(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK()+"/Barkasse.ott",docdescript);
+		//docdescript.setHidden(true);
+		url = Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK()+"/Barkasse.ott";
+		document = documentService.loadDocument(url,docdescript);
+
+		docdescript.setHidden(hideOfficeInBackground);
 		//ITextTable[] tbl = null;
 		ITextDocument textDocument = (ITextDocument)document;
 		//tbl = textDocument.getTextTableService().getTextTables();
@@ -360,7 +371,39 @@ public class Barkasse extends JXPanel implements ItemListener{
 		textTable.getCell(2,8).getTextService().getText().setText(barlab.getText()+" €");
 		textTable.getCell(2,9).getTextService().getText().setText(differenzlab.getText()+" €");
 
-		document.getFrame().getXFrame().getContainerWindow().setVisible(true);
+		//document.getFrame().getXFrame().getContainerWindow().setVisible(true);
+		if(hideOfficeInBackground) {
+/*
+ * keine Drucker-settings in ini/Systeminitialisierung -> Einstellungen aus Vorlage verwenden
+ */
+//			String druckername = settings.getStringProperty(propSection, "Drucker");
+			IPrinter drucker = null;
+//			if(druckername == null) {
+				drucker = textDocument.getPrintService().getActivePrinter();
+//			} else {
+//				drucker = textDocument.getPrintService().createPrinter(druckername);
+//			}
+//			textDocument.getPrintService().setActivePrinter(drucker);
+//			short exemplare = settings.getIntegerProperty(propSection, "Exemplare").shortValue();
+//			final PrintProperties printprop = new PrintProperties(exemplare, null);
+				final PrintProperties printprop = new PrintProperties((short) 1, null);
+				textDocument.getPrintService().print(printprop);
+			final ITextDocument xdoc = textDocument;
+			new SwingWorker<Void,Void>() {
+
+				@Override
+				protected Void doInBackground() throws Exception {
+					Thread.sleep(100);
+					xdoc.close();
+					Thread.sleep(100);
+					return null;
+				}
+				
+			};
+		}else{
+			OOTools.bringDocToFront(documentService, textDocument, docdescript, url);
+		}
+
 	}
 	public void doAufraeumen(){
 		buts[0].removeActionListener(al);
@@ -407,6 +450,11 @@ public class Barkasse extends JXPanel implements ItemListener{
 			// Default-Werte setzen (Verhalten wie vor Erweiterung um Verkäufe)
 			incRG = true;
 			incVerk = false;
+		}
+		if ( inif.getStringProperty("BarKasse", "SofortDrucken") != null ){						// unabhäng. (später hinzugekommen)
+			hideOfficeInBackground = inif.getBooleanProperty("BarKasse", "SofortDrucken") ;
+		}else{
+			hideOfficeInBackground = false;
 		}
 	}
 	/**
