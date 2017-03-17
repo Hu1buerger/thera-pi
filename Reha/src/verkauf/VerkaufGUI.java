@@ -40,7 +40,7 @@ import CommonTools.INITool;
 import CommonTools.JCompTools;
 import CommonTools.JRtaRadioButton;
 import CommonTools.JRtaTextField;
-import CommonTools.SqlInfo;
+import CommonTools.OOTools;
 import CommonTools.StringTools;
 import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
@@ -819,6 +819,9 @@ public class VerkaufGUI extends JXPanel{
 						}
 						
 					};
+				}else{
+//					OOTools.inDenVordergrund(doc);		// w7: öffnet Dokument meist im Hintergrund
+					OOTools.bringDocToFront(application.getDocumentService(), doc, descriptor, url);
 				}
 			} catch (Exception e) {
 				JOptionPane.showMessageDialog(null, "Fehler: "+ e.getMessage() +"!");
