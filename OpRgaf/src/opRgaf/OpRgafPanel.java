@@ -835,14 +835,31 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 				}else if(tabmod.getColumnClass(col) == String.class){
 					value = tabmod.getValueAt(row,col).toString();
 				}
-				String cmd = "update rgaffaktura set "+colname+"="+(value != null ? "'"+value+"'" : "null")+" where id='"+id+"' LIMIT 1";
-				//System.out.println(cmd);
-				SqlInfo.sqlAusfuehren(cmd);
-				tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), 4)));
+				String rnr = (String) tabmod.getValueAt(row,1);
+	            if (rnr.startsWith("VR-")){			// test ob VR -> Änderung in 'rliste' schreiben
+	        		new SwingWorker<Void,Void>(){	// oder 'rückgängig' machen (= Suche neu ausführen)
+	        			@Override
+	        			protected Void doInBackground() throws Exception {
+	        				try{
+	        					doSuchen();
+	        				}catch(Exception ex){
+	        					ex.printStackTrace();
+	        				}
+	        				return null;
+	        			}
+	        		}.execute();
 
+					JOptionPane.showMessageDialog(null,"Ändern in Verkaufsrechnungen ist nicht möglich!");
+	            } else {
+					String cmd = "update rgaffaktura set "+colname+"="+(value != null ? "'"+value+"'" : "null")+" where id='"+id+"' LIMIT 1";
+					//System.out.println(cmd);
+					SqlInfo.sqlAusfuehren(cmd);
+					tfs[0].setText(dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 4)));
+	            }
+			
 			}catch(Exception ex){
 				System.out.println(ex);
-				JOptionPane.showMessageDialog(null,"Fehler in der Dateneingbe");
+				JOptionPane.showMessageDialog(null,"Fehler in der Dateneingabe");
 			}
 			return;
 		}
