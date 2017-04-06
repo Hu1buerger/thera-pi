@@ -23,7 +23,7 @@ public class OpRgAfIni {
 	private boolean incRG = false, incAR = false, incVK = false, settingsLocked = false;
 	private int vorauswahlSuchkriterium = -1;
 	private String progHome, aktIK;
-	private boolean allowCashSales = false, iniValuesValid = false;
+	private boolean allowCashInSalesReceipt = false, allowCashSales = false, iniValuesValid = false;
 	
 	/**
 	 * liest Einträge aus 'oprgaf.ini' 
@@ -42,16 +42,18 @@ public class OpRgAfIni {
 		new SwingWorker<Void,Void>(){
 			@Override
 			protected Void doInBackground() throws java.lang.Exception {
+				String section = "offenePosten";
 				INIFile inif = INITool.openIni (path2IniFile,iniFile);		// keine Direktzugriffe aus ext. Modulen (mehr) erlaubt -> iniFile lokal öffnen
-				if ( inif.getStringProperty("offenePosten","lockSettings") != null ){
-					settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
+				if ( inif.getStringProperty(section,"lockSettings") != null ){
+					settingsLocked = inif.getBooleanProperty(section, "lockSettings");
 				}
 				mahnParam = new HashMap<String,Object>();
 				readLastSelectRgAfVk(inif);
 				OpCommon.readMahnParamCommon(inif, mahnParam);
 				readMahnParamRgAfVk(inif, mahnParam,path2TemplateFiles);
 				
-				allowCashSales = inif.getBooleanProperty("offenePosten", "erlaubeVRinBarkasse");
+				readCashSettings(inif);
+
 				iniValuesValid = true;
 				return null;
 			}
@@ -103,6 +105,21 @@ public class OpRgAfIni {
 		}
 	}
 	
+	/**
+	 * liest BarzahlungsEinstellungen aus der ini-Datei
+	 * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
+	 */
+	private void readCashSettings(INIFile inif){
+		String section = "offenePosten";
+		if ( inif.getStringProperty(section,"erlaubeVRinBarkasse") != null ){
+			allowCashInSalesReceipt = inif.getBooleanProperty(section, "erlaubeVRinBarkasse");
+			allowCashSales = inif.getBooleanProperty(section, "erlaubeVBoninBarkasse");
+		} else {
+			allowCashInSalesReceipt = false;
+			allowCashSales = false;
+			initCashSettings();
+		}
+	}
 /*
 	private void addFormNb (INIFile inif,String section, String entry, String defaultName, int lfdNb){
 		if ( inif.getStringProperty(section,entry+lfdNb) != null ){
@@ -123,7 +140,7 @@ public class OpRgAfIni {
 	private boolean valuesValid(){
 		int maxWait = 20;
 		int waitTimes = maxWait;
-		while((!iniValuesValid) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
+		while((!iniValuesValid) && (waitTimes-- > 1)){		// lesen aus ini ist noch nicht fertig...
 			try {
 				Thread.sleep(25);
 			} catch (InterruptedException ex) {
@@ -193,51 +210,118 @@ public class OpRgAfIni {
 	}
 	
 	public void setVrCashAllowed(boolean value){
-		allowCashSales = value;
+		allowCashInSalesReceipt = value;
 	}
 	public boolean getVrCashAllowed(){
+		valuesValid();
+		return allowCashInSalesReceipt;
+	}
+
+	public void setVbCashAllowed(boolean value){
+		allowCashSales = value;
+	}
+	public boolean getVbCashAllowed(){
 		valuesValid();
 		return allowCashSales;
 	}
 
+	public void setSettingsLocked(boolean value) {
+		settingsLocked = value;
+	}
 
+	public boolean getSettingsLocked() {
+		return settingsLocked;
+	}
+
+	
 	/**
-	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die oprgaf.ini
+	 * schreibt die zuletzt verwandten OpRgAf-Einstellungen (falls geändert) in die oprgaf.ini
 	 */
 	public void saveLastSelection(){
 		INIFile inif = INITool.openIni (path2IniFile,iniFile);
-		String section = "offenePosten", comment = null;
+		String section = "offenePosten";
 		if ( ! settingsLocked ){																	// ini-Einträge  dürfen aktualisiert werden
 			if ( (incRG != inif.getBooleanProperty(section, "Rezeptgebuehren") ) || 
 					( incAR != inif.getBooleanProperty(section, "Ausfallrechnungen") ) ||
 					( incVK != inif.getBooleanProperty(section, "Verkaeufe") ) ||
-					(vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ) ||
-					(allowCashSales != inif.getBooleanProperty(section, "erlaubeVRinBarkasse") )
+					(vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ) 
 				){
 
-				if ( inif.getStringProperty("offenePosten", "Rezeptgebuehren") == null ){			// Eintrag in ini noch nicht vorhanden
-					comment = "offenePosten RgAfVk beruecksichtigt";
-				}else{comment = null;}
-				inif.setBooleanProperty("offenePosten", "Rezeptgebuehren", incRG, comment);
-				inif.setBooleanProperty("offenePosten", "Ausfallrechnungen", incAR, null);
-				inif.setBooleanProperty("offenePosten", "Verkaeufe", incVK, null);
+				inif.setBooleanProperty(section, "Rezeptgebuehren", incRG, "offenePosten RgAfVk beruecksichtigt");
+				inif.setBooleanProperty(section, "Ausfallrechnungen", incAR, null);
+				inif.setBooleanProperty(section, "Verkaeufe", incVK, null);
 
-				if ( inif.getStringProperty("offenePosten", "Suchkriterium") == null ){
-					comment = "zuletzt gesucht";
-				}else{comment = null;}
-				inif.setIntegerProperty("offenePosten", "Suchkriterium", vorauswahlSuchkriterium, comment);
+				inif.setIntegerProperty(section, "Suchkriterium", vorauswahlSuchkriterium, "zuletzt gesucht");
 
-				if ( inif.getStringProperty("offenePosten", "lockSettings") == null ){
-					inif.setBooleanProperty("offenePosten", "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
-				}
-				if ( inif.getStringProperty("offenePosten", "erlaubeVRinBarkasse") == null ){
-					inif.setBooleanProperty("offenePosten", "erlaubeVRinBarkasse",false, "Verkaeufe duerfen in Barkasse gebucht werden");
+				if ( inif.getStringProperty(section, "lockSettings") == null ){						// Wert noch nicht vorhanden?
+					inif.setBooleanProperty(section, "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
 				}
 				INITool.saveIni(inif);
 			}
-			
 		}
 	}
 
+	/**
+	 * legt die Lock- und BarzahlungsEinstellungen in der oprgaf.ini mit Defaultwerten an
+	 */
+	public void initCashSettings(){
+		INIFile inif = INITool.openIni (path2IniFile,iniFile);
+		String section = "offenePosten";
+		boolean saveChanges = false;
+		if ( inif.getStringProperty(section,"lockSettings") == null ){
+			settingsLocked = true;
+			inif.setBooleanProperty(section, "lockSettings",settingsLocked, "Aktualisieren der Eintraege gesperrt");
+			saveChanges = true;
+		}
+		if ( inif.getStringProperty(section,"erlaubeVRinBarkasse") == null ){
+			writeSalesRhg(inif);
+			saveChanges = true;
+		}
+		if ( inif.getStringProperty(section,"erlaubeVBoninBarkasse") == null ){
+			writeSalesBon(inif);
+			saveChanges = true;
+		}
+		if (saveChanges){INITool.saveIni(inif);}
+	}
+
+	/**
+	 * schreibt die zuletzt verwandten BarzahlungsEinstellungen (falls geändert) in die oprgaf.ini
+	 */
+	public void saveLastCashSettings(){
+		INIFile inif = INITool.openIni (path2IniFile,iniFile);
+		String section = "offenePosten";
+		boolean saveChanges = false;
+		if ( ! settingsLocked ){						// ini-Einträge  dürfen aktualisiert werden
+			if (allowCashInSalesReceipt != inif.getBooleanProperty(section, "erlaubeVRinBarkasse")){
+				writeSalesRhg(inif);
+				saveChanges = true;
+			}
+			if (allowCashSales != inif.getBooleanProperty(section, "erlaubeVBoninBarkasse") ){
+				writeSalesBon(inif);
+				saveChanges = true;
+			}
+			if (saveChanges){INITool.saveIni(inif);}
+		}
+	}
+
+	/**
+	 * schreibt die zuletzt verwandten Lock-Einstellungen (falls geändert) in die oprgaf.ini
+	 */
+	public void saveLockSettings(){
+		INIFile inif = INITool.openIni (path2IniFile,iniFile);
+		String section = "offenePosten";
+		if (settingsLocked != inif.getBooleanProperty(section, "lockSettings")){
+			inif.setBooleanProperty(section, "lockSettings",settingsLocked, "Aktualisieren der Eintraege gesperrt");
+			INITool.saveIni(inif);
+		}
+	}
+
+	private void writeSalesBon(INIFile inif){
+		inif.setBooleanProperty("offenePosten", "erlaubeVBoninBarkasse",allowCashSales, "Barverkaeufe (Bondruck) duerfen in Barkasse gebucht werden");
+	}
+
+	private void writeSalesRhg(INIFile inif){
+		inif.setBooleanProperty("offenePosten", "erlaubeVRinBarkasse",allowCashInSalesReceipt, "Verkaufsrechnungen duerfen in Barkasse gebucht werden");
+	}
 
 }
