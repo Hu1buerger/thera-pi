@@ -264,9 +264,9 @@ private JScrollPane getParameterListe(){
 	/* Die Offenen Posten in der aktuellen Form funktionieren hinten und vorne nicht
 	 * solange dies so ist werden die OffenenPosten wieder zurückgebaut auf deren
 	 * ursprüngliche Fassung
+	*/
 	treeitem = new DefaultMutableTreeNode( "Offene Posten & Mahnung");
 	node.add(treeitem);
-	*/
 	root.add(node);
 
 	/***/
