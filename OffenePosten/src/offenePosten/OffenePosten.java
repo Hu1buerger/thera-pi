@@ -1,4 +1,4 @@
-package offenePosten;
+﻿package offenePosten;
 
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -95,13 +95,16 @@ public class OffenePosten implements WindowListener{
 	private static int vorauswahlSuchkriterium = -1;
 	private static boolean settingsLocked = false;
 	private static String iniFile;
+	private static boolean erlaubeBarInKasse = false;
+	private static boolean iniValuesValid = false;
 
-
+	
 	public static void main(String[] args) {
 		new Logging("offeneposten");
 		OffenePosten application = new OffenePosten();
 		application.getInstance();
 		application.getInstance().sqlInfo = new SqlInfo();
+		System.out.println("OP main: " + application.getInstance());
 
 		if(args.length > 0 || testcase){
 			if(!testcase){
@@ -214,10 +217,11 @@ public class OffenePosten implements WindowListener{
 						//System.out.println(mahnParameter);
 
 						readLastSelection (oinif);
+						readBarAnKasse(oinif);
+						iniValuesValid = true;		// werte für Anzeige OP sind jetzt gültig
 						
 						AbrechnungParameter(progHome);
 						FirmenDaten(progHome);
-
 
 					return null;
 					}
@@ -646,18 +650,43 @@ public class OffenePosten implements WindowListener{
 		return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
 	}
 
+	private static void readBarAnKasse(INIFile inif) {
+		erlaubeBarInKasse = false;
+		if ( inif.getStringProperty("offenePosten", "erlaubeBarzahlung") != null ){
+			erlaubeBarInKasse = inif.getBooleanProperty("offenePosten","erlaubeBarzahlung");
+		}
+	}
+	public static boolean getBarAusbuchenErlaubt() {
+		int maxWait = 20;
+		int waitTimes = maxWait;
+		while((!iniValuesValid) && (waitTimes-- > 0)){		// lesen aus ini ist noch nicht fertig...
+			try {
+				Thread.sleep(25);
+			} catch (InterruptedException ex) {
+				ex.printStackTrace();
+			}
+		}
+		if(waitTimes == 0) { 
+			System.out.println("OP erlaubeBarInKasse: " + erlaubeBarInKasse +"(Abbruch ini-read)");
+			}
+		return erlaubeBarInKasse;
+	}
+
 	/**
 	 * liest die zuletzt verwandten (Such-)Einstellungen aus der ini-Datei
 	 * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
 	 */
 	private static void readLastSelection(INIFile inif){
 		String section = "offenePosten";
-		if ( inif.getStringProperty(section, "lockSettings") != null ){					// Eintraege in ini vorhanden (alle oder keiner)
-			//vorauswahlSuchkriterium = inif.getIntegerProperty(section, "Suchkriterium");	
+		if ( inif.getStringProperty(section, "Suchkriterium") != null ){		// Eintrag in ini vorhanden?
 			setVorauswahl(inif.getIntegerProperty(section, "Suchkriterium"));
-			settingsLocked = inif.getBooleanProperty("offenePosten", "lockSettings");
 		}else{
 			setVorauswahl(0);			// Default-Wert setzen
+		}
+		if ( inif.getStringProperty(section, "lockSettings") != null ){
+			settingsLocked = inif.getBooleanProperty(section, "lockSettings");
+		}else{
+			settingsLocked = true;
 		}
 		System.out.println("OP readLastSel.: " + vorauswahlSuchkriterium);
 	}
@@ -668,20 +697,38 @@ public class OffenePosten implements WindowListener{
 	public void saveLastSelection(){
 		INIFile inif = INITool.openIni (path2IniFile,iniFile);
 		String section = "offenePosten", comment = null;
+		boolean saveChanges = false;
 		if ( ! settingsLocked ){																	// ini-Einträge  dürfen aktualisiert werden
-			if ( inif.getStringProperty("offenePosten", "lockSettings") == null ){
-				inif.setBooleanProperty("offenePosten", "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
-				inif.setIntegerProperty("offenePosten", "Suchkriterium", 0, "zuletzt gesucht");
+			if ( inif.getStringProperty(section, "lockSettings") == null ){
+				inif.setBooleanProperty(section, "lockSettings",true, "Aktualisieren der Eintraege gesperrt");
+				saveChanges = true;
 			}
 
-			if ( vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ){
-				if ( inif.getStringProperty("offenePosten", "Suchkriterium") == null ){
-					comment = "zuletzt gesucht";
-				}else{comment = null;}
-				inif.setIntegerProperty("offenePosten", "Suchkriterium", vorauswahlSuchkriterium, comment);
+			comment = "zuletzt gesucht";
+			if ( inif.getStringProperty(section, "Suchkriterium") == null ){
+				inif.setIntegerProperty(section, "Suchkriterium", vorauswahlSuchkriterium, comment);
+				saveChanges = true;
+			}else{
+				if ( vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ){
+					inif.setIntegerProperty(section, "Suchkriterium", vorauswahlSuchkriterium, comment);
+					saveChanges = true;
+				}
+			}
+			if ( inif.getStringProperty(section, "erlaubeBarzahlung") == null ){					// default setzen - Ändern nur über Systemeinstellungen
+				comment = "ermoeglicht Barzahlung von Rechnungen in Barkasse zu buchen";
+				inif.setBooleanProperty(section, "erlaubeBarzahlung", false, comment);
+				saveChanges = true;
+			}
+			
+			if(saveChanges){
 				INITool.saveIni(inif);
 			}
 		}
 	}
-
+	private static boolean isIniValuesValid() {
+		return iniValuesValid;
+	}
+	private static void setIniValuesValid(boolean iniValuesValid) {
+		OffenePosten.iniValuesValid = iniValuesValid;
+	}
 }

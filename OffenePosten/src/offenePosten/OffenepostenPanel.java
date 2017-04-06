@@ -208,7 +208,10 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 
 		++colCnt;
 		bar  = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
-		//bar.setEnabled(false);
+		bar.setEnabled(OffenePosten.getBarAusbuchenErlaubt());
+		if(!bar.isEnabled()){
+			bar.setToolTipText("disabled (see System-Init)");
+		}
 
 		colCnt +=2;
 		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(colCnt,rowCnt));
