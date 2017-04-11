@@ -22,7 +22,7 @@ class TageTreeSize {
 	}
 
 	public void setAnzTage (int days){
-		if (days > 0){
+		if (days >= 0){
 			currNbDays = days;
 		}
 	}
