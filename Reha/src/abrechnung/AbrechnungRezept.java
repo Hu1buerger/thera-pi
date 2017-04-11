@@ -2511,7 +2511,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			buf1.append("Indikationsschlüssel / ICD-10");
 			buf1.append("</td><td class=\"spalte2\" align=\"left\">");
 			buf1.append((aktRezept.getIndiSchluessel().startsWith("kein Indi") ? "<b><font color=#FF0000>"+aktRezept.getIndiSchluessel()+"</font></b>" : aktRezept.getIndiSchluessel())+
-					(aktRezept.getICD10().equals("") ? " / <b>n.a.</b>" : " / <b>"+aktRezept.getICD10()+"</b>"));
+					(aktRezept.getICD10().equals("") ? " / <b>n.a.</b>" : " / <b>"+aktRezept.getICD10()+"</b>")+
+					(aktRezept.getICD10_2().equals("") ? " " : "<b>, "+aktRezept.getICD10_2()+"</b>"));
 			buf1.append("</td>");
 			buf1.append("</tr>");
 			/*******/
