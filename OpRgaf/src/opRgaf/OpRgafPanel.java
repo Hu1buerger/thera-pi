@@ -598,6 +598,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		if(!cmd.equals("")){
 			buts[btAusbuchen].setEnabled(false);
 			suchen.setEnabled(false);
+			//System.out.println("suche nach: "+'"'+cmd+'"');
 			try{
 			starteSuche(cmd);
 			}catch(Exception ex){
@@ -836,20 +837,26 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 					value = tabmod.getValueAt(row,col).toString();
 				}
 				String rnr = (String) tabmod.getValueAt(row,1);
-	            if (rnr.startsWith("VR-")){			// test ob VR -> Änderung in 'rliste' schreiben
-	        		new SwingWorker<Void,Void>(){	// oder 'rückgängig' machen (= Suche neu ausführen)
-	        			@Override
-	        			protected Void doInBackground() throws Exception {
-	        				try{
-	        					doSuchen();
-	        				}catch(Exception ex){
-	        					ex.printStackTrace();
-	        				}
-	        				return null;
-	        			}
-	        		}.execute();
+	            if (rnr.startsWith("VR-")){				// test ob VR -> Änderung in 'verkliste' schreiben
+	            	if (colname.equals("rbezdatum")){	// (bisher) nur ändern des Buchungsdatums erlaubt
+						String cmd = "update verkliste set v_bezahldatum ="+(value != null ? "'"+value+"'" : "null")+" where verklisteID='"+id+"' LIMIT 1";
+						//System.out.println(cmd);
+						SqlInfo.sqlAusfuehren(cmd);
+	            	} else{
+		        		new SwingWorker<Void,Void>(){	// andere 'rückgängig' machen (= Suche neu ausführen)
+		        			@Override					// eleganter wäre nur das geänderte Feld neu einzulesen ...
+		        			protected Void doInBackground() throws Exception {
+		        				try{
+		        					doSuchen();
+		        				}catch(Exception ex){
+		        					ex.printStackTrace();
+		        				}
+		        				return null;
+		        			}
+		        		}.execute();
 
-					JOptionPane.showMessageDialog(null,"Ändern in Verkaufsrechnungen ist nicht möglich!");
+						JOptionPane.showMessageDialog(null,"Ändern in Verkaufsrechnungen ist nicht möglich!");	            		
+	            	}
 	            } else {
 					String cmd = "update rgaffaktura set "+colname+"="+(value != null ? "'"+value+"'" : "null")+" where id='"+id+"' LIMIT 1";
 					//System.out.println(cmd);
