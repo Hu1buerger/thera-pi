@@ -233,6 +233,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
 
 
+
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
 		content.add(jscr,cc.xyw(2,4,17));
 
@@ -651,7 +652,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 					 //vec.add( (rs.getString(i)==null ? "" : rs.getString(i)) );//r_klasse
 					 //System.out.println(rsMetaData.getColumnClassName(i));
 				 }
-				
+
 				suchOffen = suchOffen.add(rs.getBigDecimal(5));
 				suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
 				tabmod.addRow( (Vector<?>) vec.clone());
