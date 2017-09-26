@@ -1,7 +1,6 @@
 package opRgaf;
 
 
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
@@ -234,7 +233,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
 
 
-
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
 		content.add(jscr,cc.xyw(2,4,17));
 
@@ -429,10 +427,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		}
 
 		suchOffen = suchOffen.subtract(eingang );
-		//suchOffen = suchOffen.add( BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) ) );
-
 		gesamtOffen = gesamtOffen.subtract(eingang);
-		//gesamtOffen = gesamtOffen.add( BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) ) );
 
 		String cmd = "";
 		//einen größeren Schwachsinn für den praktische Einsatz kann man sich schwerlich vorstellen.
@@ -454,10 +449,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		}
 		tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), 6);
 		tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 4);
-		//
 
 		if(rgaf_rechnum.startsWith("RGR-")){										// Rezept bezahlt setzen
-			SqlInfo.sqlAusfuehren("update verordn set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");
+			SqlInfo.sqlAusfuehren("update verordn set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");	// zz: 1-ok
 			SqlInfo.sqlAusfuehren("update lza set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");
 		}
 
@@ -657,25 +651,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 					 //vec.add( (rs.getString(i)==null ? "" : rs.getString(i)) );//r_klasse
 					 //System.out.println(rsMetaData.getColumnClassName(i));
 				 }
-				/*
-				vec.add(rs.getInt(1)); //r_nummer
-				vec.add(rs.getDate(2)); // r_datum
-				vec.add( (rs.getString(3)==null ? "" : rs.getString(3)) );// r_kasse
-				vec.add( (rs.getString(4)==null ? "" : rs.getString(4)) );//r_name
-				vec.add( (rs.getString(5)==null ? "" : rs.getString(5)) );//r_klasse
-				vec.add(rs.getBigDecimal(6).doubleValue());//r_betrag
-				vec.add(rs.getBigDecimal(7).doubleValue());//r_offen
-				vec.add(rs.getDate(8));//r_bezdatum
-				vec.add(rs.getBigDecimal(9).doubleValue());//r_zuzahl
-				vec.add(rs.getDate(10));//mahndat1
-				vec.add(rs.getDate(11));//mahndat2
-				vec.add(rs.getDate(12));//mahndat3
-				vec.add( (rs.getString(13)==null ?  Boolean.FALSE : (rs.getString(13).equals("T") ? Boolean.TRUE : Boolean.FALSE)) );//mahnsperr
-				vec.add( (rs.getString(14)==null ? "" : rs.getString(14)) );//pat_intern
-				vec.add( (rs.getString(15)==null ? "" : rs.getString(15)));//ikktraeger
-				vec.add(rs.getInt(16));//id
-				*/
-
+				
 				suchOffen = suchOffen.add(rs.getBigDecimal(5));
 				suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
 				tabmod.addRow( (Vector<?>) vec.clone());
@@ -720,8 +696,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 				}
 			}
 		}
-
-
 	}
 	/*****************************************************/
 	class OPListSelectionHandler implements ListSelectionListener {
@@ -791,7 +765,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 
 						}
 					}
-					//value = tabmod.getValueAt(row,col).toString();
 				}else if(tabmod.getColumnClass(col) == Double.class){
 					value = dcf.format(tabmod.getValueAt(row,col)).replace(",",".");
 				}else if(tabmod.getColumnClass(col) == String.class){
@@ -806,8 +779,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 				System.out.println(ex);
 				JOptionPane.showMessageDialog(null,"Fehler in der Dateneingbe");
 			}
-
-
 			return;
 		}
 	}
@@ -984,10 +955,5 @@ public class OpRgafPanel extends JXPanel implements TableModelListener{
 		*/
 
 			OpRgaf.thisFrame.setCursor(OpRgaf.thisClass.normalCursor);
-
-
 	}
-
-
-
 }

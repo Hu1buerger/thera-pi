@@ -1,4 +1,4 @@
-package org.therapi.reha.patient;
+﻿package org.therapi.reha.patient;
 
 
 import java.awt.BorderLayout;
@@ -268,14 +268,14 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 
 
 	}
-
+/* McM scheint unbenutzt:	
 	public void getAktDates(){
 
 	}
 	public void setDtblmValues(ImageIcon ico,int row,int col){
 		dtblm.setValueAt(ico,row,col);
 	}
-
+ */
 	public void formulareAuswerten(){
 		int row = tabaktrez.getSelectedRow();
 		if(row >= 0){
@@ -1728,8 +1728,8 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 	public void actionPerformed(ActionEvent arg0) {
 
 		String cmd = arg0.getActionCommand();
-
-		for(int i = 0; i < 1; i++){
+		
+		for(int i = 0; i < 1; i++){			// McM: hu?
 			if(cmd.equals("terminplus")){
 				if(rezGeschlossen()){return;}
 				try{
@@ -3045,8 +3045,12 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 						//Icon
 //						dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[Integer.parseInt((String)Reha.instance.patpanel.vecaktrez.get(39))],
 //											tabaktrez.getSelectedRow(),1);
+
+						// falls typ des zzstatus (@idx 39) im vecaktrez auf typ ZZStat umgestellt wird, oder get-Methoden erstellt werden, 
+						// sind die beiden Hilfsvariablen obsolet:
 						int iZzStat = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(39));
 						String sRezNr = Reha.instance.patpanel.vecaktrez.get(1);
+
 						ZZStat iconKey =  ZuzahlTools.getIconKey (iZzStat, sRezNr);
 						setZuzahlImageActRow(iconKey,sRezNr);
 
