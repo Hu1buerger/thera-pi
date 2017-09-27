@@ -3338,25 +3338,25 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 			//boolean testcase = true;
 			Map<Object, ImageIcon> icons = new HashMap<Object, ImageIcon>();
 			icons.put("Rezeptgebühren kassieren",SystemConfig.hmSysIcons.get("rezeptgebuehr"));
+			// Lemmi 20101218: angehängt  Rezeptgebühr-Rechnung aus dem Rezept heraus erzeugen
+			//icons.put("Rezeptgebühr-Rechnung erstellen",SystemConfig.hmSysIcons.get("privatrechnung"));
+			// McM: 'thematisch einsortiert' u. mit eigenem Icon (match mit Anzeige in Rezeptliste):
+			icons.put("Rezeptgebühr-Rechnung erstellen",SystemConfig.hmSysIcons.get("rezeptgebuehrrechnung"));
 			icons.put("BarCode auf Rezept drucken",SystemConfig.hmSysIcons.get("barcode"));
 			icons.put("Ausfallrechnung drucken",SystemConfig.hmSysIcons.get("ausfallrechnung"));
 			icons.put("Rezept ab-/aufschließen",SystemConfig.hmSysIcons.get("statusset"));
 			icons.put("Privat-/BG-/Nachsorge-Rechnung erstellen",SystemConfig.hmSysIcons.get("privatrechnung"));
 			icons.put("Behandlungstage in Clipboard",SystemConfig.hmSysIcons.get("einzeltage"));
 			icons.put("Transfer in Historie",SystemConfig.hmSysIcons.get("redo"));
-			// Lemmi 20101218: angehängt  Rezeptgebühr-Rechnung aus dem Rezept heraus erzeugen
-			//icons.put("Rezeptgebühr-Rechnung erstellen",SystemConfig.hmSysIcons.get("privatrechnung"));
-			// McM: mit eigenem Icon (match mit Anzeige in Rezeptliste):
-			icons.put("Rezeptgebühr-Rechnung erstellen",SystemConfig.hmSysIcons.get("rezeptgebuehrrechnung"));
 			icons.put("§301 Reha-Fallsteuerung",SystemConfig.hmSysIcons.get("abrdreieins"));
 
 			// create a list with some test data
-			JList list = new JList(	new Object[] {"Rezeptgebühren kassieren",     "BarCode auf Rezept drucken", "Ausfallrechnung drucken",
-												  "Rezept ab-/aufschließen",      "Privat-/BG-/Nachsorge-Rechnung erstellen",
-												  "Behandlungstage in Clipboard", "Transfer in Historie",
-												  "Rezeptgebühr-Rechnung erstellen",
-												  "§301 Reha-Fallsteuerung" });   // Lemmi 20101218: eingefügt  Rezeptgebühr-Rechnung aus dem Rezept heraus erzeugen
-			list.setCellRenderer(new IconListRenderer(icons));
+			JList list = new JList(	new Object[] {"Rezeptgebühren kassieren",  "Rezeptgebühr-Rechnung erstellen",
+					  "BarCode auf Rezept drucken", "Ausfallrechnung drucken", 
+					  "Rezept ab-/aufschließen",      "Privat-/BG-/Nachsorge-Rechnung erstellen",
+					  "Behandlungstage in Clipboard", "Transfer in Historie", 
+					  "§301 Reha-Fallsteuerung" });   
+			list.setCellRenderer(new IconListRenderer(icons));	
 			Reha.toolsDlgRueckgabe = -1;
 			ToolsDialog tDlg = new ToolsDialog(Reha.getThisFrame(),"Werkzeuge: aktuelle Rezepte",list);
 			tDlg.setPreferredSize(new Dimension(275, (255+28) +   // Lemmi: Breite, Höhe des Werkzeug-Dialogs
@@ -3378,7 +3378,22 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 					RezTools.constructRawHMap();
 					rezeptGebuehr();
 					return;
-				}else if(Reha.toolsDlgRueckgabe==1){
+				}
+				// Lemmi 20101218: neuer if Block:  Rezeptgebühr-Rechnung aus dem Rezept heraus erzeugen
+				else if(Reha.toolsDlgRueckgabe==1){
+					tDlg = null;
+					if(!Rechte.hatRecht(Rechte.Rezept_gebuehren, true)){return;}
+					PointerInfo info = MouseInfo.getPointerInfo();
+		    	    Point location = info.getLocation();
+		    		doRezeptgebuehrRechnung(location);
+		    		
+//		    		abrRez = new AbrechnungRezept(null);
+//		    		this.abrRez.setRechtsAufNull();
+//		    		return abrRez;
+//		    		abrRez.doRezeptgebuehrRechnung(location);
+
+					return;
+				}else if(Reha.toolsDlgRueckgabe==2){
 					tDlg = null;
 					if(!Rechte.hatRecht(Rechte.Rezept_gebuehren, true)){return;}
 					new SwingWorker<Void,Void>(){
@@ -3390,16 +3405,16 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 					}.execute();
 
 					return;
-				}else if(Reha.toolsDlgRueckgabe==2){
+				}else if(Reha.toolsDlgRueckgabe==3){
 					tDlg = null;
 					if(!Rechte.hatRecht(Rechte.Rezept_ausfallrechnung, true)){return;}
 					ausfallRechnung();
 					return;
-				}else if(Reha.toolsDlgRueckgabe==3){
+				}else if(Reha.toolsDlgRueckgabe==4){
 					tDlg = null;
 					rezeptAbschliessen(connection);
 					return;
-				}else if(Reha.toolsDlgRueckgabe==4){
+				}else if(Reha.toolsDlgRueckgabe==5){
 					tDlg = null;
 					if(!Rechte.hatRecht(Rechte.Rezept_privatrechnung, true)){return;}
 					try{
@@ -3418,11 +3433,11 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 						JOptionPane.showMessageDialog(null, ex.getMessage());
 					}
 					return;
-				}else if(Reha.toolsDlgRueckgabe==5){
+				}else if(Reha.toolsDlgRueckgabe==6){
 					tDlg = null;
 					doTageDrucken();
 					return;
-				}else if(Reha.toolsDlgRueckgabe==6){
+				}else if(Reha.toolsDlgRueckgabe==7){
 					tDlg = null;
 					if(!Rechte.hatRecht(Rechte.Sonstiges_rezepttransfer, true)){
 						return;
@@ -3431,21 +3446,6 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 					if(anfrage == JOptionPane.YES_OPTION){
 						doUebertrag();
 					}
-					return;
-				}
-				// Lemmi 20101218: neuer if Block:  Rezeptgebühr-Rechnung aus dem Rezept heraus erzeugen
-				else if(Reha.toolsDlgRueckgabe==7){
-					tDlg = null;
-					if(!Rechte.hatRecht(Rechte.Rezept_gebuehren, true)){return;}
-					PointerInfo info = MouseInfo.getPointerInfo();
-		    	    Point location = info.getLocation();
-		    		doRezeptgebuehrRechnung(location);
-
-//		    		abrRez = new AbrechnungRezept(null);
-//		    		this.abrRez.setRechtsAufNull();
-//		    		return abrRez;
-//		    		abrRez.doRezeptgebuehrRechnung(location);
-
 					return;
 				}else if(Reha.toolsDlgRueckgabe==8){
 					do301FallSteuerung();
