@@ -927,8 +927,9 @@ public class PatientHauptLogic {
 		try{
 			Reha.instance.patpanel.patDatenOk = false;
 			Reha.instance.patpanel.patDaten = SqlInfo.holeSatz("pat5"," * ", "PAT_INTERN ='"+patint+"'", Arrays.asList(new String[] {}) );
-			String stmt = "select id from rgaffaktura where roffen > '0' and pat_intern = '"+patint+"' LIMIT 1";
-
+//			String stmt = "select id from rgaffaktura where roffen > '0' and pat_intern = '"+patint+"' LIMIT 1";
+			String stmt = "select id from rgaffaktura where roffen > '0' and rnr not like 'storno%' and pat_intern = '"+patint+"' LIMIT 1";
+			
 			if(SqlInfo.holeFelder(stmt).size() > 0){
 				Reha.bRGAFoffen = true;
 			}else{

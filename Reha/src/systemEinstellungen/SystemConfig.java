@@ -241,6 +241,7 @@ public class SystemConfig {
 	public static boolean phoneAvailable = false;
 
 	public static boolean behdatumTippen = false;
+	public static boolean useStornieren = false;
 	public static boolean isAndi = false;
 
 	public static boolean fullSizePwDialog = false;
@@ -1311,7 +1312,14 @@ public class SystemConfig {
 			if(dummy != null){
 				behdatumTippen = (inif.getStringProperty("Sonstiges", "BehDatumTippen").equals("0") ? false : true);
 			}
-
+			dummy = inif.getStringProperty("Sonstiges", "StornoStattLoeschen");
+			if(dummy == null){															// Eintrag noch nicht vorhanden?
+				inif.setStringProperty("Sonstiges", "StornoStattLoeschen","0",null);	// default wie gehabt: löschen
+				mustsave = true;
+			}else{
+				useStornieren = (inif.getStringProperty("Sonstiges", "StornoStattLoeschen").equals("0") ? false : true);				
+			}
+			
 			String[] hmPraefixArt =  {"KG","MA","ER","LO","RH","PO","RS","FT"};
 			String[] hmPraefixZahl = {"22","21","26","23","67","71","61","62"};
 			String[] hmIndexZahl = 	 {"2", "1", "5", "3", "6", "7","6","7"};

@@ -2017,7 +2017,7 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 				}
 				if(rezGeschlossen()){return;}
 				int currow = tabaktrez.getSelectedRow();
-				String xreznr;
+				String xreznr = null;
 				if(currow >=0){
 					xreznr = (String)tabaktrez.getValueAt(currow,0);
 					String xcmd = "update verordn set zzstatus='"+1+"', befr='F',rez_bez='T' where rez_nr='"+xreznr+"' LIMIT 1";
@@ -2038,13 +2038,50 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 				String xreznr;
 				if(currow >=0){
 					xreznr = (String)tabaktrez.getValueAt(currow,0);
-					String xcmd = "update verordn set zzstatus='2', befr='F', rez_geb='0.00',rez_bez='F' where rez_nr='"+xreznr+"' LIMIT 1";
+					//String xcmd = "update verordn set zzstatus='2', befr='F', rez_geb='0.00',rez_bez='F' where rez_nr='"+xreznr+"' LIMIT 1"; 
+					//dtblm.setValueAt(Reha.thisClass.patpanel.imgzuzahl[2],currow,1);
+					//doVectorAktualisieren(new int[]{12,13,14,39},new String[] {"F","0.00","F","2"});	// befr,rez_geb, rez_bez,zzstatus (zuzahlnichtok)
+
+					// McM: sollte der Dialog vom Befreiungs-Status nicht besser die Finger lassen?
+					// (wenn nicht, dann sollte die $302-Abrechnung den gesetzten Status auch verwenden. Bisher ist das nicht der Fall...)
+					doVectorAktualisieren(new int[]{13,14,39},new String[] {"0.00","F","2"});	//rez_geb, rez_bez,zzstatus (zuzahlnichtok)
+					String xcmd = "update verordn set zzstatus='2', rez_geb='0.00',rez_bez='F' where rez_nr='"+xreznr+"' LIMIT 1"; 
 					SqlInfo.sqlAusfuehren(xcmd);
-					dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[2],currow,1);
-					tabaktrez.validate();
-					doVectorAktualisieren(new int[]{12,13,14,39},new String[] {"F","0.00","F","2"});
-					SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");
-					SqlInfo.sqlAusfuehren("delete from rgaffaktura where reznr='"+xreznr+"' and rnr like 'RGR-%' LIMIT 1");
+					
+					if(SystemConfig.useStornieren){
+						if(stammDatenTools.ZuzahlTools.existsRGR(xreznr)){
+							//SqlInfo.sqlAusfuehren("delete from rgaffaktura where reznr='"+xreznr+"' and rnr like 'RGR-%' LIMIT 1");	// löscht RGR
+							/**
+							 * McM: stellt in Tabelle rgaffaktura 'storno_' vor Rechnungsnummer u. hängt 'S' an Rezeptnummer an, 
+							 * dadurch wird record bei der Suche nach Rechnungs-/Rezeptnummer nicht mehr gefunden
+							 * <roffen> wird nicht 0 gesetzt, falls schon eine Teilzahlung gebucht wurde o.ä. - in OP taucht er deshalb noch auf
+							 */
+							xcmd = "UPDATE rgaffaktura SET rnr=CONCAT('storno_',rnr), reznr=CONCAT(reznr,'S') where reznr='"+xreznr+"' AND rnr like 'RGR-%' LIMIT 1"; 
+							SqlInfo.sqlAusfuehren(xcmd);															// storniert RGR in 'rgaffaktura'
+							// McM: storno auch in 'kasse' (falls RGR schon als 'bar bezahlt' verbucht wurde)
+							// auf einnahme = 0 u. 'storno_RGR...' ändern (da Kassenabrechnung nach 'RGR-%' sucht)
+							if (stammDatenTools.ZuzahlTools.existsRgrBarInKasse(xreznr)){
+								// TODO ?? user & IK auf den stornierenden ändern?
+								xcmd = "UPDATE kasse SET einnahme='0.00', ktext=CONCAT('storno_',ktext) where rez_nr='"+xreznr+"' AND ktext like 'RGR-%' LIMIT 1"; 
+								SqlInfo.sqlAusfuehren(xcmd);														// storniert RGR in 'kasse'							
+							}
+						}else{
+							//SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");			// löscht Bar-Zuzahlung	(besser: stornieren)			
+							xcmd = "UPDATE kasse SET einnahme='0.00', ktext=CONCAT('storno_',ktext) where rez_nr='"+xreznr+"' AND ktext not like 'storno%' LIMIT 1"; 
+	 						SqlInfo.sqlAusfuehren(xcmd);															// storniert Bar-Zuzahlung in 'kasse'							
+						}
+						//SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");				// löscht Bar-Zuzahlung	_und_ bar bez. RGR
+					}else{		// Ursprungs-Variante (Steinhilber)
+						if(stammDatenTools.ZuzahlTools.existsRGR(xreznr)){
+							SqlInfo.sqlAusfuehren("delete from rgaffaktura where reznr='"+xreznr+"' and rnr like 'RGR-%' LIMIT 1");	// löscht RGR
+						}
+						SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");				// löscht Bar-Zuzahlung	_und_ bar bez. RGR						
+					}
+
+					// ZZ-Icon in akt. Zeile setzen
+//					dtblm.setValueAt(stammDatenTools.ZuzahlTools.getZzIcon(zzIcon), currow, 1);						
+//					tabaktrez.validate();
+					setZuzahlImageActRow(ZZStat.ZUZAHLNICHTOK,xreznr);
 				}
 
 			}

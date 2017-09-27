@@ -272,6 +272,7 @@ public class RezeptDaten extends JXPanel implements ActionListener{
 							Reha.instance.patpanel.aktRezept.tabaktrez.validate();
 							 */					
 							org.therapi.reha.patient.AktuelleRezepte.setZuzahlImage(zzbild);
+							
 						}
 					}
 
