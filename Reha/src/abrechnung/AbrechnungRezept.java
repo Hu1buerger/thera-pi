@@ -4035,6 +4035,10 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 
 			edibuf.append(test.replace(" ", "")+plus);
 			/************************************************/
+/*			// McM vor dentist-test:
+			//edibuf.append(voIndex[Integer.parseInt(aktRezept.getVec_rez().get(0).get(27))]+EOL);
+			//  -> edibuf.append(voIndex[aktRezept.getRezArt()]+EOL);
+
 			if(AktuelleRezepte.isDentist(test)){
 				edibuf.append(voIndex[aktRezept.getRezArt()]+plus);
 				edibuf.append("1"+EOL);
@@ -4042,10 +4046,13 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			}else{
 				edibuf.append(voIndex[aktRezept.getRezArt()]+EOL);
 			}
-
-			// McM vor dentist-test:
-			//edibuf.append(voIndex[Integer.parseInt(aktRezept.getVec_rez().get(0).get(27))]+EOL);
-			//  -> edibuf.append(voIndex[aktRezept.getRezArt()]+EOL);
+ */
+			edibuf.append(voIndex[aktRezept.getRezArt()]);
+			if(AktuelleRezepte.isDentist(test)){
+				edibuf.append(plus+"1");
+				System.out.println("Zahnarztverordnung");
+			}
+			edibuf.append(EOL);	
 		}
 
 		//an dieser Stelle muß der ICD-10 eingebaut werden, sofern vorhanden
@@ -4433,18 +4440,19 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
     		//INIFile inif = new INIFile (path2IniFile);
     		boolean mustsave = false;
         	INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "abrechnung.ini");
+        	String section = "HMGKVRechnung";
         	for(Entry<Integer, Integer> e : tts.getHmTageTreeSize().entrySet()){
         		int key = e.getKey();
         		String val = e.getValue().toString();
-                //System.out.println("save TTS_"+key+ " = " + val);
+                System.out.println("save TTS_"+key+ " = " + val);
                 if (tts.getTTSchanged(key)){
-                    inif.setStringProperty("HMGKVRechnung", "TTS_"+key, val, "");    
+//                    inif.setStringProperty(section, "TTS_"+key, val, "");    
                     mustsave = true;
                 }
         	}
         	if(mustsave){
-                System.out.println("abrechnung.ini sollte geschrieben werden (noch deaktiviert)");
-//            	INITool.saveIni(inif);        		
+//                System.out.println("abrechnung.ini sollte geschrieben werden (noch deaktiviert)");
+            	INITool.saveIni(inif);        		
         	}
         }
 	}

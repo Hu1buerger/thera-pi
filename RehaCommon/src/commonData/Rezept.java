@@ -532,9 +532,6 @@ public class Rezept {
 	public String getICD10() {
 		return getStringAt(71);
 	}
-	public void setICD10(String data) {
-		setStringAt(71, data);
-	}
 
 	public String getICD10_2() {
 		return getStringAt(72);
