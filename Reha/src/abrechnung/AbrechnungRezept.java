@@ -73,6 +73,15 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
+import jxTableTools.DblCellEditor;
+import jxTableTools.DoubleTableCellRenderer;
+import jxTableTools.MitteRenderer;
+import jxTableTools.MyTableCheckBox;
+import jxTableTools.MyTableComboBox;
+import oOorgTools.OOTools;
+
+import javax.swing.SwingWorker;
+
 import org.jdesktop.swingx.JXDatePicker;
 import org.jdesktop.swingx.JXMonthView;
 import org.jdesktop.swingx.JXPanel;
@@ -117,8 +126,8 @@ import environment.Path;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.sun.star.uno.Exception;
-import commonData.Rezept;
 
+import commonData.Rezept;
 import events.PatStammEvent;
 import events.PatStammEventClass;
 import hauptFenster.AktiveFenster;
@@ -321,15 +330,15 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			@Override
             public void run(){
 				jSplitOU.setDividerLocation(getHeight()-200);
-		        if (SystemConfig.hmAbrechnung.get("keepTTSize").equals("1")) {				// TageTreeSize Werte aus ini lesen (McM)
+		        if (SystemConfig.hmAbrechnung.get("keepTTSize").equals("1")) {				// TageTreeSize Werte in ini gespeichert (McM)
+		            int maxBehTage = Integer.parseInt(SystemConfig.hmAbrechnung.get("maxBehTage"));
 		        	INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "abrechnung.ini");
 		        	String section = "HMGKVRechnung";
-		    		int maxBehTage = inif.getIntegerProperty(section, "maxTage");
-					for(int i = 1;i <= maxBehTage ;i++){
+		            for(int i = 1;i <= maxBehTage ;i++){
 		    			String key = "TTS_"+i;
 		    			if ( inif.getStringProperty(section, key) != null ){				// Eintrag in ini vorhanden?
 		    				tts.setDaysAndSize(i,inif.getIntegerProperty(section, key));
-		                    //System.out.println("read TTS_"+i+ " = " + inif.getIntegerProperty(section, key));
+		                    System.out.println("read TTS_"+i+ " = " + inif.getIntegerProperty(section, key));
 		    			}
 		        	}
 		        }
@@ -4475,12 +4484,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
         		String val = e.getValue().toString();
                 System.out.println("save TTS_"+key+ " = " + val);
                 if (tts.getTTSchanged(key)){
-//                    inif.setStringProperty(section, "TTS_"+key, val, "");    
+                    inif.setStringProperty(section, "TTS_"+key, val, null);    
                     mustsave = true;
                 }
         	}
         	if(mustsave){
-//                System.out.println("abrechnung.ini sollte geschrieben werden (noch deaktiviert)");
             	INITool.saveIni(inif);        		
         	}
         }
