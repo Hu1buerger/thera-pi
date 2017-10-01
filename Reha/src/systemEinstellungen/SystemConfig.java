@@ -1769,20 +1769,22 @@ public class SystemConfig {
 
 		hmAbrechnung.put("hmallinoffice", inif.getStringProperty("GemeinsameParameter", "InOfficeStarten"));
 
-		if ( inif.getStringProperty("HMGKVRechnung", "AutoOKwenn302offen") == null ){			// kein Eintrag in ini -> default anlegen
-			inif.setStringProperty("HMGKVRechnung", "AutoOKwenn302offen","0","Rezept bekommt automatisch Haekchen wenn beim Abschliessen auch das 302-er Panel offen ist");
+    	String section = "HMGKVRechnung";
+		if ( inif.getStringProperty(section, "AutoOKwenn302offen") == null ){			// kein Eintrag in ini -> default anlegen
+			inif.setStringProperty(section, "AutoOKwenn302offen","0","Rezept bekommt automatisch Haekchen wenn beim Abschliessen auch das 302-er Panel offen ist");
 			mustsave=true;
 		}
-		hmAbrechnung.put("autoOk302", inif.getStringProperty("HMGKVRechnung", "AutoOKwenn302offen"));
+		hmAbrechnung.put("autoOk302", inif.getStringProperty(section, "AutoOKwenn302offen"));
 
-		if ( inif.getStringProperty("HMGKVRechnung", "keepTageTreeSize") == null ){			// kein Eintrag in ini -> default anlegen
-			inif.setIntegerProperty("HMGKVRechnung", "keepTageTreeSize",1,"Groesse des Fensters fuer versch. Anz. Behandlungstage merken") ;
-			inif.setIntegerProperty("HMGKVRechnung", "maxTage",24,"maximale Anz. Behandlungstage") ;
-			inif.setIntegerProperty("HMGKVRechnung", "lockSettings",0, "Aktualisieren der Eintraege gesperrt");
+		if ( inif.getStringProperty(section, "keepTageTreeSize") == null ){			// kein Eintrag in ini -> default anlegen
+			inif.setIntegerProperty(section, "keepTageTreeSize",1,"Groesse des Fensters fuer versch. Anz. Behandlungstage merken") ;
+			inif.setIntegerProperty(section, "maxTage",24,"maximale Anz. Behandlungstage") ;
+			inif.setIntegerProperty(section, "lockSettings",0, "Aktualisieren der Eintraege gesperrt");
 			mustsave=true;
 		}
-		hmAbrechnung.put("keepTTSize", inif.getStringProperty("HMGKVRechnung", "keepTageTreeSize"));
-		hmAbrechnung.put("TTSizeLocked", inif.getStringProperty("HMGKVRechnung", "lockSettings"));
+		hmAbrechnung.put("keepTTSize", inif.getStringProperty(section, "keepTageTreeSize"));
+		hmAbrechnung.put("TTSizeLocked", inif.getStringProperty(section, "lockSettings"));
+		hmAbrechnung.put("maxBehTage", inif.getStringProperty(section, "maxTage"));
 
 		String sask = inif.getStringProperty("GemeinsameParameter", "FragenVorEmail");
 		if(sask==null){
