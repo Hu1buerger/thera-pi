@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
@@ -13,7 +12,6 @@ import java.text.DecimalFormat;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -26,6 +24,10 @@ import CommonTools.DatFunk;
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.JRtaTextField;
+import rehaInternalFrame.JBarkassenInternal;
+import systemTools.ButtonTools;
+import CommonTools.RgVkPrSelect;
+import CommonTools.RgVkPr_IfCallBack;
 import CommonTools.SqlInfo;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
@@ -41,11 +43,10 @@ import rehaInternalFrame.JBarkassenInternal;
 import systemTools.ButtonTools;
 
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-public class Barkasse extends JXPanel implements ItemListener{
+public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 
 	/**
 	 * 
@@ -63,9 +64,10 @@ public class Barkasse extends JXPanel implements ItemListener{
 	JLabel barlab = null;
 	JLabel differenzlab = null;
 
-	JCheckBox ChkRG = null;
+/*	JCheckBox ChkRG = null;
 	JCheckBox ChkVerk = null;
 	JCheckBox ChkPR = null;
+ */
 	boolean incRG = false, incVerk = false, incPR = false;
 
 	ActionListener al = null;
@@ -74,6 +76,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 	
 	DecimalFormat dcf = new DecimalFormat("#######0.00");
 	private Boolean settingsLocked = false;
+	private RgVkPrSelect selPan = null; 
 	
 	public Barkasse(JBarkassenInternal bki){
 		super();
@@ -111,7 +114,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
 
-		ChkRG = new JCheckBox();
+/*		ChkRG = new JCheckBox();
 		if (incRG) {
 			ChkRG.setSelected(true);
 		}
@@ -126,8 +129,8 @@ public class Barkasse extends JXPanel implements ItemListener{
 			ChkPR.setSelected(true);
 		}
 		ChkPR.addItemListener(this);
-
-		int colLeft=3, colRight=8, rowCnt=2;
+ */
+		int colLeft=3, colRight=8, rowCnt=2, colCnt=3;
 
 		lab = new JLabel("Erfassungszeitraum");
 		builder.add(lab,cc.xyw(colLeft,rowCnt++,5));		// 3,2
@@ -143,7 +146,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 		tfs[1] = new JRtaTextField("DATUM",false);
 		tfs[1].setText(DatFunk.sHeute());
 		builder.add(tfs[1],cc.xyw(colRight,rowCnt++,2));	// 8,4 
-		
+/*
 		// checkbox Gebühren 
 		builder.add(ChkRG, cc.xy(colRight, ++rowCnt));		// 8,6
 		lab = new JLabel("Rezeptgebühren");
@@ -162,6 +165,14 @@ public class Barkasse extends JXPanel implements ItemListener{
 		builder.add(ChkPR, cc.xy(colRight, ++rowCnt));		// 8,10
 		lab = new JLabel("(Privat-)Rechnung");
 		builder.add(lab,cc.xy(9,rowCnt));
+ */
+		// Auswahl RGR_AFR/Verkauf/PrivR
+		selPan = new RgVkPrSelect("berücksichtige Einnahmen aus");			// Subpanel mit Checkboxen anlegen
+		selPan.setCallBackObj(this);										// callBack registrieren
+		initSelection();
+
+		builder.add(selPan.getPanel(),cc.xywh(colCnt, ++rowCnt,5,1,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
+		// Ende Auswahl
 
 		builder.add((buts[0]=ButtonTools.macheButton("ermitteln", "ermitteln", al)),cc.xy(11,rowCnt++));
 
@@ -290,10 +301,10 @@ public class Barkasse extends JXPanel implements ItemListener{
 			return;
 		}
 		
-		if (ChkRG.isSelected()){	// zuerst die Rezeptgebühren ermitteln ...
+		if (selPan.useRGR()){	// zuerst die Rezeptgebühren ermitteln ...
 			Vector<Vector<String>> vec = SqlInfo.holeFelder(
 				"select sum(einnahme),sum(ausgabe) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
-				+ "AND ktext not like 'R-%'"
+				+ "AND ktext not like 'R-%' AND ktext not like 'VR-%'"
 				);
 			if(vec.get(0).get(0).trim() != ""){
 				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
@@ -302,15 +313,30 @@ public class Barkasse extends JXPanel implements ItemListener{
 				ausgaben = ausgaben + Double.parseDouble(vec.get(0).get(1).trim());
 			}
 		}
-		if (ChkVerk.isSelected()){	// ... dann die Verkaufserlöse ...
+		if (selPan.useVKR()){	// ... dann die Verkaufserlöse ...
  			Vector<Vector<String>> vec = SqlInfo.holeFelder(
- 					"select sum(v_betrag) from verkliste where v_datum>='"+dat1+"' AND v_datum<='"+dat2+"' AND v_nummer like 'VB-%'"
+ 					"select sum(v_betrag) from verkliste where v_datum>='"+dat1+"' AND v_datum<='"+dat2+"' AND v_nummer like 'VB-%'"  // ... der Verkäufe mit Bon ...
+ 					);
+			if(vec.get(0).get(0).trim() != ""){
+				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
+			}
+/* 			vec = SqlInfo.holeFelder(
+ 					"select sum(v_betrag) from verkliste where v_bezahldatum>='"+dat1+"' AND v_bezahldatum<='"+dat2+
+ 						"' AND v_nummer like 'VR-%'  AND v_offen = '0'"  // ... der Verkäufe gegen Rechnung, bereits bezahlt (keine Möglichk. zum Ausbuchen) ...
+ 					);
+			if(vec.get(0).get(0).trim() != ""){
+				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
+			}
+ */
+ 			vec = SqlInfo.holeFelder(
+ 					"select sum(einnahme) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
+ 							+ "AND ktext like 'VR-%'"			  		// ... der Verkäufe gegen Rechnung, 'bar an Kasse' gebucht
  					);
 			if(vec.get(0).get(0).trim() != ""){
 				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
 			}
 		}
-		if (ChkPR.isSelected()){	// ... und schließlich bar bezahlte Rechnungen
+		if (selPan.usePR()){	// ... und schließlich bar bezahlte Rechnungen
 			Vector<Vector<String>> vec = SqlInfo.holeFelder(
 				"select sum(einnahme) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
 				+ "AND ktext like 'R-%'"
@@ -411,31 +437,7 @@ public class Barkasse extends JXPanel implements ItemListener{
 		kl = null;
 		saveLastSelection();
 	}
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-	    Object source = e.getItemSelectable();
-	    //    System.out.println(e.getStateChange() == ItemEvent.SELECTED ? "SELECTED" : "DESELECTED");
 
-	    if (source == ChkRG) {
-	        //find out whether box was checked or unchecked.
-	        if (e.getStateChange() == ItemEvent.DESELECTED) {
-	            //keine Gebühren berücksichtigen
-	        }else{
-	        }
-	    }
-	    if (source == ChkVerk) {
-	        if (e.getStateChange() == ItemEvent.DESELECTED) {
-	        	// keine Verkaufserlöse berücksichtigen
-	        }else{
-	        }
-	    }
-	    if (source == ChkPR) {
-   	        if (e.getStateChange() == ItemEvent.DESELECTED) {
-   	        	// keine (Privat-)Rechnungen berücksichtigen
-   	        }else{
-   	        }
-   	    }
-	}	
 	/**
 	 * liest die zuletzt verwandten Checkbox-Einstellungen aus der bedienung.ini
 	 * ist keine Einstellung vorhanden, wird ein Default gesetzt
@@ -458,12 +460,12 @@ public class Barkasse extends JXPanel implements ItemListener{
 	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die bedienung.ini
 	 */
 	private void saveLastSelection(){
-		if ( ! settingsLocked ){																	// ini-Eintraege  duerfen aktualisiert werden
-			INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "bedienung.ini");
-			if ( ( ChkRG.isSelected() != incRG ) || ( ChkVerk.isSelected() != incVerk ) || ( ChkPR.isSelected() != incPR ) ){
-				inif.setBooleanProperty("BarKasse", "Rezeptgebuehren", ChkRG.isSelected(), "Abrechnung Barkasse beruecksichtigt");
-				inif.setBooleanProperty("BarKasse", "Verkaeufe", ChkVerk.isSelected(), null);
-				inif.setBooleanProperty("BarKasse", "privRechng", ChkPR.isSelected(), null);
+if ( ! settingsLocked ){																	// ini-Eintraege  duerfen aktualisiert werden
+	INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "bedienung.ini");
+			if ( ( selPan.useRGR() != incRG ) || ( selPan.useVKR() != incVerk ) || ( selPan.usePR() != incPR ) ){
+				inif.setBooleanProperty("BarKasse", "Rezeptgebuehren", selPan.useRGR(), "Abrechnung Barkasse beruecksichtigt");
+				inif.setBooleanProperty("BarKasse", "Verkaeufe", selPan.useVKR(), null);
+				inif.setBooleanProperty("BarKasse", "privRechng", selPan.usePR(), null);
 				
 				if (inif.getStringProperty("BarKasse", "lockSettings") == null ){
 					inif.setBooleanProperty("BarKasse", "lockSettings",false, "Aktualisieren der Eintraege gesperrt");
@@ -472,4 +474,32 @@ public class Barkasse extends JXPanel implements ItemListener{
 			}
  		}
  	}
+
+	public void initSelection() {
+		if (incRG) {
+			selPan.setRGR(true);
+		}
+		if (incVerk) {
+			selPan.setVKR(true);
+		}
+		if (incPR) {
+			selPan.setPR(true);
+		}
+		if (!selPan.useRGR() && !selPan.useVKR() && !selPan.usePR()){
+			selPan.setRGR(true);	// einer sollte immer ausgewählt sein
+		}
+	}
+
+	@Override
+	public void useRGAVR(boolean rgafr) {
+		incRG = rgafr;
+	}
+	@Override
+	public void useVKR(boolean vkr) {
+		incVerk = vkr;
+	}
+	@Override
+	public void usePR(boolean pr) {
+		incPR = pr;
+	}
  }
