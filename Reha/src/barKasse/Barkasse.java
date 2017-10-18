@@ -304,7 +304,7 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 		if (selPan.useRGR()){	// zuerst die Rezeptgebühren ermitteln ...
 			Vector<Vector<String>> vec = SqlInfo.holeFelder(
 				"select sum(einnahme),sum(ausgabe) from kasse where datum>='"+dat1+"' AND datum<='"+dat2+"' "
-				+ "AND ktext not like 'R-%' AND ktext not like 'VR-%'"
+				+ "AND ktext not like 'R-%' AND ktext not like 'VR-%' AND ktext not like 'VB-%'"
 				);
 			if(vec.get(0).get(0).trim() != ""){
 				einnahmen = einnahmen + Double.parseDouble(vec.get(0).get(0).trim());
