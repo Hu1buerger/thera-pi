@@ -43,6 +43,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
+import jxTableTools.DateTableCellEditor;
+import jxTableTools.TableTool;
+import oOorgTools.OOTools;
+
+import javax.swing.SwingWorker;
+
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -73,6 +79,7 @@ import patientenFenster.HistorDaten;
 import patientenFenster.KeinRezept;
 import rechteTools.Rechte;
 import stammDatenTools.RezTools;
+import stammDatenTools.ZuzahlTools.ZZStat;
 import systemEinstellungen.SystemConfig;
 import systemTools.IconListRenderer;
 
@@ -713,6 +720,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 				"pat_intern='"+xpatint+"' ORDER BY rez_datum DESC", Arrays.asList(new String[]{}));
 
 		int anz = vec.size();
+		ZZStat iconKey;
 
 		for(int i = 0; i < anz;i++){
 			if(i==0){
@@ -725,9 +733,14 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 			}else if(!((Vector)vec.get(i)).get(1).equals("")){
 				zzbild = Integer.valueOf((String) ((Vector)vec.get(i)).get(1) );
 			}
-			dtblm.addRow(vec.get(i));
 			
-			dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[zzbild], i, 1);
+			final String testreznum = String.valueOf(vec.get(i).get(0)); 
+			iconKey = stammDatenTools.ZuzahlTools.getIconKey(zzbild, testreznum);
+
+			dtblm.addRow((Vector)vec.get(i));
+			
+//			dtblm.setValueAt(Reha.thisClass.patpanel.imgzuzahl[zzbild], i, 1);
+			dtblm.setValueAt(stammDatenTools.ZuzahlTools.getZzIcon(iconKey), i, 1);						
 			if(i==0){
 				final int ix = i;
                 new Thread(){
