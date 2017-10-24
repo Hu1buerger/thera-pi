@@ -228,7 +228,23 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			spalten[i] = felder.get(i).get(0);
 		}
 		*/
-
+		Vector<Vector<String>> felder = SqlInfo.holeFelder("describe verkliste");
+		String[] cols = new String[felder.size()];
+		HashMap types = new HashMap();
+		for(int i= 0; i < felder.size();i++){
+			cols[i] = felder.get(i).get(0);
+			types.put(cols[i], felder.get(i).get(1));
+		}
+		String dummy = types.get("v_betrag").toString(); 
+		if (types.get("v_offen").toString().contains("double")
+				|| types.get("v_betrag").toString().contains("double")
+				|| types.get("v_mwst7").toString().contains("double")
+				|| types.get("v_mwst19").toString().contains("double")
+			){
+			JOptionPane.showMessageDialog(null, "Struktur der Tabelle 'verkliste' veraltet. \nBitte aktualisieren!");
+			return builder.getPanel();
+		}
+		
 		tabmod.setColumnIdentifiers(spalten);
 		tab = new JXTable(tabmod);
 		tab.setHorizontalScrollEnabled(true);
