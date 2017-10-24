@@ -21,7 +21,7 @@ public class RezeptFahnder {
 			if(ret == null){
 				return;
 			}
-			doFahndung(ret.toString().trim(), connection);
+			doFahndung(ret.toString().trim().toUpperCase(), connection);
 		}
 	}
 	

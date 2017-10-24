@@ -732,6 +732,7 @@ public class PatientHauptLogic {
 						@Override
 						protected Void doInBackground() throws Exception {
 							long zeit = System.currentTimeMillis();
+							String rezNb = xrez;
 							while(! Reha.instance.patpanel.patDatenOk){
 								Thread.sleep(20);
 								if(System.currentTimeMillis()-zeit > 10000){
@@ -739,16 +740,11 @@ public class PatientHauptLogic {
 									return null;
 								}
 							}
-							if(!xrez.contains("#REZHOLEN-")){
-								if(xrez.trim().equals("")){
-									patientHauptPanel.aktRezept.holeRezepte(xpatint,"");
-								}else{
-									patientHauptPanel.aktRezept.holeRezepte(xpatint,xrez.trim());
-								}
-							}else{
+							if(xrez.contains("#REZHOLEN-")){
 								patientHauptPanel.aktRezept.suchePatUeberRez = true;
-								patientHauptPanel.aktRezept.holeRezepte(xpatint,xrez.split("#REZHOLEN-")[1].trim());
+								rezNb = xrez.split("#REZHOLEN-")[1].trim();
 							}
+							patientHauptPanel.aktRezept.holeRezepte(xpatint,rezNb);
 							return null;
 						}
 					}.execute();
@@ -761,8 +757,12 @@ public class PatientHauptLogic {
 					new SwingWorker<Void,Void>(){
 						@Override
 						protected Void doInBackground() throws Exception {
+							String rezNb = xrez;
+							if(xrez.contains("#REZHOLEN-")){
+								rezNb = xrez.split("#REZHOLEN-")[1].trim();
+							}
 							try{
-								patientHauptPanel.historie.holeRezepte(xpatint,"");
+								patientHauptPanel.historie.holeRezepte(xpatint,rezNb);
 							}catch(Exception ex){
 								//ex.printStackTrace();
 							}
