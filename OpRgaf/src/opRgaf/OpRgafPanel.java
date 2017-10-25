@@ -538,11 +538,16 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		sumPan.schreibeAnzRec();
 	}
 
-	public void sucheRezept(String rezept){		// <- nutzt das jemand?
+	public void sucheRezept(String rezept){				// Einstieg für RehaReverseServer (z.B. RGR-Kopie aus Historie) 
 		suchen.setText(rezept);
 		//combo.setSelectedIndex(8);
 		combo.setSelectedItem("Rezeptnummer =");
+		boolean useRGR = selPan.useRGR();				// Checkbox-Einstellung merken
+		boolean useAFR = selPan.useAFR();
+		boolean useVKR = selPan.useVKR();
+		selPan.setRGR_AFR_VKR(true,false,false);		// wird immer eine RGR gesucht?
 		doSuchen();
+		selPan.setRGR_AFR_VKR(useRGR,useRGR,useVKR);	// Checkbox-Einstellung wiederherstellen
 	}
 
 	private void doSuchen(){
