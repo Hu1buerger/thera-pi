@@ -2068,7 +2068,7 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 						}else{
 							//SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");			// löscht Bar-Zuzahlung	(besser: stornieren)			
 							xcmd = "UPDATE kasse SET einnahme='0.00', ktext=CONCAT('storno_',ktext) where rez_nr='"+xreznr+"' AND ktext not like 'storno%' LIMIT 1"; 
-	 						SqlInfo.sqlAusfuehren(xcmd);															// storniert Bar-Zuzahlung in 'kasse'							
+							SqlInfo.sqlAusfuehren(xcmd);															// storniert Bar-Zuzahlung in 'kasse'							
 						}
 						//SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='"+xreznr+"' LIMIT 1");				// löscht Bar-Zuzahlung	_und_ bar bez. RGR
 					}else{		// Ursprungs-Variante (Steinhilber)
