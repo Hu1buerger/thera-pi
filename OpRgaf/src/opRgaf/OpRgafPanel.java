@@ -573,6 +573,10 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 				cmd = stmtString+" where rnr ='"+suchen.getText().trim()+"'";
 				break;
 			case 1:					// Rechnungsnummer enthält
+				String searchStr = suchen.getText().trim();
+				if (searchStr.contains("sto") || searchStr.contains("tor") || searchStr.contains("orn") || searchStr.contains("rno")){
+					whereToSearch = sucheStornierte (whereToSearch);
+				}
 				cmd = stmtString+ whereToSearch + " rnr like'%"+suchen.getText().trim()+"%' order by t1.id";
 				break;
 			case 2:					// Rechnungsbetrag =
@@ -633,6 +637,20 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			setzeFocus();
 		}
 
+	}
+
+	private String sucheStornierte(String whereToSearch) {
+		String tmp = whereToSearch;
+		if (whereToSearch.contains("RGR")){
+			tmp = tmp.replace("RGR", "storno_RGR");
+		}
+		if (whereToSearch.contains("AFR")){
+			tmp = tmp.replace("AFR", "storno_AFR");
+		}
+		if (whereToSearch.contains("VR")){
+			tmp = tmp.replace("VR", "storno_VR");
+		}
+		return tmp;
 	}
 
 
