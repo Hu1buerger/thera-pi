@@ -3243,7 +3243,7 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 			if(anfrage != JOptionPane.YES_OPTION){
 				return;
 			}
-			buchen = false;
+			buchen = false;		// hier in RGR-Kopie verzweigen! (Wozu RGR erstellen u. evtl. die Preise ändern? - Ist keine Kopie!)
 		} else {
 			// vvv Prüfungen aus der Bar-Quittung auch hier !
 			if( Reha.instance.patpanel.vecaktrez.get(39).equals("0") ){

@@ -143,7 +143,7 @@ public class RezeptGebuehrRechnung extends JXDialog implements FocusListener, Ac
 	private void setzeFelderOhneBuchung(){
 		try{
 			String cmd = "select reznr,rdatum,rgbetrag,rpbetrag from rgaffaktura where reznr='"+
-						hmRezgeb.get("<rgreznum>")+"' LIMIT 1";
+						hmRezgeb.get("<rgreznum>")+"' and rnr like 'RGR-%' LIMIT 1";
 			//System.out.println(cmd);
 			Vector<Vector<String>> vec = SqlInfo.holeFelder(cmd);
 			if(vec.size() <= 0){
@@ -236,7 +236,7 @@ public class RezeptGebuehrRechnung extends JXDialog implements FocusListener, Ac
 			hmRezgeb.put("<rgnr>","RGR-"+Integer.toString(SqlInfo.erzeugeNummer("rgrnr")));	
 		}else{
 			hmRezgeb.put("<rgnr>",SqlInfo.holeEinzelFeld("select rnr from rgaffaktura where reznr='"+
-					hmRezgeb.get("<rgreznum>")+"' LIMIT 1"));
+					hmRezgeb.get("<rgreznum>")+"' and rnr like 'RGR-%' LIMIT 1"));
 		}
 		hmRezgeb.put("<rgbehandlung>",tfs[4].getText().trim());
 		String url = Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK()+"/RezeptgebuehrRechnung.ott";
