@@ -15,6 +15,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Vector;
 
 import javax.swing.InputMap;
@@ -28,6 +29,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXButton;
 import org.jdesktop.swingx.JXDialog;
@@ -278,6 +280,12 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 			if(suchart==toolBar.getAktRezIdx()){   // Lemmi 20101212: komplettes if mit neuer Spalte "Rezepte" ergänzt
 				reiheVector.addElement("Rezepte");
 			}
+			if(suchart==toolBar.getTelPIdx() 
+					|| suchart==toolBar.getTelGIdx() 
+					|| suchart==toolBar.getTelMIdx()){   // McM 2017-10: eigene Spalten für Telefonnummern
+				reiheVector.addElement("Telefon");
+				jlb.setText("Telefonnummer suchen: ");
+			}
 			tblDataModel = new DefaultTableModel();
 			tblDataModel.setColumnIdentifiers(reiheVector);
 			jtable = new JXTable(tblDataModel);
@@ -402,21 +410,18 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 	private JXTitledPanel getJXTitledPanel() {
 		if (jXTitledPanel == null) {
 			jXTitledPanel = new JXTitledPanel();
-
-			/*
+			
 			// Lemmi 20101212: Erweitert um "Patienten mit aktuellen Rezepten"
-			String kriterium[]={"Nachname Vorname","Patienten-ID","Vorname Nachname",
-					"Telefon privat","Telefon geschäftl.","Telefon mobil","Notizen", "Nur Patienten mit aktuellen Rezepten"};
-
-			jXTitledPanel.setTitle("Suche Patient..."+this.fname+" nach "+kriterium[suchart]);
-			*/
 			String titel = "Suche ";
 			String kriterium = toolBar.getKritAsString(suchart);
-			if (suchart == toolBar.getAktRezIdx()){		// "Nur Patienten mit aktuellen Rezepten"
-				titel = titel + kriterium;
+			if(suchart==toolBar.getTelPIdx()
+					|| suchart==toolBar.getTelGIdx() 
+					|| suchart==toolBar.getTelMIdx()){
+				titel = titel + "Nummer... "+this.fname+" in ";
 			}else{
-				titel = titel + "Patient..."+this.fname+" nach "+kriterium;
-			}
+				titel = titel + "Patient..."+this.fname+" in ";
+			};
+			titel = titel + kriterium;
 			jXTitledPanel.setTitle(titel);
 			jXTitledPanel.setTitleForeground(Color.WHITE);
 			jXTitledPanel.setName("PatSuchen");
@@ -464,7 +469,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 							setCursor(cnsize);
 							break;
 						}
-						if ((e.getX() <= 4 && e.getY() >= (((JComponent) e.getSource()).getHeight()-4))){ //s�d-west
+						if ((e.getX() <= 4 && e.getY() >= (((JComponent) e.getSource()).getHeight()-4))){ //süd-west
 							insize = true;
 							sizeart = 4;
 							orgbounds[0]=e.getXOnScreen();
@@ -480,8 +485,8 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 							setCursor(cwsize);
 							break;
 						}
-						if ((e.getX()>=  (((JComponent) e.getSource()).getWidth()-4)) && //s�d-ost
-								e.getY() >= (((JComponent) e.getSource()).getHeight()-4)){
+						if ((e.getX()>=  (((JComponent) e.getSource()).getWidth()-4)) && //süd-ost
+								e.getY() >= (((JComponent) e.getSource()).getHeight()-4)){ 
 							insize = true;
 							sizeart = 6;
 							orgbounds[0]=e.getXOnScreen();
@@ -489,7 +494,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 							setCursor(csesize);
 							break;
 						}
-						if (e.getY() >= (((JComponent) e.getSource()).getHeight()-2)){ //s�d
+						if (e.getY() >= (((JComponent) e.getSource()).getHeight()-2)){ //süd
 							insize = true;
 							sizeart = 7;
 							orgbounds[0]=e.getXOnScreen();
@@ -558,8 +563,8 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 								SuchenDialog.this.setLocation(e.getXOnScreen()-e.getX(),e.getYOnScreen());
 								setCursor(cnsize);
 								break;
-							}
-							if(sizeart==4){ //s�d-west
+							}	
+							if(sizeart==4){ //süd-west
 								dim.width = (oX > orgbounds[0] ? dim.width-(oX-orgbounds[0]) : dim.width+(orgbounds[0]-oX));
 								dim.height = (oY > orgbounds[1] ? dim.height+(oY-orgbounds[1]) : dim.height-(orgbounds[1]-oY));
 								dim.width = (dim.width < 185 ? 185 : dim.width);
@@ -583,7 +588,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 								setCursor(cwsize);
 								break;
 							}
-							if(sizeart==6){ //s�d-ost
+							if(sizeart==6){ //süd-ost
 								dim.width = (oX > orgbounds[0] ? dim.width+(oX-orgbounds[0]) : dim.width-(orgbounds[0]-oX));
 								dim.height = (oY > orgbounds[1] ? dim.height+(oY-orgbounds[1]) : dim.height-(orgbounds[1]-oY));
 								dim.width = (dim.width < 185 ? 185 : dim.width);
@@ -595,7 +600,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 								setCursor(cwsize);
 								break;
 							}
-							if(sizeart==7){ //s�d
+							if(sizeart==7){ //süd
 								//dim.width = (oX > orgbounds[0] ? dim.width+(oX-orgbounds[0]) : dim.width-(orgbounds[0]-oX));
 								dim.height = (oY > orgbounds[1] ? dim.height+(oY-orgbounds[1]) : dim.height-(orgbounds[1]-oY));
 								dim.width = (dim.width < 185 ? 185 : dim.width);
@@ -823,14 +828,17 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 			}
 
 		}else if(suchart == toolBar.getTelPIdx()){ // Telfon privat
-			sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefonp) as geboren,pat_intern from pat5 where telefonp LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+			//sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefonp) as geboren,pat_intern from pat5 where telefonp LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+			sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y') as geboren,pat_intern,telefonp from pat5 where telefonp LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
 		}else if(suchart == toolBar.getTelGIdx()){// Telefon geschäftilich
-			sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefong) as geboren,pat_intern from pat5 where telefong LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+			//sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefong) as geboren,pat_intern from pat5 where telefong LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+			sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y') as geboren,pat_intern,telefong from pat5 where telefong LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
 		}else if(suchart == toolBar.getTelMIdx()){// Telefon mobil
-			sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefonm) as geboren,pat_intern from pat5 where telefonm LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
-		}else if(suchart == toolBar.getNoteIdx()){ // In Notitzen
+			//sstmt = "select n_name,v_name,concat(DATE_FORMAT(geboren,'%d.%m.%Y'),'-',telefonm) as geboren,pat_intern from pat5 where telefonm LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+			sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y' as geboren,pat_intern,telefonm from pat5 where telefonm LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
+		}else if(suchart == toolBar.getNoteIdx()){ // In Notizen
 			if(suche.length > 1){
-				//Umbuen zur oder bzw. und Suche
+				//Umbauen zur oder- bzw. und-Suche
 				if(suche[1].contains("|")){
 					sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y') as geboren,pat_intern from pat5 where anamnese LIKE '%"+suche[0]+"%' OR anamnese LIKE '%"+suche[1].replace("|","")+ "%' ORDER BY n_name,v_name,geboren";
 				}else{
@@ -840,7 +848,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 				sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y') as geboren,pat_intern from pat5 where anamnese LIKE '%"+suche[0]+"%' ORDER BY n_name,v_name,geboren";
 			}
 		}else if(suchart == toolBar.getAktRezIdx()){    		// Lemmi 20101212: Erweitert um "Nur Patienten mit aktuellen Rezepten"
-//			sstmt = "select p.n_name, p.v_name, DATE_FORMAT(p.geboren,'%d.%m.%Y') AS geboren, p.pat_intern, r.rez_nr from pat5 as p INNER JOIN verordn as r ON p.pat_intern = r.pat_intern ORDER BY p.n_name asc, r.rez_nr asc";
 			sstmt = "SELECT p.n_name, p.v_name, DATE_FORMAT(p.geboren,'%d.%m.%Y') AS geboren, p.pat_intern, GROUP_CONCAT(r.rez_nr ORDER BY r.rez_nr ASC SEPARATOR ', ') FROM verordn AS r INNER JOIN pat5 AS p where p.pat_intern = r.pat_intern GROUP BY p.pat_intern ORDER BY p.n_name";
 		}else{
 			return;
@@ -853,10 +860,10 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener{
 			try{
 				rs = stmt.executeQuery(sstmt);
 				Vector<String> rowVector = new Vector<String>();
-				int reihen = (suchart == toolBar.getAktRezIdx() ? 5 : 4 );
+//				int reihen = (suchart == toolBar.getAktRezIdx() ? 5 : 4 );
+				int reihen = rs.getMetaData().getColumnCount();
 				while( rs.next()){
 					rowVector.clear();
-					//for(int i = 1; i <= 4; i++)
 					for(int i = 1; i <= reihen ; i++){  // Lemmi 20101212: optional von 4 auf 5 erweitert
 						rowVector.addElement(rs.getString(i) != null ? rs.getString(i) : "");
 					}
