@@ -1,4 +1,4 @@
-package opRgaf;
+package CommonTools;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -10,14 +10,12 @@ import java.util.Vector;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import CommonTools.SqlInfo;
-
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-public class RgAfVkGesamt {
+public class OpShowGesamt {
 	private JLabel valGesamtOffen;
 	private JLabel valSuchOffen;
 	private JLabel valSuchGesamt;
@@ -31,7 +29,7 @@ public class RgAfVkGesamt {
 	DecimalFormat dcf = new DecimalFormat("###0.00");
 
 	
-	public RgAfVkGesamt() {
+	public OpShowGesamt() {
 		auswertung = new JPanel();
 		JLabel tmpLbl = new JLabel();
 		
@@ -39,7 +37,7 @@ public class RgAfVkGesamt {
 		//       1    2      3    4        5        6    7
 				"5dlu,145dlu,5dlu,100dlu:g,182dlu:g,5dlu,40dlu",	// xwerte,
 		//       1    2 3    4 5    6 7    8 9
-				"0dlu,p,3dlu,p,2dlu,p,2dlu,p,10dlu"					// ywerte
+				"0dlu,p,3dlu,p,2dlu,p,2dlu,p,5dlu"					// ywerte
 				);
 		PanelBuilder builder = new PanelBuilder(lay);
 		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
@@ -48,14 +46,14 @@ public class RgAfVkGesamt {
 		CellConstraints cc = new CellConstraints();
 
 		tmpLbl = builder.addLabel("Offene Posten gesamt:", cc.xy(2,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		tmpLbl.setToolTipText("Summe OP in allen Rechnungsarten");
+//		tmpLbl.setToolTipText("Summe OP in allen Rechnungsarten");
 		valGesamtOffen = builder.addLabel("0,00", cc.xy(4,2,CellConstraints.LEFT,CellConstraints.DEFAULT));
 		valGesamtOffen.setForeground(Color.RED);
 		Font f = valGesamtOffen.getFont();
 		valGesamtOffen.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
 
 		tmpLbl = builder.addLabel("Offene Posten der letzten Abfrage:", cc.xy(2,4,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		tmpLbl.setToolTipText("Summe OP in den gewählten Rechnungsarten (derzeit ohne Rechnungsverkäufe 'an Kasse')");
+		tmpLbl.setToolTipText("Summe OP in den gewählten Rechnungen");
 		valSuchOffen = builder.addLabel("0,00", cc.xy(4,4,CellConstraints.LEFT,CellConstraints.DEFAULT));
 		valSuchOffen.setForeground(Color.RED);
 

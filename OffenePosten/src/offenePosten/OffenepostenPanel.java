@@ -19,7 +19,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -34,9 +36,6 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
 import CommonTools.ButtonTools;
 import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
@@ -46,9 +45,15 @@ import CommonTools.JCompTools;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
+import CommonTools.OpShowGesamt;
 import CommonTools.SqlInfo;
 import RehaIO.SocketClient;
 import io.RehaIOMessages;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 public class OffenepostenPanel extends JXPanel implements TableModelListener{
 
@@ -61,6 +66,9 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	JRtaTextField offen = null;
 	JRtaTextField[] tfs = {null,null,null,null};
 	JButton[] buts = {null,null,null};
+	enum btIdx {ausbuchen,suchen,dummy};
+	int btAusbuchen = btIdx.ausbuchen.ordinal();
+	int btSuchen = btIdx.suchen.ordinal();
 	JRtaComboBox combo = null;
 	JXPanel content = null;
 	KeyListener kl = null;
@@ -68,11 +76,11 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	
 	MyOffenePostenTableModel tabmod = null;
 	JXTable tab = null;
-	JLabel summeOffen;
+/*	JLabel summeOffen;
 	JLabel summeRechnung;
 	JLabel summeGesamtOffen;
 	JLabel anzahlSaetze;
-	
+*/	
 	BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
 	BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
 	BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
@@ -81,6 +89,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	String[] spalten = {"Rechn.Nr.","R.Datum","Kasse","Name/Notiz","Sparte","Gesamtbetrag","Offen","bezahlt am","Zuzahlung","1.Mahnung","2.Mahnung","3.Mahnung","Mahnsperre","Pat.Nr.","IK Kostentr.","id","IK"};
 	String[] colnamen ={"r_nummer","r_datum","r_kasse","r_name","r_klasse","r_betrag","r_offen","r_bezdatum","r_zuzahl","r_mahndat1","r_mahndat2","r_mahndat3","mahnsperr","pat_intern","ikktraeger","id","ik"};
 	OffenepostenTab eltern = null;
+
+	private OpShowGesamt sumPan;
 	
 	public OffenepostenPanel(OffenepostenTab xeltern){
 		super();
@@ -106,18 +116,23 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		});
 	}
 	
-	private JXPanel getContent(){
-		content = new JXPanel();
-		//				 1     2     3    4     5     6      7    8      9    10      11   12    13   14     15  
-		String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,30dlu,1dlu,40dlu:g,2dlu,50dlu,5dlu,50dlu,2dlu,40dlu,1dlu,50dlu,10dlu";
-		//				 1     2  3     4       5    6      7
-		String ywerte = "10dlu,p,2dlu,150dlu:g,5dlu,80dlu,0dlu";	
-		FormLayout lay = new FormLayout(xwerte,ywerte);
+	private JPanel getContent(){
+		FormLayout lay = new FormLayout(
+		//  1     2     3    4     5     6     7    8      9    10    11   12    13   14    15    16    17
+		 "10dlu,50dlu,2dlu,90dlu,10dlu,30dlu,1dlu,40dlu:g,2dlu,50dlu,2dlu,40dlu,5dlu,40dlu,10dlu,50dlu,10dlu",	// xwerte,
+		//  1   2  3     4       5   6  7     8   9  10   11
+		 "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,0dlu,0dlu"																// ywerte
+//		 "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,30dlu,0dlu,0dlu"																// ywerte
+		);
+		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
+		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
-		content.setLayout(lay);
 		
-		JLabel lab = new JLabel("Suchkriterium");
-		content.add(lab,cc.xy(2,2));
+		int colCnt=2, rowCnt=2;
+		
+		builder.addLabel("Suchkriterium", cc.xy(colCnt++, rowCnt));			// 2,2
+		
 		String[] args = {"Rechnungsnummer =","Rechnungsnummer >=","Rechnungsnummer <=",
 				"Rechnungsbetrag =","Rechnungsbetrag >=","Rechnungsbetrag <=",
 				"Noch offen =","Noch offen >=","Noch offen <=",
@@ -125,49 +140,30 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 				"Rezeptnummer =",
 				"Rechnungsdatum =","Rechnungsdatum >=","Rechnungsdatum <=",
 				"Krankenkasse enthält",};
-
+		
 		int vorauswahl = OffenePosten.getVorauswahl(args.length);
 		combo = new JRtaComboBox(args);
 		combo.setSelectedIndex( vorauswahl ); 
-		content.add(combo,cc.xy(4,2));
-		
-		lab = new JLabel("finde:");
-		content.add(lab,cc.xy(6,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		builder.add(combo, cc.xy(++colCnt,rowCnt));							// 4,2
+
+		++colCnt;
+		builder.addLabel("finde:", cc.xy(++colCnt, rowCnt));				// 6,2
+		++colCnt;
 		suchen = new JRtaTextField("nix",true);
 		suchen.setName("suchen");
 		suchen.addKeyListener(kl);
-		content.add(suchen,cc.xy(8,2));
-		
-		//neu
-		JButton but = ButtonTools.macheButton("suchen", "suchen", al);
-		but.setMnemonic('s');
-		content.add(but,cc.xy(10,2));
+		builder.add(suchen,cc.xy(++colCnt, rowCnt,CellConstraints.FILL,CellConstraints.DEFAULT));	// 8,2
 
-
-		
-		lab = new JLabel("Geldeingang");
-		content.add(lab,cc.xy(12,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		tfs[0] = new JRtaTextField("F",true,"6.2","");
-		tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
-		tfs[0].setText("0,00");
-		tfs[0].setName("offen");
-		tfs[0].addKeyListener(kl);
-		content.add(tfs[0],cc.xy(14,2));
-		
-		content.add((buts[0] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),cc.xy(16,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		buts[0].setMnemonic('a');
+		buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
+		buts[btSuchen].setMnemonic('s');
+		colCnt +=8;
+		builder.add(buts[btSuchen],cc.xy(colCnt,rowCnt));
 
 		while(!OffenePosten.DbOk){
 			
 		}
 		tabmod = new MyOffenePostenTableModel();
-		/*
-		Vector<Vector<String>> felder = SqlInfo.holeFelder("describe rliste");
-		String[] spalten = new String[felder.size()];
-		for(int i= 0; i < felder.size();i++){
-			spalten[i] = felder.get(i).get(0);
-		}
-		*/
+
 		tabmod.setColumnIdentifiers(spalten);
 		tab = new JXTable(tabmod);
 		tab.setHorizontalScrollEnabled(true);
@@ -191,54 +187,37 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 
 		tab.getSelectionModel().addListSelectionListener( new OPListSelectionHandler());
 		tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
-		
-		
-		
+				
 		JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
-		content.add(jscr,cc.xyw(2,4,15));
-		
-		JXPanel auswertung = new JXPanel();
-		String xwerte2 = "10dlu,150dlu,5dlu,100dlu";
-		String ywerte2 = "0dlu,p,2dlu,p,2dlu,p,2dlu,p,10dlu";			
-		FormLayout lay2 = new FormLayout(xwerte2,ywerte2);
-		CellConstraints cc2 = new CellConstraints();
-		auswertung.setLayout(lay2);
-		lab = new JLabel("Offene Posten gesamt:");
-		auswertung.add(lab,cc2.xy(2,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeGesamtOffen = new JLabel("0,00");
-		summeGesamtOffen.setForeground(Color.RED);
-		auswertung.add(summeGesamtOffen,cc2.xy(4, 2));
+		rowCnt +=2;
+		builder.add(jscr,cc.xyw(2,rowCnt++,15));		// 2,4
 
-		lab = new JLabel("Offene Posten der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,4,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeOffen = new JLabel("0,00");
-		summeOffen.setForeground(Color.BLUE);
-		auswertung.add(summeOffen,cc2.xy(4,4));
-		
-		lab = new JLabel("Summe Rechnunsbetrag der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,6,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		summeRechnung = new JLabel("0,00");
-		summeRechnung.setForeground(Color.BLUE);
-		auswertung.add(summeRechnung,cc2.xy(4,6));
+		colCnt = 12;
+		builder.addLabel("Geldeingang:", cc.xy(colCnt++, ++rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));	// 12,6
 
-		lab = new JLabel("Anzahl Datensätze der letzten Abfrage:");
-		auswertung.add(lab,cc2.xy(2,8,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		anzahlSaetze = new JLabel("0");
-		anzahlSaetze.setForeground(Color.BLUE);
-		auswertung.add(anzahlSaetze,cc2.xy(4,8));
+		tfs[0] = new JRtaTextField("F",true,"6.2","");
+		tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
+		tfs[0].setText("0,00");
+		tfs[0].setName("offen");
+		tfs[0].addKeyListener(kl);
+		//content.add(tfs[0],cc.xy(14,2));
+		builder.add(tfs[0],cc.xy(++colCnt,rowCnt));																// 14,6
+
+//		content.add((buts[btAusbuchen] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),cc.xy(16,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		colCnt +=2;
+		buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(colCnt,rowCnt));
+		buts[btAusbuchen].setMnemonic('a');
 		
-		content.add(auswertung,cc.xyw(1,6,15));
-		content.validate();
-		new SwingWorker<Void,Void>(){
-			@Override
-			protected Void doInBackground() throws Exception {
-				ermittleGesamtOffen();
-				return null;
-			}
-			
-		}.execute();
+		rowCnt +=2;
+		colCnt = 1;
+		builder.add(new JSeparator(SwingConstants.HORIZONTAL), cc.xyw(colCnt,rowCnt++,17));
 		
-		return content;
+		sumPan = new OpShowGesamt();
+		builder.add(sumPan.getPanel(),cc.xyw(colCnt, rowCnt,2,CellConstraints.LEFT,CellConstraints.TOP));	//2,2
+
+		ermittleGesamtOffen();
+		
+		return builder.getPanel();		
 	}
 	private OffenepostenPanel getInstance(){
 		return this;
@@ -371,12 +350,22 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	}
 	private void schreibeAbfrage(){
 		schreibeGesamtOffen();
-		summeOffen.setText(dcf.format(suchOffen));
-		summeRechnung.setText(dcf.format(suchGesamt));
-		anzahlSaetze.setText(Integer.toString(gefunden));
+		//summeOffen.setText(dcf.format(suchOffen));
+		sumPan.setSuchOffen(suchOffen);
+		sumPan.schreibeSuchOffen();
+		//summeRechnung.setText(dcf.format(suchGesamt));
+		sumPan.setSuchGesamt(suchGesamt);
+		sumPan.schreibeSuchGesamt();
+		//anzahlSaetze.setText(Integer.toString(gefunden));
+		sumPan.setAnzRec(gefunden);
+		sumPan.schreibeAnzRec();
 	}
+
 	private void schreibeGesamtOffen(){
-		summeGesamtOffen.setText( dcf.format(gesamtOffen) );
+		//summeGesamtOffen.setText( dcf.format(gesamtOffen) );
+		sumPan.setGesamtOffen(gesamtOffen);
+		sumPan.schreibeGesamtOffen();
+
 	}
 	
 	private void doSuchen(){

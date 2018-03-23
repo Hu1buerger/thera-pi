@@ -50,6 +50,10 @@ import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
+
+import CommonTools.OpShowGesamt;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
@@ -135,8 +139,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	String[] colnamen ={"nix","rnr","rdatum","rgesamt","roffen","rpbetrag","rbezdatum","rmahndat1","rmahndat2","nix","nix","id"};
 	OpRgafTab eltern = null;
 
+	private OpShowGesamt sumPan;
 	private RgAfVkSelect selPan;
-	private RgAfVkGesamt sumPan;
 
 	public OpRgafPanel(OpRgafTab xeltern){
 		super();
@@ -290,7 +294,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		colCnt = 1;
 		builder.add(new JSeparator(SwingConstants.HORIZONTAL), cc.xyw(colCnt,rowCnt++,19));
 
-		sumPan = new RgAfVkGesamt();
+		sumPan = new OpShowGesamt();
 		builder.add(sumPan.getPanel(),cc.xyw(colCnt, rowCnt,2,CellConstraints.LEFT,CellConstraints.TOP));	//2,2
 
 		calcGesamtOffen();
