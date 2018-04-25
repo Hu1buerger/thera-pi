@@ -44,7 +44,7 @@ public class HMRCheck {
     static SimpleDateFormat sdDeutsch = new SimpleDateFormat("dd.MM.yyyy");
     static SimpleDateFormat sdSql = new SimpleDateFormat("yyyy-MM-dd");
 
-    String[] rezarten = {"Erstverordnung","Folgeverordnung","außerhalb des Regelfalles"};
+    String[] rezarten = {"Erstverordnung","Folgeverordnung","Verordnung außerhalb des Regelfalles"};
 
     String[] keinefolgevo = {"EX1a","EX1b","EX1c","WS1a","WS1b","WS1c","WS1d","WS1e",
             "AT1a","AT1b","AT1c","SB4","ST3"};
@@ -154,7 +154,7 @@ public class HMRCheck {
             testok = false;
         }
         // Hier den Folgeverordnungstest einbauen, bzw. testen ob Höchstverordnungsmenge überschritten wird und deshalb VoAdr fällig ist
-        if(this.folgerezept){
+        if(this.folgerezept){    // kann das nicht auch falsch angegeben sein?
             testok = checkeVoFolgeKorrekt();
         }
         //Hier der Check ob für Kinder ein Erwachsenen-Indischlüssel verwendet wurde z.B. ZN2a
@@ -357,13 +357,13 @@ public class HMRCheck {
         int[] ret = {0,0,0};  //0=Arbeitstag,1=wochenende,2=Feiertag
 
         for(Date date = start; date.compareTo(ende) <= 0; date = new Date(date.getTime() + 24*60*60*1000)) {
-        if (date.getDay() % 7 == 0) {
-            ret[1] ++;
-        } else if (checkFeiertage && istFeiertag(date)) {  //selber implementieren
-            ret[2] ++;
-        } else {
-            ret[0]++;
-        }
+        	if (date.getDay() % 7 == 0) {
+        	    ret[1] ++;
+            } else if (checkFeiertage && istFeiertag(date)) {  //selber implementieren
+                ret[2] ++;
+            } else {
+                ret[0]++;
+            }
         }
         return ret;
     }
@@ -574,7 +574,7 @@ public class HMRCheck {
                         rezDgIdx = currIdx;
                     }
 
-                    //erst prüfen ob zwischen letzter behandlung des alten Rezeptes und dem ersten Termin der
+                    //erst prüfen ob zwischen letzter Behandlung des alten Rezeptes und dem ersten Termin der
                     //neuen VO 12 Wochen Therapiepause lagen, sofern ja -> nicht summieren (muesste dann Erstverordnung sein)
                     if(neudummy){
                         idxVorg = 0;        // Index '0' ist Vorgänger des gerade angelegten (u. noch nicht in der DB gespeicherten) Rezeptes
@@ -604,12 +604,12 @@ public class HMRCheck {
                             }
                             idxVorg++;                                                                    // jetzt Index auf Vorgänger setzen
                         }
-                        if(idxVorg < testvec.size()){                                                    // es ist (immer) noch ein Vorgänger vorhanden und
-                            if(testvec.get(idxVorg).get(5).length() > 0){                                // es sind termine eingetragen
+                        if(idxVorg < testvec.size()){                                                     // es ist (immer) noch ein Vorgänger vorhanden und
+                            if(testvec.get(idxVorg).get(5).length() > 0){                                 // es sind termine eingetragen
                                 enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(idxVorg).get(5));
                             }
                         }else{                                                                            // aeltestes Rezept erreicht
-                            enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i).get(5));        // dummy (damit die Berechnung durchlaeuft?)
+                            enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i).get(5));       // dummy (damit die Berechnung durchlaeuft?)
                         }
                         // besser(?):
                         //if((iVg >= testvec.size()) || (testvec.get(iVg).get(5).length() == 0)){    // kein Vorgänger oder (auch) keine Termine
@@ -652,7 +652,7 @@ public class HMRCheck {
                     //gesamt = gesamt + Integer.parseInt(testvec.get(i).get(3));
                 }
             }
-        }
+        	
         }catch(Exception ex){
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null,"Fehler  in der Prüfung auf Folgerezepte\n\nBitte Informieren Sie den Systemadministrator");
