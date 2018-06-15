@@ -493,7 +493,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 	
 	
 	class MyOffenePostenTableModel extends DefaultTableModel{
-		   /**
+	    /*
 		 * 
 		 */
 		private static final long serialVersionUID = 1L;
@@ -600,6 +600,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 			tab.repaint();
 			if(tab.getRowCount() > 0){
 				tab.setRowSelectionInterval(0, 0);
+				adjustColumns();
 			}
 			
 		}catch(SQLException ev){
@@ -625,6 +626,15 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener{
 		}
 		
 		
+	}
+	private void adjustColumns() {
+	    /*
+		 * ausgewaehlte Spalten dem Inhalt anpassen
+		 */
+		int columns2adjust[]={0,2,4,6,8};	// Rechn.Nr., Kasse, Sparte, Offen, Zuzahlung
+		for(int col:columns2adjust){
+			tab.packColumn(col, 5);
+		}
 	}
 	/*****************************************************/
 	class OPListSelectionHandler implements ListSelectionListener {

@@ -762,6 +762,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			tab.repaint();
 			if(tab.getRowCount() > 0){
 				tab.setRowSelectionInterval(0, 0);
+				adjustColumns();
 			}
 
 		}catch(SQLException ev){
@@ -786,6 +787,17 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			}
 		}
 	}
+
+	private void adjustColumns() {
+	    /*
+		 * ausgewaehlte Spalten dem Inhalt anpassen
+		 */
+		int columns2adjust[]={0,4,7,8,10};	// 	Name,Vorname,Geburtstag, Offen, 1.Mahnung, 2.Mahnung, RezeptNr.
+		for(int col:columns2adjust){
+			tab.packColumn(col, 5);
+		}
+	}
+
 
 	/*****************************************************/
 	class OPListSelectionHandler implements ListSelectionListener {
