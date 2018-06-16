@@ -46,6 +46,7 @@ public class OpShowGesamt {
 		CellConstraints cc = new CellConstraints();
 
 		tmpLbl = builder.addLabel("Offene Posten gesamt:", cc.xy(2,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
+		tmpLbl.setToolTipText("Summe OP in ausgewählten Rechnungsarten");
 //		tmpLbl.setToolTipText("Summe OP in allen Rechnungsarten");
 		valGesamtOffen = builder.addLabel("0,00", cc.xy(4,2,CellConstraints.LEFT,CellConstraints.DEFAULT));
 		valGesamtOffen.setForeground(Color.RED);
@@ -53,7 +54,7 @@ public class OpShowGesamt {
 		valGesamtOffen.setFont(f.deriveFont(f.getStyle() | Font.BOLD));
 
 		tmpLbl = builder.addLabel("Offene Posten der letzten Abfrage:", cc.xy(2,4,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		tmpLbl.setToolTipText("Summe OP in den gewählten Rechnungen");
+		tmpLbl.setToolTipText("Summe OP in den zuletzt gesuchten Rechnungen");
 		valSuchOffen = builder.addLabel("0,00", cc.xy(4,4,CellConstraints.LEFT,CellConstraints.DEFAULT));
 		valSuchOffen.setForeground(Color.RED);
 
@@ -95,37 +96,39 @@ public class OpShowGesamt {
 		gesamtOffen = val;
 	}
 
+	public void substFromGesamtOffen(BigDecimal val){
+		gesamtOffen = gesamtOffen.subtract(val);
+		schreibeGesamtOffen();
+	}
+
 	public void ermittleGesamtOffen(boolean useRGR, boolean useAFR, boolean useVKR){
 		gesamtOffen = BigDecimal.ZERO;
-//		if (useRGR) {
-		if (true) {
-			Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(roffen) from rgaffaktura where roffen > '0.00' AND rnr LIKE 'RGR-%'");
-			gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen.get(0).get(0)) ));
+		if (useRGR) {
+//		if (true) {
+			String offen = SqlInfo.holeEinzelFeld("select sum(roffen) from rgaffaktura where roffen > '0.00' AND rnr LIKE 'RGR-%'");
+			if (!offen.isEmpty()){
+				gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen) ));				
+			}
 		}
-//		if (useAFR) {
-		if (true) {
-			Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(roffen) from rgaffaktura where roffen > '0.00' AND rnr LIKE 'AFR-%'");
-			gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen.get(0).get(0)) ));
+		if (useAFR) {
+//		if (true) {
+			String offen = SqlInfo.holeEinzelFeld("select sum(roffen) from rgaffaktura where roffen > '0.00' AND rnr LIKE 'AFR-%'");
+			boolean tmp = offen.isEmpty();
+			int tst = offen.length();
+			if (!offen.isEmpty()){
+				gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen) ));				
+			}
 		}
-//		if (useVKR) {
-		if (true) {
-			Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(v_offen) from verkliste where v_offen > '0.00' AND v_nummer LIKE 'VR-%'");
-			gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen.get(0).get(0)) ));
+		if (useVKR) {
+//		if (true) {
+			String offen = SqlInfo.holeEinzelFeld("select sum(v_offen) from verkliste where v_offen > '0.00' AND v_nummer LIKE 'VR-%'");
+			if (!offen.isEmpty()){
+				gesamtOffen = gesamtOffen.add(BigDecimal.valueOf( Double.parseDouble(offen) ));				
+			}
 		}
 		schreibeGesamtOffen();
 	}
 
-/*
-	public void schreibeSuchOffen(String betrag){
-		valSuchOffen.setText( betrag );
-		auswertung.validate();
-	}
-
-	public void schreibeSuchOffen(BigDecimal val){
-		valSuchOffen.setText( dcf.format(val) );
-		auswertung.validate();
-	}
-*/
 	public void schreibeSuchOffen(){
 		valSuchOffen.setText( dcf.format(suchOffen) );
 		auswertung.validate();
@@ -137,6 +140,11 @@ public class OpShowGesamt {
 
 	public void setSuchOffen(BigDecimal val){
 		suchOffen = val;
+	}
+
+	public void substFromSuchOffen(BigDecimal val){
+		suchOffen = suchOffen.subtract(val);
+		schreibeSuchOffen ();
 	}
 
 	public void delSuchOffen() {
@@ -157,6 +165,11 @@ public class OpShowGesamt {
 		suchGesamt = val;
 	}
 
+	public void substFromSuchGesamt(BigDecimal val){
+		suchGesamt.subtract(val);
+		schreibeSuchGesamt();
+	}
+
 	public void delSuchGesamt() {
 		suchGesamt = BigDecimal.ZERO;
 		schreibeSuchGesamt();
@@ -165,6 +178,10 @@ public class OpShowGesamt {
 	public void schreibeAnzRec(){
 		valAnzahlSaetze.setText(Integer.toString(records) );
 		auswertung.validate();
+	}
+
+	public void incAnzRec(){
+		records++;
 	}
 
 	public int getAnzRec(){

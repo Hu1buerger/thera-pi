@@ -99,9 +99,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
 	MyOpRgafTableModel tabmod = null;
 	JXTable tab = null;
-	JLabel summeOffen;
-	JLabel summeRechnung;
-	JLabel summeGesamtOffen;
+//	JLabel summeOffen;
+//	JLabel summeRechnung;
+//	JLabel summeGesamtOffen;
 	Component kopieButton;
 	JRtaCheckBox bar = null;
 	private boolean barWasSelected = false;
@@ -109,8 +109,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	JButton kopie;
 
 	BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-	BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-	BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
+	
+//	BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
+//	BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
 
 	DecimalFormat dcf = new DecimalFormat("###0.00");
 
@@ -132,7 +133,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		"UNION SELECT rnr,rdatum,rgesamt,roffen,rpbetrag,rbezdatum,rmahndat1,rmahndat2,reznr,id as id,pat_intern as pat_id " +
 		"FROM rgaffaktura ) t1 LEFT JOIN pat5 AS t2 ON (t1.pat_id = t2.pat_intern) LEFT JOIN kass_adr AS t3 ON ( t2.kassenid = t3.id )";
 
-	int gefunden;
+//	int gefunden;
 	String[] spalten = {"Name,Vorname,Geburtstag","Rechn.Nr.","Rechn.Datum","Gesamtbetrag","Offen","Bearb.Gebühr","bezahlt am","1.Mahnung","2.Mahnung","Krankenkasse","RezeptNr.","id"};
 	String[] colnamen ={"nix","rnr","rdatum","rgesamt","roffen","rpbetrag","rbezdatum","rmahndat1","rmahndat2","nix","nix","id"};
 	OpRgafTab eltern = null;
@@ -287,7 +288,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		colCnt = 4;
 		kopieButton = builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));		// 4,6
 		colCnt = 11;
-		builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));										// 12,6
+		builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));			// 12,6
 
 		++colCnt;
 		tfs[0] = new JRtaTextField("F",true,"6.2","");
@@ -295,7 +296,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		tfs[0].setText("0,00");
 		tfs[0].setName("offen");
 		tfs[0].addKeyListener(kl);
-		builder.add(tfs[0],cc.xy(++colCnt,rowCnt));														// 14,6
+		builder.add(tfs[0],cc.xy(++colCnt,rowCnt));																	// 14,6
 
 		++colCnt;
 		bar = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
@@ -481,13 +482,16 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			JOptionPane.showMessageDialog(null, "Keine Rechnung zum Ausbuchen ausgewählt");
 			return;
 		}
+
 		if(nochoffen.equals(BigDecimal.valueOf(Double.parseDouble("0.0")))){
 			JOptionPane.showMessageDialog(null,"Diese Rechnung ist bereits auf bezahlt gesetzt");
 			return;
 		}
 
-		suchOffen = suchOffen.subtract(eingang );
-		gesamtOffen = gesamtOffen.subtract(eingang);
+//		suchOffen = suchOffen.subtract(eingang );
+//		sumPan.setGesamtOffen(sumPan.getGesamtOffen().subtract(eingang));
+		sumPan.substFromGesamtOffen(eingang);
+		sumPan.substFromSuchOffen(eingang);
 
 		String cmd = "";
 		String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RezNr).toString(); 
@@ -529,15 +533,13 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		tfs[0].setText("0,00");
 	}
 
-//	private void ermittleGesamtOffen(){  ==> RgAfVkGesamt
-
 	private void schreibeAbfrage(){
 		sumPan.schreibeGesamtOffen();
-		sumPan.setSuchOffen(suchOffen);
+//		sumPan.setSuchOffen(suchOffen);
 		sumPan.schreibeSuchOffen();
-		sumPan.setSuchGesamt(suchGesamt);
+//		sumPan.setSuchGesamt(suchGesamt);
 		sumPan.schreibeSuchGesamt();
-		sumPan.setAnzRec(gefunden);
+//		sumPan.setAnzRec(gefunden);
 		sumPan.schreibeAnzRec();
 	}
 
@@ -719,9 +721,10 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			sumPan.delSuchGesamt();
 			sumPan.delSuchOffen();
 			sumPan.delAnzRec();
-			suchGesamt = sumPan.getSuchGesamt();
-			suchOffen = sumPan.getSuchOffen();
-			gefunden = sumPan.getAnzRec();
+			calcGesamtOffen();
+//			suchGesamt = sumPan.getSuchGesamt();
+//			suchOffen = sumPan.getSuchOffen();
+//			gefunden = sumPan.getAnzRec();
 			ResultSetMetaData rsMetaData = null;
 			while(rs.next()){
 				vec.clear();
@@ -740,9 +743,11 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 					 //vec.add( (rs.getString(i)==null ? "" : rs.getString(i)) );//r_klasse
 					 //System.out.println(rsMetaData.getColumnClassName(i));
 				 }
-
-				suchOffen = suchOffen.add(rs.getBigDecimal(5));
-				suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
+				
+//				suchOffen = suchOffen.add(rs.getBigDecimal(5));
+//				suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
+				sumPan.setSuchGesamt(sumPan.getSuchGesamt().add(rs.getBigDecimal(4)));
+				sumPan.setSuchOffen(sumPan.getSuchOffen().add(rs.getBigDecimal(5)));
 				tabmod.addRow( (Vector<?>) vec.clone());
 				if(durchlauf>200){
 					try {
@@ -755,7 +760,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 					}
 				}
 				durchlauf++;
-				gefunden++;
+//				gefunden++;
+				sumPan.incAnzRec();
 			}
 
 			tab.validate();
