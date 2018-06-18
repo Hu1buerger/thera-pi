@@ -136,6 +136,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 	String[] spalten = {"Name,Vorname,Geburtstag","Rechn.Nr.","Rechn.Datum","Gesamtbetrag","Offen","Bearb.Gebühr","bezahlt am","1.Mahnung","2.Mahnung","Krankenkasse","RezeptNr.","id"};
 	String[] colnamen ={"nix","rnr","rdatum","rgesamt","roffen","rpbetrag","rbezdatum","rmahndat1","rmahndat2","nix","nix","id"};
 	OpRgafTab eltern = null;
+	class IdxCol {		//Indices fuer sprechende Spaltenzugriffe
+		static final short Name = 0, RNr=1, RDat=2, GBetr=3, Offen=4, BGeb=5, bez=6, mahn1=7, mahn2=8, kk=9, RezNr=10, id=11;
+	}
 
 	private OpShowGesamt sumPan;
 	private RgAfVkSelect selPan;
@@ -433,7 +436,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		}
 	}
 	private void setzeBezahlBetrag(final int i){
-		tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), 4)));
+		tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), IdxCol.Offen)));
 	}
 
 	private void sucheEinleiten(){
@@ -470,7 +473,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 			JOptionPane.showMessageDialog(null, "Keine Rechnung zum Ausbuchen ausgewählt");
 			return;
 		}
-		BigDecimal nochoffen = BigDecimal.valueOf((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 4));
+		BigDecimal nochoffen = BigDecimal.valueOf((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen));
 		BigDecimal eingang = BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) );
 		BigDecimal restbetrag = nochoffen.subtract(eingang);
 
@@ -487,27 +490,27 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 		gesamtOffen = gesamtOffen.subtract(eingang);
 
 		String cmd = "";
-		String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 10).toString(); 
-		String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 1).toString();
+		String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RezNr).toString(); 
+		String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RNr).toString();
 
 		if(bar.isSelected()){
 			cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', datum='"+
 			DatFunk.sDatInSQL(DatFunk.sHeute())+"', ktext='"+
 			rgaf_rechnum+","+
-			tabmod.getValueAt(tab.convertRowIndexToModel(row), 0)+"',"+		// Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
+			tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Name)+"',"+		// Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
 			"rez_nr='"+rgaf_reznum+"'";
 			//System.out.println(cmd);
 			SqlInfo.sqlAusfuehren(cmd);
 		}
-		tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), 6);
-		tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 4);
+		tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), IdxCol.bez);
+		tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), IdxCol.Offen);
 
 		if(rgaf_rechnum.startsWith("RGR-")){										// Rezept bezahlt setzen
 			SqlInfo.sqlAusfuehren("update verordn set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");	// zz: 1-ok
 			SqlInfo.sqlAusfuehren("update lza set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");
 		}
 
-		int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), 11);
+		int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.id);
 		if(rgaf_rechnum.startsWith("RGR-") || rgaf_rechnum.startsWith("AFR-")){		// aus rgaffaktura ausbuchen
 			cmd = "update rgaffaktura set roffen='"+dcf.format(restbetrag).replace(",", ".")+"', rbezdatum='"+
 					DatFunk.sDatInSQL(DatFunk.sHeute())+"' where id ='"+Integer.toString(id)+"' LIMIT 1";			
@@ -900,7 +903,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 					String cmd = "update rgaffaktura set "+colname+"="+(value != null ? "'"+value+"'" : "null")+" where id='"+id+"' LIMIT 1";
 					//System.out.println(cmd);
 					SqlInfo.sqlAusfuehren(cmd);
-					tfs[0].setText(dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 4)));
+					tfs[0].setText(dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen)));
 	            }
 			
 			}catch(Exception ex){
