@@ -142,6 +142,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 
 	Vector<String> existiertschon = new Vector<String>();
 	Vector<String> customIconList = new Vector<String>();
+	Vector<String> lateKtList = new Vector<String>();
+	Vector<String> lateVOList = new Vector<String>();
 	int toggleIcons;
 	Vector<Vector<String>> kassenIKs = new Vector<Vector<String>>();
 	/*******Controls für die rechte Seite*********/
@@ -565,6 +567,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 					}.execute();
 					existiertschon.clear();
 					customIconList.clear();
+					lateKtList.clear();
+					lateVOList.clear();
 //					String dsz = diszis[cmbDiszi.getSelectedIndex()];		// McM: kann weg (OK)
 					String dsz = disziSelect.getCurrRezClass();
 
@@ -649,23 +653,34 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 				cmd = "select n_name from pat5 where pat_intern='"+
 				vecRezepte.get(i).get(1)+"' LIMIT 1";
 
-				String name = SqlInfo.holeFelder(cmd).get(0).get(0);
-				cmd = "select preisgruppe from verordn where rez_nr='"+vecRezepte.get(i).get(0)+"' LIMIT 1";;
+				String thisRezNr = vecRezepte.get(i).get(0);
+				String thisPatInt = vecRezepte.get(i).get(1);
+				String name = SqlInfo.holeEinzelFeld(cmd);
+//				name = SqlInfo.holeFelder(cmd).get(0).get(0);
+				cmd = "select preisgruppe from verordn where rez_nr='"+thisRezNr+"' LIMIT 1";;
 				////System.out.println(cmd);
 				String preisgr = SqlInfo.holeEinzelFeld(cmd);
 				////System.out.println("Preisgruppe="+preisgr);
 
-				KnotenObjekt rezeptknoten = new KnotenObjekt(vecRezepte.get(i).get(0)+"-"+name,
+				KnotenObjekt rezeptknoten = new KnotenObjekt(thisRezNr+"-"+name,
 						vecRezepte.get(i).get(0),
 						(vecRezepte.get(i).get(2).equals("T")? true : false),
 						vecRezepte.get(i).get(3),
 						preisgr);
 				rezeptknoten.ktraeger = ktraeger;
-				rezeptknoten.pat_intern = vecRezepte.get(i).get(1);
+				rezeptknoten.pat_intern = thisPatInt;
 				meinitem = new JXTTreeNode(rezeptknoten,true);
 
 				treeModelKasse.insertNodeInto(meinitem,node,node.getChildCount());
 				treeKasse.validate();
+				
+				if(RezTools.isLate(thisRezNr)){
+					lateVOList.add(thisRezNr);			// letzte Behandlung ist > 10 Monate her -> Kasse u. Rezept rot markieren
+					if (lateKtList.contains(ktraeger)){	
+					}else{
+						lateKtList.add(ktraeger);						
+					}
+				}
 			}catch(Exception ex){
 
 			}
@@ -2399,12 +2414,11 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		expanded, leaf, row,
 		hasFocus);
 		KnotenObjekt o = ((JXTTreeNode)value).knotenObjekt;
+		this.setText(o.titel);
 		if (leaf && istFertig(value)) {
 			setIcon(fertigIcon);
-			this.setText(o.titel);
 			setToolTipText("Verordnung "+o.rez_num+" kann dirket abgerechnet werden.");
 		} else {
-			setToolTipText(null);
 			this.setText(o.titel);
 		}
 		if (!leaf){
@@ -2413,6 +2427,13 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 				setIcon(getDisabledIcon());
 			}else{
 				setIcon(getIcon());
+			}
+			if (lateKtList.contains(o.ktraeger)){
+				this.setForeground(Color.red);		// Kasse sollte zeitnah abgerechnet werden (enthält VO nahe am MHD).
+			}
+		}else{
+			if (lateVOList.contains(o.rez_num)){
+				this.setForeground(Color.red);		// VO nahe am MHD - umgehend abrechnen!
 			}
 		}
 		return this;
