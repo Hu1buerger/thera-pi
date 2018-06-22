@@ -175,7 +175,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	public static boolean lOwnCert = (SystemConfig.hmAbrechnung.get("hmkeystoreusecertof").equals(SystemConfig.hmAbrechnung.get("hmkeystorealias")) ? true : false);
 	
 	final String sucheFertige = "SELECT t1.name1,t1.ikktraeger,t1.ikkasse,t1.id,t2.ik_papier FROM fertige AS t1 LEFT JOIN kass_adr AS t2 ON t1.ikkasse = t2.ik_kasse ";
-	
+
 	public static boolean directCall = false;
 
 	public Disziplinen disziSelect = null;
