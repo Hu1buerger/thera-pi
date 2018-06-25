@@ -150,6 +150,10 @@ import systemTools.ListenerTools;
 
 
 
+/**
+ * @author Admin
+ *
+ */
 public class AbrechnungRezept extends JXPanel implements HyperlinkListener,ActionListener, MouseListener, PopupMenuListener, PropertyChangeListener, ComponentListener{
 	/**
 	 *
@@ -311,7 +315,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	private boolean vec_rez_valid = false;		// flag, ob vec_rez gültig ist 
 
 	private TageTreeSize tts = null;
-	
+	private String currBerichtId = "";
 	boolean kannAbhaken = false;
 	private Connection connection;
 
@@ -1300,11 +1304,12 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 			if(!therapiebericht.equals("") && aktRezept.getArztbericht()){
 				String berichtid = aktRezept.getArztBerichtID();
 				if(!AbrechnungGKV.directCall){
-					String dlgcmd = "<html>Für dieses Rezept wurde ein Therapiebericht angefordert!<br>"+
+					showTbInfo(aktRezept.getArztBerichtID());
+/*					String dlgcmd = "<html>Für dieses Rezept wurde ein Therapiebericht angefordert!<br>"+
 							(berichtid.equals("") ? "Es wurde aber <b><font color=#FF0000>kein</font> Therapiebericht erstellt</b>" :	"Der Therapiebericht wurde <b>bereits erstellt</b>")+
 								"<br><br>Position Therapiebericht wird an den letzten Behandlungstag angehängt</html>";
 							JOptionPane.showMessageDialog(null, dlgcmd);
-							doTherapieBericht(therapiebericht);
+ */							doTherapieBericht(therapiebericht);
 							this.getVectorFromNodes();
 							doTarifWechselCheck();
 							if(berichtid.equals("")){
@@ -1338,6 +1343,25 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 		}
 	}
 
+	/*
+	 *  verhindert die mehrfache Anzeige der TB-Meldung im Fall 
+	 *  'Rezept abschließen bei geöffnetem Abrechnungspanel' wenn 'AutoOKwenn302offen = 0' eingestellt ist
+	 *  (workaround; eleganter wäre setWerte() nur einmal zu durchlaufen... )
+	 */
+	private void showTbInfo(final String berichtId){
+		if (currBerichtId.equals(berichtId)){ return; };	// Info fÃ¼r diesen Bericht wird bereits angezeigt
+		currBerichtId = berichtId;
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				String dlgcmd = "<html>Für dieses Rezept wurde ein Therapiebericht angefordert!<br>"+
+						(berichtId.equals("") ? "Es wurde aber <b><font color=#FF0000>kein</font> Therapiebericht erstellt</b>" :	"Der Therapiebericht wurde <b>bereits erstellt</b>")+
+						"<br><br>Position Therapiebericht wird an den letzten Behandlungstag angehängt</html>";
+				JOptionPane.showMessageDialog(null, dlgcmd);
+				currBerichtId = "";
+			}
+		});
+	}
+	
 	private void setToClipboard(final String xcrez ){
 		new SwingWorker<Void,Void>(){
 			@Override
