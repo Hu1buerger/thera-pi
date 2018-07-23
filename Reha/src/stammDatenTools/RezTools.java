@@ -225,36 +225,6 @@ public class RezTools {
         return xvec;
     }
 
-    public static Vector<ArrayList<?>> X_holePosUndAnzahlAusTerminen(String xreznr){
-        Vector<ArrayList<?>> xvec = new Vector<ArrayList<?>>();
-        Vector<String> termvec = holeEinzelZiffernAusRezept(xreznr,"");
-        String behandlungen = null;
-        String[] einzelbehandlung = null;
-        ArrayList<String> positionen = new ArrayList<String>();
-        ArrayList<Integer>anzahl = new ArrayList<Integer>();
-        int trefferbei = -1;
-        for(int i = 0; i < termvec.size();i++){
-            behandlungen = termvec.get(i);
-            if(! behandlungen.equals("")){
-                einzelbehandlung = behandlungen.split(",");
-                //Scheiße weil Doppelbehandlungen zusammengefaßt werden
-                //Wird verwendet von: TerminFenster.terminBestaetigen()
-                //dort werden Doppelbehandlungen nachträglich erkannt und korrigiert
-                for(int i2 = 0; i2 < einzelbehandlung.length;i2++){
-                    trefferbei = positionen.indexOf(einzelbehandlung[i2]);
-                    if(trefferbei >= 0){
-                        anzahl.set(trefferbei,anzahl.get(trefferbei)+1 );
-                    }else{
-                        positionen.add(einzelbehandlung[i2]);
-                        anzahl.add(1);
-                    }
-                }
-            }
-        }
-        xvec.add((ArrayList<?>)positionen.clone());
-        xvec.add((ArrayList<?>)anzahl.clone());
-        return xvec;
-    }
     public static int countOccurence(List<String> list, String comperator){
         int ret = 0;
         for(int i = 0; i < list.size();i++){
