@@ -97,10 +97,12 @@ public class Disziplinen {
 		}
 	}
 
+	/**
+	 * liefert Index der als Kurzbezeichnung (z.B. "Physio") uebergebenen Disziplin 
+	 */
 	public int getIndex(String Disziplin) {
 		return diszis.indexOf(Disziplin);
 	}
-
 	
 	public String[] getActiveRK(){
 		return this.aktiveRezeptKlassen;
@@ -111,7 +113,7 @@ public class Disziplinen {
 	}
 
 	public String getCurrDisziFromActRK(){
-		String selectedRK = cmbDisziActive.getSelectedItem().toString();			
+		String selectedRK = cmbDisziActive.getSelectedItem().toString();
 		for (int i = 0; i < listTypeOfVO.size(); i++){
 			if(selectedRK.equals(listTypeOfVO.get(i))){
 				return diszis.get(i);
@@ -133,7 +135,7 @@ public class Disziplinen {
 	}
 
 	/**
-	 * liefert den Rezeptklasse-Prefix fuer die uebergebene Disziplin
+	 * liefert den Rezeptklasse-Prefix (z.B. "KG") fuer die uebergebene Disziplin 
 	 */
 	public String getRezClass(int Disziplin) {
 		return rezeptKlassen[Disziplin];
