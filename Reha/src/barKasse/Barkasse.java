@@ -64,10 +64,6 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 	JLabel barlab = null;
 	JLabel differenzlab = null;
 
-/*	JCheckBox ChkRG = null;
-	JCheckBox ChkVerk = null;
-	JCheckBox ChkPR = null;
- */
 	boolean incRG = false, incVerk = false, incPR = false, hideOfficeInBackground = false;
 
 
@@ -115,22 +111,6 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
 
-/*		ChkRG = new JCheckBox();
-		if (incRG) {
-			ChkRG.setSelected(true);
-		}
-		ChkRG.addItemListener(this);			// Listener registrieren (setzt 'implements ... ItemListener' in class definition voraus)
-		ChkVerk = new JCheckBox();
-		if (incVerk) {
-			ChkVerk.setSelected(true);
-		}
-		ChkVerk.addItemListener(this);
-		ChkPR = new JCheckBox();
-		if (incPR) {
-			ChkPR.setSelected(true);
-		}
-		ChkPR.addItemListener(this);
- */
 		int colLeft=3, colRight=8, rowCnt=2, colCnt=3;
 
 		lab = new JLabel("Erfassungszeitraum");
@@ -147,26 +127,7 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 		tfs[1] = new JRtaTextField("DATUM",false);
 		tfs[1].setText(DatFunk.sHeute());
 		builder.add(tfs[1],cc.xyw(colRight,rowCnt++,2));	// 8,4 
-/*
-		// checkbox Gebühren 
-		builder.add(ChkRG, cc.xy(colRight, ++rowCnt));		// 8,6
-		lab = new JLabel("Rezeptgebühren");
-		builder.add(lab,cc.xyw(9,rowCnt++,3));
-		
-		lab = new JLabel("berücksichtige Einnahmen aus");
-		//builder.add(lab,cc.xyw(colLeft,++rowCnt,5));		// 3,8
-		builder.add(lab,cc.xyw(4,++rowCnt,3,CellConstraints.RIGHT,CellConstraints.DEFAULT));		// 4,8
 
-		// checkbox Verkauf 
-		builder.add(ChkVerk, cc.xy(colRight, rowCnt));		// 8,8
-		lab = new JLabel("Verkauf");
-		builder.add(lab,cc.xy(9,rowCnt++));
-
-		// checkbox Privatrechnung 
-		builder.add(ChkPR, cc.xy(colRight, ++rowCnt));		// 8,10
-		lab = new JLabel("(Privat-)Rechnung");
-		builder.add(lab,cc.xy(9,rowCnt));
- */
 		// Auswahl RGR_AFR/Verkauf/PrivR
 		selPan = new RgVkPrSelect("berücksichtige Einnahmen aus");			// Subpanel mit Checkboxen anlegen
 		selPan.setCallBackObj(this);										// callBack registrieren
@@ -249,9 +210,6 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 		differenzlab.setForeground(Color.RED);
 		builder.add(differenzlab,cc.xyw(colRight,rowCnt++,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
 		builder.add((buts[1]=ButtonTools.macheButton("drucken", "drucken", al)),cc.xy(11,++rowCnt));
-		
-		//builder.add(differenzlab,cc.xyw(colRight,rowCnt,2,CellConstraints.RIGHT,CellConstraints.DEFAULT));
-		//builder.add((buts[1]=ButtonTools.macheButton("drucken", "drucken", al)),cc.xywh(11,--rowCnt,1,3));
 		
 		return builder.getPanel();
 	}
