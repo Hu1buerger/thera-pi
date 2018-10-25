@@ -68,7 +68,8 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 	JCheckBox ChkVerk = null;
 	JCheckBox ChkPR = null;
  */
-	boolean incRG = false, incVerk = false, incPR = false;
+	boolean incRG = false, incVerk = false, incPR = false, hideOfficeInBackground = false;
+
 
 	ActionListener al = null;
 	KeyListener kl = null;
@@ -455,13 +456,19 @@ public class Barkasse extends JXPanel implements RgVkPr_IfCallBack{
 			incVerk = false;
 			incPR = false;
 		}
+		if ( inif.getStringProperty("BarKasse", "SofortDrucken") != null ){						// unabhaeng. (spaeter hinzugekommen)
+			hideOfficeInBackground = inif.getBooleanProperty("BarKasse", "SofortDrucken") ;
+		}else{
+			hideOfficeInBackground = false;
+		}
 	}
 	/**
 	 * schreibt die zuletzt verwandten Checkbox-Einstellungen (falls geändert) in die bedienung.ini
 	 */
 	private void saveLastSelection(){
-if ( ! settingsLocked ){																	// ini-Eintraege  duerfen aktualisiert werden
-	INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "bedienung.ini");
+		if ( ! settingsLocked ){																// ini-Eintraege  duerfen aktualisiert werden
+			readLastSelection();
+			INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "bedienung.ini");
 			if ( ( selPan.useRGR() != incRG ) || ( selPan.useVKR() != incVerk ) || ( selPan.usePR() != incPR ) ){
 				inif.setBooleanProperty("BarKasse", "Rezeptgebuehren", selPan.useRGR(), "Abrechnung Barkasse beruecksichtigt");
 				inif.setBooleanProperty("BarKasse", "Verkaeufe", selPan.useVKR(), null);
