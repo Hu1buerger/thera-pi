@@ -53,6 +53,8 @@ import CommonTools.JRtaRadioButton;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.OOTools;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import CommonTools.TableTool;
@@ -73,7 +75,7 @@ import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
-public class OpRgafMahnungen extends JXPanel implements IfCbxCallBack{
+public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack{
 
 	/**
 	 * 
@@ -154,11 +156,11 @@ public class OpRgafMahnungen extends JXPanel implements IfCbxCallBack{
 		content.add(getSuchEinstellungPanel(),cc.xyw(1,2,2,CellConstraints.FILL,CellConstraints.TOP));
 		content.add(getRechnungDatenPanel(),cc.xy(1,4));
 		content.add(getTablePanel(),cc.xy(2,4,CellConstraints.FILL,CellConstraints.FILL));
-		content.add(getButtonPanel(),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
+		content.add(getMahnButtonPanel(),cc.xy(1,6,CellConstraints.FILL,CellConstraints.TOP));
 		content.validate();
 		return content;
 	}
-	private JPanel getButtonPanel(){
+	private JPanel getMahnButtonPanel(){
 		FormLayout lay = new FormLayout(
 		//       1                 2     3                 4     5                 6     7     
 				"15dlu,65dlu,fill:0:grow(0.5),2dlu,fill:0:grow(0.5),15dlu,80dlu,15dlu",		// xwerte,

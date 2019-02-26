@@ -1,6 +1,7 @@
 ﻿package opRgaf;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -54,6 +55,8 @@ import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import RehaIO.SocketClient;
@@ -70,11 +73,8 @@ import ag.ion.noa.NOAException;
 import io.RehaIOMessages;
 
 import com.jgoodies.forms.builder.PanelBuilder;
-import com.jgoodies.forms.debug.FormDebugPanel;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 
-public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCallBack {
+public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBack {
 
 	/**
 	 *
@@ -98,7 +98,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 	JLabel summeOffen;
 	JLabel summeRechnung;
 	JLabel summeGesamtOffen;
-	JLabel anzahlSaetze;
+	Component kopieButton;
 	JRtaCheckBox bar = null;
 //	JRtaCheckBox ChkRGR = null;
 //	JRtaCheckBox ChkAFR = null;
@@ -203,9 +203,13 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 		// Auswahl RGR/AFR/Verkauf
 		colCnt += 2;
 		selPan = new RgAfVkSelect("suche in  ");							// Subpanel mit Checkboxen anlegen
-		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
 		//selPan.ask("Tabellen:");
 		selPan.setCallBackObj(this);										// callBack registrieren
+		selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());					 		// letzte Auswahl wiederherstellen
+		selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
+		selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+		
+		builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));	//10..15,1..3
 		// Ende Auswahl
 
 		buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
@@ -262,7 +266,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 
 		rowCnt +=2;									// 6
 		colCnt = 4;
-		builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));		// 4,6
+		kopieButton = builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));		// 4,6
 		colCnt = 12;
 		builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));										// 12,6
 
@@ -382,7 +386,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 						String rez_nr = SqlInfo.holeEinzelFeld("select reznr from rgaffaktura where id='"+id+"' LIMIT 1");
 						String pat_intern = SqlInfo.holeEinzelFeld("select pat_intern from rgaffaktura where id='"+id+"' LIMIT 1");
 						String rdatum = SqlInfo.holeEinzelFeld("select rdatum from rgaffaktura where id='"+id+"' LIMIT 1");
-						AusfallRechnung ausfall = new AusfallRechnung(anzahlSaetze.getLocationOnScreen(),pat_intern,
+						AusfallRechnung ausfall = new AusfallRechnung(kopieButton.getLocationOnScreen(),pat_intern,
 								rez_nr,rnr,rdatum);
 						ausfall.setModal(true);
 						ausfall.setLocationRelativeTo(null);
@@ -564,7 +568,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, IfCbxCal
 			case 9:					// Rezeptnummer =
 				cmd = stmtString+ whereToSearch + " t1.reznr ='"+suchen.getText().trim()+"'";
 				break;
-			case 10:					// Rechnungsdatum =
+			case 10:				// Rechnungsdatum =
 				cmd = stmtString+ whereToSearch + " rdatum ='"+DatFunk.sDatInSQL(suchen.getText().trim())+"'";
 				break;
 			case 11:				//  >=
