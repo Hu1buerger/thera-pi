@@ -182,6 +182,8 @@ public class InfoDialog extends JDialog implements WindowListener{
 		bufhead.append("A{text-decoration:none;background-color:transparent;border:none}\n");
 		bufhead.append("A.even{text-decoration:underline;color: #000000; background-color:transparent;border:none}\n");
 		bufhead.append("A.odd{text-decoration:underline;color: #FFFFFF;background-color:transparent;border:none}\n");
+		bufhead.append("TR.head{font-family: Arial; font-size: 14pt; vertical-align: top;white-space: nowrap; \n");
+		bufhead.append("background-color: #E6E6E6; color: #000000;}\n");
 		bufhead.append("TD{font-family: Arial; font-size: 12pt; vertical-align: top;white-space: nowrap;}\n");
 		bufhead.append("TD.inhalt {font-family: Arial, Helvetica, sans-serif; font-size: 20px;background-color: #7356AC;color: #FFFFFF;}\n");
 		bufhead.append("TD.inhaltinfo {font-family: Arial, Helvetica, sans-serif; font-size: 20px;background-color: #DACFE7; color: #1E0F87;}\n");
