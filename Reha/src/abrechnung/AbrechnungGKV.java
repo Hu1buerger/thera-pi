@@ -9,6 +9,9 @@ import java.awt.Point;
 import java.awt.PointerInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.BufferedWriter;
@@ -24,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Vector;
 
 import javax.swing.ButtonGroup;
@@ -52,18 +56,25 @@ import org.thera_pi.nebraska.crypto.NebraskaFileException;
 import org.thera_pi.nebraska.crypto.NebraskaKeystore;
 import org.thera_pi.nebraska.crypto.NebraskaNotInitializedException;
 
+import rehaInternalFrame.JAbrechnungInternal;
+import CommonTools.SqlInfo;
+import stammDatenTools.RezTools;
+import systemEinstellungen.SystemConfig;
+import systemEinstellungen.SystemPreislisten;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.mysql.jdbc.PreparedStatement;
 
 import CommonTools.DatFunk;
+import dialoge.InfoDialog;
+import dialoge.InfoDialogVOinArbeit;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaRadioButton;
-import CommonTools.SqlInfo;
 import CommonTools.StringTools;
+import commonData.RezFromDB;
 import emailHandling.EmailSendenExtern;
 import environment.Path;
 import events.PatStammEvent;
@@ -78,7 +89,7 @@ import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
-public class AbrechnungGKV extends JXPanel implements PatStammEventListener,ActionListener,TreeSelectionListener, MouseListener{
+public class AbrechnungGKV extends JXPanel implements PatStammEventListener,ActionListener,TreeSelectionListener, MouseListener, KeyListener{
 	/**
 	 *
 	 */
@@ -182,6 +193,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 
 	public Disziplinen disziSelect = null;
 	private Connection connection;
+	protected InfoDialog infoDlg;
+	private RezFromDB RezFromDB;
 
 	public AbrechnungGKV(JAbrechnungInternal xjry, Connection connection){
 		super();
@@ -223,6 +236,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		//cmbDiszi.setSelectedItem(SystemConfig.initRezeptKlasse);
 		disziSelect.setCurrDiszi(SystemConfig.initRezeptKlasse);
 		jry.setAbrRezInstance(abrRez);							    // JAbrechnungInternal mitteilen, welche Instanz cleanup() enthält
+		RezFromDB = new RezFromDB();
 	}
 	public void setEncryptTitle(){
 		this.jry.setzeTitel(originalTitel+ " [Abrechnung für IK: "+Reha.getAktIK()+" - Zertifikat von IK: "+zertifikatVon.replace("IK","")+"]");
@@ -324,6 +338,10 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		treeKasse.getSelectionModel().addTreeSelectionListener(this);
 		treeKasse.setCellRenderer(new MyRenderer(SystemConfig.hmSysIcons.get("zuzahlok")));
 		treeKasse.addMouseListener(this);
+		
+		treeKasse.addKeyListener((KeyListener) this);
+		
+		
 		JScrollPane jscrk = JCompTools.getTransparentScrollPane(treeKasse);
 		jscrk.validate();
 		pb.add(jscrk,cc.xy(2, 6));
@@ -2513,6 +2531,40 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	@Override
 	public void mouseExited(MouseEvent e) {
 
+	}
+	@Override
+	public void keyTyped(KeyEvent e) {
+		
+	}
+	@Override
+	public void keyPressed(KeyEvent e) {
+		if(e.getKeyCode()==KeyEvent.VK_F1){
+			TreePath tp =  treeKasse.getSelectionPath();
+			if(tp==null){
+				return;
+			}
+			if(infoDlg != null){
+				return;
+			}
+
+			String ikKasse = getaktuellerKassenKnoten().knotenObjekt.ikkasse;
+			String kassenName = getaktuellerKassenKnoten().knotenObjekt.titel;
+            
+            Vector<Vector<String>> vecInArbeit = RezFromDB.getPendingVO(ikKasse);
+            ////System.out.println("VO in Arbeit: "+ vecInArbeit);
+            if(vecInArbeit.size() >= 0){
+            	infoDlg = new InfoDialogVOinArbeit(kassenName,vecInArbeit);
+    			infoDlg.pack();
+    			infoDlg.setLocationRelativeTo(null);
+    			infoDlg.setVisible(true);
+    			infoDlg = null;		
+			}
+		}
+	}
+	
+	@Override
+	public void keyReleased(KeyEvent e) {
+		
 	}
 
 }
