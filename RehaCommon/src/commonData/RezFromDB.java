@@ -42,7 +42,7 @@ public class RezFromDB {
 		if (vecInArbeit.size() > 0){
 			String sucheFertig = "SELECT rez_nr FROM fertige where ikkasse="+aktKasse;
 			vecFertige = SqlInfo.holeFelder(sucheFertig);
-	        assert (vecInArbeit.size()  > vecFertige.size()) :"more 'ready' than 'under processing' -something wrong here";	
+	        assert (vecInArbeit.size()  > vecFertige.size()) :"more 'ready' than 'under processing' - something wrong here";	
 	        Vector<Vector<String>> offen = vecInArbeit;
 	        for( Iterator it = vecFertige.iterator(); it.hasNext(); )
 	        {
