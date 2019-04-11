@@ -81,6 +81,7 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import dialoge.InfoDialog;
+import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
 import dialoge.RehaSmartDialog;
 import dialoge.ToolsDialog;
@@ -156,7 +157,7 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 
 	AbrechnungRezept abrRez = null;
 
-	InfoDialog infoDlg = null;
+	InfoDialogTerminInfo infoDlg = null;	
 	String sRezNumNeu = "";
 	private Connection connection;
 	//public boolean lneu = false;
@@ -548,7 +549,8 @@ public class AktuelleRezepte  extends JXPanel implements ListSelectionListener,T
 					if(reznummer.equals("")){
 						return;
 					}
-					infoDlg = new InfoDialog(reznummer,"terminInfo",null);
+//					infoDlg = new InfoDialog(reznummer,"terminInfo",null);
+					infoDlg = new InfoDialogTerminInfo(reznummer,null);
 					infoDlg.pack();
 					infoDlg.setLocationRelativeTo(null);
 					infoDlg.setVisible(true);

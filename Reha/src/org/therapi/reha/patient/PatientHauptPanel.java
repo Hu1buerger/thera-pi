@@ -35,7 +35,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
-import dialoge.InfoDialog;
+import dialoge.InfoDialogRGAFoffen;
 import events.PatStammEvent;
 import events.PatStammEventClass;
 import events.PatStammEventListener;
@@ -137,7 +137,7 @@ public class PatientHauptPanel extends JXPanel{
 	JPatientInternal patientInternal = null;
 	
 	
-	InfoDialog infoDlg = null;
+	InfoDialogRGAFoffen infoDlg = null;
 	/**
 	 * @param connection *****************************************************/
 	public PatientHauptPanel(String name,JPatientInternal internal, Connection connection){
@@ -394,7 +394,8 @@ public class PatientHauptPanel extends JXPanel{
 		Vector<Vector<String>> vecoffen = SqlInfo.holeFelder(stmt);
 		if(vecoffen.size() > 0 || Reha.bHatMerkmale){
 			try{
-				infoDlg = new InfoDialog(xpatint,"offenRGAF",vecoffen);
+//				infoDlg = new InfoDialog(xpatint,"offenRGAF",vecoffen);
+				infoDlg = new InfoDialogRGAFoffen(xpatint,vecoffen);
 				infoDlg.pack();
 				infoDlg.setLocationRelativeTo(this);
 				infoDlg.setVisible(true);
