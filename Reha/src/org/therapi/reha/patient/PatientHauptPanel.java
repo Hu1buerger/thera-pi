@@ -32,6 +32,8 @@ import org.jdesktop.swingx.JXPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import rehaInternalFrame.JPatientInternal;
+import systemEinstellungen.SystemConfig;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;

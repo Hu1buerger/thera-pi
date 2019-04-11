@@ -37,6 +37,8 @@ public class InfoDialog extends JDialog implements WindowListener{
 	Font font = new Font("Arial",Font.PLAIN,12);
 	
 	protected String arg1 = null;
+
+	private String infoArt = null;
 	JEditorPane htmlPane1 = null;
 	JEditorPane htmlPane2 = null;
 

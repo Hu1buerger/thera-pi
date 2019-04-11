@@ -319,7 +319,7 @@ public class InfoDialogTerminInfo extends InfoDialog {
 		}else if(tage.size() == 0){
 			long diff = 0;
 			if((diff = DatFunk.TageDifferenz(DatFunk.sDatInDeutsch(vecResult.get(0).get(0)), DatFunk.sHeute())) > 0){
-				ergebnis.append("<span "+getSpanStyle("14","#ff0000")+"<b>"+DatFunk.sDatInDeutsch(vecResult.get(0).get(0))+"</b></span><br>"+"<span "+getSpanStyle("10","")+"Achtung Behandlungsbeginn heute überschreitet<br>den spätestesn Behandlungsbeginn<br>um "+Long.toString(diff)+" Tage!!</span>\n");
+				ergebnis.append("<span "+getSpanStyle("14","#ff0000")+"<b>"+DatFunk.sDatInDeutsch(vecResult.get(0).get(0))+"</b></span><br>"+"<span "+getSpanStyle("10","")+"Achtung Behandlungsbeginn heute überschreitet<br>den spätesten Behandlungsbeginn<br>um "+Long.toString(diff)+" Tage!!</span>\n");
 			}else{
 				ergebnis.append("<span "+getSpanStyle("14","#008000")+"<b>"+DatFunk.sDatInDeutsch(vecResult.get(0).get(0))+"</b></span><br>"+"<span "+getSpanStyle("10","")+"Behandlung noch nicht begonnen stand heute<br>spätester Behandlungsbeginn<br>in "+Long.toString(diff)+" Tage(n)!!</span>\n");				
 			}
