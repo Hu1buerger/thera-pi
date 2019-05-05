@@ -1,8 +1,5 @@
 package dialoge;
 
-import hauptFenster.AktiveFenster;
-import hauptFenster.Reha;
-
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
@@ -14,17 +11,15 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.BorderFactory;
-import javax.swing.JComponent;
 import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.SwingWorker;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 
 import org.jdesktop.swingx.JXPanel;
-import org.therapi.reha.patient.AktuelleRezepte;
 
+import patientenFenster.PatUndVOsuchen;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import CommonTools.DatFunk;
@@ -34,11 +29,8 @@ import CommonTools.JCompTools;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-import com.sun.star.uno.Exception;
 
 import commonData.Rezept;
-import events.PatStammEvent;
-import events.PatStammEventClass;
 
 
 public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListener{
@@ -171,7 +163,7 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
 	    	if(url.contains("vo_suche")){
 	    		String reznr = extractVO(url);
 	    		System.out.println("öffne Hyperlink zu VO: "+reznr+" für PatId: "+hmVO.get(reznr));
-	    		SucheNachAllem.doPatSuchen(hmVO.get(reznr), reznr, this, this.connection);
+	    		PatUndVOsuchen.doPatSuchen(hmVO.get(reznr), reznr, this, this.connection);
 	    	}
 	      }
 	}
@@ -180,57 +172,4 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
 		String ext = url.substring(16);
 		return ext.replace(".de", "");
 	}
-}
-
-class SucheNachAllem{
-	public static void doPatSuchen(String patint,String reznr,Object source, Connection connection){
-		String pat_int;
-		pat_int = patint;
-		JComponent patient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-		final String xreznr = reznr;
-		if(patient == null){
-			final String xpat_int = pat_int;
-			final Object xsource = source;
-			new SwingWorker<Void,Void>(){
-				protected Void doInBackground() throws Exception {
-					JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-					Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection);
-					while( (xpatient == null) ){
-						try {
-							Thread.sleep(20);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-					}
-					while(  (!AktuelleRezepte.initOk) ){
-						try {
-							Thread.sleep(20);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-					
-					String s1 = "#PATSUCHEN";
-					String s2 = (String) xpat_int;
-					PatStammEvent pEvt = new PatStammEvent(xsource);
-					pEvt.setPatStammEvent("PatSuchen");
-					pEvt.setDetails(s1,s2,"#REZHOLEN-"+xreznr) ;
-					PatStammEventClass.firePatStammEvent(pEvt);
-					return null;
-				}
-				
-			}.execute();
-		}else{
-			Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection);
-			String s1 = "#PATSUCHEN";
-			String s2 = (String) pat_int;
-			PatStammEvent pEvt = new PatStammEvent(source);
-			pEvt.setPatStammEvent("PatSuchen");
-			pEvt.setDetails(s1,s2,"#REZHOLEN-"+xreznr) ;
-			PatStammEventClass.firePatStammEvent(pEvt);
-
-		}
-	}
-	
 }
