@@ -179,7 +179,7 @@ public class InfoDialog extends JDialog implements WindowListener{
 		bufhead.append("<html>\n<head>\n");
 		bufhead.append("<STYLE TYPE=\"text/css\">\n");
 		bufhead.append("<!--\n");
-		bufhead.append("A{text-decoration:none;background-color:transparent;border:none}\n");
+		bufhead.append("A{text-decoration:none;background-color:transparent;border:none;font-weight: bold;}\n");	// besser text-decoration:underline?
 		bufhead.append("A.even{text-decoration:underline;color: #000000; background-color:transparent;border:none}\n");
 		bufhead.append("A.odd{text-decoration:underline;color: #FFFFFF;background-color:transparent;border:none}\n");
 		bufhead.append("TR.head{font-family: Arial; font-size: 14pt; vertical-align: top;white-space: nowrap; \n");
