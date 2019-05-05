@@ -280,13 +280,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		return SystemConfig.certNotFound;
 	}
 	/**********
-<<<<<<< HEAD
-	 *
-	 *
-	 *
-=======
 	 * 
->>>>>>> fd1bd68... source cleanup
 	 * Linke Seite
 	 */
 	private void mandantenCheck(){
@@ -1528,19 +1522,10 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 
 
 			/***
-<<<<<<< HEAD
-			 *
-			 *
-			 * In der Echtfunktion muß das Löschen in der rezept-Datenbank eingeschaltet werden
-			 * und das sofortige Löschen aus der Historie auscheschaltet werden
-			 *
-			 *
-=======
 			 * 
-			 * In der Echtfunktion muß das Löschen in der rezept-Datenbank eingeschaltet werden
-			 * und das sofortige Löschen aus der Historie auscheschaltet werden
+			 * In der Echtfunktion muß das Loeschen in der rezept-Datenbank eingeschaltet werden
+			 * und das sofortige Löschen aus der Historie auschgeschaltet werden
 			 *  
->>>>>>> fd1bd68... source cleanup
 			 */
 
 			//SqlInfo.sqlAusfuehren("delete from lza where rez_nr='"+abgerechneteRezepte.get(i2)+"' LIMIT 1");
