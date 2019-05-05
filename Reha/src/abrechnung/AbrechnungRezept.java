@@ -104,6 +104,7 @@ import com.sun.star.uno.Exception;
 
 import CommonTools.DatFunk;
 import patientenFenster.KassenAuswahl;
+import patientenFenster.PatUndVOsuchen;
 import patientenFenster.RezNeuanlage;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -2818,8 +2819,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	    		if(anfrage == JOptionPane.YES_OPTION){
 	    			eltern.loescheKnoten();
 	    		}
-	    		SucheNachAllem.doPatSuchen(aktRezept.getPatIntern(), aktRezept.getRezNb(),this,this.connection);
-
+	    		PatUndVOsuchen.doPatSuchen(aktRezept.getPatIntern(), aktRezept.getRezNb(),this,this.connection);
 	    	}
 	    	if(event.getURL().toString().contains("nozz.de")){
 	    		PointerInfo info = MouseInfo.getPointerInfo();
@@ -4552,7 +4552,6 @@ class MyDateCellEditor extends AbstractCellEditor implements TableCellEditor {
 }
 
 class MyDate2CellEditor extends AbstractCellEditor implements TableCellEditor {
-
 	/**
 	 *
 	 */
@@ -4568,60 +4567,4 @@ class MyDate2CellEditor extends AbstractCellEditor implements TableCellEditor {
 	public Object getCellEditorValue() {
 		return null;
 	}
-
-}
-
-class SucheNachAllem{
-	public static void doPatSuchen(String patint,String reznr,Object source, Connection connection){
-		Connection connection1 =connection;
-		String pat_int;
-		pat_int = patint;
-		JComponent patient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-		final String xreznr = reznr;
-		if(patient == null){
-			final String xpat_int = pat_int;
-			final Object xsource = source;
-			new SwingWorker<Void,Void>(){
-				@Override
-                protected Void doInBackground() throws Exception {
-					JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-					Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection1);
-					while( (xpatient == null) ){
-						try {
-							Thread.sleep(20);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-					}
-					while(  (!AktuelleRezepte.initOk) ){
-						try {
-							Thread.sleep(20);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-					}
-
-					String s1 = "#PATSUCHEN";
-					String s2 = xpat_int;
-					PatStammEvent pEvt = new PatStammEvent(xsource);
-					pEvt.setPatStammEvent("PatSuchen");
-					pEvt.setDetails(s1,s2,"#REZHOLEN-"+xreznr) ;
-					PatStammEventClass.firePatStammEvent(pEvt);
-					return null;
-				}
-
-			}.execute();
-		}else{
-			Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection1);
-			String s1 = "#PATSUCHEN";
-			String s2 = pat_int;
-			PatStammEvent pEvt = new PatStammEvent(source);
-			pEvt.setPatStammEvent("PatSuchen");
-			pEvt.setDetails(s1,s2,"#REZHOLEN-"+xreznr) ;
-			PatStammEventClass.firePatStammEvent(pEvt);
-
-		}
-	}
-
 }
