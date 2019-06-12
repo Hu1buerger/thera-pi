@@ -1786,6 +1786,11 @@ public class SystemConfig {
 		hmAbrechnung.put("TTSizeLocked", inif.getStringProperty(section, "lockSettings"));
 		hmAbrechnung.put("maxBehTage", inif.getStringProperty(section, "maxTage"));
 
+		if ( inif.getStringProperty(section, "usePrinterFromTemplate") == null ){			// kein Eintrag in ini -> default setzen
+			hmAbrechnung.put("hmusePrinterFromTemplate", "0");
+		}else{
+			hmAbrechnung.put("hmusePrinterFromTemplate", inif.getStringProperty(section, "usePrinterFromTemplate"));
+		}
 		String sask = inif.getStringProperty("GemeinsameParameter", "FragenVorEmail");
 		if(sask==null){
 			System.out.println("Erstelle Parameter 'FrageVorEmail'");

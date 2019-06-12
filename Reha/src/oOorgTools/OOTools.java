@@ -10,6 +10,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.print.PrintService;
+import javax.print.PrintServiceLookup;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
@@ -949,7 +951,9 @@ public class OOTools{
 		document = documentService.loadDocument(url,docdescript);
 		ITextDocument textDocument = (ITextDocument)document;
 		/**********************/
-		OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmgkvtaxierdrucker"));
+		if (SystemConfig.hmAbrechnung.get("hmusePrinterFromTemplate").equals("0")){
+			OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmgkvtaxierdrucker"));
+		}
 		/**********************/
 		ITextFieldService textFieldService = textDocument.getTextFieldService();
 		ITextField[] placeholders = null;
@@ -1660,6 +1664,9 @@ public class OOTools{
 			}
 			//Wenn nicht gleich wie im Übergebenen Parameter angegeben -> Drucker wechseln
 			IPrinter iprint = null;
+			//getSysPrinter ();
+			//System.out.println("hmgkvtaxierdrucker (ini): "+drucker);
+			//System.out.println("ActivePrinter: "+druckerName);	// scheint der Drucker aus der Vorlage
 			if(! druckerName.equals(drucker)){
 				try {
 					iprint = textDocument.getPrintService().createPrinter(drucker);
@@ -1674,6 +1681,15 @@ public class OOTools{
 			}
 		}
 	}
+	static Vector<String> getSysPrinter (){
+		Vector<String> list = new Vector<String>();
+		for ( PrintService s : PrintServiceLookup.lookupPrintServices( null, null ) ){		// alle dem System bekannten Drucker auflisten
+			System.out.println("SysPrinter: "+ s.getName() );
+			list.add(s.getName());
+		}
+		return (Vector<String>) list.clone();
+	}
+	
 	/***********************OO-Calc Funktionen*******************************/
 	public static void doColWidth(ISpreadsheetDocument spreadsheetDocument,String sheetName, int col_first,int col_last,int width) throws NoSuchElementException, WrappedTargetException, IndexOutOfBoundsException, UnknownPropertyException, PropertyVetoException, IllegalArgumentException{
 		XSpreadsheets spreadsheets = spreadsheetDocument.getSpreadsheetDocument().getSheets();
