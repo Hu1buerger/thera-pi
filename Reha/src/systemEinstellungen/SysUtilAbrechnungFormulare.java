@@ -35,7 +35,7 @@ import CommonTools.JRtaTextField;
 import environment.Path;
 import hauptFenster.Reha;
 
-public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, ActionListener {
+public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 	/**
 	 * 
 	 */
@@ -72,7 +72,10 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 	     jscr.setViewportView(getVorlagenSeite());
 	     jscr.validate();
 	     add(jscr,BorderLayout.CENTER);
-	     add(getKnopfPanel(),BorderLayout.SOUTH);
+	     //add(getKnopfPanel(),BorderLayout.SOUTH);
+	     AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+	     this.add(footer.getPanel(),BorderLayout.SOUTH);
+
 		return;
 	}
 	/************** Beginn der Methode für die Objekterstellung und -platzierung *********/
@@ -177,7 +180,7 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 		return builder.getPanel();
 	}
 	
-	private JPanel getKnopfPanel(){
+/*	private JPanel getKnopfPanel(){
 		
 		
 		but[3] = macheBut("abbrechen","abbrechen");
@@ -199,6 +202,7 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 		
 		return jpan.getPanel();
 	}
+ */
 	private JButton macheBut(String titel,String cmd){
 		JButton but = new JButton(titel);
 		but.setActionCommand(cmd);
@@ -214,20 +218,14 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		
-		
 	}
 
 	@Override
 	public void keyReleased(KeyEvent e) {
-		
-		
 	}
 
 	@Override
 	public void keyTyped(KeyEvent e) {
-		
-		
 	}
 
 	@Override
@@ -378,6 +376,22 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
         }
  
 
+	}
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();
+		
+	}
+	@Override
+	public void Speichern() {
+		doSpeichern();		
+	}
+	@Override
+	public void AddEntry(int instanceNb) {
+		
+	}
+	@Override
+	public void RemoveEntry(int instanceNb) {
+		
 	}	
-
 }
