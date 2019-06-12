@@ -3,6 +3,8 @@ package systemEinstellungen;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.beans.PropertyChangeEvent;
@@ -14,6 +16,7 @@ import javax.print.PrintServiceLookup;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -23,19 +26,21 @@ import javax.swing.SwingWorker;
 import org.jdesktop.swingx.JXPanel;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.JRtaCheckBox;
+import CommonTools.JRtaCheckBoxR;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaRadioButton;
 import CommonTools.JRtaTextField;
 import environment.Path;
 import hauptFenster.Reha;
 
-public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
+public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, ActionListener, ItemListener, SysInitCommon_If {
 	/**
 	 * 
 	 */
@@ -47,23 +52,35 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 	JRtaTextField[] tf = {null,null,null,null};
 	JRtaRadioButton[] rbut = {null,null,null,null,null,null,null,null};
 	JRtaCheckBox cbemail = null;
+	JRtaCheckBox ChkUseTmplPrinter = null;
 	String[] exemplare = {"0","1","2","3","4","5"};
 	ButtonGroup bg = new ButtonGroup();
 	ButtonGroup bg2 = new ButtonGroup();
 	ButtonGroup bg3 = new ButtonGroup();
 	ButtonGroup bg4 = new ButtonGroup();
+	
+	boolean enableTaxPrinterSelect = true, usePrinterFromTemplate = false;
 	public SysUtilAbrechnungFormulare(){
 		super(new BorderLayout());
 		this.setBorder(BorderFactory.createEmptyBorder(20, 40, 20, 20));
 		/****/
 		setBackgroundPainter(Reha.instance.compoundPainter.get("SystemInit"));
-	     services = PrintServiceLookup.lookupPrintServices(null, null);
-			drucker = new String[services.length];
-			
-			for (int i = 0 ; i < services.length; i++){
-				drucker[i] = services[i].getName();
-			}
-		/****/
+		initFields();
+		services = PrintServiceLookup.lookupPrintServices(null, null);
+		drucker = new String[services.length];
+		for (int i = 0 ; i < services.length; i++){
+			drucker[i] = services[i].getName();
+		}
+
+ 		/****/
+		new SwingWorker<Void,Void>(){
+				@Override
+				protected Void doInBackground() throws Exception {
+					doEinstellungen();	// ala readFromIni();
+					setFields();
+					return null;
+				}
+		    }.execute();
 	     JScrollPane jscr = new JScrollPane();
 	     jscr.setBorder(null);
 	     jscr.setOpaque(false);
@@ -76,107 +93,128 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 	     AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
 	     this.add(footer.getPanel(),BorderLayout.SOUTH);
 
+	     new SwingWorker<Void,Void>(){
+				@Override
+				protected Void doInBackground() throws Exception {
+					doEinstellungen();	// ändern ala readFromIni();
+					setFields();
+					return null;
+				}
+		    }.execute();
+
 		return;
 	}
+	private void initFields() {
+		ChkUseTmplPrinter = new JRtaCheckBox("Einstellung aus Vorlage nutzen");
+		ChkUseTmplPrinter.addItemListener(this);
+	}
+	private void setFields() {
+		ChkUseTmplPrinter.setSelected(usePrinterFromTemplate);
+		enableTaxPrinterSelect = (usePrinterFromTemplate == Boolean.TRUE ? false : true);
+		jcmb[1].setEnabled(enableTaxPrinterSelect);
+		// 		ChkOP2BarKasse.showLocked(enableTaxPrinterSelect,usePrinterFromTemplate);
+	}
+	
 	/************** Beginn der Methode für die Objekterstellung und -platzierung *********/
 	private JPanel getVorlagenSeite(){
 		FormLayout lay = new FormLayout("right:max(80dlu;p), 20dlu, 120dlu, 4dlu, 40dlu", //, 4dlu, 40dlu, 4dlu, 40dlu",
-			       //1.    2.  3.   4.  5.   6.  7.   8.  9.  10.  11. 12.  13.  14.  15. 16.   17. 18.   19.  20. 21.  22.  23.  24   25  26    27   28   29   30   31  32   33   34   35  36   37  38   39  40    41    42  43  44 45   46   47
-					"p, 10dlu, p, 3dlu, p, 3dlu, p,  3dlu, p, 2dlu, p, 3dlu, p, 10dlu, p, 10dlu, p, 3dlu, p, 3dlu, p, 10dlu, p,  10dlu, p,  3dlu , p, 3dlu, p, 10dlu, p,10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p");
+			       //1.    2.  3.   4.  5.   6.  7.   8.  9.  10.  11. 12.  13.  14.  15. 16.   17. 18.   19.  20. 21.  22.  23.  24   25  26    27   28   29   30   31  32   33   34   35  36   37  38   39  40    41    42  43  44 45   46   47  48    49
+					"p, 10dlu, p, 3dlu, p, 8dlu, p, 3dlu, p,  3dlu, p, 2dlu, p, 3dlu, p, 10dlu, p, 10dlu, p, 3dlu, p, 3dlu, p, 10dlu, p,  10dlu, p,  3dlu , p, 3dlu, p, 10dlu, p,10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p");
 		
 		PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
 		builder.setDefaultDialogBorder();
 		builder.getPanel().setOpaque(false);
 		CellConstraints cc = new CellConstraints();
-		builder.addSeparator("Heilmittelabrechnung GKV", cc.xyw(1, 1, 5));
-		builder.addLabel("Rechnungsformular",cc.xy(1,3));
+		int rowCnt=1;
+		builder.addSeparator("Heilmittelabrechnung GKV", cc.xyw(1, rowCnt++, 5));			// 1,1
+		builder.addLabel("Drucker für Taxierung",cc.xy(1,++rowCnt));						// 1,3
+		jcmb[1] = new JRtaComboBox(drucker);
+		builder.add(jcmb[1],cc.xyw(3,rowCnt++,3));											// 3,3
+		
+		builder.add(ChkUseTmplPrinter, cc.xyw(3, ++rowCnt,3));								// 3,5
+		ChkUseTmplPrinter.setOpaque(false);
+		ChkUseTmplPrinter.setToolTipText("So können den Vorlagen verschiedene Drucker zugewiesen werden");
+		rowCnt++;
+
+		builder.addLabel("Rechnungsformular",cc.xy(1,++rowCnt));
 		tf[0] = new JRtaTextField("nix",false);
 		//tf[0].setEditable(false);
-		builder.add(tf[0],cc.xy(3,3));
-		builder.add((but[0] = macheBut("auswaehlen","gkvrechnwahl")),cc.xy(5,3));
+		builder.add(tf[0],cc.xy(3,rowCnt));
+		builder.add((but[0] = macheBut("auswaehlen","gkvrechnwahl")),cc.xy(5,rowCnt++));
 
-		builder.addLabel("Rechnungsdrucker",cc.xy(1,5));
+		builder.addLabel("Rechnungsdrucker",cc.xy(1,++rowCnt));	
 		jcmb[0] = new JRtaComboBox(drucker);
-		builder.add(jcmb[0],cc.xyw(3,5,3));
+		builder.add(jcmb[0],cc.xyw(3,rowCnt++,3));
 				
-		builder.addLabel("Drucker für Taxierung",cc.xy(1,7));
-		jcmb[1] = new JRtaComboBox(drucker);
-		builder.add(jcmb[1],cc.xyw(3,7,3));
 		
-		
-		builder.addLabel("folgende Ausdrucke erstellen",cc.xy(1,9));
-		builder.add(rbut[0] = macheRadio("nur den Begleitzettel ausdrucken","nurbegleitzettel"),cc.xyw(3,9,3));
+		builder.addLabel("folgende Ausdrucke erstellen",cc.xy(1,++rowCnt));
+		builder.add(rbut[0] = macheRadio("nur den Begleitzettel ausdrucken","nurbegleitzettel"),cc.xyw(3,rowCnt++,3));
 		rbut[0].setOpaque(false);
 		bg.add(rbut[0]);
-		builder.add(rbut[1] = macheRadio("Begleitzettel und Rechnung ausdrucken","beides"),cc.xyw(3,11,3));
+		builder.add(rbut[1] = macheRadio("Begleitzettel und Rechnung ausdrucken","beides"),cc.xyw(3,++rowCnt,3));
 		rbut[1].setOpaque(false);
 		bg.add(rbut[1]);
+		rowCnt++;
 		
-		builder.addLabel("Rechnungsexemplare",cc.xy(1,13));
+		builder.addLabel("Rechnungsexemplare",cc.xy(1,++rowCnt));
 		jcmb[2] = new JRtaComboBox(exemplare);
-		builder.add(jcmb[2],cc.xy(5,13));
+		builder.add(jcmb[2],cc.xy(5,rowCnt++));
 		
 		
 		/********************************************/
 		
-		builder.addSeparator("Heilmittelabrechnung Privatpatienten", cc.xyw(1, 15, 5));
+		builder.addSeparator("Heilmittelabrechnung Privatpatienten", cc.xyw(1, ++rowCnt, 5));
+		rowCnt++;
 		
-		builder.addLabel("Rechnungsformular",cc.xy(1,17));
+		builder.addLabel("Rechnungsformular",cc.xy(1,++rowCnt));
 		tf[1] = new JRtaTextField("nix",false);
 		//tf[0].setEditable(false);
-		builder.add(tf[1],cc.xy(3,17));
-		builder.add((but[1] = macheBut("auswaehlen","prirechnwahl")),cc.xy(5,17));
+		builder.add(tf[1],cc.xy(3,rowCnt));
+		builder.add((but[1] = macheBut("auswaehlen","prirechnwahl")),cc.xy(5,rowCnt++));
 		
-		builder.addLabel("Rechnungsdrucker",cc.xy(1,19));
+		builder.addLabel("Rechnungsdrucker",cc.xy(1,++rowCnt));
 		jcmb[3] = new JRtaComboBox(drucker);
-		builder.add(jcmb[3],cc.xyw(3,19,3));
+		builder.add(jcmb[3],cc.xyw(3,rowCnt++,3));
 		
-		builder.addLabel("Rechnungsexemplare",cc.xy(1,21));
+		builder.addLabel("Rechnungsexemplare",cc.xy(1,++rowCnt));
 		jcmb[4] = new JRtaComboBox(exemplare);
-		builder.add(jcmb[4],cc.xy(5,21));
+		builder.add(jcmb[4],cc.xy(5,rowCnt++));
 		
-		builder.addSeparator("Heilmittelabrechnung Berufsgenossenschaft", cc.xyw(1, 23, 5));
+		builder.addSeparator("Heilmittelabrechnung Berufsgenossenschaft", cc.xyw(1, ++rowCnt, 5));
+		rowCnt++;
 
-		builder.addLabel("Rechnungsformular",cc.xy(1,25));
+		builder.addLabel("Rechnungsformular",cc.xy(1,++rowCnt));
 		tf[2] = new JRtaTextField("nix",false);
 		//tf[0].setEditable(false);
-		builder.add(tf[2],cc.xy(3,25));
-		builder.add((but[2] = macheBut("auswaehlen","bgerechnwahl")),cc.xy(5,25));
+		builder.add(tf[2],cc.xy(3,rowCnt));
+		builder.add((but[2] = macheBut("auswaehlen","bgerechnwahl")),cc.xy(5,rowCnt++));
 		
-		builder.addLabel("Rechnungsdrucker",cc.xy(1,27));
+		builder.addLabel("Rechnungsdrucker",cc.xy(1,++rowCnt));
 		jcmb[5] = new JRtaComboBox(drucker);
-		builder.add(jcmb[5],cc.xyw(3,27,3));
+		builder.add(jcmb[5],cc.xyw(3,rowCnt++,3));
 		
-		builder.addLabel("Rechnungsexemplare",cc.xy(1,29));
+		builder.addLabel("Rechnungsexemplare",cc.xy(1,++rowCnt));
 		jcmb[6] = new JRtaComboBox(exemplare);
-		builder.add(jcmb[6],cc.xy(5,29));
+		builder.add(jcmb[6],cc.xy(5,rowCnt++));
 		
-		builder.addSeparator("Gemeinsame Einstellungen", cc.xyw(1, 31, 5));
+		builder.addSeparator("Gemeinsame Einstellungen", cc.xyw(1, ++rowCnt, 5));
+		rowCnt++;
 		
-		builder.addLabel("alle Ausdrucke",cc.xy(1,33));
-		builder.add(rbut[2] = macheRadio("direkt zum Drucker leiten","druckdirekt"),cc.xyw(3,33,3));
+		builder.addLabel("alle Ausdrucke",cc.xy(1,++rowCnt));
+		builder.add(rbut[2] = macheRadio("direkt zum Drucker leiten","druckdirekt"),cc.xyw(3,rowCnt++,3));
 		rbut[2].setOpaque(false);
 		bg2.add(rbut[2]);
-		builder.add(rbut[3] = macheRadio("im OpenOffice-Writer öffnen","druckoffice"),cc.xyw(3,35,3));
+		builder.add(rbut[3] = macheRadio("im OpenOffice-Writer öffnen","druckoffice"),cc.xyw(3,++rowCnt,3));
 		rbut[3].setOpaque(false);
 		bg2.add(rbut[3]);
+		rowCnt++;
 		
-		
-		builder.addLabel("Vor dem Versand der  302-er Mail",cc.xy(1, 37));
-		builder.add(cbemail = new JRtaCheckBox("immer fragen"), cc.xyw(3, 37,3));
+		builder.addLabel("Vor dem Versand der  302-er Mail",cc.xy(1, ++rowCnt));
+		builder.add(cbemail = new JRtaCheckBox("immer fragen"), cc.xyw(3, rowCnt,3));
 		cbemail.setOpaque(false);
-		
 
-		
-
-		new SwingWorker<Void,Void>(){
-			@Override
-			protected Void doInBackground() throws Exception {
-				doEinstellungen();
-				return null;
-			}
-			
-		}.execute();
+		//setFields();
 		return builder.getPanel();
 	}
 	
@@ -262,7 +300,7 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 			return;
 		}
 	}
-	private void doEinstellungen(){
+	private void doEinstellungen(){		// <- s. readFromIni() in SysUtilOpMahnung
 		/**GKV**/
 		tf[0].setText(SystemConfig.hmAbrechnung.get("hmgkvformular"));
 		jcmb[0].setSelectedItem(SystemConfig.hmAbrechnung.get("hmgkvrechnungdrucker"));
@@ -289,13 +327,14 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 			rbut[2].setSelected(true);
 		}
 		wert = SystemConfig.hmAbrechnung.get("hmaskforemail");
+		cbemail.setSelected(wert.equals("1") ? true : false);
 		if(wert.equals("1")){
 			cbemail.setSelected(true);
 		}else{
 			cbemail.setSelected(false);
 		}
-		
-		
+		wert = SystemConfig.hmAbrechnung.get("hmusePrinterFromTemplate");
+		usePrinterFromTemplate = (wert.equals("1") ? true : false);
 	}
 	private void doSpeichern(){
 		try{
@@ -308,6 +347,7 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 		//inif.setStringProperty("HMGKVRechnung", "Begleitzettel","1" , null);
 		inif.setStringProperty("HMGKVRechnung", "Rauchdrucken",wert , null);
 		inif.setStringProperty("HMGKVRechnung", "Rexemplare",(String)jcmb[2].getSelectedItem() , null);
+		inif.setStringProperty("HMGKVRechnung", "usePrinterFromTemplate",(usePrinterFromTemplate == true ? "1" : "0") , null);
 
 		inif.setStringProperty("HMPRIRechnung", "Pformular",tf[1].getText().trim() , null);
 		inif.setStringProperty("HMPRIRechnung", "Pdrucker",((String) jcmb[3].getSelectedItem()).trim() , null);
@@ -320,6 +360,7 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 		inif.setStringProperty("GemeinsameParameter", "InOfficeStarten",wert , null);
 		wert = (cbemail.isSelected() ? "1" : "0");
 		inif.setStringProperty("GemeinsameParameter", "FragenVorEmail",wert , null);
+		// useTmplPrinter speichern
 		INITool.saveIni(inif);
 		JOptionPane.showMessageDialog(null,"Die Werte wurden erfolgreich in abrechung.ini gespeichert");
 		new SwingWorker<Void,Void>(){
@@ -378,6 +419,16 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 
 	}
 	@Override
+	public void itemStateChanged(ItemEvent e) {
+		Object source = e.getItemSelectable();
+		if (source == ChkUseTmplPrinter) {
+	    	usePrinterFromTemplate = (e.getStateChange() == ItemEvent.SELECTED ? true : false);
+	    	SystemConfig.hmAbrechnung.put("hmusePrinterFromTemplate", (usePrinterFromTemplate ? "1" : "0"));
+	    }
+	    setFields();
+	    validate();
+	}
+	@Override
 	public void Abbruch() {
 		SystemInit.abbrechen();
 		
@@ -393,5 +444,6 @@ public class SysUtilAbrechnungFormulare extends JXPanel implements KeyListener, 
 	@Override
 	public void RemoveEntry(int instanceNb) {
 		
-	}	
+	}
+		
 }
