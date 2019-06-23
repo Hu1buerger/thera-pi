@@ -2538,7 +2538,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
             Vector<Vector<String>> vecInArbeit = RezFromDB.getPendingVO(ikKasse);
             ////System.out.println("VO in Arbeit: "+ vecInArbeit);
             if(vecInArbeit.size() >= 0){
-            	infoDlg = new InfoDialogVOinArbeit(kassenName,vecInArbeit);
+            	infoDlg = new InfoDialogVOinArbeit(kassenName,vecInArbeit,this.connection);
     			infoDlg.pack();
     			infoDlg.setLocationRelativeTo(null);
     			infoDlg.setVisible(true);
