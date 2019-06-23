@@ -9,6 +9,7 @@ import java.awt.Font;
 import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.PointerInfo;
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -50,8 +51,11 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
 	static HashMap<String,String> hmVO = new HashMap<String,String>();
 	Font font = new Font("Arial",Font.PLAIN,12);
 
-	public InfoDialogVOinArbeit(String arg1, Vector<Vector<String>> data) {
+	private Connection connection;
+
+	public InfoDialogVOinArbeit(String arg1, Vector<Vector<String>> data, Connection connection) {
 		super(arg1, data);
+		this.connection = connection;
 		
 		activateListener();
 		this.setContentPane(getVOinArbeitInfoContent(data));
@@ -167,7 +171,7 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
 	    	if(url.contains("vo_suche")){
 	    		String reznr = extractVO(url);
 	    		System.out.println("öffne Hyperlink zu VO: "+reznr+" für PatId: "+hmVO.get(reznr));
-	    		SucheNachAllem.doPatSuchen(hmVO.get(reznr), reznr, this);
+	    		SucheNachAllem.doPatSuchen(hmVO.get(reznr), reznr, this, this.connection);
 	    	}
 	      }
 	}
@@ -179,7 +183,7 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
 }
 
 class SucheNachAllem{
-	public static void doPatSuchen(String patint,String reznr,Object source){
+	public static void doPatSuchen(String patint,String reznr,Object source, Connection connection){
 		String pat_int;
 		pat_int = patint;
 		JComponent patient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
@@ -190,7 +194,7 @@ class SucheNachAllem{
 			new SwingWorker<Void,Void>(){
 				protected Void doInBackground() throws Exception {
 					JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-					Reha.thisClass.progLoader.ProgPatientenVerwaltung(1);
+					Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection);
 					while( (xpatient == null) ){
 						try {
 							Thread.sleep(20);
@@ -218,7 +222,7 @@ class SucheNachAllem{
 				
 			}.execute();
 		}else{
-			Reha.thisClass.progLoader.ProgPatientenVerwaltung(1);
+			Reha.instance.progLoader.ProgPatientenVerwaltung(1,connection);
 			String s1 = "#PATSUCHEN";
 			String s2 = (String) pat_int;
 			PatStammEvent pEvt = new PatStammEvent(source);
