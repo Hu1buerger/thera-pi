@@ -127,7 +127,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	public JXTTreeNode rootKasse;
 	public KassenTreeModel treeModelKasse;
 	public JXTTreeNode aktuellerKnoten;
-	public JXTTreeNode aktuellerKassenKnoten;
+	public static JXTTreeNode aktuellerKassenKnoten;
 	public int kontrollierteRezepte;
 
 	public StringBuffer positionenBuf = new StringBuffer();
@@ -195,7 +195,9 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	private Connection connection;
 	protected InfoDialog infoDlg;
 	private RezFromDB RezFromDB;
-
+	KeyStore keyStore = null;
+	static int noCertFound = 0xfff;	// max. 0x448 (3 Jahre) gültig
+	
 	public AbrechnungGKV(JAbrechnungInternal xjry, Connection connection){
 		super();
 		this.connection = connection;
@@ -218,19 +220,16 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		mandantenCheck();
 		SlgaVersion = "11";//( DatFunk.TageDifferenz("30.09.2013",DatFunk.sHeute()) <= 0 ? "08" : "09");
 		SllaVersion = "11";//( DatFunk.TageDifferenz("30.09.2013",DatFunk.sHeute()) <= 0 ? "08" : "09");
-
-		new SwingWorker<Void,Void>(){
-			@Override
-			protected Void doInBackground() throws Exception {
-				SystemConfig.certState = checkCert(zertifikatVon/*"IK"+Reha.aktIK*/);
-				if(SystemConfig.certState > 0){
-					abrRez.tbbuts[3].setEnabled(false);
-				}
-				//System.out.println(SystemConfig.hmAbrechnung);
-				//System.out.println("CertState = "+SystemConfig.certState);
-				return null;
-			}
-		}.execute();
+		
+		keyStore = new KeyStore();
+		/* Änderung im Ablauf:
+		 * hier wird nur das (eigene) Zertifikat geprüft, das für die Abrechnung zum Einsatz kommt
+		 * Keine pauschale Prüfung aller Zertifikate im Keystore mehr.
+		 * Prüfung der Zertifikate der Datenannahmestellen erfolgt nach Bedarf, wenn eine Kasse im Kassentree ausgewählt wird.
+		 * (warum soll das abgelaufene Zert einer Kasse, für die gar keine Rezepte existieren, die Kassenabrechnung blockieren?)
+		 */
+		SystemConfig.certState = keyStore.checkOwnCert(zertifikatVon/*"IK"+Reha.aktIK*/);
+		
 		originalTitel = this.jry.getTitel();
 		setEncryptTitle();
 		//cmbDiszi.setSelectedItem(SystemConfig.initRezeptKlasse);
@@ -238,46 +237,10 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		jry.setAbrRezInstance(abrRez);							    // JAbrechnungInternal mitteilen, welche Instanz cleanup() enthält
 		RezFromDB = new RezFromDB();
 	}
+	
 	public void setEncryptTitle(){
 		this.jry.setzeTitel(originalTitel+ " [Abrechnung für IK: "+Reha.getAktIK()+" - Zertifikat von IK: "+zertifikatVon.replace("IK","")+"]");
 		this.jry.repaint();
-	}
-	public static int checkCert(String alias){
-		try{
-			String keystore = SystemConfig.hmAbrechnung.get("hmkeystorefile");
-			NebraskaKeystore store = new NebraskaKeystore(keystore, SystemConfig.hmAbrechnung.get("hmkeystorepw"),"123456", SystemConfig.hmAbrechnung.get("hmkeystoreusecertof").replace("IK", ""));
-			Vector<X509Certificate> certs = store.getAllCerts();
-			String[] dn = null;
-			String ik;
-			long tage;
-			for(int i = 0; i < certs.size();i++){
-				dn=certs.get(i).getSubjectDN().toString().split(",");
-				if(dn.length==5){
-					ik = dn[3].split("=")[1];
-					if(ik.equals(alias)){
-						String verfall = certs.get(i).getNotAfter().toLocaleString().split(" ")[0].trim();
-						tage = DatFunk.TageDifferenz(DatFunk.sHeute(),verfall);
-						if( tage <= 0){
-							JOptionPane.showMessageDialog(null,"Ihr Zertifikat ist abgelaufen.\nEine Verschlüsselung mit diesem Zertifikat ist nicht mehr möglich");
-							return SystemConfig.certIsExpired;
-						}else if(tage <= 30){
-							JOptionPane.showMessageDialog(null,"Achtung!!!\nIhr Zertifikat läuft in "+Long.toString(tage)+" Tage(n) ab.\nBitte rechtzeitig neues Zertifikat beantragen");
-						}
-						return SystemConfig.certOK;
-					}else{
-						String verfall = certs.get(i).getNotAfter().toLocaleString().split(" ")[0].trim();
-						tage = DatFunk.TageDifferenz(DatFunk.sHeute(),verfall);
-						if( tage <= 0){
-							JOptionPane.showMessageDialog(null,"Mindestens ein Zertifikat im Keystore ist abgelaufen.\nVerschlüsselung und damit die 302-er Abrechnung wird daher gesperrt");
-							return SystemConfig.certIsExpired;
-						}
-					}
-				}
-			}
-		}catch(Exception ex){
-			return SystemConfig.certNotFound;
-		}
-		return SystemConfig.certNotFound;
 	}
 	/**********
 	 * 
@@ -472,7 +435,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 				node = ((JXTTreeNode)rootKasse.getChildAt(i));
 				aktuellerAst = i;
 				break;
-			} else if(((JXTTreeNode)rootKasse.getChildAt(i)).knotenObjekt.ikpapier.equals(ikpapier)){
+			} else if(((JXTTreeNode)rootKasse.getChildAt(i)).knotenObjekt.getIkPap().equals(ikpapier)){
 				usesSameIkPapier = i; 
 			}
 		}
@@ -704,6 +667,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		knoten.ktraeger = ktraeger;
 		knoten.ikkasse = ikkasse;
 		knoten.setIkPap(ikpapier);
+		String cmd = "select ik_nutzer from kass_adr where ik_kasse='"+ikkasse+"' Limit 1";
+		knoten.setIkNutzer(SqlInfo.holeEinzelFeld(cmd));
 		JXTTreeNode node = new JXTTreeNode(knoten,true);
 		treeModelKasse.insertNodeInto(node, rootKasse, usesSameIkPap);
 		treeKasse.validate();
@@ -895,11 +860,15 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
     	}
     	JXTTreeNode node = (JXTTreeNode) tp.getLastPathComponent();
     	String rez_nr = node.knotenObjekt.rez_num;
-    	if(!rez_nr.trim().equals("")){
+    	if(!rez_nr.trim().equals("")){		// Knoten enthält ein Rezept
     		aktuellerKnoten = node;
     		doKassenTreeAuswerten(node.knotenObjekt);
     		aktuellerPat = node.knotenObjekt.pat_intern;
-    		aktuellerKassenKnoten =(JXTTreeNode) aktuellerKnoten.getParent();
+			if (aktuellerKassenKnoten != (JXTTreeNode)aktuellerKnoten.getParent()){
+				// VO gehört zu einem anderen Kassenknoten
+				aktuellerKassenKnoten = (JXTTreeNode)aktuellerKnoten.getParent();
+				SystemConfig.certState = keyStore.checkCertKT(getaktuellerKassenKnoten().knotenObjekt);
+			}
     		int pgr = -1;
     		if(! node.knotenObjekt.preisgruppe.trim().equals("")){
     			////System.out.println("Aktuelle Disziplin = "+getDiszis()+" / Aktuelle Preisgruppe = "+pgr);
@@ -910,16 +879,16 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
     			JOptionPane.showMessageDialog(null,"Achtung Preisgruppe kann nicht ermittelt werden!\nBitte dieses Rezept nicht abrechnen!");
     		}
     		////System.out.println("Preisguppe = "+Integer.toString(pgr)+"\nZuhahlmodus = "+(zuzahlModusDefault ? "Normal" : "Bayrisch"));
-
-    	}else{
+    	}else{		// Knoten ist ein Kassenknoten
     		abrRez.setRechtsAufNull();
     		aktuellerKnoten = node;
     		if(aktuellerKnoten.getParent() != null){
     			if(((JXTTreeNode)aktuellerKnoten.getParent()).isRoot()){
-    	    		aktuellerKassenKnoten =(aktuellerKnoten);
-    	    		//////System.out.println("Aktueller Knoten ist Root");
-    			}else{
-    				//////System.out.println("Aktueller Knoten ungleich Root");
+    	    		//////System.out.println("Aktueller Knoten ist ein Kassenknoten");
+    				if (aktuellerKassenKnoten != aktuellerKnoten){
+        	    		aktuellerKassenKnoten = aktuellerKnoten;
+    					SystemConfig.certState = keyStore.checkCertKT(getaktuellerKassenKnoten().knotenObjekt);
+    				}
     			}
         		//////System.out.println("Pfad zu Parent = "+new TreePath(aktuellerKnoten.getParent()).toString());
     		}else{
@@ -2301,6 +2270,7 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		public boolean langfrist;
 		public String langfristaz;
 		private String ikpapier;
+		private String ikNutzer;
 		
 		public KnotenObjekt(String titel,String rez_num,boolean fertig,String ikkasse,String preisgruppe){
 			this.titel = titel;
@@ -2314,6 +2284,12 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		}
 		public String getIkPap (){
 			return this.ikpapier;
+		}
+		public void setIkNutzer(String iknutzer) {
+			this.ikNutzer = iknutzer;
+		}
+		public String getIkNutzer() {
+			return this.ikNutzer;
 		}
 	}
 	/*************************************/
@@ -2369,6 +2345,120 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 	            return Object.class;
 	      }
 	}
+	/*****************************************/
+	private class KeyStore  {
+		/**
+		 * Zertifikatshandling
+		 */
+		NebraskaKeystore keyStore = null;
+		Vector<X509Certificate> certs = null;
+		
+		public void keyStore() throws NebraskaCryptoException, NebraskaFileException{
+			this.init();
+		}
+		/**********
+		 * 
+		 * Keystore öffnen 
+		 */
+		public void init() throws NebraskaCryptoException, NebraskaFileException{
+			if(this.keyStore == null){	// (evtl. zusätzlich Überwachung des Dateidatums um auf Aktualisierung reagieren zu können)
+				String keyStoreLoc = SystemConfig.hmAbrechnung.get("hmkeystorefile");	//Reha.proghome+"keystore/"+Reha.aktIK+"/"+Reha.aktIK+".p12";
+				this.keyStore = new NebraskaKeystore(keyStoreLoc, SystemConfig.hmAbrechnung.get("hmkeystorepw"),"123456", SystemConfig.hmAbrechnung.get("hmkeystoreusecertof").replace("IK", ""));				
+				this.certs = keyStore.getAllCerts();			
+			}
+		}
+		/**********
+		 * 
+		 * Restlaufzeit eines Zertifikates ermitteln
+		 * @param  alias String - IK des gesuchten Zertifikates
+		 * @return int Anz. Tage, wie lange das Zert noch gültig ist oder noCertFound, falls kein Zertifikat gefunden wurde.
+		 */
+		public int getCertDaysValid(String alias){
+			try{
+				this.init();
+				String[] dn = null;
+				String ik;
+				long tage;
+				for(int i = 0; i < certs.size();i++){
+					dn=certs.get(i).getSubjectDN().toString().split(",");
+					if(dn.length==5){
+						ik = (String)dn[3].split("=")[1];
+						if(ik.equals(alias)){	// gesuchtes Zertifikat gefunden
+							String verfall = certs.get(i).getNotAfter().toLocaleString().split(" ")[0].trim();
+							tage = DatFunk.TageDifferenz(DatFunk.sHeute(),verfall); 
+							return (int) tage;
+						}
+					}
+				}
+			}catch(Exception ex){
+				return noCertFound;
+			}
+			return noCertFound;
+		}
+		
+		/**********
+		 * 
+		 * Eigenes Zertifikat auf Gültigkeit prüfen
+		 * @param  alias String - IK des eigenen Zertifikates
+		 * @return SystemConfig.certState
+		 */
+		public int checkOwnCert(String alias){
+			abrRez.sperreAbrechnung();		// Abrechnung bleibt gesperrt bis Zertifikat geprüft ist
+			new SwingWorker<Void,Void>(){
+				@Override
+				protected Void doInBackground() throws Exception {
+					int daysLeft = getCertDaysValid(alias);
+					if(daysLeft <= 0){
+						JOptionPane.showMessageDialog(null,"Ihr Zertifikat ist abgelaufen.\nEine Verschlüsselung mit diesem Zertifikat ist nicht mehr möglich");
+						SystemConfig.certState = SystemConfig.certIsExpired;
+					}else if(daysLeft <= 30){
+						JOptionPane.showMessageDialog(null,"Achtung!!!\nIhr Zertifikat läuft in "+Long.toString(daysLeft)+" Tage(n) ab.\nBitte rechtzeitig neues Zertifikat beantragen");
+						SystemConfig.certState = SystemConfig.certWillExpire;
+						abrRez.erlaubeAbrechnung();
+					}else if(daysLeft == noCertFound){
+						JOptionPane.showMessageDialog(null,"Kein Zertifikat für IK"+alias+" gefunden!.\nVerschlüsselung und damit die 302-er Abrechnung ist nicht möglich");
+						SystemConfig.certState = SystemConfig.certNotFound;
+					}else{
+						SystemConfig.certState = SystemConfig.certOK;
+						abrRez.erlaubeAbrechnung();
+					}
+					return null;
+				}
+			}.execute();
+			return SystemConfig.certState;
+		}
+		/**********
+		 * 
+		 * Zertifikat einer Kasse (bzw. von deren Datenannahmestelle) auf Gültigkeit prüfen
+		 * @param  currNode KnotenObjekt - Knoten im Kassenbaum 
+		 * @return SystemConfig.certState
+		 */
+		public int checkCertKT(KnotenObjekt currNode){
+			abrRez.sperreAbrechnung();		// Abrechnung bleibt gesperrt bis Zertifikat dieser Kasse geprüft ist
+			new SwingWorker<Void,Void>(){
+				String txtKasse = currNode.titel;
+				String ikNutzer = "IK"+currNode.getIkNutzer();
+				@Override
+				protected Void doInBackground() throws Exception {
+					int daysLeft = getCertDaysValid(ikNutzer);
+					if( daysLeft <= 0){
+						JOptionPane.showMessageDialog(null,"Das für "+txtKasse+" zuständige Zertifikat im Keystore ist abgelaufen.\nVerschlüsselung und damit die 302-er Abrechnung wird daher gesperrt.");
+						SystemConfig.certState =  SystemConfig.certIsExpired;
+					}else if(daysLeft == noCertFound){
+						JOptionPane.showMessageDialog(null,"Kein für "+txtKasse+" zuständiges Zertifikat im Keystore gefunden!.\nVerschlüsselung und damit die 302-er Abrechnung ist nicht möglich");
+						SystemConfig.certState = SystemConfig.certNotFound;
+					}else{
+						SystemConfig.certState = SystemConfig.certOK;
+						abrRez.erlaubeAbrechnung();					
+					}
+					return null;
+				}
+			}.execute();
+			return SystemConfig.certState;
+		}
+
+	}
+	
 	/*****************************************/
 	private class KeepIkPap  {
 		/**

@@ -512,6 +512,12 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener,Actio
 	public void setTageDrucken(boolean drucken){
 		this.tagedrucken = drucken;
 	}
+	public void sperreAbrechnung(){
+		tbbuts[3].setEnabled(false);
+	}
+	public void erlaubeAbrechnung(){
+		tbbuts[3].setEnabled(true);
+	}
 	public boolean setNewRez(String rez,boolean schonfertig,String aktDisziplin){
 //		try{
 //			String dummy1 = rez.split(",")[2];
