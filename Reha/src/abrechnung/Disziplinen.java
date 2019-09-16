@@ -48,7 +48,14 @@ public class Disziplinen {
 		typeOfVerordnung = new String[ listTypeOfVO.size() ];		// ... daraus das Array fuer die ComboBox erstellen ...
 		listTypeOfVO.toArray( typeOfVerordnung );					// ... und fuellen
 		this.cmbDiszi = new JRtaComboBox(typeOfVerordnung);
-		cmbDiszi.setSelectedItem(SystemConfig.initRezeptKlasse);	// default setzen
+		String initVal = SystemConfig.initRezeptKlasse;
+		if (initVal.equals(null) || initVal.isEmpty()){
+			initVal = SystemConfig.rezeptKlassenAktiv.get(0).get(0);
+		}
+		if (initVal.equals(null) || initVal.isEmpty()){
+			initVal = listTypeOfVO.get(0);
+		}
+		cmbDiszi.setSelectedItem(initVal);						// default setzen
 
 		// weitere ComboBox mit nur den aktiven Rezeptklassen erzeugen
 		listActiveTypeOfVO = new ArrayList<String>();
