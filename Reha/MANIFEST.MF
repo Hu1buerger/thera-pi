@@ -39,5 +39,6 @@ Class-Path: Libraries/lib/sql/adsjdbc.jar
  Nebraska.jar 
  TheraPiUpdates.jar 
  RehaCommon.jar 
+ OpRgaf.jar 
 
  

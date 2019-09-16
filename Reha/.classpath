@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="tests"/>
@@ -51,5 +51,7 @@
 	<classpathentry kind="lib" path="/Libraries/lib/ocf/ocf-cc.jar"/>
 	<classpathentry kind="src" path="/ICDSuche"/>
 	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/junit-4.12.jar"/>
+	<classpathentry kind="src" path="/OpRgaf"/>
+	<classpathentry kind="src" path="/OffenePosten"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

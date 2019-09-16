@@ -9,8 +9,10 @@ import static CommonTools.StringLiterals.RTACURIE;
 import static CommonTools.StringLiterals.RTAUSER;
 import static CommonTools.StringLiterals.RTA_IK;
 
+import java.awt.Toolkit;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -208,6 +210,7 @@ public class RehaSql implements WindowListener {
         jFrame.setSize(1000, 700);
         jFrame.setTitle("Thera-Pi  Sql-Modul  [IK: " + aktIK + "] " + "[Server-IP: " + dbIpAndName
                 + "] - Äußerste Vorsicht ist geboten!!!");
+		jFrame.setIconImage( Toolkit.getDefaultToolkit().getImage( System.getProperty("user.dir")+File.separator+"icons"+File.separator+"SQL-Modul.png" ) );
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setLocationRelativeTo(null);
         jFrame.getContentPane().add(new RehaSqlTab());
