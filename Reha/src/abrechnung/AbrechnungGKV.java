@@ -197,8 +197,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		jSplitLR.setDividerLocation(230);
 		add(jSplitLR,BorderLayout.CENTER);
 		mandantenCheck();
-		SlgaVersion = "11";//( DatFunk.TageDifferenz("30.09.2013",DatFunk.sHeute()) <= 0 ? "08" : "09");
-		SllaVersion = "11";//( DatFunk.TageDifferenz("30.09.2013",DatFunk.sHeute()) <= 0 ? "08" : "09");
+		SlgaVersion = "12";	//( DatFunk.TageDifferenz("30.06.2019",DatFunk.sHeute()) <= 0 ? "11" : "12");
+		SllaVersion = "12";	//( DatFunk.TageDifferenz("30.06.2019",DatFunk.sHeute()) <= 0 ? "11" : "12");
 		
 		new SwingWorker<Void,Void>(){
 			@Override
@@ -1583,8 +1583,8 @@ public class AbrechnungGKV extends JXPanel implements PatStammEventListener,Acti
 		unbBuf.append(aktDfue+plus+sgruppe+plus);
 		abrDateiName = "SL"+zertifikatVon.replace("IK", "").substring(2,8)/*Reha.aktIK.substring(2,8)*/+"S"+getEdiMonat();
 		unbBuf.append(abrDateiName+plus);
+		//unbBuf.append("0"+EOL);	// Testdatei
 		unbBuf.append("2"+EOL);
-		//unbBuf.append(aktDfue+plus+"B"+plus+"SL"+Reha.aktIK.substring(2,8)+"S"+getEdiMonat()+plus+"2"+EOL);
 		
 		unbBuf.append("UNH+00001+SLGA:"+SlgaVersion+":0:0"+EOL);
 		unbBuf.append("FKT+01"+plus+plus+Reha.aktIK+plus+ik_kostent+plus+ik_kasse+plus+zertifikatVon.replace("IK", "")/*Reha.aktIK*/+EOL);
