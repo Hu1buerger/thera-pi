@@ -22,7 +22,8 @@ public class RezeptFahnder {
                 return;
             }
             doFahndung(ret.toString()
-                          .trim(),
+                          .trim()
+                          .toUpperCase(),
                     connection);
         }
     }

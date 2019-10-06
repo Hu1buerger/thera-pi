@@ -46,6 +46,7 @@ public class WechselgeldDialog extends RehaSmartDialog {
     RehaTPEventClass rtp = null;
 
     PinPanel pinPanel = null;
+	boolean gotCash = false;
 
     public WechselgeldDialog(Frame owner, Point position, double summe) {
         super(null, "WechselGeld");
@@ -53,11 +54,6 @@ public class WechselgeldDialog extends RehaSmartDialog {
         this.activateListener();
         this.setSize(200, 150);
         this.setLocation(position);
-        /*
-         * this.setUndecorated(true); this.setContentPane(getJContentPane());
-         * this.setName("Wechselgeld"); this.setModal(true); this.setResizable(true);
-         * this.setzeFocus(); this.setVisible(true);
-         */
 
         pinPanel = new PinPanel();
         pinPanel.getGruen()
@@ -102,8 +98,6 @@ public class WechselgeldDialog extends RehaSmartDialog {
             pane.setLayout(lay);
             pane.setBackground(Color.WHITE);
 
-            // pane.add(getJXTitledPanel(), cc.xyw(1, 1, 5));
-
             JXLabel lab = new JXLabel("Summe");
             pane.add(lab, cc.xy(2, 3));
 
@@ -125,8 +119,8 @@ public class WechselgeldDialog extends RehaSmartDialog {
             gegebenFeld.addKeyListener(kl);
             pane.add(gegebenFeld, cc.xy(4, 5));
 
-            JXButton close = new JXButton("schliessen");
-            close.setActionCommand("schliessen");
+		JXButton close = new JXButton("Bon drucken & buchen");
+		close.setActionCommand("printNbook");
             close.addActionListener(al);
             pane.add(close, cc.xyw(2, 9, 3));
 
@@ -138,19 +132,6 @@ public class WechselgeldDialog extends RehaSmartDialog {
         return pane;
     }
 
-    /*
-     * private JXTitledPanel getJXTitledPanel() { JXTitledPanel panel = new
-     * JXTitledPanel();
-     * 
-     * JXButton close = new JXButton(); close.setBorder(null);
-     * close.setOpaque(false); close.setPreferredSize(new Dimension(16, 16));
-     * close.setIcon(SystemConfig.hmSysIcons.get("rot")); close.addMouseListener(new
-     * MouseAdapter(){ public void mouseClicked(MouseEvent e) { schliessen(); } });
-     * panel.setRightDecoration(close);
-     * 
-     * panel.setTitle("Wechselgeld"); panel.setTitleForeground(Color.white);
-     * panel.setBorder(null); return panel; }
-     */
     private void activateListener() {
         fl = new FocusListener() {
 
@@ -169,11 +150,11 @@ public class WechselgeldDialog extends RehaSmartDialog {
 
             @Override
             public void keyPressed(KeyEvent arg0) {
-                if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-                    schliessen();
+                if(arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+                    continuePayment();
                     return;
-                } else if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                    schliessen();
+                }else if(arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    endPayment();       // Abbruch mit ESC
                     return;
                 }
             }
@@ -200,9 +181,9 @@ public class WechselgeldDialog extends RehaSmartDialog {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (arg0.getActionCommand()
-                        .equals("schliessen")) {
-                    schliessen();
+                if(arg0.getActionCommand()
+                        .equals("printNbook")) {
+                    continuePayment();
                 }
 
             }
@@ -213,20 +194,34 @@ public class WechselgeldDialog extends RehaSmartDialog {
         rtp.addRehaTPEventListener(this);
     }
 
-    private void schliessen() {
+	private void endPayment() {
         this.setVisible(false);
+		rtp.removeRehaTPEventListener(this);
+		rtp = null;
+		pinPanel = null;
         this.dispose();
     }
 
+    private void continuePayment() {
+        gotCash = true;
+        endPayment();
+    }
+    
+    public boolean processPayment(){
+        return gotCash;
+    }
+    
     @Override
     public void rehaTPEventOccurred(RehaTPEvent evt) {
         try {
             if (evt.getDetails()[0].equals("WechselGeld")) {
-                this.setVisible(false);
+                endPayment();
+/*              this.setVisible(false); 
                 rtp.removeRehaTPEventListener(this);
                 rtp = null;
                 pinPanel = null;
                 this.dispose();
+ */
             }
         } catch (NullPointerException ne) {
         }

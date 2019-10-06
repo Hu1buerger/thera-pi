@@ -1,4 +1,4 @@
-package offenePosten;
+﻿package offenePosten;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,7 +19,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -34,21 +36,25 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-
 import CommonTools.ButtonTools;
 import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
 import CommonTools.JCompTools;
+import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
+import CommonTools.OpShowGesamt;
 import CommonTools.SqlInfo;
 import RehaIO.SocketClient;
 import io.RehaIOMessages;
+
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
 
 public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
@@ -61,6 +67,9 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
     JRtaTextField offen = null;
     JRtaTextField[] tfs = { null, null, null, null };
     JButton[] buts = { null, null, null };
+    enum btIdx {ausbuchen,suchen,dummy};
+    int btAusbuchen = btIdx.ausbuchen.ordinal();
+    int btSuchen = btIdx.suchen.ordinal();
     JRtaComboBox combo = null;
     JXPanel content = null;
     KeyListener kl = null;
@@ -68,11 +77,11 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     MyOffenePostenTableModel tabmod = null;
     JXTable tab = null;
-    JLabel summeOffen;
+/*    JLabel summeOffen;
     JLabel summeRechnung;
     JLabel summeGesamtOffen;
     JLabel anzahlSaetze;
-
+*/    
     BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
@@ -84,6 +93,10 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             "r_zuzahl", "r_mahndat1", "r_mahndat2", "r_mahndat3", "mahnsperr", "pat_intern", "ikktraeger", "id", "ik" };
     OffenepostenTab eltern = null;
 
+    private OpShowGesamt sumPan;
+
+    private JRtaCheckBox bar = null;
+    
     public OffenepostenPanel(OffenepostenTab xeltern) {
         super();
         this.eltern = xeltern;
@@ -109,63 +122,53 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         });
     }
 
-    private JXPanel getContent() {
-        content = new JXPanel();
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-        String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,30dlu,1dlu,40dlu:g,2dlu,50dlu,5dlu,50dlu,2dlu,40dlu,1dlu,50dlu,10dlu";
-        // 1 2 3 4 5 6 7
-        String ywerte = "10dlu,p,2dlu,150dlu:g,5dlu,80dlu,0dlu";
-        FormLayout lay = new FormLayout(xwerte, ywerte);
+    private JPanel getContent(){
+        FormLayout lay = new FormLayout(
+        // 1    2     3    4     5    6  7    8       9     10   11    12   13    14   15    16   17    18   19
+        "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,40dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p",    // xwerte,
+        //  1   2  3     4       5   6  7     8   9  10   11
+         "10dlu,p,5dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,0dlu,0dlu"                                                        // ywerte
+        );
+        PanelBuilder builder = new PanelBuilder(lay);
+        //PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());        // debug mode
+        builder.getPanel().setOpaque(false);
         CellConstraints cc = new CellConstraints();
-        content.setLayout(lay);
 
-        JLabel lab = new JLabel("Suchkriterium");
-        content.add(lab, cc.xy(2, 2));
-        String[] args = { "Rechnungsnummer =", "Rechnungsnummer >=", "Rechnungsnummer <=", "Rechnungsbetrag =",
-                "Rechnungsbetrag >=", "Rechnungsbetrag <=", "Noch offen =", "Noch offen >=", "Noch offen <=",
-                "Kasse enthält", "Name enthält", "Rechnungsdatum =", "Rechnungsdatum >=", "Rechnungsdatum <=",
-                "Rezeptnummer =" };
-
-        // int vorauswahl = Arrays.asList(args).indexOf("Noch offen >=");
-        int vorauswahl = 0;
+        int colCnt=2, rowCnt=2;
+        
+        builder.addLabel("Suchkriterium", cc.xy(colCnt++, rowCnt));            // 2,2
+        
+        String[] args = {"Rechnungsnummer =","Rechnungsnummer >=","Rechnungsnummer <=",
+                "Rechnungsbetrag =","Rechnungsbetrag >=","Rechnungsbetrag <=",
+                "Noch offen =","Noch offen >=","Noch offen <=",
+                "Name enthält",
+                "Rezeptnummer =",
+                "Rechnungsdatum =","Rechnungsdatum >=","Rechnungsdatum <=",
+                "Krankenkasse enthält",};
+        
+        int vorauswahl = OffenePosten.getVorauswahl(args.length);
         combo = new JRtaComboBox(args);
-        combo.setSelectedIndex(vorauswahl);
-        content.add(combo, cc.xy(4, 2));
+        combo.setSelectedIndex( vorauswahl ); 
+        builder.add(combo, cc.xy(++colCnt,rowCnt));                            // 4,2
 
-        lab = new JLabel("finde:");
-        content.add(lab, cc.xy(6, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        suchen = new JRtaTextField("nix", true);
+        ++colCnt;
+        builder.addLabel("finde:", cc.xy(++colCnt, rowCnt));                // 6,2
+        ++colCnt;
+        suchen = new JRtaTextField("nix",true);
         suchen.setName("suchen");
         suchen.addKeyListener(kl);
-        content.add(suchen, cc.xy(8, 2));
+        builder.add(suchen,cc.xy(++colCnt, rowCnt,CellConstraints.FILL,CellConstraints.DEFAULT));    // 8,2
 
-        // neu
-        JButton but = ButtonTools.macheButton("suchen", "suchen", al);
-        but.setMnemonic('s');
-        content.add(but, cc.xy(10, 2));
-
-        lab = new JLabel("Geldeingang");
-        content.add(lab, cc.xy(12, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        tfs[0] = new JRtaTextField("F", true, "6.2", "");
-        tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
-        tfs[0].setText("0,00");
-        tfs[0].setName("offen");
-        tfs[0].addKeyListener(kl);
-        content.add(tfs[0], cc.xy(14, 2));
-
-        content.add((buts[0] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)),
-                cc.xy(16, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        buts[0].setMnemonic('a');
+        buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
+        buts[btSuchen].setMnemonic('s');
+        colCnt +=9;
+        builder.add(buts[btSuchen],cc.xy(colCnt,rowCnt));                    // 17,2
 
         while (!OffenePosten.DbOk) {
 
         }
         tabmod = new MyOffenePostenTableModel();
-        /*
-         * Vector<Vector<String>> felder = SqlInfo.holeFelder("describe rliste");
-         * String[] spalten = new String[felder.size()]; for(int i= 0; i <
-         * felder.size();i++){ spalten[i] = felder.get(i).get(0); }
-         */
+
         tabmod.setColumnIdentifiers(spalten);
         tab = new JXTable(tabmod);
         tab.setHorizontalScrollEnabled(true);
@@ -205,50 +208,42 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
 
         JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
-        content.add(jscr, cc.xyw(2, 4, 15));
+        rowCnt +=2;
+        builder.add(jscr,cc.xyw(2,rowCnt++,17));        // 2,4
 
-        JXPanel auswertung = new JXPanel();
-        String xwerte2 = "10dlu,150dlu,5dlu,100dlu";
-        String ywerte2 = "0dlu,p,2dlu,p,2dlu,p,2dlu,p,10dlu";
-        FormLayout lay2 = new FormLayout(xwerte2, ywerte2);
-        CellConstraints cc2 = new CellConstraints();
-        auswertung.setLayout(lay2);
-        lab = new JLabel("Offene Posten gesamt:");
-        auswertung.add(lab, cc2.xy(2, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeGesamtOffen = new JLabel("0,00");
-        summeGesamtOffen.setForeground(Color.RED);
-        auswertung.add(summeGesamtOffen, cc2.xy(4, 2));
+        colCnt = 11;
+        //colCnt = 13;    // ohne 'bar in Kasse'
+        builder.addLabel("Geldeingang:", cc.xy(colCnt++, ++rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));    // 12,6
 
-        lab = new JLabel("Offene Posten der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 4, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeOffen = new JLabel("0,00");
-        summeOffen.setForeground(Color.BLUE);
-        auswertung.add(summeOffen, cc2.xy(4, 4));
+        tfs[0] = new JRtaTextField("F",true,"6.2","");
+        tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
+        tfs[0].setText("0,00");
+        tfs[0].setName("offen");
+        tfs[0].addKeyListener(kl);
+        //content.add(tfs[0],cc.xy(14,2));
+        builder.add(tfs[0],cc.xy(++colCnt,rowCnt));                                                                // 14,6
 
-        lab = new JLabel("Summe Rechnunsbetrag der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 6, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeRechnung = new JLabel("0,00");
-        summeRechnung.setForeground(Color.BLUE);
-        auswertung.add(summeRechnung, cc2.xy(4, 6));
-
-        lab = new JLabel("Anzahl Datensätze der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 8, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        anzahlSaetze = new JLabel("0");
-        anzahlSaetze.setForeground(Color.BLUE);
-        auswertung.add(anzahlSaetze, cc2.xy(4, 8));
-
-        content.add(auswertung, cc.xyw(1, 6, 15));
-        content.validate();
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                ermittleGesamtOffen();
-                return null;
+        ++colCnt;
+        bar  = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
+        bar.setEnabled(OffenePosten.getBarAusbuchenErlaubt());
+        if(!bar.isEnabled()){
+            bar.setToolTipText("disabled (see System-Init)");
             }
 
-        }.execute();
+        colCnt +=2;
+        buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(colCnt,rowCnt));
+        buts[btAusbuchen].setMnemonic('a');
+        
+        rowCnt +=2;
+        colCnt = 1;
+        builder.add(new JSeparator(SwingConstants.HORIZONTAL), cc.xyw(colCnt,rowCnt++,17));
+        
+        sumPan = new OpShowGesamt();
+        builder.add(sumPan.getPanel(),cc.xyw(colCnt, rowCnt,2,CellConstraints.LEFT,CellConstraints.TOP));    //2,2
 
-        return content;
+        ermittleGesamtOffen();
+        
+        return builder.getPanel();        
     }
 
     private OffenepostenPanel getInstance() {
@@ -363,9 +358,29 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             return;
         }
         suchOffen = suchOffen.subtract(eingang);
-
         gesamtOffen = gesamtOffen.subtract(eingang);
 
+        if(bar.isSelected()){            // Buchung in Bar-Kasse
+            String op_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 0).toString();
+            String op_patId = tabmod.getValueAt(tab.convertRowIndexToModel(row), 13).toString();
+            if(op_patId.equals("")){                // wenn leer war's 'ne Rechnung an 'ne Kasse
+                JOptionPane.showMessageDialog(null,"Die Kasse hat bar gezahlt? - Glaub' ich nicht! \nAusbuchen abgebrochen!");
+                bar.setSelected(false);
+                return;                
+            }
+            String op_patient = tabmod.getValueAt(tab.convertRowIndexToModel(row), 2).toString();         // bei Privatrechng steht hier 'Name,Vorname'
+            String op_sparte = tabmod.getValueAt(tab.convertRowIndexToModel(row), 4).toString();
+            String op_reznum = SqlInfo.holeEinzelFeld("select rez_nr from faktura where rnummer='"+op_rechnum+"' LIMIT 1");
+
+            String cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', "
+                    + "datum='"+ DatFunk.sDatInSQL(DatFunk.sHeute())+"', " 
+                    + "ktext='R-"+ op_sparte + " " + op_rechnum+","+ op_patient +"', rez_nr='"+op_reznum+"'";
+            //System.out.println(cmd);
+            SqlInfo.sqlAusfuehren(cmd);
+
+            bar.setSelected(false);
+        }
+        
         tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 6);
         tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), 7);
 
@@ -391,104 +406,76 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     private void schreibeAbfrage() {
         schreibeGesamtOffen();
-        summeOffen.setText(dcf.format(suchOffen));
-        summeRechnung.setText(dcf.format(suchGesamt));
-        anzahlSaetze.setText(Integer.toString(gefunden));
+        sumPan.setSuchOffen(suchOffen);
+        sumPan.schreibeSuchOffen();
+        sumPan.setSuchGesamt(suchGesamt);
+        sumPan.schreibeSuchGesamt();
+        sumPan.setAnzRec(gefunden);
+        sumPan.schreibeAnzRec();
     }
 
     private void schreibeGesamtOffen() {
-        summeGesamtOffen.setText(dcf.format(gesamtOffen));
+        sumPan.setGesamtOffen(gesamtOffen);
+        sumPan.schreibeGesamtOffen();
     }
 
     private void doSuchen() {
-        if (suchen.getText()
-                  .trim()
-                  .equals("")) {
+        String searchStr = suchen.getText()
+                                 .trim();
+        String searchStrNumVal = searchStr.replace(",", ".");
+        if (searchStr.equals("")) {
             return;
         }
         int suchart = combo.getSelectedIndex();
+        OffenePosten.setVorauswahl(suchart); // Auswahl merken
         String cmd = "";
         try {
             switch (suchart) {
             case 0: // Rechnungsnummer =
-                cmd = "select * from rliste where r_nummer ='" + suchen.getText()
-                                                                       .trim()
-                        + "'";
+                cmd = "select * from rliste where r_nummer ='" + searchStr + "'";
                 break;
             case 1: // >=
-                cmd = "select * from rliste where r_nummer >='" + suchen.getText()
-                                                                        .trim()
-                        + "'";
+                cmd = "select * from rliste where r_nummer >='" + searchStr + "'";
                 break;
             case 2: // <=
-                cmd = "select * from rliste where r_nummer <='" + suchen.getText()
-                                                                        .trim()
-                        + "'";
+                cmd = "select * from rliste where r_nummer <='" + searchStr + "'";
                 break;
             case 3: // Rechnungsbetrag =
-                cmd = "select * from rliste where r_betrag ='" + suchen.getText()
-                                                                       .trim()
-                                                                       .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_betrag ='" + searchStrNumVal + "'";
                 break;
             case 4: // >=
-                cmd = "select * from rliste where r_betrag >='" + suchen.getText()
-                                                                        .trim()
-                                                                        .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_betrag >='" + searchStrNumVal + "'";
                 break;
             case 5: // <=
-                cmd = "select * from rliste where r_betrag <='" + suchen.getText()
-                                                                        .trim()
-                                                                        .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_betrag <='" + searchStrNumVal + "'";
                 break;
             case 6: // offen =
-                cmd = "select * from rliste where r_offen ='" + suchen.getText()
-                                                                      .trim()
-                                                                      .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_offen ='" + searchStrNumVal + "'";
                 break;
             case 7: // offen >=
-                cmd = "select * from rliste where r_offen >='" + suchen.getText()
-                                                                       .trim()
-                                                                       .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_offen >='" + searchStrNumVal + "'";
                 break;
             case 8: // offen <=
-                cmd = "select * from rliste where r_offen <='" + suchen.getText()
-                                                                       .trim()
-                                                                       .replace(",", ".")
-                        + "'";
+                cmd = "select * from rliste where r_offen <='" + searchStrNumVal + "'";
                 break;
-            case 9: // Kasse enthält
-                cmd = "select * from rliste where r_kasse like'%" + suchen.getText() + "%'";
+            case 9: // Name enthält
+                cmd = "select * from rliste where r_name like'%" + searchStr + "%'";
                 break;
-            case 10: // Name enthält
-                cmd = "select * from rliste where r_name like'%" + suchen.getText()
-                                                                         .trim()
-                        + "%'";
+            case 10: // Rezeptnummer =
+                cmd = "select * from rliste where r_nummer = (select rnummer from faktura where rez_nr = '" + searchStr
+                        + "'  LIMIT 1)";
                 break;
             case 11: // Rechnungsdatum =
-                cmd = "select * from rliste where r_datum ='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                        .trim())
-                        + "'";
+                cmd = "select * from rliste where r_datum ='" + DatFunk.sDatInSQL(searchStr) + "'";
                 break;
             case 12: // Rechnungsdatum >=
-                cmd = "select * from rliste where r_datum >='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                         .trim())
-                        + "'";
+                cmd = "select * from rliste where r_datum >='" + DatFunk.sDatInSQL(searchStr) + "'";
                 break;
             case 13: // Rechnungsdatum <=
-                cmd = "select * from rliste where r_datum <='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                         .trim())
-                        + "'";
+                cmd = "select * from rliste where r_datum <='" + DatFunk.sDatInSQL(searchStr) + "'";
                 break;
-            case 14: // Rezeptnummer =
-                cmd = "select * from rliste where r_nummer = (select rnummer from faktura where rez_nr = '"
-                        + suchen.getText()
-                                .trim()
-                        + "'  LIMIT 1)";
+            case 14: // Krankenkasse enthält
+                cmd = "select * from rliste where r_kasse like'%" + suchen.getText() + "%'";
                 break;
 
             }
@@ -602,7 +589,6 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             e.printStackTrace();
         }
         try {
-
             rs = stmt.executeQuery(sstmt);
             Vector<Object> vec = new Vector<Object>();
             int durchlauf = 0;
@@ -654,6 +640,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             tab.repaint();
             if (tab.getRowCount() > 0) {
                 tab.setRowSelectionInterval(0, 0);
+                adjustColumns();
             }
 
         } catch (SQLException ev) {
@@ -679,6 +666,15 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     }
 
+    private void adjustColumns() {
+        /*
+         * ausgewaehlte Spalten dem Inhalt anpassen
+         */
+        int columns2adjust[]={0, 2, 4, 6, 8};    // Rechn.Nr., Kasse, Sparte, Offen, Zuzahlung
+        for(int col:columns2adjust){
+            tab.packColumn(col, 5);
+        }
+    }
     /*****************************************************/
     class OPListSelectionHandler implements ListSelectionListener {
 
@@ -762,7 +758,6 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null, "Fehler in der Dateneingbe");
             }
-
             return;
         }
 

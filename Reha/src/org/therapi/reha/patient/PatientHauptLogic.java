@@ -798,24 +798,19 @@ public class PatientHauptLogic {
                         @Override
                         protected Void doInBackground() throws Exception {
                             long zeit = System.currentTimeMillis();
-                            while (!Reha.instance.patpanel.patDatenOk) {
+							String rezNb = xrez;
+							while(!Reha.instance.patpanel.patDatenOk) {
                                 Thread.sleep(20);
                                 if (System.currentTimeMillis() - zeit > 10000) {
                                     JOptionPane.showMessageDialog(null, "Fehler beim Bezug der Rezeptdaten");
                                     return null;
                                 }
                             }
-                            if (!xrez.contains("#REZHOLEN-")) {
-                                if (xrez.trim()
-                                        .equals("")) {
-                                    patientHauptPanel.aktRezept.holeRezepte(xpatint, "");
-                                } else {
-                                    patientHauptPanel.aktRezept.holeRezepte(xpatint, xrez.trim());
-                                }
-                            } else {
-                                patientHauptPanel.aktRezept.suchePatUeberRez = true;
-                                patientHauptPanel.aktRezept.holeRezepte(xpatint, xrez.split("#REZHOLEN-")[1].trim());
+							if(xrez.contains("#REZHOLEN-")){
+								patientHauptPanel.aktRezept.suchePatUeberRez = true;
+								rezNb = xrez.split("#REZHOLEN-")[1].trim();
                             }
+							patientHauptPanel.aktRezept.holeRezepte(xpatint,rezNb);
                             return null;
                         }
                     }.execute();
@@ -828,10 +823,14 @@ public class PatientHauptLogic {
                     new SwingWorker<Void, Void>() {
                         @Override
                         protected Void doInBackground() throws Exception {
-                            try {
-                                patientHauptPanel.historie.holeRezepte(xpatint, "");
-                            } catch (Exception ex) {
-                                // ex.printStackTrace();
+							String rezNb = xrez;
+							if(xrez.contains("#REZHOLEN-")){
+								rezNb = xrez.split("#REZHOLEN-")[1].trim();
+							}
+							try{
+								patientHauptPanel.historie.holeRezepte(xpatint,rezNb);
+							}catch(Exception ex){
+								//ex.printStackTrace();
                             }
                             return null;
                         }
@@ -981,7 +980,8 @@ public class PatientHauptLogic {
             Reha.instance.patpanel.patDatenOk = false;
             Reha.instance.patpanel.patDaten = SqlInfo.holeSatz("pat5", " * ", "PAT_INTERN ='" + patint + "'",
                     Arrays.asList(new String[] {}));
-            String stmt = "select id from rgaffaktura where roffen > '0' and pat_intern = '" + patint + "' LIMIT 1";
+//          String stmt = "select id from rgaffaktura where roffen > '0' and pat_intern = '" + patint + "' LIMIT 1";
+            String stmt = "select id from rgaffaktura where roffen > '0' and rnr not like 'storno%' and pat_intern = '"+patint+"' LIMIT 1";
 
             if (SqlInfo.holeFelder(stmt)
                        .size() > 0) {

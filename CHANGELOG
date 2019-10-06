@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 Alle nennenswerten Änderungen werden in dieser Datei dokumentitert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -10,6 +10,71 @@ die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
 
 ### fixed
 - Falsche Anrede auf Verkaufsrechnung #84
+
+
+
+## branch mcm_dev - 2019-09-16
+Verkaufs-Modul:
+ ### added
+ - Möglichkeit aus mehreren Druckformularen auszuwählen 
+ - Einbinden weiterer Druckformulare möglich (SystemInitialisierung -> sonstige Einstellungen -> Verkauf)
+ - Adressdaten können, neben Übernahme von Patient oder Kasse, auch v. Hand eingegeben werden
+ - Verkäufe gegen Bon können in Barkasse gebucht werden (SystemInitialisierung -> Abrechnung -> Offene Posten und Mahnung)
+ ### changed
+ - Barverkauf (Bondruck) (de-)aktivierbar (SystemInitialisierung -> sonstige Einstellungen -> Verkauf)
+ ### fixed
+ - Artikelverwaltung: Sortierung nach ID u. Aufruf des Editor (doppelklick) führte zu Absturz 
+   (Sortierung nach numer. Spalten noch nicht korrekt)
+ - Warnung bei 'alter' Tabellenstruktur ('verkliste' enthält double-Spalten statt dezimal)
+
+Abrechnung $302:
+ ### added
+ - Liste mit Behandlungstagen 'merkt' sich ihre Größe für versch. Anz. Beh.-Tage (in abrechnung.ini sperrbar, noch nicht in Gui)
+ - Kasse u. Rezept rot markieren wenn dringend abgerechnet werden sollte (letzte Behandlung > 10 Monate her)
+ - Anzeige ICD10-2
+ - Kassen-Zweig markieren + [F1] zeigt Liste mit für diese Kasse noch in Bearbeitung befindlichen VOs
+ ### changed
+ - Gültigkeit der Zertifikate: 
+     - nur eig. Zert. wird beim Öffnen des 302er geprüft
+     - Zertifikate d. Annahmestellen werden nur geprüft, wenn VOs für diese Annahmestelle vorliegen 
+     - nur Annahmestellen mit abgel. Zert. werden für die Abrechnung gesperrt (nicht alle sobald irgendein Zert. ungültig ist)
+ - verschiedene Taxier-Drucker möglich (Einstellung aus Vorlage, z.B. getrennt nach A5 / A4)
+   (SystemInitialisierung -> Abrechnung -> Abrechnungsformulare -> Einstellung aus Vorlage nutzen)
+
+Hauptfenster:
+ ### added
+ - Barkasse abrechnen kann (Privat-)Rechnungen berücksichtigen
+ -   ~  merkt sich letzte Selektion der Rechnungsarten
+
+Patientenfenster:
+ ### changed
+ - Tools-Menü umsortiert (Alternativen Quittung u. RGR 'gehören zusammen')
+ - VO '..auf nicht bezahlt setzen' löscht vorh. RGR/Quittungen nicht sondern setzt Storno-Markierungen 
+ 		(in rezept.ini aktivierbar, noch nicht in Gui erreichbar
+		 wenn aktiv, werden die Daten wie folgt geändert:
+		 bei Quittung u. RGR:
+		  kasse.ktext:  'abc' -> 'storno_abc' (+ Einnahme löschen); 
+		 bei RGR zusätzlich:
+		  rgrfaktura.rnr: 'RGR-1' -> 'storno_RGR-1' u. rgrfaktura.reznr: 'KG13' -> 'KG13S')
+ ### fixed
+ - bezahlt/nicht bezahlt setzen ändert Befreiungsstatus _nicht_ (mehr)
+ - HMR-Check prüft, ob opt. HM auch isoliert verordnet werden darf (ET,EST,US) (-> fix 180920)
+   + Zählung der Behandlungen endet wenn die Erst-VO gefunden wurde 	(-> fix 180920)
+
+OP/OpRgaf: 
+ ### changed
+ - einheitl. Bildschirm-Aufteilung u. ergon. Abarbeitung (v.o. Suche-Daten-Action/Status; Datenbereich größer)
+ - Breite v. ausgew. Tabellenspalten automat. an Inhalt anpassen
+
+OpRgaf ausbuchen: 
+ ### added
+ - listet auch Verkaufsrechnungen (mahnen fehlt noch)
+ - merkt sich letzte Selektion der Rechnungsarten (wenn nicht gesperrt)
+ - Verkaufsrechnung ausbuchen 'bar an Kasse' möglich (SystemInitialisierung -> Abrechnung -> Offene Posten und Mahnung)
+
+OP ausbuchen: 
+ ### changed
+ - (Privat-)Rechnung ausbuchen 'bar an Kasse' möglich (SystemInitialisierung -> Abrechnung -> Offene Posten und Mahnung)
 
 
 ## [1.1.1] - 2019-09-02
@@ -35,7 +100,7 @@ die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
 - Unterprojekt Datenbank zur Flexibilisierung der Datenbankanbindung
 - logging in Dateien
 
-###changed
+### changed
 - Heilmittelcheck prüft, ob optionale Heilmittel einzeln verordnet werden dürfen.
 - Behandlungen zählen mit Leitsysmptomwechsel
 - Berücksichtigung von Wechsel in Leitsymptomatik oder Diagnosegruppe

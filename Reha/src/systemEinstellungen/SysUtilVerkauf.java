@@ -24,6 +24,7 @@ import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+
 import CommonTools.ButtonTools;
 import CommonTools.INIFile;
 import CommonTools.INITool;
@@ -31,8 +32,14 @@ import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaTextField;
 import environment.Path;
 import hauptFenster.Reha;
+import CommonTools.JCompTools;
 
-public class SysUtilVerkauf extends JXPanel {
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+public class SysUtilVerkauf extends JXPanel implements SysInitCommon_If {
 
     /**
      * 
@@ -46,15 +53,18 @@ public class SysUtilVerkauf extends JXPanel {
             rechnungSpalte6, bonSpalte1, bonSpalte2, bonSpalte3, bonSpalte4, bonSpalte5, bonSpalte6, rechnungDrucker,
             bonDrucker, rechnungSpalten, bonSpalten;
 
-    private JButton rechnungVorlageB, bonVorlageB, speichern, abbruch;
+    private JButton rechnungVorlageB, bonVorlageB;
 
-    private JRtaCheckBox bonAnpassen, sofortDrucken;
+    private JRtaCheckBox bonAnpassen, sofortDrucken, bonEnabled;
 
     private JRtaTextField rechnungVorlage, bonVorlage, rechnungExemplare, bonSeitenlaenge;
 
     private INIFile inif;
 
     private ActionListener al;
+
+    SysUtilVorlagen vorlagen = null;
+    
 
     SysUtilVerkauf() {
         super(new BorderLayout());
@@ -74,27 +84,24 @@ public class SysUtilVerkauf extends JXPanel {
         jscr.setViewportView(getContent());
         jscr.validate();
 
-        inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "verkauf.ini");
+        //inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "verkauf.ini");
+        inif = vorlagen.getInif();
 
-        // add(getContent(),BorderLayout.CENTER);
+        //add(getContent(),BorderLayout.CENTER);
         ladeEinstellungen();
-        this.add(jscr, BorderLayout.CENTER);
-        this.add(getKnopfPanel(), BorderLayout.SOUTH);
-        System.out.println(getWidth() + "/" + getHeight());
+        this.add(jscr,BorderLayout.CENTER);
+//      this.add(getKnopfPanel(),BorderLayout.SOUTH);
+        AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+        this.add(footer.getPanel(),BorderLayout.SOUTH);
+        System.out.println(getWidth()+"/"+getHeight());
     }
-
-    private JPanel getKnopfPanel() {
+/*  
+    private JPanel getKnopfPanel(){
         abbruch = ButtonTools.macheButton("abbrechen", "abbrechen", al);
         speichern = ButtonTools.macheButton("speichern", "speicher", al);
-        /*
-         * abbruch = new JButton("abbrechen"); abbruch.setActionCommand("abbrechen");
-         * abbruch.addActionListener(al); speichern = new JButton("speichern");
-         * speichern.setActionCommand("speichern"); speichern.addActionListener(al);
-         */
-        // 1. 2. 3. 4. 5. 6. 7. 8. 9.
-        FormLayout jpanlay = new FormLayout("right:max(150dlu;p), 60dlu, 60dlu, 4dlu, 60dlu",
-                // 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17. 18. 19. 20. 21.
-                // 22. 23.
+                                    //      1.                      2.    3.    4.     5.     6.    7.      8.     9.
+        FormLayout jpanlay = new FormLayout("right:max(150dlu;p), 60dlu:g, 60dlu, 4dlu, 60dlu, 20dlu",
+       //1.    2. 3.   4.   5.   6.     7.    8. 9.  10.  11. 12. 13.  14.  15. 16.  17. 18.  19.   20.    21.   22.   23.
                 "10dlu,p, 10dlu, p");
 
         PanelBuilder jpan = new PanelBuilder(jpanlay);
@@ -111,184 +118,206 @@ public class SysUtilVerkauf extends JXPanel {
             .validate();
         return jpan.getPanel();
     }
+ */    
 
+    /**
+     * @return
+     */
     private JPanel getContent() {
 
-        // 1 2 3 4 5 6
-        String xwerte = "15dlu, 3dlu, 60dlu, 5dlu, 40dlu:g, 15dlu";
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20
+        //                 1      2     3      4     5        6
+        String xwerte = "15dlu, 3dlu, 80dlu, 5dlu, 40dlu:g, 15dlu";
+        //                 1   2    3   4    5   6    7   8    9  10   11  12   13  14   15  16   17  18   19  20
         String ywerte = "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
-        // "" 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
+        // ""     21  22   23  24   25  26   27  28   29  30   31  32   33  34   35  36   37  38   39  40
                 "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p," +
-                // 41 42 43 44 45 46 47 48 49
-                "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
+        //        41  42   43   44  45  46  47   48   49  50   51  52   53
+                "5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu, p, 5dlu";
         FormLayout lay = new FormLayout(xwerte, ywerte);
         CellConstraints cc = new CellConstraints();
-        // JXPanel pane = new JXPanel();
+        int rowCnt=2;
         PanelBuilder pane = new PanelBuilder(lay);
+        //PanelBuilder pane = new PanelBuilder(lay, new FormDebugPanel());        // debug mode
         pane.setDefaultDialogBorder();
         pane.getPanel()
             .setOpaque(false);
 
-        pane.addSeparator("Bondruck", cc.xyw(1, 2, 5));
-        // JXLabel lab = new JXLabel("Bon:");
-        // pane.add(lab, cc.xyw(2, 2, 2));
-
-        JXLabel lab = new JXLabel("Drucker:");
-        pane.add(lab, cc.xy(3, 4));
-
-        PrintService[] printers = PrinterJob.lookupPrintServices();
+        PrintService[] printers = PrinterJob.lookupPrintServices();     // Druckerliste
         druckernamen = new String[printers.length];
         for (int i = 0; i < printers.length; i++) {
             druckernamen[i] = printers[i].getName();
         }
-        bonDrucker = new JComboBox(druckernamen);
-        pane.add(bonDrucker, cc.xy(5, 4));
 
-        lab = new JXLabel("Vorlage:");
-        pane.add(lab, cc.xy(3, 6));
+        
+        vorlagen = new SysUtilVorlagen(this);
+        vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+        vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "verkauf.ini");
+        vorlagen.setLabels("Formulare","FormulareAnzahl","Formular");
+        vorlagen.activateEditing();
+        
+        pane.add(vorlagen.getPanel(), cc.xyw(1, rowCnt++, 6));        // 1,2
+        
+        pane.addSeparator("Rechnungsdruck", cc.xyw(1,++rowCnt,5));    // 1,4
+        rowCnt++;
 
-        bonVorlage = new JRtaTextField("nix", false);
-        bonVorlage.setLayout(new BorderLayout());
-        bonVorlage.add(bonVorlageB = new JXButton("auswählen"), BorderLayout.EAST);
-        bonVorlageB.setActionCommand("vorlageBon");
-        bonVorlageB.addActionListener(al);
-        pane.add(bonVorlage, cc.xy(5, 6));
+        JXLabel lab = new JXLabel("Sofort drucken?");
+        pane.add(lab, cc.xy(3, ++rowCnt));                            // 3,6
+        String toolTip = "Ausnahme: 'Adresseingabe von Hand' wird im Verkaufsmodul gewählt";
+        lab.setToolTipText(toolTip);
+        
+        sofortDrucken = new JRtaCheckBox();
+        pane.add(sofortDrucken, cc.xy(5, rowCnt++));                // 5,6
+        sofortDrucken.setToolTipText(toolTip);
 
-        lab = new JXLabel("Anzahlspalten:");
-        pane.add(lab, cc.xy(3, 8));
-
-        bonSpalten = new JComboBox(spaltenAnzahl);
-        pane.add(bonSpalten, cc.xy(5, 8));
-
-        lab = new JXLabel("Spalte 1:");
-        pane.add(lab, cc.xy(3, 10));
-
-        bonSpalte1 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte1, cc.xy(5, 10));
-
-        lab = new JXLabel("Spalte 2:");
-        pane.add(lab, cc.xy(3, 12));
-
-        bonSpalte2 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte2, cc.xy(5, 12));
-
-        lab = new JXLabel("Spalte 3:");
-        pane.add(lab, cc.xy(3, 14));
-
-        bonSpalte3 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte3, cc.xy(5, 14));
-
-        lab = new JXLabel("Spalte 4:");
-        pane.add(lab, cc.xy(3, 16));
-
-        bonSpalte4 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte4, cc.xy(5, 16));
-
-        lab = new JXLabel("Spalte 5:");
-        pane.add(lab, cc.xy(3, 18));
-
-        bonSpalte5 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte5, cc.xy(5, 18));
-
-        lab = new JXLabel("Spalte 6:");
-        pane.add(lab, cc.xy(3, 20));
-
-        bonSpalte6 = new JComboBox(spaltenNamen);
-        pane.add(bonSpalte6, cc.xy(5, 20));
-
-        lab = new JXLabel("Seitenlänge anpassen?");
-        pane.add(lab, cc.xy(3, 22));
-
-        bonAnpassen = new JRtaCheckBox();
-        pane.add(bonAnpassen, cc.xy(5, 22));
-
-        lab = new JXLabel("Seitenlänge pro Artikel:");
-        pane.add(lab, cc.xy(3, 24));
-
-        bonSeitenlaenge = new JRtaTextField("nix", false);
-        bonSeitenlaenge.setLayout(new BorderLayout());
-        bonSeitenlaenge.add(new JXLabel("mm * 100"), BorderLayout.EAST);
-        pane.add(bonSeitenlaenge, cc.xy(5, 24));
-
-        pane.addSeparator("Rechnungsdruck", cc.xyw(1, 26, 5));
-        /*
-         * lab = new JXLabel("Rechnung:"); pane.add(lab, cc.xyw(2, 26, 2));
-         */
         lab = new JXLabel("Drucker:");
-        pane.add(lab, cc.xy(3, 28));
-
+        pane.add(lab, cc.xy(3, ++rowCnt));                            // 3,8
+        
         rechnungDrucker = new JComboBox(druckernamen);
-        pane.add(rechnungDrucker, cc.xy(5, 28));
+        pane.add(rechnungDrucker, cc.xy(5, rowCnt++));                // 5,8
 
         lab = new JXLabel("Vorlage:");
-        pane.add(lab, cc.xy(3, 30));
+        pane.add(lab, cc.xy(3, ++rowCnt));                            // 3,10
 
         rechnungVorlage = new JRtaTextField("nix", false);
         rechnungVorlage.setLayout(new BorderLayout());
         rechnungVorlage.add(rechnungVorlageB = new JXButton("auswählen"), BorderLayout.EAST);
         rechnungVorlageB.setActionCommand("vorlageRechnung");
         rechnungVorlageB.addActionListener(al);
-        pane.add(rechnungVorlage, cc.xy(5, 30));
+        pane.add(rechnungVorlage, cc.xy(5, rowCnt++));              // 5,10
 
-        lab = new JXLabel("Anzahlspalten:");
-        pane.add(lab, cc.xy(3, 32));
+        lab = new JXLabel("Anzahl Spalten:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalten = new JComboBox(spaltenAnzahl);
-        pane.add(rechnungSpalten, cc.xy(5, 32));
+        pane.add(rechnungSpalten, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 1:");
-        pane.add(lab, cc.xy(3, 34));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte1 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte1, cc.xy(5, 34));
+        pane.add(rechnungSpalte1, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 2:");
-        pane.add(lab, cc.xy(3, 36));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte2 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte2, cc.xy(5, 36));
+        pane.add(rechnungSpalte2, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 3:");
-        pane.add(lab, cc.xy(3, 38));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte3 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte3, cc.xy(5, 38));
+        pane.add(rechnungSpalte3, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 4:");
-        pane.add(lab, cc.xy(3, 40));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte4 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte4, cc.xy(5, 40));
+        pane.add(rechnungSpalte4, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 5:");
-        pane.add(lab, cc.xy(3, 42));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte5 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte5, cc.xy(5, 42));
+        pane.add(rechnungSpalte5, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Spalte 6:");
-        pane.add(lab, cc.xy(3, 44));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungSpalte6 = new JComboBox(spaltenNamen);
-        pane.add(rechnungSpalte6, cc.xy(5, 44));
+        pane.add(rechnungSpalte6, cc.xy(5, rowCnt++));
 
         lab = new JXLabel("Exemplare:");
-        pane.add(lab, cc.xy(3, 46));
+        pane.add(lab, cc.xy(3, ++rowCnt));
 
         rechnungExemplare = new JRtaTextField("ZAHLEN", false);
-        pane.add(rechnungExemplare, cc.xy(5, 46));
+        pane.add(rechnungExemplare, cc.xy(5, rowCnt++));
 
-        lab = new JXLabel("Sofort drucken?");
-        pane.add(lab, cc.xy(3, 48));
 
-        sofortDrucken = new JRtaCheckBox();
-        pane.add(sofortDrucken, cc.xy(5, 48));
-        /*
-         * speichern = new JXButton("speichern");
-         * speichern.setActionCommand("speicher"); speichern.addActionListener(al);
-         * pane.add(speichern, cc.xy(5, 50));
-         */
+        rowCnt ++;
+        pane.addSeparator("Bondruck", cc.xyw(1,rowCnt++,5));
+        
+        lab = new JXLabel("Bondruck erlaubt?");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+        toolTip = "wenn nicht können nur Rechnungen erstellt werden";
+        lab.setToolTipText(toolTip);
+
+        bonEnabled = new JRtaCheckBox();
+        pane.add(bonEnabled, cc.xy(5, rowCnt++));
+        bonEnabled.setToolTipText(toolTip);
+
+        lab = new JXLabel("Drucker:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonDrucker = new JComboBox(druckernamen);
+        pane.add(bonDrucker, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Vorlage:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonVorlage = new JRtaTextField("nix", false);
+        bonVorlage.setLayout(new BorderLayout());
+        bonVorlage.add(bonVorlageB = new JXButton("auswählen"), BorderLayout.EAST);
+        bonVorlageB.setActionCommand("vorlageBon");
+        bonVorlageB.addActionListener(al);
+        pane.add(bonVorlage, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Anzahl Spalten:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalten = new JComboBox(spaltenAnzahl);
+        pane.add(bonSpalten, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 1:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte1 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte1, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 2:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte2 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte2, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 3:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte3 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte3, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 4:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte4 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte4, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 5:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte5 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte5, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Spalte 6:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonSpalte6 = new JComboBox(spaltenNamen);
+        pane.add(bonSpalte6, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Seitenlänge anpassen?");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+
+        bonAnpassen = new JRtaCheckBox();
+        pane.add(bonAnpassen, cc.xy(5, rowCnt++));
+
+        lab = new JXLabel("Seitenlänge pro Artikel:");
+        pane.add(lab, cc.xy(3, ++rowCnt));
+        
+        bonSeitenlaenge = new JRtaTextField("nix", false);
+        bonSeitenlaenge.setLayout(new BorderLayout());
+        bonSeitenlaenge.add(new JXLabel("mm * 100"), BorderLayout.EAST);
+        pane.add(bonSeitenlaenge, cc.xy(5, rowCnt++));
+
         pane.getPanel()
             .validate();
 
@@ -333,6 +362,7 @@ public class SysUtilVerkauf extends JXPanel {
     private void ladeEinstellungen() {
         bonAnpassen.setSelected(inif.getBooleanProperty("Bon", "SeitenLaengeAendern"));
         sofortDrucken.setSelected(inif.getBooleanProperty("Bon", "SofortDrucken"));
+        bonEnabled.setSelected(inif.getBooleanProperty("Bon", "BonDruckErlaubt"));
 
         rechnungSpalte1.setSelectedItem(inif.getStringProperty("Rechnung", "Spalte1"));
         rechnungSpalte2.setSelectedItem(inif.getStringProperty("Rechnung", "Spalte2"));
@@ -361,11 +391,13 @@ public class SysUtilVerkauf extends JXPanel {
 
         bonSeitenlaenge.setText(inif.getStringProperty("Bon", "ProArtikelSeitenLaenge"));
 
+        vorlagen.readFromIni();
     }
 
     private void speicherEinstellungen() {
         try {
             inif.setBooleanProperty("Bon", "SeitenLaengeAendern", bonAnpassen.isSelected(), null);
+            inif.setBooleanProperty("Bon", "BonDruckErlaubt", bonEnabled.isSelected(), null);
 
             inif.setBooleanProperty("Bon", "SofortDrucken", sofortDrucken.isSelected(), null);
             inif.setBooleanProperty("Rechnung", "SofortDrucken", sofortDrucken.isSelected(), null);
@@ -398,6 +430,8 @@ public class SysUtilVerkauf extends JXPanel {
 
             inif.setStringProperty("Bon", "ProArtikelSeitenLaenge", bonSeitenlaenge.getText(), null);
 
+            boolean formok = vorlagen.saveToIni();
+
             INITool.saveIni(inif);
             JOptionPane.showMessageDialog(null, "Konfiguration erfolgreich in verkauf.ini gespeichert.");
         } catch (Exception ex) {
@@ -411,25 +445,38 @@ public class SysUtilVerkauf extends JXPanel {
 
             @Override
             public void actionPerformed(ActionEvent arg0) {
-                if (arg0.getActionCommand()
-                        .equals("speicher")) {
-                    speicherEinstellungen();
-                } else if (arg0.getActionCommand()
-                               .equals("vorlageRechnung")) {
+                if(arg0.getActionCommand()
+                        .equals("vorlageRechnung")) {
                     String sdummy = dateiWaehlen();
                     rechnungVorlage.setText((sdummy.equals("") ? rechnungVorlage.getText() : sdummy));
                 } else if (arg0.getActionCommand()
                                .equals("vorlageBon")) {
                     String sdummy = dateiWaehlen();
                     bonVorlage.setText((sdummy.equals("") ? bonVorlage.getText() : sdummy));
-                } else if (arg0.getActionCommand()
-                               .equals("abbrechen")) {
+                }
+            }
+        };
+    }
+
+    @Override
+    public void Abbruch() {
                     SystemInit.abbrechen();
-                    return;
                 }
 
+    @Override
+    public void Speichern() {
+        speicherEinstellungen();
+    }
+
+    @Override
+    public void AddEntry(int instanceNb) {
+        // TODO Auto-generated method stub
+        
             }
 
-        };
+    @Override
+    public void RemoveEntry(int instanceNb) {
+        // TODO Auto-generated method stub
+        
     }
 }

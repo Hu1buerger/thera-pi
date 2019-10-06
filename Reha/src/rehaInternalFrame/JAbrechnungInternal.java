@@ -8,6 +8,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.event.InternalFrameEvent;
 
+import abrechnung.AbrechnungRezept;
 import CommonTools.RehaEvent;
 import CommonTools.RehaEventClass;
 import CommonTools.RehaEventListener;
@@ -18,6 +19,8 @@ public class JAbrechnungInternal extends JRehaInternal implements FocusListener,
     /**
     * 
     */
+	private AbrechnungRezept abrRez = null;
+	
     private static final long serialVersionUID = -4989326440978535166L;
     RehaEventClass rEvent = null;
 
@@ -37,6 +40,7 @@ public class JAbrechnungInternal extends JRehaInternal implements FocusListener,
         removeFocusListener(this);
         this.removeAncestorListener(this);
         final String name = this.getName();
+			abrRez.cleanUp();
 
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -67,5 +71,8 @@ public class JAbrechnungInternal extends JRehaInternal implements FocusListener,
             }
         }
     }
+		public void setAbrRezInstance(AbrechnungRezept xAbrRez) {
+			abrRez = xAbrRez;
+		}
 
 }

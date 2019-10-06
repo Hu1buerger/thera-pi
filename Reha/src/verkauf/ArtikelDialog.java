@@ -156,6 +156,7 @@ public class ArtikelDialog extends RehaSmartDialog {
         speichern.setActionCommand("speicher");
         speichern.addActionListener(al);
         pane.add(speichern, cc.xyw(2, 18, 3));
+		pane.addKeyListener(kl);
 
         return pane;
     }
@@ -240,7 +241,12 @@ public class ArtikelDialog extends RehaSmartDialog {
                                                          : this.textLagerstand.getText()
                                                                               .replace(',', '.'));
                 this.artikel.setLagerstand(Double.parseDouble(dummyparse));
+				Lieferant geliefertVon = (Lieferant) this.comboLieferant.getSelectedItem();
+				if (geliefertVon != null){
                 this.artikel.setLieferant(((Lieferant) this.comboLieferant.getSelectedItem()).getID());
+				}else{
+					this.artikel.setLieferant(-1);
+				}
                 this.artikel.setEinheit((String) this.comboEinheit.getSelectedItem());
                 this.artikel.setMwst(Double.parseDouble(((String) this.comboMwst.getSelectedItem()).replace(',', '.')));
             } else {

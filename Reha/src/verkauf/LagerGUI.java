@@ -18,6 +18,8 @@ import org.jdesktop.swingx.JXTable;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+
+import CommonTools.DoubleTableCellRenderer;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import verkauf.model.Artikel;
@@ -75,11 +77,14 @@ public class LagerGUI extends JXPanel {
         lgmod = new DefaultTableModel();
         lgmod.setColumnIdentifiers(columns);
         lgtab = new JXTable(lgmod);
-        lgtab.getColumn(7)
-             .setMinWidth(0);
-        lgtab.getColumn(7)
-             .setMaxWidth(0);
+        lgtab.getColumn(7).setMinWidth(0);      // \
+        lgtab.getColumn(7).setMaxWidth(0);      // /verkartikelID ausblenden
         lgtab.setEditable(false);
+        lgtab.getColumn(2).setCellRenderer(new DoubleTableCellRenderer());
+        lgtab.getColumn(3).setCellRenderer(new DoubleTableCellRenderer());
+        lgtab.getColumn(4).setCellRenderer(new DoubleTableCellRenderer());
+        lgtab.getColumn(6).setCellRenderer(new DoubleTableCellRenderer());
+
         new SwingWorker<Void, Void>() {
 
             @Override
@@ -111,23 +116,28 @@ public class LagerGUI extends JXPanel {
         if (befehl == VerkaufTab.neu) {
             doArtikelDialog(-1);
             this.setzeTabDaten(Artikel.liefereArtikelDaten());
-            this.setLastRowSelected();
-        } else if (befehl == VerkaufTab.edit) {
-            if (this.lgtab.getSelectedRow() >= 0) {
-                int row = this.lgtab.getSelectedRow();
-                int id = Integer.parseInt((String) this.lgmod.getValueAt(row, this.lgmod.getColumnCount() - 1));
+            //this.setLastRowSelected();
+            this.selectNewestRow();
+        } else if(befehl == VerkaufTab.edit) {
+            if(this.lgtab.getSelectedRow() >= 0) {
+                int currRow = this.lgtab.getSelectedRow();
+                int realRow = this.lgtab.convertRowIndexToModel(currRow);       // (echter) Zeilen-Idx im Model (falls Tabelle umsortiert ist) 
+                int id = Integer.parseInt((String)this.lgmod.getValueAt(realRow, this.lgmod.getColumnCount()-1));
                 doArtikelDialog(id);
                 this.setzeZeileNeu(id);
-                this.lgtab.setRowSelectionInterval(row, row);
+				this.lgtab.setRowSelectionInterval(currRow, currRow);
             } else {
                 JOptionPane.showMessageDialog(null, "Wen oder was willst du ändern?");
             }
-        } else if (befehl == VerkaufTab.delete) {
-            if (this.lgtab.getSelectedRow() >= 0) {
-                Artikel.loescheArtikel(Integer.parseInt(
-                        (String) this.lgmod.getValueAt(this.lgtab.getSelectedRow(), this.lgmod.getColumnCount() - 1)));
-                this.loescheZeile(this.lgtab.getSelectedRow());
-                this.setLastRowSelected();
+        } else if(befehl == VerkaufTab.delete) {
+            int currRow = this.lgtab.getSelectedRow();                      // aktuell markierte Zeile merken
+            int realRow = this.lgtab.convertRowIndexToModel(currRow);       // (echter) Zeilen-Idx im Model (falls Tabelle umsortiert ist) 
+            if(realRow >= 0) {
+                String currArtID = (String)this.lgmod.getValueAt(realRow, 0);
+                currArtID = (String)this.lgmod.getValueAt(realRow, this.lgmod.getColumnCount()-1);
+                Artikel.loescheArtikel(Integer.parseInt((String)this.lgmod.getValueAt(realRow, this.lgmod.getColumnCount()-1)));
+                this.loescheZeile(realRow);
+                this.setRowSelected(currRow);
             } else {
                 JOptionPane.showMessageDialog(null, "Wen oder was willst du löschen?");
             }
@@ -186,6 +196,7 @@ public class LagerGUI extends JXPanel {
                 for (int i = 0; i < d.size(); i++) {
                     lgmod.addRow(d.get(i));
                 }
+				lgtab.packColumn(1, 5);
                 lgtab.repaint();
                 return null;
             }
@@ -237,4 +248,24 @@ public class LagerGUI extends JXPanel {
         }
     }
 
+	private void setRowSelected(int currRow) {
+		if(this.lgmod.getRowCount() > currRow) {
+			this.lgtab.setRowSelectionInterval(currRow, currRow);
+		}
+		else{
+			this.setLastRowSelected();
+		}
+	}
+
+	private void selectNewestRow() {
+		String lastOne = Artikel.getNeuesteArtikelID();
+		for(int n = 0; n < lgtab.getRowCount(); n++) {
+			if( ((String)lgmod.getValueAt(n, 1)).equals(lastOne) ) {
+				setRowSelected(n);
+				break;
+			}
+		}
+	}
+
 }
+

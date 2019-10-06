@@ -229,6 +229,7 @@ public class SystemConfig {
     public static boolean phoneAvailable = false;
 
     public static boolean behdatumTippen = false;
+	public static boolean useStornieren = false;
     public static boolean isAndi = false;
 
     public static boolean fullSizePwDialog = false;
@@ -1408,6 +1409,14 @@ public class SystemConfig {
                                       .equals("0") ? false : true);
             }
 
+            dummy = inif.getStringProperty("Sonstiges", "StornoStattLoeschen");
+            if(dummy == null){                                                          // Eintrag noch nicht vorhanden?
+                inif.setStringProperty("Sonstiges", "StornoStattLoeschen","0",null);    // default wie gehabt: löschen
+                mustsave = true;
+            }else{
+                useStornieren = (inif.getStringProperty("Sonstiges", "StornoStattLoeschen").equals("0") ? false : true);                
+            }
+            
             String[] hmPraefixArt = { "KG", "MA", "ER", "LO", "RH", "PO", "RS", "FT" };
             String[] hmPraefixZahl = { "22", "21", "26", "23", "67", "71", "61", "62" };
             String[] hmIndexZahl = { "2", "1", "5", "3", "6", "7", "6", "7" };
@@ -1915,14 +1924,30 @@ public class SystemConfig {
 
         hmAbrechnung.put("hmallinoffice", inif.getStringProperty("GemeinsameParameter", "InOfficeStarten"));
 
+        String section = "HMGKVRechnung";
         if (inif.getStringProperty("HMGKVRechnung", "AutoOKwenn302offen") == null) { // kein Eintrag in ini -> default
                                                                                      // anlegen
-            inif.setStringProperty("HMGKVRechnung", "AutoOKwenn302offen", "0",
+            inif.setStringProperty(section, "AutoOKwenn302offen", "0",
                     "Rezept bekommt automatisch Haekchen wenn beim Abschliessen auch das 302-er Panel offen ist");
             mustsave = true;
         }
-        hmAbrechnung.put("autoOk302", inif.getStringProperty("HMGKVRechnung", "AutoOKwenn302offen"));
+        hmAbrechnung.put("autoOk302", inif.getStringProperty(section, "AutoOKwenn302offen"));
 
+        if ( inif.getStringProperty(section, "keepTageTreeSize") == null ){         // kein Eintrag in ini -> default anlegen
+            inif.setIntegerProperty(section, "keepTageTreeSize",1,"Groesse des Fensters fuer versch. Anz. Behandlungstage merken") ;
+            inif.setIntegerProperty(section, "maxTage",24,"maximale Anz. Behandlungstage") ;
+            inif.setIntegerProperty(section, "lockSettings",0, "Aktualisieren der Eintraege gesperrt");
+            mustsave=true;
+        }
+		hmAbrechnung.put("keepTTSize", inif.getStringProperty(section, "keepTageTreeSize"));
+		hmAbrechnung.put("TTSizeLocked", inif.getStringProperty(section, "lockSettings"));
+		hmAbrechnung.put("maxBehTage", inif.getStringProperty(section, "maxTage"));
+
+		if ( inif.getStringProperty(section, "usePrinterFromTemplate") == null ){			// kein Eintrag in ini -> default setzen
+			hmAbrechnung.put("hmusePrinterFromTemplate", "0");
+		}else{
+			hmAbrechnung.put("hmusePrinterFromTemplate", inif.getStringProperty(section, "usePrinterFromTemplate"));
+		}
         String sask = inif.getStringProperty("GemeinsameParameter", "FragenVorEmail");
         if (sask == null) {
             System.out.println("Erstelle Parameter 'FrageVorEmail'");

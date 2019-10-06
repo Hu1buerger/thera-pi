@@ -1,4 +1,4 @@
-package offenePosten;
+﻿package offenePosten;
 
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -21,6 +21,7 @@ import org.jdesktop.swingworker.SwingWorker;
 
 import CommonTools.INIFile;
 import CommonTools.INITool;
+import CommonTools.OpCommon;
 import CommonTools.SqlInfo;
 import CommonTools.StartOOApplication;
 import CommonTools.Verschluesseln;
@@ -89,12 +90,21 @@ public class OffenePosten implements WindowListener {
     public static int rehaReversePort = -1;
 
     public boolean isLibreOffice;
+    private static String path2IniFile;
+    private static String path2TemplateFiles;
+    private static int vorauswahlSuchkriterium = -1;
+    private static boolean settingsLocked = false;
+    private static String iniFile;
+    private static boolean erlaubeBarInKasse = false;
+    private static boolean iniValuesValid = false;
+
 
     public static void main(String[] args) {
         new Logging("offeneposten");
         OffenePosten application = new OffenePosten();
         application.getInstance();
         application.getInstance().sqlInfo = new SqlInfo();
+        System.out.println("OP main: " + application.getInstance());
 
         if (args.length > 0 || testcase) {
             if (!testcase) {
@@ -115,7 +125,9 @@ public class OffenePosten implements WindowListener {
                 officeNativePfad = inif.getStringProperty("OpenOffice.org", "OfficeNativePfad");
                 progHome = args[0];
                 aktIK = args[1];
-                INITool.init(progHome + "ini/" + aktIK + "/");
+                path2IniFile = progHome + "ini/" + aktIK + "/";
+                path2TemplateFiles = progHome+"vorlagen/"+aktIK;
+                INITool.init(path2IniFile);
                 /*******************************************************/
                 final OffenePosten xoffeneposten = application;
                 new SwingWorker<Void, Void>() {
@@ -145,8 +157,10 @@ public class OffenePosten implements WindowListener {
 
                 }.execute();
                 /*******************************************************/
+/*
                 final String arg0 = args[0];
                 final String arg1 = args[1];
+*/
                 new SwingWorker<Void, Void>() {
                     @Override
 
@@ -154,50 +168,59 @@ public class OffenePosten implements WindowListener {
                         while (!OffenePosten.DbOk) {
                             Thread.sleep(30);
                         }
-                        INIFile oinif = INITool.openIni(arg0 + "ini/" + arg1 + "/", "offeneposten.ini");
-                        mahnParameter.put("frist1", oinif.getIntegerProperty("General", "TageBisMahnung1"));
-                        mahnParameter.put("frist2", oinif.getIntegerProperty("General", "TageBisMahnung2"));
-                        mahnParameter.put("frist3", oinif.getIntegerProperty("General", "TageBisMahnung3"));
-                        mahnParameter.put("einzelmahnung",
-                                oinif.getIntegerProperty("General", "EinzelMahnung") == 1 ? Boolean.TRUE
-                                        : Boolean.FALSE);
-                        mahnParameter.put("drucker", oinif.getStringProperty("General", "MahnungDrucker"));
-                        mahnParameter.put("exemplare", oinif.getIntegerProperty("General", "MahnungExemplare"));
-                        mahnParameter.put("inofficestarten",
-                                oinif.getIntegerProperty("General", "InOfficeStarten") == 1 ? Boolean.TRUE
-                                        : Boolean.FALSE);
-                        mahnParameter.put("erstsuchenab", oinif.getStringProperty("General", "AuswahlErstAb"));
-                        /***/
-                        String forms = oinif.getStringProperty("General", "FormularMahnung1");
-                        if (forms.indexOf("/") > 0) {
-                            forms = forms.substring(forms.lastIndexOf("/") + 1);
+                        iniFile = "offeneposten.ini";
+                        INIFile oinif = INITool.openIni(path2IniFile, iniFile);
+                        OpCommon.readMahnParamCommon(oinif, mahnParameter);
+/*
+                        mahnParameter.put("frist1", (Integer) oinif.getIntegerProperty("General","TageBisMahnung1") );
+                        mahnParameter.put("frist2", (Integer) oinif.getIntegerProperty("General","TageBisMahnung2") );
+                        mahnParameter.put("frist3", (Integer) oinif.getIntegerProperty("General","TageBisMahnung3") );
+                        mahnParameter.put("einzelmahnung", (Boolean) (oinif.getIntegerProperty("General","EinzelMahnung") == 1 ? Boolean.TRUE : Boolean.FALSE) );
+                        mahnParameter.put("drucker", (String) oinif.getStringProperty("General","MahnungDrucker") );
+                        mahnParameter.put("exemplare", (Integer) oinif.getIntegerProperty("General","MahnungExemplare") );
+                        mahnParameter.put("inofficestarten", (Boolean) (oinif.getIntegerProperty("General","InOfficeStarten") == 1 ? Boolean.TRUE : Boolean.FALSE) );
+                        mahnParameter.put("erstsuchenab", (String) oinif.getStringProperty("General","AuswahlErstAb") );
+*/                        
+                        for(int i = 1; i <=4;i++){
+                            OpCommon.addFormNb (oinif,"General","FormularMahnung", "Mahnung", i,mahnParameter,path2TemplateFiles);
                         }
-                        mahnParameter.put("formular1", progHome + "vorlagen/" + aktIK + "/" + forms);
-                        /***/
-                        forms = oinif.getStringProperty("General", "FormularMahnung2");
-                        if (forms.indexOf("/") > 0) {
-                            forms = forms.substring(forms.lastIndexOf("/") + 1);
+/*
+                        String forms = oinif.getStringProperty("General","FormularMahnung1") ;
+                        if(forms.indexOf("/") > 0){
+                            forms = forms.substring(forms.lastIndexOf("/")+1);
                         }
-                        mahnParameter.put("formular2", progHome + "vorlagen/" + aktIK + "/" + forms);
-                        /***/
-                        forms = oinif.getStringProperty("General", "FormularMahnung3");
-                        if (forms.indexOf("/") > 0) {
-                            forms = forms.substring(forms.lastIndexOf("/") + 1);
+                        mahnParameter.put("formular1", (String) progHome+"vorlagen/"+aktIK+"/"+forms );
+
+                        forms = oinif.getStringProperty("General","FormularMahnung2") ;
+                        if(forms.indexOf("/") > 0){
+                            forms = forms.substring(forms.lastIndexOf("/")+1);
                         }
-                        mahnParameter.put("formular3", progHome + "vorlagen/" + aktIK + "/" + forms);
-                        /***/
-                        forms = oinif.getStringProperty("General", "FormularMahnung4");
-                        if (forms.indexOf("/") > 0) {
-                            forms = forms.substring(forms.lastIndexOf("/") + 1);
+                        mahnParameter.put("formular2", (String) progHome+"vorlagen/"+aktIK+"/"+forms  );
+
+                        forms = oinif.getStringProperty("General","FormularMahnung3") ;
+                        if(forms.indexOf("/") > 0){
+                            forms = forms.substring(forms.lastIndexOf("/")+1);
                         }
-                        mahnParameter.put("formular4", progHome + "vorlagen/" + aktIK + "/" + forms);
-                        /***/
-                        // System.out.println(mahnParameter.get("formular1"));
-                        // System.out.println(mahnParameter.get("formular2"));
-                        // System.out.println(mahnParameter.get("formular3"));
-                        // System.out.println(mahnParameter.get("formular4"));
-                        mahnParameter.put("diralterechnungen", oinif.getStringProperty("General", "DirAlteRechnungen"));
-                        // System.out.println(mahnParameter);
+                        mahnParameter.put("formular3", (String) progHome+"vorlagen/"+aktIK+"/"+forms  );
+
+                        forms = oinif.getStringProperty("General","FormularMahnung4") ;
+                        if(forms.indexOf("/") > 0){
+                            forms = forms.substring(forms.lastIndexOf("/")+1);
+                        }
+                        mahnParameter.put("formular4", (String) progHome+"vorlagen/"+aktIK+"/"+forms   );
+
+*/
+                        //System.out.println(mahnParameter.get("formular1"));
+                        //System.out.println(mahnParameter.get("formular2"));
+                        //System.out.println(mahnParameter.get("formular3"));
+                        //System.out.println(mahnParameter.get("formular4"));
+                        mahnParameter.put("diralterechnungen", oinif.getStringProperty("General","DirAlteRechnungen")  );
+                        //System.out.println(mahnParameter);
+
+                        readLastSelection (oinif);
+                        readBarAnKasse(oinif);
+                        iniValuesValid = true;        // werte für Anzeige OP sind jetzt gültig
+                        
                         AbrechnungParameter(progHome);
                         FirmenDaten(progHome);
 
@@ -458,10 +481,11 @@ public class OffenePosten implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent arg0) {
+        saveLastSelection();
         if (OffenePosten.thisClass.conn != null) {
             try {
                 OffenePosten.thisClass.conn.close();
-                System.out.println("Datenbankverbindung wurde geschlossen");
+                System.out.println("OP: Datenbankverbindung wurde geschlossen");
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -601,4 +625,106 @@ public class OffenePosten implements WindowListener {
 
     }
 
+    public static void setVorauswahl(int value){
+        vorauswahlSuchkriterium = value;
+    }
+    public static int getVorauswahl(int max){
+        int maxWait = 20;
+        int waitTimes = maxWait;
+        while((vorauswahlSuchkriterium < 0) && (waitTimes-- > 0)){        // lesen aus ini ist noch nicht fertig...
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        if(waitTimes == 0) { 
+            System.out.println("OP getVorauswahl: " + 0 +"(Abbruch ini-read)");
+            return 0; 
+            }
+        //System.out.println("OP getVorauswahl: " + vorauswahlSuchkriterium +"(" + max + ")");
+        return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
+    }
+
+    private static void readBarAnKasse(INIFile inif) {
+        erlaubeBarInKasse = false;
+        if ( inif.getStringProperty("offenePosten", "erlaubeBarzahlung") != null ){
+            erlaubeBarInKasse = inif.getBooleanProperty("offenePosten","erlaubeBarzahlung");
+        }
+    }
+    public static boolean getBarAusbuchenErlaubt() {
+        int maxWait = 20;
+        int waitTimes = maxWait;
+        while((!iniValuesValid) && (waitTimes-- > 0)){        // lesen aus ini ist noch nicht fertig...
+            try {
+                Thread.sleep(25);
+            } catch (InterruptedException ex) {
+                ex.printStackTrace();
+            }
+        }
+        if(waitTimes == 0) { 
+            System.out.println("OP erlaubeBarInKasse: " + erlaubeBarInKasse +"(Abbruch ini-read)");
+            }
+        return erlaubeBarInKasse;
+    }
+
+    /**
+     * liest die zuletzt verwandten (Such-)Einstellungen aus der ini-Datei
+     * ist keine Einstellung vorhanden, werden hier die Defaults gesetzt
+     */
+    private static void readLastSelection(INIFile inif){
+        String section = "offenePosten";
+        if ( inif.getStringProperty(section, "Suchkriterium") != null ){        // Eintrag in ini vorhanden?
+            setVorauswahl(inif.getIntegerProperty(section, "Suchkriterium"));
+        }else{
+            setVorauswahl(0);            // Default-Wert setzen
+        }
+        if ( inif.getStringProperty(section, "lockSettings") != null ){
+            settingsLocked = inif.getBooleanProperty(section, "lockSettings");
+        }else{
+            settingsLocked = true;
+        }
+        System.out.println("OP readLastSel.: " + vorauswahlSuchkriterium);
+    }
+    
+    /**
+     * schreibt die zuletzt verwandten Such-Einstellungen (falls geändert) in die ini-Datei
+     */
+    public void saveLastSelection(){
+        INIFile inif = INITool.openIni (path2IniFile,iniFile);
+        String section = "offenePosten", comment = null;
+        boolean saveChanges = false;
+        if ( ! settingsLocked ){                                                                    // ini-Einträge  dürfen aktualisiert werden
+            if ( inif.getStringProperty(section, "lockSettings") == null ){
+                inif.setBooleanProperty(section, "lockSettings",true, "Aktualisieren der Eintraege gesperrt");
+                saveChanges = true;
+            }
+
+            comment = "zuletzt gesucht";
+            if ( inif.getStringProperty(section, "Suchkriterium") == null ){
+                inif.setIntegerProperty(section, "Suchkriterium", vorauswahlSuchkriterium, comment);
+                saveChanges = true;
+            }else{
+                if ( vorauswahlSuchkriterium != inif.getIntegerProperty(section, "Suchkriterium") ){
+                    inif.setIntegerProperty(section, "Suchkriterium", vorauswahlSuchkriterium, comment);
+                    saveChanges = true;
+                }
+            }
+            if ( inif.getStringProperty(section, "erlaubeBarzahlung") == null ){                    // default setzen - Ändern nur über Systemeinstellungen
+                comment = "ermoeglicht Barzahlung von Rechnungen in Barkasse zu buchen";
+                inif.setBooleanProperty(section, "erlaubeBarzahlung", false, comment);
+                saveChanges = true;
+            }
+            
+            if(saveChanges){
+                INITool.saveIni(inif);
+            }
+        }
+    }
+    private static boolean isIniValuesValid() {
+        return iniValuesValid;
+    }
+    private static void setIniValuesValid(boolean iniValuesValid) {
+        OffenePosten.iniValuesValid = iniValuesValid;
+    }
 }

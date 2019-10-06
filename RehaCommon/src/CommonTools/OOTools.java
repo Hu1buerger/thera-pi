@@ -4,8 +4,34 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import org.jdesktop.swingworker.SwingWorker;
+
+import ag.ion.bion.officelayer.desktop.IFrame;
+import ag.ion.bion.officelayer.document.DocumentException;
+import ag.ion.bion.officelayer.document.IDocument;
+import ag.ion.bion.officelayer.document.IDocumentDescriptor;
+import ag.ion.bion.officelayer.document.IDocumentService;
+import ag.ion.bion.officelayer.event.IDocumentEvent;
+import ag.ion.bion.officelayer.event.IDocumentListener;
+import ag.ion.bion.officelayer.event.IEvent;
+import ag.ion.bion.officelayer.spreadsheet.ISpreadsheetDocument;
+import ag.ion.bion.officelayer.text.IText;
+import ag.ion.bion.officelayer.text.ITextCursor;
+import ag.ion.bion.officelayer.text.ITextDocument;
+import ag.ion.bion.officelayer.text.ITextField;
+import ag.ion.bion.officelayer.text.ITextFieldService;
+import ag.ion.bion.officelayer.text.ITextRange;
+import ag.ion.bion.officelayer.text.ITextTableCell;
+import ag.ion.bion.officelayer.text.ITextTableCellProperties;
+import ag.ion.bion.officelayer.text.IViewCursor;
+import ag.ion.bion.officelayer.text.TextException;
+import ag.ion.noa.NOAException;
+import ag.ion.noa.internal.printing.PrintProperties;
+import ag.ion.noa.printing.IPrinter;
+import ag.ion.noa.search.ISearchResult;
+import ag.ion.noa.search.SearchDescriptor;
 
 import com.sun.star.awt.XTopWindow;
 import com.sun.star.beans.PropertyVetoException;
@@ -41,25 +67,7 @@ import com.sun.star.text.XTextViewCursorSupplier;
 import com.sun.star.uno.Exception;
 import com.sun.star.uno.UnoRuntime;
 import com.sun.star.view.XLineCursor;
-
-import ag.ion.bion.officelayer.desktop.IFrame;
-import ag.ion.bion.officelayer.document.DocumentException;
-import ag.ion.bion.officelayer.spreadsheet.ISpreadsheetDocument;
-import ag.ion.bion.officelayer.text.IText;
-import ag.ion.bion.officelayer.text.ITextCursor;
-import ag.ion.bion.officelayer.text.ITextDocument;
-import ag.ion.bion.officelayer.text.ITextField;
-import ag.ion.bion.officelayer.text.ITextFieldService;
-import ag.ion.bion.officelayer.text.ITextRange;
-import ag.ion.bion.officelayer.text.ITextTableCell;
-import ag.ion.bion.officelayer.text.ITextTableCellProperties;
-import ag.ion.bion.officelayer.text.IViewCursor;
-import ag.ion.bion.officelayer.text.TextException;
-import ag.ion.noa.NOAException;
-import ag.ion.noa.internal.printing.PrintProperties;
-import ag.ion.noa.printing.IPrinter;
-import ag.ion.noa.search.ISearchResult;
-import ag.ion.noa.search.SearchDescriptor;
+import com.sun.star.util.XNumberFormats;
 
 public class OOTools {
 
@@ -218,10 +226,6 @@ public class OOTools {
         }
         return arrayList;
     }
-
-    /**************************************************************************************/
-    /**************************************************************************************/
-    /**************************************************************************************/
     /*******************************************************************************************/
     private static boolean sucheNachPlatzhalter(ITextDocument document) {
         IText text = document.getTextService()
@@ -287,8 +291,6 @@ public class OOTools {
         }
     }
 
-    /*******************************************************************************************/
-    /*******************************************************************************************/
     /*******************************************************************************************/
     public static synchronized void setzePapierFormat(ITextDocument textDocument, int hoch, int breit)
             throws NoSuchElementException, WrappedTargetException, UnknownPropertyException, PropertyVetoException,
@@ -356,7 +358,6 @@ public class OOTools {
     }
 
     /*************************************************************************/
-
     public static void inDenVordergrund(ITextDocument textDocumentx) {
         ITextDocument textDocument = textDocumentx;
         IFrame officeFrame = textDocument.getFrame();
@@ -367,8 +368,43 @@ public class OOTools {
         topWindow.toFront();
     }
 
-    public static void druckerSetzen(ITextDocument textDocument, String drucker) {
+	/*
+	 * workaround um ausgefülltes Formular in den Vordergrund zu holen:
+	 * legt ein temporäres Dokument an (neue Dokumente werden im Vordergrund geöffnet)
+	 * setzt anschließend den Fokus auf das 'eigentliche' Dokument und 
+	 * schließt das temporäre Dokument wieder
+	 */
+	public static void bringDocToFront(IDocumentService iDocumentService, ITextDocument doc, IDocumentDescriptor descriptor, String url) {
+		final IDocumentService xService = iDocumentService;
+		final ITextDocument xdoc = doc;
+		final IDocumentDescriptor xDescriptor = descriptor;
+		final String xUrl = url;
+		
+		SwingUtilities.invokeLater(new Runnable(){
+			public void run(){
+				IDocument dummyDocument;
+				try {
+					dummyDocument = xService.loadDocument(xUrl, xDescriptor);
+					xdoc.getFrame().getXFrame().getContainerWindow().setVisible(true);
+					xdoc.getFrame().getXFrame().getComponentWindow().setFocus();
+/*
+					if (dummyDocument.getFrame().getXFrame().isTop()){
+						System.out.println("dummyDocument on Top");
+					}else{
+						System.out.println("dummyDocument NOT on Top");
+					}
+ */
+					dummyDocument.getFrame().getXFrame().getContainerWindow().setVisible(false);
+					dummyDocument.close();
+				} catch (NOAException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}	
+			}
+		});
+	}
 
+    public static void druckerSetzen(ITextDocument textDocument, String drucker) {
         /**********************/
         if (drucker != null) {
             String druckerName = null;
@@ -614,3 +650,105 @@ public class OOTools {
 
     /*******************************************************/
 }
+class TheraPiDocListener implements IDocumentListener{
+    Object document = null;
+    public TheraPiDocListener(IDocument document){
+        this.document = document;
+    }
+    @Override
+    public void disposing(IEvent arg0) {
+        System.out.println("disposing");
+    }
+
+    @Override
+    public void onAlphaCharInput(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onFocus(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onInsertDone(IDocumentEvent arg0) {
+        System.out.println("onInsertDone");
+    }
+
+    @Override
+    public void onInsertStart(IDocumentEvent arg0) {
+        System.out.println("onInsertStart");
+    }
+
+    @Override
+    public void onLoad(IDocumentEvent arg0) {
+        System.out.println("onLoad");
+    }
+
+    @Override
+    public void onLoadDone(IDocumentEvent arg0) {
+        System.out.println("onLoadDone");
+    }
+
+    @Override
+    public void onLoadFinished(IDocumentEvent arg0) {
+        System.out.println("onLoadFinished");
+    }
+
+    @Override
+    public void onModifyChanged(IDocumentEvent arg0) {
+        System.out.println("onModifyChanged");
+    }
+
+    @Override
+    public void onMouseOut(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onMouseOver(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onNew(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onNonAlphaCharInput(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onSave(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onSaveAs(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onSaveAsDone(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onSaveDone(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onSaveFinished(IDocumentEvent arg0) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void onUnload(IDocumentEvent arg0) {
+        System.out.println("onUnload");
+    }
+    
+}
+/**************************************/

@@ -1,7 +1,7 @@
 package opRgaf;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,7 +25,9 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -48,11 +50,17 @@ import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
+
+import CommonTools.OpShowGesamt;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import RehaIO.SocketClient;
@@ -68,7 +76,9 @@ import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
 import io.RehaIOMessages;
 
-public class OpRgafPanel extends JXPanel implements TableModelListener {
+import com.jgoodies.forms.builder.PanelBuilder;
+
+public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBack {
 
     /**
      *
@@ -79,6 +89,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
     JRtaTextField offen = null;
     JRtaTextField[] tfs = { null, null, null, null };
     JButton[] buts = { null, null, null };
+    enum btIdx {ausbuchen, suchen, dummy};
+    int btAusbuchen = btIdx.ausbuchen.ordinal();
+    int btSuchen = btIdx.suchen.ordinal();
     JRtaComboBox combo = null;
     JXPanel content = null;
     KeyListener kl = null;
@@ -86,34 +99,56 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
 
     MyOpRgafTableModel tabmod = null;
     JXTable tab = null;
-    JLabel summeOffen;
-    JLabel summeRechnung;
-    JLabel summeGesamtOffen;
-    JLabel anzahlSaetze;
+//    JLabel summeOffen;
+//    JLabel summeRechnung;
+//    JLabel summeGesamtOffen;
+    Component kopieButton;
     JRtaCheckBox bar = null;
+    private boolean barWasSelected = false;
 
     JButton kopie;
 
     BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-    BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-    BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
+    
+//    BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
+//    BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
+
     DecimalFormat dcf = new DecimalFormat("###0.00");
 
     int ccount = -2;
 
-    private HashMap<String, String> hmRezgeb = new HashMap<String, String>();
-    final String stmtString = "select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y')),"
-            + "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "
-            + "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "
-            + "left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
-    int gefunden;
+    private HashMap<String,String> hmRezgeb = new HashMap<String,String>();
+    final String stmtString = 
+/*
+        "select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y'))," +
+        "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "+
+        "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "+
+        "left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
+*/
+            "SELECT concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(t2.geboren,'%d.%m.%Y')),t1.rnr,t1.rdatum,t1.rgesamt,"
+                    + "t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id,t1.pat_id "
+                    + "FROM (SELECT v_nummer as rnr,v_datum as rdatum,v_betrag as rgesamt,v_offen as roffen,'' as rpbetrag,"
+                    + "v_bezahldatum as rbezdatum,mahndat1 as rmahndat1,mahndat2 as rmahndat2,'' as reznr,verklisteid as id,pat_id as pat_id "
+                    + "FROM verkliste where v_nummer like 'VR-%' "
+                    + "UNION SELECT rnr,rdatum,rgesamt,roffen,rpbetrag,rbezdatum,rmahndat1,rmahndat2,reznr,id as id,pat_intern as pat_id "
+                    + "FROM rgaffaktura ) t1 LEFT JOIN pat5 AS t2 ON (t1.pat_id = t2.pat_intern) LEFT JOIN kass_adr AS t3 ON ( t2.kassenid = t3.id )";
+
+//    int gefunden;
     String[] spalten = { "Name,Vorname,Geburtstag", "Rechn.Nr.", "Rechn.Datum", "Gesamtbetrag", "Offen", "Bearb.Gebühr",
             "bezahlt am", "1.Mahnung", "2.Mahnung", "Krankenkasse", "RezeptNr.", "id" };
     String[] colnamen = { "nix", "rnr", "rdatum", "rgesamt", "roffen", "rpbetrag", "rbezdatum", "rmahndat1",
             "rmahndat2", "nix", "nix", "id" };
     OpRgafTab eltern = null;
 
-    public OpRgafPanel(OpRgafTab xeltern) {
+    class IdxCol { // Indices fuer sprechende Spaltenzugriffe
+        static final short Name = 0, RNr = 1, RDat = 2, GBetr = 3, Offen = 4, BGeb = 5, bez = 6, mahn1 = 7, mahn2 = 8,
+                kk = 9, RezNr = 10, id = 11;
+    }
+
+    private OpShowGesamt sumPan;
+    private RgAfVkSelect selPan;
+
+    public OpRgafPanel(OpRgafTab xeltern){
         super();
         this.eltern = xeltern;
         startKeyListener();
@@ -138,61 +173,56 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
         });
     }
 
-    private JXPanel getContent() {
-        content = new JXPanel();
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
-        String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,  p,1dlu,50dlu:g,2dlu,50dlu,5dlu,50dlu,5dlu,50dlu,2dlu,50dlu,2dlu,50dlu,10dlu";
-        // 1 2 3 4 5 6 7
-        String ywerte = "10dlu,p,2dlu,150dlu:g,5dlu,80dlu,0dlu";
+    private JPanel getContent() {
+        //                 1     2     3    4     5   6   7    8       9    10   11    12   13    14   15    16   17    18  19
+        String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,40dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p";
+        //                 1   2   3     4        5  6   7     8  9  10   11
+        String ywerte = "15dlu,p,15dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,8dlu,0dlu";
         FormLayout lay = new FormLayout(xwerte, ywerte);
+        PanelBuilder builder = new PanelBuilder(lay);
+        //PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());        // debug mode
+        builder.getPanel().setOpaque(false);
         CellConstraints cc = new CellConstraints();
-        content.setLayout(lay);
 
-        JLabel lab = new JLabel("Suchkriterium");
-        content.add(lab, cc.xy(2, 2));
+        int colCnt=2, rowCnt=2;
+        
+        builder.addLabel("Suchkriterium", cc.xy(colCnt++, rowCnt));            // 2,2
 
         String[] args = { "Rechnungsnummer =", "Rechnungsnummer enthält", "Rechnungsbetrag =", "Rechnungsbetrag >=",
                 "Rechnungsbetrag <=", "Noch offen =", "Noch offen >=", "Noch offen <=", "Pat. Nachname beginnt mit",
                 "Rezeptnummer =", "Rechnungsdatum =", "Rechnungsdatum >=", "Rechnungsdatum <=",
                 "Krankenkasse enthält" };
 
-        // int vorauswahl = Arrays.asList(args).indexOf("Noch offen >=");
-        int vorauswahl = 0;
+        int vorauswahl =  OpRgaf.iniOpRgAf.getVorauswahl(args.length);
         combo = new JRtaComboBox(args);
-        combo.setSelectedIndex(vorauswahl);
-        content.add(combo, cc.xy(4, 2));
+        combo.setSelectedIndex( vorauswahl ); 
+        builder.add(combo, cc.xy(++colCnt,rowCnt));                            // 4,2
 
-        lab = new JLabel("finde:");
-        content.add(lab, cc.xy(6, 2));
-        suchen = new JRtaTextField("nix", true);
+        ++colCnt;
+        builder.addLabel("finde:", cc.xy(++colCnt, rowCnt));                // 6,2
+        
+        ++colCnt;
+        suchen = new JRtaTextField("nix",true);
         suchen.setName("suchen");
         suchen.addKeyListener(kl);
-        content.add(suchen, cc.xy(8, 2, CellConstraints.FILL, CellConstraints.DEFAULT));
+        builder.add(suchen,cc.xy(++colCnt, rowCnt,CellConstraints.FILL,CellConstraints.DEFAULT));    // 8,2
+        
+        // Auswahl RGR/AFR/Verkauf
+        colCnt += 2;
+        selPan = new RgAfVkSelect("suche in  ");                            // Subpanel mit Checkboxen anlegen
+        //selPan.ask("Tabellen:");
+        selPan.setCallBackObj(this);                                        // callBack registrieren
+        initSelection();
+        
+        builder.add(selPan.getPanel(),cc.xywh(++colCnt, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));    //10..15,1..3
+        // Ende Auswahl
 
-        buts[1] = ButtonTools.macheButton("suchen", "suchen", al);
-        buts[1].setMnemonic('s');
-        content.add(buts[1], cc.xy(10, 2));
+        buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
+        buts[btSuchen].setMnemonic('s');
+        builder.add(buts[btSuchen],cc.xy(17,rowCnt));
 
-        bar = new JRtaCheckBox("bar in Kasse");
-        if (OpRgaf.mahnParameter.get("inkasse")
-                                .equals("Kasse")) {
-            bar.setSelected(true);
-        }
-        content.add(bar, cc.xy(12, 2));
-
-        lab = new JLabel("Geldeingang:");
-        content.add(lab, cc.xy(14, 2));
-        tfs[0] = new JRtaTextField("F", true, "6.2", "");
-        tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
-        tfs[0].setText("0,00");
-        tfs[0].setName("offen");
-        tfs[0].addKeyListener(kl);
-        content.add(tfs[0], cc.xy(16, 2));
-
-        content.add((buts[0] = ButtonTools.macheButton("ausbuchen", "ausbuchen", al)), cc.xy(18, 2));
-        buts[0].setMnemonic('a');
-
-        while (!OpRgaf.DbOk) {
+//**********************
+        while(!OpRgaf.DbOk){
 
         }
         tabmod = new MyOpRgafTableModel();
@@ -201,6 +231,22 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
          * String[] spalten = new String[felder.size()]; for(int i= 0; i <
          * felder.size();i++){ spalten[i] = felder.get(i).get(0); }
          */
+        Vector<Vector<String>> felder = SqlInfo.holeFelder("describe verkliste");
+        String[] cols = new String[felder.size()];
+        HashMap types = new HashMap();
+        for(int i= 0; i < felder.size();i++){
+            cols[i] = felder.get(i).get(0);
+            types.put(cols[i], felder.get(i).get(1));
+        }
+        String dummy = types.get("v_betrag").toString(); 
+        if (types.get("v_offen").toString().contains("double")
+                || types.get("v_betrag").toString().contains("double")
+                || types.get("v_mwst7").toString().contains("double")
+                || types.get("v_mwst19").toString().contains("double")
+            ){
+            JOptionPane.showMessageDialog(null, "Struktur der Tabelle 'verkliste' veraltet. \nBitte aktualisieren!");
+            return builder.getPanel();
+        }
 
         tabmod.setColumnIdentifiers(spalten);
         tab = new JXTable(tabmod);
@@ -244,52 +290,66 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
         tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
 
         JScrollPane jscr = JCompTools.getTransparentScrollPane(tab);
-        content.add(jscr, cc.xyw(2, 4, 17));
+        rowCnt +=2;
+        builder.add(jscr,cc.xyw(2,rowCnt,17));        // 2,4
+//**********************
 
-        JXPanel auswertung = new JXPanel();
-        // 1 2 3 4 5 6 7
-        String xwerte2 = "10dlu,150dlu,5dlu,100dlu,150dlu:g,p,10dlu";
-        String ywerte2 = "0dlu,p,2dlu,p,2dlu,p,2dlu,p,10dlu";
-        FormLayout lay2 = new FormLayout(xwerte2, ywerte2);
-        CellConstraints cc2 = new CellConstraints();
-        auswertung.setLayout(lay2);
-        lab = new JLabel("Offene Posten gesamt:");
-        auswertung.add(lab, cc2.xy(2, 2, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeGesamtOffen = new JLabel("0,00");
-        summeGesamtOffen.setForeground(Color.RED);
-        auswertung.add(summeGesamtOffen, cc2.xy(4, 2));
+        rowCnt +=2;                                    // 6
+        colCnt = 4;
+        kopieButton = builder.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al),cc.xy(colCnt,rowCnt));        // 4,6
+        colCnt = 11;
+        builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt,CellConstraints.RIGHT,CellConstraints.TOP));            // 12,6
 
-        lab = new JLabel("Offene Posten der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 4, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeOffen = new JLabel("0,00");
-        summeOffen.setForeground(Color.BLUE);
-        auswertung.add(summeOffen, cc2.xy(4, 4));
+        ++colCnt;
+        tfs[0] = new JRtaTextField("F",true,"6.2","");
+        tfs[0].setHorizontalAlignment(SwingConstants.RIGHT);
+        tfs[0].setText("0,00");
+        tfs[0].setName("offen");
+        tfs[0].addKeyListener(kl);
+        builder.add(tfs[0],cc.xy(++colCnt,rowCnt));                                                                    // 14,6
 
-        lab = new JLabel("Summe Rechnunsbetrag der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 6, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        summeRechnung = new JLabel("0,00");
-        summeRechnung.setForeground(Color.BLUE);
-        auswertung.add(summeRechnung, cc2.xy(4, 6));
+        ++colCnt;
+        bar = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt,rowCnt));
+        if(OpRgaf.iniOpRgAf.getWohinBuchen().equals("Kasse")){
+            bar.setSelected(true);            
+        }
 
-        lab = new JLabel("Anzahl Datensätze der letzten Abfrage:");
-        auswertung.add(lab, cc2.xy(2, 8, CellConstraints.RIGHT, CellConstraints.DEFAULT));
-        anzahlSaetze = new JLabel("0");
-        anzahlSaetze.setForeground(Color.BLUE);
-        auswertung.add(anzahlSaetze, cc2.xy(4, 8));
+        
+        buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al),cc.xy(17,6));
+//**********************
 
-        auswertung.add(ButtonTools.macheButton("Rechnungskopie", "kopie", al), cc2.xy(6, 2));
-        content.add(auswertung, cc.xyw(1, 6, 17));
-        content.validate();
-        new SwingWorker<Void, Void>() {
+        rowCnt +=2;
+        colCnt = 1;
+        builder.add(new JSeparator(SwingConstants.HORIZONTAL), cc.xyw(colCnt,rowCnt++,19));
+
+        sumPan = new OpShowGesamt();
+        builder.add(sumPan.getPanel(),cc.xyw(colCnt, rowCnt,2,CellConstraints.LEFT,CellConstraints.TOP));    //2,2
+
+        calcGesamtOffen();
+        
+        return builder.getPanel();
+    }
+    /**
+     * letzte Checkbox-Auswahl wiederherstellen
+     */
+    public void initSelection() {
+        selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());    
+        selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
+        selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+        if (!selPan.useRGR() && !selPan.useAFR() && !selPan.useVKR()){
+            selPan.setRGR(Boolean.TRUE);    // einer sollte immer ausgewählt sein 
+        }
+    }
+    
+    private void calcGesamtOffen() {
+        new SwingWorker<Void,Void>(){
             @Override
             protected Void doInBackground() throws Exception {
-                ermittleGesamtOffen();
+                sumPan.ermittleGesamtOffen(selPan.useRGR(), selPan.useAFR(), selPan.useVKR());
                 return null;
             }
 
         }.execute();
-
-        return content;
     }
 
     private OpRgafPanel getInstance() {
@@ -365,9 +425,10 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                 @Override
                 protected Void doInBackground() throws Exception {
 
-                    try {
+                        try{
                         // System.out.println("in Ausfallrechnung");
-                        // (Point pt, String pat_intern,String rez_nr,String rnummer,String rdatum){
+                        // (Point pt, String pat_intern,String rez_nr,String
+                        // rnummer,String rdatum){
                         String id = tab.getValueAt(tab.getSelectedRow(), 11)
                                        .toString();
                         String rez_nr = SqlInfo.holeEinzelFeld(
@@ -376,7 +437,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                                 "select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
                         String rdatum = SqlInfo.holeEinzelFeld(
                                 "select rdatum from rgaffaktura where id='" + id + "' LIMIT 1");
-                        AusfallRechnung ausfall = new AusfallRechnung(anzahlSaetze.getLocationOnScreen(), pat_intern,
+                        AusfallRechnung ausfall = new AusfallRechnung(kopieButton.getLocationOnScreen(), pat_intern,
                                 rez_nr, rnr, rdatum);
                         ausfall.setModal(true);
                         ausfall.setLocationRelativeTo(null);
@@ -397,7 +458,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
     }
 
     private void setzeBezahlBetrag(final int i) {
-        tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), 4)));
+        tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), IdxCol.Offen)));
     }
 
     private void sucheEinleiten() {
@@ -412,7 +473,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                     schreibeAbfrage();
                     tabmod.addTableModelListener(getInstance());
                     suchen.setEnabled(true);
-                    buts[0].setEnabled(true);
+                    buts[btAusbuchen].setEnabled(true);
 
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -420,7 +481,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                     OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                     setzeFocus();
                     suchen.setEnabled(true);
-                    buts[0].setEnabled(true);
+                    buts[btAusbuchen].setEnabled(true);
                 }
                 OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 setzeFocus();
@@ -435,7 +496,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
             JOptionPane.showMessageDialog(null, "Keine Rechnung zum Ausbuchen ausgewählt");
             return;
         }
-        BigDecimal nochoffen = BigDecimal.valueOf((Double) tabmod.getValueAt(tab.convertRowIndexToModel(row), 4));
+        BigDecimal nochoffen = BigDecimal.valueOf((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen));
         BigDecimal eingang = BigDecimal.valueOf(Double.parseDouble(tfs[0].getText()
                                                                          .replace(",", ".")));
         BigDecimal restbetrag = nochoffen.subtract(eingang);
@@ -444,93 +505,75 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
             JOptionPane.showMessageDialog(null, "Keine Rechnung zum Ausbuchen ausgewählt");
             return;
         }
-        if (nochoffen.equals(BigDecimal.valueOf(Double.parseDouble("0.0")))) {
-            JOptionPane.showMessageDialog(null, "Diese Rechnung ist bereits auf bezahlt gesetzt");
+
+        if(nochoffen.equals(BigDecimal.valueOf(Double.parseDouble("0.0")))){
+            JOptionPane.showMessageDialog(null,"Diese Rechnung ist bereits auf bezahlt gesetzt");
             return;
         }
 
-        suchOffen = suchOffen.subtract(eingang);
-        // suchOffen = suchOffen.add(
-        // BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) )
-        // );
-
-        gesamtOffen = gesamtOffen.subtract(eingang);
-        // gesamtOffen = gesamtOffen.add(
-        // BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",", ".")) )
-        // );
+//        suchOffen = suchOffen.subtract(eingang );
+//        sumPan.setGesamtOffen(sumPan.getGesamtOffen().subtract(eingang));
+        sumPan.substFromGesamtOffen(eingang);
+        sumPan.substFromSuchOffen(eingang);
 
         String cmd = "";
-        // einen größeren Schwachsinn für den praktische Einsatz kann man sich
-        // schwerlich vorstellen.
-        // Der logische Wert muß über die CheckBox bar.isSelected() bestimmt werden
-        // alles andere ist völlig Scheiße
-        // ich habe mich dafür bereits mehrfach(!!) in den Arsch gebissen
-        // if(OpRgaf.mahnParameter.get("inkasse").equals("Kasse")){
-        String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 10)
-                                   .toString();
-        String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), 1)
-                                    .toString();
-        if (bar.isSelected()) {
-            // BigDecimal einnahme =
-            // BigDecimal.valueOf((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row),
-            // 4));
-            // einnahme =
-            // einnahme.subtract(BigDecimal.valueOf(Double.parseDouble(tfs[0].getText().replace(",",
-            // ".")) ));
-            cmd = "insert into kasse set einnahme='" + dcf.format(eingang)
-                                                          .replace(",", ".")
-                    + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='" + rgaf_rechnum + ","
-                    + tabmod.getValueAt(tab.convertRowIndexToModel(row), 0) + "'," + "rez_nr='" + rgaf_reznum + "'";
-            // System.out.println(cmd);
+        String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RezNr).toString(); 
+        String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RNr).toString();
+
+        if(bar.isSelected()){
+            cmd = "insert into kasse set einnahme='"+dcf.format(eingang).replace(",", ".")+"', datum='"+
+            DatFunk.sDatInSQL(DatFunk.sHeute())+"', ktext='"+
+            rgaf_rechnum+","+
+            tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Name)+"',"+        // Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
+            "rez_nr='"+rgaf_reznum+"'";
+            //System.out.println(cmd);
             SqlInfo.sqlAusfuehren(cmd);
         }
-        tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), 6);
-        tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), 4);
-        //
+        tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), IdxCol.bez);
+        tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), IdxCol.Offen);
 
-        if (rgaf_rechnum.startsWith("RGR-")) { // Rezept bezahlt setzen
-            SqlInfo.sqlAusfuehren(
-                    "update verordn set zzstatus='1', rez_bez='T' where rez_nr = '" + rgaf_reznum + "' LIMIT 1");
-            SqlInfo.sqlAusfuehren(
-                    "update lza set zzstatus='1', rez_bez='T' where rez_nr = '" + rgaf_reznum + "' LIMIT 1");
+        if(rgaf_rechnum.startsWith("RGR-")){                                        // Rezept bezahlt setzen
+            SqlInfo.sqlAusfuehren("update verordn set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");    // zz: 1-ok
+            SqlInfo.sqlAusfuehren("update lza set zzstatus='1', rez_bez='T' where rez_nr = '"+rgaf_reznum+"' LIMIT 1");
         }
 
-        int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), 11);
-        cmd = "update rgaffaktura set roffen='" + dcf.format(restbetrag)
-                                                     .replace(",", ".")
-                + "', rbezdatum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "' where id ='" + Integer.toString(id)
-                + "' LIMIT 1";
+        int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.id);
+        if(rgaf_rechnum.startsWith("RGR-") || rgaf_rechnum.startsWith("AFR-")){        // aus rgaffaktura ausbuchen
+            cmd = "update rgaffaktura set roffen='"+dcf.format(restbetrag).replace(",", ".")+"', rbezdatum='"+
+                    DatFunk.sDatInSQL(DatFunk.sHeute())+"' where id ='"+Integer.toString(id)+"' LIMIT 1";            
+        }
+        if(rgaf_rechnum.startsWith("VR-")){                                            // aus verkliste ausbuchen
+            cmd = "update verkliste set v_offen='"+dcf.format(restbetrag).replace(",", ".")+"', v_bezahldatum='"+
+                    DatFunk.sDatInSQL(DatFunk.sHeute())+"' where verklisteID ='"+Integer.toString(id)+"' LIMIT 1";            
+        }
         /*
          * if(!OpRgaf.testcase){ SqlInfo.sqlAusfuehren(cmd); }
          */
-        // hier rein die Kasseneinnahme
         SqlInfo.sqlAusfuehren(cmd);
         schreibeAbfrage();
         tfs[0].setText("0,00");
     }
 
-    private void ermittleGesamtOffen() {
-        Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(roffen) from rgaffaktura where roffen > '0.00'");
-        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
-                                                                 .get(0)));
-        schreibeGesamtOffen();
+    private void schreibeAbfrage(){
+        sumPan.schreibeGesamtOffen();
+//        sumPan.setSuchOffen(suchOffen);
+        sumPan.schreibeSuchOffen();
+//        sumPan.setSuchGesamt(suchGesamt);
+        sumPan.schreibeSuchGesamt();
+//        sumPan.setAnzRec(gefunden);
+        sumPan.schreibeAnzRec();
     }
 
-    private void schreibeAbfrage() {
-        schreibeGesamtOffen();
-        summeOffen.setText(dcf.format(suchOffen));
-        summeRechnung.setText(dcf.format(suchGesamt));
-        anzahlSaetze.setText(Integer.toString(gefunden));
-    }
-
-    private void schreibeGesamtOffen() {
-        summeGesamtOffen.setText(dcf.format(gesamtOffen));
-    }
-
-    public void sucheRezept(String rezept) {
+    public void sucheRezept(String rezept) {            // Einstieg für RehaReverseServer (z.B. RGR-Kopie aus Historie) 
         suchen.setText(rezept);
-        combo.setSelectedIndex(10);
+        //combo.setSelectedIndex(8);
+        combo.setSelectedItem("Rezeptnummer =");
+        boolean useRGR = selPan.useRGR();                // Checkbox-Einstellung merken
+        boolean useAFR = selPan.useAFR();
+        boolean useVKR = selPan.useVKR();
+        selPan.setRGR_AFR_VKR(true,false,false);        // wird immer eine RGR gesucht?
         doSuchen();
+        selPan.setRGR_AFR_VKR(useRGR,useRGR,useVKR);    // Checkbox-Einstellung wiederherstellen
     }
 
     private void doSuchen() {
@@ -540,97 +583,77 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
 
             return;
         }
-        // tab.setRowSorter(null);
         int suchart = combo.getSelectedIndex();
+        OpRgaf.iniOpRgAf.setVorauswahl(suchart);        // Auswahl merken
+        //String suchVal = combo.getItemAt(combo.getSelectedIndex()).toString();
+        //System.out.println("OpRgafPanel-doSuchen-suche: " +'"' + suchVal + '"' + "(" + suchart + ")");  // s. String[] args
         String cmd = "";
-        try {
-            switch (suchart) {
-            case 0:
-                cmd = stmtString + " where rnr ='" + suchen.getText()
-                                                           .trim()
-                        + "'";
-                break;
-            case 1: // Rechnungsnummer enthält
-                cmd = stmtString + " where rnr like'%" + suchen.getText()
-                                                               .trim()
-                        + "%' order by t1.id";
-                break;
-            case 2: // Rechnungsbetrag =
-                cmd = stmtString + " where rgesamt ='" + suchen.getText()
-                                                               .trim()
-                                                               .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 3: // >=
-                cmd = stmtString + " where rgesamt >='" + suchen.getText()
-                                                                .trim()
-                                                                .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 4: // <=
-                cmd = stmtString + " where rgesamt <='" + suchen.getText()
-                                                                .trim()
-                                                                .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 5: // Noch offen =
-                cmd = stmtString + " where roffen ='" + suchen.getText()
-                                                              .trim()
-                                                              .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 6: // >=
-                cmd = stmtString + " where roffen >='" + suchen.getText()
-                                                               .trim()
-                                                               .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 7: // <=
-                cmd = stmtString + " where roffen <='" + suchen.getText()
-                                                               .trim()
-                                                               .replace(",", ".")
-                        + "' order by t1.id";
-                break;
-            case 8: // Nachname beginnt mit
-                cmd = stmtString + " where t2.n_name like'" + suchen.getText()
-                                                                    .trim()
-                        + "%' order by t1.id";
-                break;
-            case 9: // Rezeptnummer =
-                cmd = stmtString + " where t1.reznr ='" + suchen.getText()
-                                                                .trim()
-                        + "'";
-                break;
-            case 10: // Rechnungsdatum =
-                cmd = stmtString + " where rdatum ='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                .trim())
-                        + "'";
-                break;
-            case 11: // >=
-                cmd = stmtString + " where rdatum >='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                 .trim())
-                        + "'";
-                break;
-            case 12: // <=
-                cmd = stmtString + " where rdatum <='" + DatFunk.sDatInSQL(suchen.getText()
-                                                                                 .trim())
-                        + "'";
-                break;
-            case 13: // Krankenkasse enthält
-                cmd = stmtString + " where t3.kassen_nam1 like'%" + suchen.getText()
-                                                                          .trim()
-                        + "%'";
-                break;
-            }
-
-        } catch (Exception ex) {
-            // ex.printStackTrace();
+        String tmpStr = selPan.bills2search("rnr");
+        String whereToSearch = " WHERE ";
+        String searchStr = suchen.getText().trim();
+        String searchStrNumVal = searchStr.replace(",", ".");
+        if(tmpStr.length() > 0){
+            whereToSearch = whereToSearch + " ( " + tmpStr + " ) AND ";
         }
 
-        if (!cmd.equals("")) {
-            buts[0].setEnabled(false);
+        try{
+//            switch(suchVal){        // <- funktioniert erst ab Java 1.7
+            switch(suchart){
+            case 0:
+                cmd = stmtString + " where rnr ='" + searchStr + "'";
+                break;
+            case 1: // Rechnungsnummer enthält
+                if (searchStr.contains("sto") || searchStr.contains("tor") || searchStr.contains("orn") || searchStr.contains("rno")){
+                    whereToSearch = sucheStornierte (whereToSearch);
+                }
+                cmd = stmtString+ whereToSearch + " rnr like'%" + searchStr + "%' order by t1.id";
+                break;
+            case 2:                    // Rechnungsbetrag =
+                cmd = stmtString+ whereToSearch + " rgesamt ='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 3:                    //  >=
+                cmd = stmtString+ whereToSearch + " rgesamt >='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 4:                    //  <=
+                cmd = stmtString+ whereToSearch + " rgesamt <='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 5:                    // Noch offen =
+                cmd = stmtString+ whereToSearch + " roffen ='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 6:                    //  >=
+                cmd = stmtString+ whereToSearch + " t1.roffen >='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 7:                    //  <=
+                cmd = stmtString+ whereToSearch + " roffen <='" + searchStrNumVal + "' order by t1.id";
+                break;
+            case 8:                    // Nachname beginnt mit
+                cmd = stmtString+ whereToSearch + " t2.n_name like'" + searchStr + "%' order by t1.id";
+                break;
+            case 9:                    // Rezeptnummer =
+                cmd = stmtString+ whereToSearch + " t1.reznr ='" + searchStr + "'";
+                break;
+            case 10:                // Rechnungsdatum =
+                cmd = stmtString+ whereToSearch + " rdatum ='" + DatFunk.sDatInSQL(searchStr) + "'";
+                break;
+            case 11:                //  >=
+                cmd = stmtString+ whereToSearch + " rdatum >='" + DatFunk.sDatInSQL(searchStr) + "'";
+                break;
+            case 12:                //  <=
+                cmd = stmtString+ whereToSearch + " rdatum <='" + DatFunk.sDatInSQL(searchStr) + "'";
+                break;
+            case 13:                // Krankenkasse enthält
+                cmd = stmtString+ whereToSearch + " t3.kassen_nam1 like'%" + searchStr + "%'";
+                break;
+            }
+        }catch(Exception ex){
+            //ex.printStackTrace();
+        }
+
+        if(!cmd.equals("")){
+            buts[btAusbuchen].setEnabled(false);
             suchen.setEnabled(false);
-            try {
+            //System.out.println("suche nach: "+'"'+cmd+'"');
+            try{
                 starteSuche(cmd);
             } catch (Exception ex) {
                 ex.printStackTrace();
@@ -639,11 +662,26 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
             OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 
             suchen.setEnabled(true);
-            buts[0].setEnabled(true);
+            buts[btAusbuchen].setEnabled(true);
             setzeFocus();
         }
 
     }
+
+    private String sucheStornierte(String whereToSearch) {
+        String tmp = whereToSearch;
+        if (whereToSearch.contains("RGR")){
+            tmp = tmp.replace("RGR", "storno_RGR");
+        }
+        if (whereToSearch.contains("AFR")){
+            tmp = tmp.replace("AFR", "storno_AFR");
+        }
+        if (whereToSearch.contains("VR")){
+            tmp = tmp.replace("VR", "storno_VR");
+        }
+        return tmp;
+    }
+
 
     class MyOpRgafTableModel extends DefaultTableModel {
         /**
@@ -695,7 +733,6 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
         try {
             stmt = OpRgaf.thisClass.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
         } catch (SQLException e) {
-
             e.printStackTrace();
         }
         try {
@@ -703,9 +740,13 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
             rs = stmt.executeQuery(sstmt);
             Vector<Object> vec = new Vector<Object>();
             int durchlauf = 0;
-            suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
-            suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
-            gefunden = 0;
+            sumPan.delSuchGesamt();
+            sumPan.delSuchOffen();
+            sumPan.delAnzRec();
+            calcGesamtOffen();
+//            suchGesamt = sumPan.getSuchGesamt();
+//            suchOffen = sumPan.getSuchOffen();
+//            gefunden = sumPan.getAnzRec();
             ResultSetMetaData rsMetaData = null;
             while (rs.next()) {
                 vec.clear();
@@ -733,26 +774,12 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                     // vec.add( (rs.getString(i)==null ? "" : rs.getString(i)) );//r_klasse
                     // System.out.println(rsMetaData.getColumnClassName(i));
                 }
-                /*
-                 * vec.add(rs.getInt(1)); //r_nummer vec.add(rs.getDate(2)); // r_datum vec.add(
-                 * (rs.getString(3)==null ? "" : rs.getString(3)) );// r_kasse vec.add(
-                 * (rs.getString(4)==null ? "" : rs.getString(4)) );//r_name vec.add(
-                 * (rs.getString(5)==null ? "" : rs.getString(5)) );//r_klasse
-                 * vec.add(rs.getBigDecimal(6).doubleValue());//r_betrag
-                 * vec.add(rs.getBigDecimal(7).doubleValue());//r_offen
-                 * vec.add(rs.getDate(8));//r_bezdatum
-                 * vec.add(rs.getBigDecimal(9).doubleValue());//r_zuzahl
-                 * vec.add(rs.getDate(10));//mahndat1 vec.add(rs.getDate(11));//mahndat2
-                 * vec.add(rs.getDate(12));//mahndat3 vec.add( (rs.getString(13)==null ?
-                 * Boolean.FALSE : (rs.getString(13).equals("T") ? Boolean.TRUE :
-                 * Boolean.FALSE)) );//mahnsperr vec.add( (rs.getString(14)==null ? "" :
-                 * rs.getString(14)) );//pat_intern vec.add( (rs.getString(15)==null ? "" :
-                 * rs.getString(15)));//ikktraeger vec.add(rs.getInt(16));//id
-                 */
-
-                suchOffen = suchOffen.add(rs.getBigDecimal(5));
-                suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
-                tabmod.addRow((Vector<?>) vec.clone());
+                
+//              suchOffen = suchOffen.add(rs.getBigDecimal(5));
+//              suchGesamt = suchGesamt.add(rs.getBigDecimal(4));
+                sumPan.setSuchGesamt(sumPan.getSuchGesamt().add(rs.getBigDecimal(4)));
+                sumPan.setSuchOffen(sumPan.getSuchOffen().add(rs.getBigDecimal(5)));
+                tabmod.addRow( (Vector<?>) vec.clone());
                 if (durchlauf > 200) {
                     try {
                         tab.validate();
@@ -764,13 +791,15 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                     }
                 }
                 durchlauf++;
-                gefunden++;
+//                gefunden++;
+                sumPan.incAnzRec();
             }
 
             tab.validate();
             tab.repaint();
             if (tab.getRowCount() > 0) {
                 tab.setRowSelectionInterval(0, 0);
+                adjustColumns();
             }
 
         } catch (SQLException ev) {
@@ -793,7 +822,16 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                 }
             }
         }
+    }
 
+    private void adjustColumns() {
+        /*
+         * ausgewaehlte Spalten dem Inhalt anpassen
+         */
+        int columns2adjust[]={0, 4, 7, 8, 10};  //  Name,Vorname,Geburtstag, Offen, 1.Mahnung, 2.Mahnung, RezeptNr.
+        for(int col:columns2adjust){
+            tab.packColumn(col, 5);
+        }
     }
 
     /*****************************************************/
@@ -816,6 +854,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                         setzeBezahlBetrag(i);
                         String id = tab.getValueAt(i, 11)
                                        .toString();
+                        String rnr = tab.getValueAt(i, 1)
+                                        .toString();
                         String rez_nr = SqlInfo.holeEinzelFeld(
                                 "select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
                         String pat_intern = SqlInfo.holeEinzelFeld(
@@ -824,6 +864,23 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                                 "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + rez_nr);
                         // System.out.println("Satz "+i);
 
+                        if (rnr.startsWith("VR-")){            // test ob VR -> bar ausbuchen enabled/disabled
+                            if (!OpRgaf.iniOpRgAf.getVrCashAllowed()){
+                                bar.setEnabled(false);
+                                bar.setToolTipText("not allowed for VR (see System-Init)");
+                                if (bar.isSelected()){        // falls 'bar in Kasse' gewählt war -> merken
+                                    bar.setSelected(false);
+                                    barWasSelected  = true;
+                                }
+                            }
+                        }else{
+                            bar.setEnabled(true);
+                            bar.setToolTipText("");
+                            if (barWasSelected){            // // Status 'bar in Kasse' wieder herstellen
+                                bar.setSelected(true);
+                                barWasSelected  = false;
+                            }
+                        }
                         break;
                     }
                 }
@@ -867,25 +924,43 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
 
                         }
                     }
-                    // value = tabmod.getValueAt(row,col).toString();
-                } else if (tabmod.getColumnClass(col) == Double.class) {
-                    value = dcf.format(tabmod.getValueAt(row, col))
-                               .replace(",", ".");
-                } else if (tabmod.getColumnClass(col) == String.class) {
-                    value = tabmod.getValueAt(row, col)
-                                  .toString();
+                }else if(tabmod.getColumnClass(col) == Double.class){
+                    value = dcf.format(tabmod.getValueAt(row,col)).replace(",",".");
+                }else if(tabmod.getColumnClass(col) == String.class){
+                    value = tabmod.getValueAt(row,col).toString();
                 }
-                String cmd = "update rgaffaktura set " + colname + "=" + (value != null ? "'" + value + "'" : "null")
-                        + " where id='" + id + "' LIMIT 1";
-                // System.out.println(cmd);
-                SqlInfo.sqlAusfuehren(cmd);
-                tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), 4)));
+                String rnr = (String) tabmod.getValueAt(row,1);
+                if (rnr.startsWith("VR-")){                // test ob VR -> Änderung in 'verkliste' schreiben
+                    if (colname.equals("rbezdatum")){    // (bisher) nur ändern des Buchungsdatums erlaubt
+                        String cmd = "update verkliste set v_bezahldatum ="+(value != null ? "'"+value+"'" : "null")+" where verklisteID='"+id+"' LIMIT 1";
+                        //System.out.println(cmd);
+                        SqlInfo.sqlAusfuehren(cmd);
+                    } else{
+                        new SwingWorker<Void,Void>(){    // andere 'rückgängig' machen (= Suche neu ausführen)
+                            @Override                    // eleganter wäre nur das geänderte Feld neu einzulesen ...
+                            protected Void doInBackground() throws Exception {
+                                try{
+                                    doSuchen();
+                                }catch(Exception ex){
+                                    ex.printStackTrace();
+                                }
+                                return null;
+                            }
+                        }.execute();
+
+                        JOptionPane.showMessageDialog(null,"Ändern in Verkaufsrechnungen ist nicht möglich!");                        
+                    }
+                } else {
+                    String cmd = "update rgaffaktura set "+colname+"="+(value != null ? "'"+value+"'" : "null")+" where id='"+id+"' LIMIT 1";
+                    //System.out.println(cmd);
+                    SqlInfo.sqlAusfuehren(cmd);
+                    tfs[0].setText(dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen)));
+                }
 
             } catch (Exception ex) {
                 System.out.println(ex);
                 JOptionPane.showMessageDialog(null, "Fehler in der Dateneingbe");
             }
-
             return;
         }
     }
@@ -905,7 +980,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
         String rezgeb = SqlInfo.holeEinzelFeld("select rgbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
         String pauschale = SqlInfo.holeEinzelFeld("select rpbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
         String gesamt = SqlInfo.holeEinzelFeld("select rgesamt from rgaffaktura where id='" + id + "' LIMIT 1");
-        System.out.println("Rezeptnummer = " + rez_nr);
+        // System.out.println("Rezeptnummer = "+rez_nr);
         new InitHashMaps();
         /*
          * Vector<String> patDaten = SqlInfo.holeSatz("pat5", " * ",
@@ -1093,20 +1168,23 @@ public class OpRgafPanel extends JXPanel implements TableModelListener {
                 }
             }
         }
-        // if(SystemConfig.hmAbrechnung.get("hmallinoffice").equals("1")){
-        textDocument.getFrame()
-                    .getXFrame()
-                    .getContainerWindow()
-                    .setVisible(true);
-        /*
-         * }else{ PrintProperties printprop = new PrintProperties ((short) 2 ,null);
-         * textDocument.getPrintService().print(printprop); try { Thread.sleep(500); }
-         * catch (InterruptedException e) { e.printStackTrace(); } textDocument.close();
-         * textDocument = null; }
-         */
-
+        textDocument.getFrame().getXFrame().getContainerWindow().setVisible(true);
         OpRgaf.thisFrame.setCursor(OpRgaf.thisClass.normalCursor);
-
+    }
+    @Override
+    public void useRGR(boolean rgr) {
+        OpRgaf.iniOpRgAf.setIncRG(rgr);
+        calcGesamtOffen();
+    }
+    @Override
+    public void useAFR(boolean afr) {
+        OpRgaf.iniOpRgAf.setIncAR(afr);
+        calcGesamtOffen();
+    }
+    @Override
+    public void useVKR(boolean vkr) {
+        OpRgaf.iniOpRgAf.setIncVK(vkr);
+        calcGesamtOffen();
     }
 
 }

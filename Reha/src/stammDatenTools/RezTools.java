@@ -236,37 +236,6 @@ public class RezTools {
         return xvec;
     }
 
-    public static Vector<ArrayList<?>> X_holePosUndAnzahlAusTerminen(String xreznr) {
-        Vector<ArrayList<?>> xvec = new Vector<ArrayList<?>>();
-        Vector<String> termvec = holeEinzelZiffernAusRezept(xreznr, "");
-        String behandlungen = null;
-        String[] einzelbehandlung = null;
-        ArrayList<String> positionen = new ArrayList<String>();
-        ArrayList<Integer> anzahl = new ArrayList<Integer>();
-        int trefferbei = -1;
-        for (int i = 0; i < termvec.size(); i++) {
-            behandlungen = termvec.get(i);
-            if (!behandlungen.equals("")) {
-                einzelbehandlung = behandlungen.split(",");
-                // Scheiße weil Doppelbehandlungen zusammengefaßt werden
-                // Wird verwendet von: TerminFenster.terminBestaetigen()
-                // dort werden Doppelbehandlungen nachträglich erkannt und korrigiert
-                for (int i2 = 0; i2 < einzelbehandlung.length; i2++) {
-                    trefferbei = positionen.indexOf(einzelbehandlung[i2]);
-                    if (trefferbei >= 0) {
-                        anzahl.set(trefferbei, anzahl.get(trefferbei) + 1);
-                    } else {
-                        positionen.add(einzelbehandlung[i2]);
-                        anzahl.add(1);
-                    }
-                }
-            }
-        }
-        xvec.add((ArrayList<?>) positionen.clone());
-        xvec.add((ArrayList<?>) anzahl.clone());
-        return xvec;
-    }
-
     public static int countOccurence(List<String> list, String comperator) {
         int ret = 0;
         for (int i = 0; i < list.size(); i++) {
@@ -2972,6 +2941,27 @@ public class RezTools {
         return retObj;
     }
 
+
+    private static int welcheIstMaxInt(int i1,int i2){
+        if(i1 > i2){return 1;}
+        if(i1==i2){return 0;}
+        return 2;
+    }
+
+    /*
+     * pruefen, ob Rezept dringend abgerechnet werden sollte (Jahresfrist nach letzter Behandlung)
+     */
+    public static boolean isLate(String thisRezNr) {
+        int tageBisWarnung = 310;
+        String cmd = "select termine from verordn where rez_nr='"+thisRezNr+"' LIMIT 1";;
+        String termineDB = SqlInfo.holeEinzelFeld(cmd);
+        String[] behDat = termineDB.split("\n");
+        String letzteBeh = behDat[behDat.length-1].split("@")[0];
+        if (DatFunk.TageDifferenz(letzteBeh,DatFunk.sHeute()) > tageBisWarnung){    // Warnmarkierung wenn die letzte Behandlung zu lange her ist
+            return true;
+        }
+        return false;
+    }
 }
 
 class ZuzahlModell {

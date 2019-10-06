@@ -41,8 +41,6 @@ public class OffenepostenTab extends JXPanel implements ChangeListener {
     OffenepostenMahnungen omahnpanel = null;
     OffenepostenEinstellungen oeinstellungpanel = null;
     RehaBillPanel rehaBillPanel = null;
-    OffenepostenRgAf oprgaf = null;
-
     public OffenepostenTab() {
         super();
         setOpaque(false);
@@ -62,10 +60,6 @@ public class OffenepostenTab extends JXPanel implements ChangeListener {
         oeinstellungpanel = new OffenepostenEinstellungen(this);
         jtb.addTab("Einstellungen", oeinstellungpanel);
 
-        /*
-         * oprgaf = new OffenepostenRgAf(this);
-         * jtb.addTab("Rezeptgebühr-/Ausfallrechnung", oprgaf);
-         */
         jtb.addChangeListener(this);
         doHeader();
         jxh = new JXHeader();

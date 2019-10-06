@@ -1,4 +1,4 @@
-package systemEinstellungen;
+﻿package systemEinstellungen;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -51,8 +51,15 @@ import environment.Path;
 import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.TableTool;
+import CommonTools.INIFile;
+import CommonTools.INITool;
 
-public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListener {
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 
     JButton[] button = { null, null, null, null, null, null, null };
     JRtaCheckBox[] heilmittel = { null, null, null, null, null, null, null, null };
@@ -63,10 +70,13 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
     JComboBox barcodedrucker = null;
     PrintService[] services = null;
     String[] drucker = null;
-    JXTable vorlagen = null;
+	//JXTable vorlagen = null;
     JLabel datLabel = null;
     JRtaTextField vorlage = null;
     MyVorlagenTableModel modvorl = null;
+
+    SysUtilVorlagen vorlagen = null;
+    boolean formok = true;
 
     public SysUtilRezepte() {
 
@@ -92,8 +102,11 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
         jscr.validate();
 
         add(jscr, BorderLayout.CENTER);
-        add(getKnopfPanel(), BorderLayout.SOUTH);
-        new SwingWorker<Void, Void>() {
+//      add(getKnopfPanel(),BorderLayout.SOUTH);
+       AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+       this.add(footer.getPanel(),BorderLayout.SOUTH);
+
+       new SwingWorker<Void, Void>() {
 
             @Override
             protected Void doInBackground() throws Exception {
@@ -143,6 +156,7 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
         voreinstellung.setSelectedItem(SystemConfig.initRezeptKlasse);
 
+/*
         int forms = inif.getIntegerProperty("Formulare", "RezeptFormulareAnzahl");
         Vector<String> vec = new Vector<String>();
         for (int i = 1; i <= forms; i++) {
@@ -155,6 +169,8 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
             vorlagen.setRowSelectionInterval(0, 0);
         }
         vorlagen.validate();
+ */
+		vorlagen.readFromIni();			
     }
 
     /**************
@@ -167,16 +183,15 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
         }
         voreinstellung = new JRtaComboBox(SystemConfig.rezeptKlassen);
 
-        // 1. 2. 3. 4. 5. 6. 7.
-        FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 70dlu, 4dlu, 10dlu,0dlu",
-                // 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17. 18. 19. 20. 21.
-                // 22. 23. 24 25
-                "p, 2dlu, p,  2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p  ,2dlu, p  ,2dlu, p  ,10dlu, p, 10dlu, p, 10dlu, p, 10dlu, p,  10dlu ,  p, 10dlu,  p,"
-                        +
-                        // 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40
-                        "10dlu,p,10dlu,80dlu,2dlu,p ,2dlu,p, 2dlu, p, 10dlu, p, 2dlu, p, 10dlu");
+        //                                 1.                   2.       3.     4.     5.    6.    7.
+        FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu,15dlu",
+           //1.  2.   3.   4.   5.  6.   7.  8.   9.  10.  11. 12.  13.  14.  15. 16.   17. 18.    19.  20.  
+            "p, 2dlu, p,  2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p  ,2dlu, p  ,2dlu, p  ,10dlu, p,  10dlu," 
+                   //21. 22.   23. 24    25   26    27  28    29  30   31  32    33    34   35  36   37  38   39  40
+                   + "p, 10dlu, p, 10dlu, p,  10dlu, p, 10dlu, p, 10dlu,p, 10dlu, p, 2dlu, p, 10dlu, p, 2dlu, p, 10dlu");
 
         PanelBuilder builder = new PanelBuilder(lay);
+		//PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());		// debug mode
         builder.setDefaultDialogBorder();
         builder.getPanel()
                .setOpaque(false);
@@ -227,7 +242,7 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
             barcodedrucker.setSelectedItem(SystemConfig.rezBarcodeDrucker.trim());
         }
         builder.add(barcodedrucker, cc.xyw(3, 29, 4));
-
+/*		
         builder.addSeparator("Vorlagen - Verwaltung", cc.xyw(1, 31, 6));
 
         modvorl = new MyVorlagenTableModel();
@@ -278,29 +293,36 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
         butPan.add(button[2], cc2.xy(4, 3));
         butPan.validate();
         builder.add(butPan, cc.xyw(1, 37, 6));
+*/
+		vorlagen = new SysUtilVorlagen(this);
+		vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
 
-        builder.addSeparator("Sonstiges", cc.xyw(1, 39, 6));
-        builder.addLabel("Angelegt von = aktueller User", cc.xy(1, 41));
+		vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "rezept.ini");
+		vorlagen.setLabels("Formulare","RezeptFormulareAnzahl","RFormular");
+		vorlagen.activateEditing();
+
+		builder.add(vorlagen.getPanel(), cc.xyw(1, 31, 7));
+
+		builder.addSeparator("Sonstiges", cc.xyw(1, 35, 6));
+		builder.addLabel("Angelegt von = aktueller User", cc.xy(1, 37));
 
         angelegtVonUser = new JRtaCheckBox();
-        builder.add(angelegtVonUser, cc.xy(6, 41));
+		builder.add(angelegtVonUser, cc.xy(6, 37));
 
-        builder.addLabel("Signalton bei nicht bezahlten Rezeptgebühren", cc.xy(1, 43));
+		builder.addLabel("Signalton bei nicht bezahlten Rezeptgebühren", cc.xy(1, 39));
         warnungBeiRezGeb = new JRtaCheckBox();
-        builder.add(warnungBeiRezGeb, cc.xy(6, 43));
+		builder.add(warnungBeiRezGeb, cc.xy(6, 39));
 
         return builder.getPanel();
     }
-
+/*
     private JPanel getKnopfPanel() {
-
         button[5] = new JButton("abbrechen");
         button[5].setActionCommand("abbrechen");
         button[5].addActionListener(this);
         button[6] = new JButton("speichern");
         button[6].setActionCommand("speichern");
         button[6].addActionListener(this);
-
         // 1. 2. 3. 4. 5. 6. 7. 8. 9.
         FormLayout jpanlay = new FormLayout("right:max(126dlu;p), 60dlu, 40dlu, 4dlu, 40dlu",
                 // 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17. 18. 19. 20. 21.
@@ -319,7 +341,7 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
         return jpan.getPanel();
     }
-
+ */
     @Override
     public void keyPressed(KeyEvent e) {
 
@@ -337,19 +359,8 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
         String cmd = e.getActionCommand();
-        if (cmd.equals("abbrechen")) {
-            SystemInit.abbrechen();
-            // SystemUtil.thisClass.parameterScroll.requestFocus();
-        }
-        if (cmd.equals("speichern")) {
-            // System.out.println("Es wird abgespeichert");
-            doSpeichern();
-            // JOptionPane.showMessageDialog(null,"Konfiguration wurden in Datei
-            // 'rezept.ini' erfolgreich gespeichert!");
-
-        }
+/*
         if (cmd.equals("vorlagenneu")) {
             setCursor(Cursors.wartenCursor);
             String svorlage = dateiDialog(Path.Instance.getProghome() + "vorlagen/" + Reha.getAktIK());
@@ -402,9 +413,10 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
             }
             return;
         }
-
+ */ 
     }
 
+/*
     private void startCellEditing(int row) {
         final int xrows = row;
         SwingUtilities.invokeLater(new Runnable() {
@@ -458,13 +470,16 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
         return sret;
     }
+ */
 
     private void doSpeichern() {
         try {
             String wert = "";
             int iwert;
-            INIFile inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "rezept.ini");
+            //INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "rezept.ini");
+            INIFile inif = vorlagen.getInif();
             inif.setStringProperty("RezeptKlassen", "InitKlasse", (String) voreinstellung.getSelectedItem(), null);
+/*
             if (!SystemConfig.mitRs) {
                 for (int i = 0; i < 6; i++) {
                     iwert = (heilmittel[i].isSelected() ? 1 : 0);
@@ -482,8 +497,23 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
 
                 }
             }
-            inif.setStringProperty("DruckOptionen", "RezGebDrucker", (String) druckername.getSelectedItem(), null);
-            inif.setStringProperty("DruckOptionen", "BarCodeDrucker", (String) barcodedrucker.getSelectedItem(), null);
+ */
+        int nbOfClasses = 6;
+        if(SystemConfig.mitRs){nbOfClasses = 8;}
+        for(int i = 0; i < nbOfClasses; i++){
+            iwert = (heilmittel[i].isSelected() ? 1 : 0);
+            inif.setIntegerProperty("RezeptKlassen", "KlasseAktiv"+Integer.valueOf(i+1).toString(),iwert,null);
+            
+        }
+
+        SystemConfig.rezGebDrucker = (String)druckername.getSelectedItem();
+        inif.setStringProperty("DruckOptionen", "RezGebDrucker", (String) druckername.getSelectedItem(),null);
+
+        SystemConfig.rezBarcodeDrucker = (String)barcodedrucker.getSelectedItem();
+        inif.setStringProperty("DruckOptionen", "BarCodeDrucker", (String) barcodedrucker.getSelectedItem(), null);
+        
+        formok = vorlagen.saveToIni();
+/*
             int rows = vorlagen.getRowCount();
 
             boolean formok = true;
@@ -511,21 +541,40 @@ public class SysUtilRezepte extends JXPanel implements KeyListener, ActionListen
                             null);
                 }
             }
-
+ */
+		SystemConfig.AngelegtVonUser = angelegtVonUser.isSelected();
             inif.setStringProperty("Sonstiges", "AngelegtVonUser", (angelegtVonUser.isSelected() ? "1" : "0"), null);
+
+		SystemConfig.RezGebWarnung = warnungBeiRezGeb.isSelected();
             inif.setStringProperty("Sonstiges", "RezGebWarnung", (warnungBeiRezGeb.isSelected() ? "1" : "0"), null);
+
             INITool.saveIni(inif);
-            SystemConfig.rezGebDrucker = (String) druckername.getSelectedItem();
-            SystemConfig.rezBarcodeDrucker = (String) barcodedrucker.getSelectedItem();
-            SystemConfig.AngelegtVonUser = angelegtVonUser.isSelected();
-            SystemConfig.RezGebWarnung = warnungBeiRezGeb.isSelected();
             SystemConfig.RezeptInit();
+
             JOptionPane.showMessageDialog(null, "Konfiguration in rezept.ini erfolgreich gespeichert");
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Speichern der Konfiguration in rezept.ini fehlgeschlagen");
         }
     }
+	@Override
+	public void Abbruch() {
+		SystemInit.abbrechen();		
+	}
+	@Override
+	public void Speichern() {
+		doSpeichern();		
+	}
+	@Override
+	public void AddEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void RemoveEntry(int instanceNb) {
+		// TODO Auto-generated method stub
+		
+	}
 
 }
 

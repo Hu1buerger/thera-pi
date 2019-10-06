@@ -36,7 +36,13 @@ import javax.swing.table.TableCellEditor;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 
+import CommonTools.JCompTools;
+import CommonTools.JRtaTextField;
+import CommonTools.INIFile;
+import CommonTools.INITool;
+
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -49,7 +55,7 @@ import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.TableTool;
 
-public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener {
+public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener, SysInitCommon_If {
 
     /**
      * 
@@ -60,14 +66,14 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
     JRtaTextField newdoc = null;
     JXTable gruppen = null;
     MyVorlagenTableModel modarzt = null;
-    JXTable vorlagen = null;
+    SysUtilVorlagen vorlagen = null;
     MyVorlagenTableModel modvorl = null;
 
     JRadioButton oben = null;
     JRadioButton unten = null;
     JCheckBox optimize = null;
     ButtonGroup bgroup = new ButtonGroup();
-    boolean formok = true;
+    private boolean formok = true;
 
     public SysUtilArzt() {
         super(new BorderLayout());
@@ -87,7 +93,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         jscr.validate();
 
         add(jscr, BorderLayout.CENTER);
-        add(getKnopfPanel(), BorderLayout.SOUTH);
+//      add(getKnopfPanel(),BorderLayout.SOUTH);
+        AbbruchOderSpeichern footer = new AbbruchOderSpeichern(this);
+        this.add(footer.getPanel(),BorderLayout.SOUTH);
 
         new SwingWorker<Void, Void>() {
             @Override
@@ -128,6 +136,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
             gruppen.setRowSelectionInterval(0, 0);
         }
         gruppen.validate();
+        
+        vorlagen.readFromIni();
+/*
         INIFile inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "arzt.ini");
         int forms = inif.getIntegerProperty("Formulare", "ArztFormulareAnzahl");
         vec = new Vector<String>();
@@ -141,9 +152,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
             vorlagen.setRowSelectionInterval(0, 0);
         }
         vorlagen.validate();
-
-    }
-
+ */ 
+    }   
+/*
     private JPanel getKnopfPanel() {
 
         button[5] = new JButton("abbrechen");
@@ -170,6 +181,7 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
 
         return jpan.getPanel();
     }
+ */ 
 
     /**************
      * Beginn der Methode f�r die Objekterstellung und -platzierung
@@ -189,13 +201,13 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         button[1].setActionCommand("neugruppen");
         button[1].addActionListener(this);
 
-        button[2] = new JButton("entfernen"); // buttons 3-5 f�r Vorlagenverwaltung
-        button[2].setActionCommand("entfernenvorlage");
-        button[2].addActionListener(this);
+        // button[2] = new JButton("entfernen"); //buttons 3-5 f�r Vorlagenverwaltung
+        // button[2].setActionCommand("entfernenvorlage");
+        // button[2].addActionListener(this);
         // button[3] = new JButton("ausw�hlen");
-        button[4] = new JButton("hinzufügen");
-        button[4].setActionCommand("neuvorlagen");
-        button[4].addActionListener(this);
+        // button[4] = new JButton("hinzufügen");
+        // button[4].setActionCommand("neuvorlagen");
+        // button[4].addActionListener(this);
 
         modarzt = new MyVorlagenTableModel();
         modarzt.setColumnIdentifiers(new String[] { "Arzt / Facharztgruppe" });
@@ -205,12 +217,20 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         gruppen.setSortable(true);
         // gruppen.setSortOrder(0, SortOrder.ASCENDING);
 
-        modvorl = new MyVorlagenTableModel();
-        modvorl.setColumnIdentifiers(new String[] { "Titel der Vorlage", "Vorlagendatei" });
-        vorlagen = new JXTable(modvorl);
-        vorlagen.getColumn(0)
-                .setCellEditor(new TitelEditor());
-        vorlagen.setSortable(false);
+        //modvorl = new MyVorlagenTableModel();
+        //modvorl.setColumnIdentifiers(new String[] {"Titel der Vorlage","Vorlagendatei"});
+        //vorlagen = new JXTable(modvorl);
+        //vorlagen.getColumn(0)
+        //        .setCellEditor(new TitelEditor());
+        //vorlagen.setSortable(false);
+        vorlagen = new SysUtilVorlagen(this);
+        vorlagen.setVPfad(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+//      INIFile inif = INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "arzt.ini");
+//      vorlagen.setInif(inif);
+        vorlagen.setIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK(), "arzt.ini");
+        vorlagen.setLabels("Formulare","ArztFormulareAnzahl","AFormular");
+        vorlagen.activateEditing();
+/*      
         vorlagen.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent arg0) {
@@ -231,27 +251,28 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                 }
             }
         });
+ */
         newgroup = new JRtaTextField("GROSS", true);
         newdoc = new JRtaTextField("GROSS", true);
 
-        // 1. 2. 3. 4. 5. 6. 7. 8. 9.
-        FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu, 40dlu, 40dlu, 4dlu, 40dlu",
-                // 1. 2. 3. 4. 5. 6. 7. 8. 9. 10. 11. 12. 13. 14. 15. 16. 17. 18. 19. 20. 21.
-                // 22. 23. 24 25 26 27
-                "p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 80dlu, 2dlu,p, 0dlu,0dlu, 2dlu, p, 10dlu, p, 10dlu, 80dlu, 2dlu, p,   0dlu , 0dlu, 0dlu, 0dlu, 2dlu, p");
+        //                                      1.             2.       3.     4.     5.    6.     7. 
+        FormLayout lay = new FormLayout("right:max(120dlu;p), 20dlu:g, 40dlu, 70dlu, 4dlu, 10dlu, 15dlu",
+       //1.   2.  3.  4.   5.  6.    7.  8.     9.    10.  11. 12.  13.   14.  15. 16.   17. 18.  
+        "p, 2dlu, p, 10dlu,p, 10dlu, p, 10dlu, 80dlu, 2dlu,p, 0dlu,0dlu, 2dlu, p, 10dlu, p, 10dlu");
 
         PanelBuilder builder = new PanelBuilder(lay);
+        //PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());        // debug mode
         builder.setDefaultDialogBorder();
         builder.getPanel()
                .setOpaque(false);
         CellConstraints cc = new CellConstraints();
 
-        builder.addLabel("Fenster startet im ...", cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.BOTTOM));
-        builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken"),
-                cc.xyw(4, 1, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+        builder.addLabel("Fenster startet im ..." , cc.xy(1, 1, CellConstraints.LEFT, CellConstraints.BOTTOM));
+        builder.addLabel((SystemConfig.desktopHorizontal ? "oberen" : "linken"), 
+                cc.xyw(3, 1, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
         builder.add(oben, cc.xy(6, 1, CellConstraints.RIGHT, CellConstraints.BOTTOM));
-        builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten") + " Container",
-                cc.xyw(4, 3, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
+        builder.addLabel((SystemConfig.desktopHorizontal ? "unteren" : "rechten")+ " Container", 
+                cc.xyw(3, 3, 2, CellConstraints.RIGHT, CellConstraints.BOTTOM));
         builder.add(unten, cc.xy(6, 3, CellConstraints.RIGHT, CellConstraints.BOTTOM));
         builder.addLabel("Fenstergröße automatisch optimieren", cc.xy(1, 5));
         builder.add(optimize, cc.xy(6, 5, CellConstraints.RIGHT, CellConstraints.BOTTOM));
@@ -262,21 +283,26 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                 .setUnitIncrement(15);
         jscrPane.validate();
         builder.add(jscrPane, cc.xyw(1, 9, 6));
-
-        builder.addLabel("aus Liste entfernen", cc.xy(1, 11));
+/*      
+        builder.addLabel("aus Liste entfernen", cc.xy(1,11));
         builder.add(button[0], cc.xy(6, 11));
         // builder.addLabel("neuer Gruppenname", cc.xy(1, 13));
         // builder.add(newgroup, cc.xyw(3, 13, 4));
         builder.addLabel("zu Liste hinzufügen", cc.xy(1, 15));
         builder.add(button[1], cc.xy(6, 15));
+ */
+        AddOrRemove addRemoveButtons = new AddOrRemove(this,1);
+        builder.add(addRemoveButtons.getPanel(), cc.xyw(1, 11, 6));
 
+        builder.add(vorlagen.getPanel(), cc.xyw(1, 17, 7));
+/*
         builder.addSeparator("Vorlagen-Verwaltung", cc.xyw(1, 17, 6));
         jscrPane = JCompTools.getTransparentScrollPane(vorlagen);
         jscrPane.getVerticalScrollBar()
                 .setUnitIncrement(15);
         jscrPane.validate();
         builder.add(jscrPane, cc.xyw(1, 19, 6));
-
+/*
         builder.addLabel("aus Liste entfernen", cc.xy(1, 21));
         builder.add(button[2], cc.xy(6, 21));
         // builder.addLabel("Vorlagenbezeichnung", cc.xy(1, 23));
@@ -287,6 +313,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         // builder.add(button[3], cc.xy(6,25));
         builder.addLabel("zu Liste hinzufügen", cc.xy(1, 27));
         builder.add(button[4], cc.xy(6, 27));
+ */
+//      AddOrRemove addRemoveButtons2 = new AddOrRemove(this,2);
+//      builder.add(addRemoveButtons2.getPanel(), cc.xyw(1, 21, 6));
 
         return builder.getPanel();
     }
@@ -311,7 +340,29 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         String cmd = e.getActionCommand();
         for (int i = 0; i < 1; i++) {
             if (cmd.equals("entfernengruppe")) {
-                // int row = gruppen.convertRowIndexToModel(gruppen.getSelectedRow());
+                loescheFachgebiet();
+                break;
+            }
+            if(cmd.equals("neugruppen")){
+                addFachgebiet();
+                break;
+            }
+        }
+    }
+    private void addFachgebiet() {
+        Vector<String> vec = new Vector<String>();
+        vec.add("");
+        modarzt.addRow((Vector<?>)vec.clone());
+        gruppen.validate();
+        gruppen.setRowSelectionInterval(0, 0);
+        SwingUtilities.invokeLater(new Runnable(){
+               public  void run(){
+                  gruppen.requestFocus();
+                  startCellEditing(gruppen,0);
+               }
+        });
+    }
+    private void loescheFachgebiet() {
                 int row = gruppen.getSelectedRow();
                 int frage = JOptionPane.showConfirmDialog(null,
                         "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage",
@@ -322,9 +373,9 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                 if (row >= 0) {
                     TableTool.loescheRowAusModel(gruppen, row);
                 }
-                break;
             }
-            if (cmd.equals("entfernenvorlage")) {
+/*
+    private void loescheVorlage() {
                 int row = vorlagen.getSelectedRow();
                 int frage = JOptionPane.showConfirmDialog(null,
                         "Wollen Sie die ausgewählte Tabellenzeile wirklich löschen?", "Wichtige Benutzeranfrage",
@@ -333,33 +384,14 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                     return;
                 }
                 if (row >= 0) {
-                    TableTool.loescheRow(vorlagen, row);
+                    TableTool.loescheRow(vorlagen.getTable(), row);
                 }
-                break;
             }
-            if (cmd.equals("neugruppen")) {
-                Vector<String> vec = new Vector<String>();
-                vec.add("");
-                modarzt.addRow((Vector<?>) vec.clone());
-                gruppen.validate();
-                gruppen.setRowSelectionInterval(0, 0);
-                // int rows = gruppen.convertRowIndexToModel(gruppen.getSelectedRow());
-                // int rows = modarzt.getRowCount();
-                // final int xrows = rows;
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        gruppen.requestFocus();
-                        startCellEditing(gruppen, 0);
-                    }
-                });
-                break;
-
-            }
-            if (cmd.equals("neuvorlagen")) {
-                setCursor(Cursors.wartenCursor);
-                String svorlage = dateiDialog(Path.Instance.getProghome() + "vorlagen/" + Reha.getAktIK());
-                if (svorlage.equals("")) {
+        
+    private void neueVorlage() {
+        Reha.getThisFrame().setCursor(Cursors.wartenCursor);
+        String svorlage = dateiDialog(Path.Instance.getProghome()+"vorlagen/"+Reha.getAktIK());
+        if(svorlage.equals("")){
                     return;
                 }
 
@@ -378,31 +410,17 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                         startCellEditing(vorlagen, xrows);
                     }
                 });
-                break;
-            }
-
-            if (cmd.equals("abbrechen")) {
-                SystemInit.abbrechen();
-                // SystemUtil.thisClass.parameterScroll.requestFocus();
-            }
-            if (cmd.equals("speichern")) {
-                // System.out.println("Es wird abgespeichert");
-                doSpeichern();
-                if (formok) {
-                    JOptionPane.showMessageDialog(null,
-                            "Konfiguration wurden in Datei 'arzt.ini' erfolgreich gespeichert!");
-                }
-
-            }
-
-        }
-
     }
-
-    private void doSpeichern() {
-        try {
+ */
+    private void doSpeichern(){
+        try{
             String wert = "";
-            INIFile inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "arzt.ini");
+            INIFile inif = vorlagen.getInif();
+            if (inif == null){      // sollte nie vorkommen
+                INITool.openIni(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/", "arzt.ini");                
+            }
+            //System.out.println(Path.Instance.getProghome()+"ini/"+Reha.getAktIK()+"/patient.ini");
+
             wert = (unten.isSelected() ? "1" : "0");
             SystemConfig.hmContainer.put("Arzt", Integer.valueOf(wert));
             inif.setStringProperty("Container", "StarteIn", wert, null);
@@ -411,7 +429,8 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
             SystemConfig.hmContainer.put("ArztOpti", Integer.valueOf(wert));
             inif.setStringProperty("Container", "ImmerOptimieren", wert, null);
 
-            int rows = vorlagen.getRowCount();
+            formok = vorlagen.saveToIni();
+/*          int rows = vorlagen.getRowCount();
 
             formok = true;
             for (int i = 0; i < rows; i++) {
@@ -438,13 +457,14 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
                             null);
                 }
             }
-            rows = gruppen.getRowCount();
+ */
+            int rows = gruppen.getRowCount();
             inif.setStringProperty("ArztGruppen", "AnzahlGruppen", Integer.valueOf(rows)
-                                                                          .toString(),
-                    null);
-            for (int i = 0; i < rows; i++) {
-                inif.setStringProperty("ArztGruppen", "Gruppe" + (i + 1), (String) gruppen.getValueAt(i, 0), null);
+                                                                          .toString() , null);      
+            for(int i = 0; i < rows; i++) {
+                inif.setStringProperty("ArztGruppen", "Gruppe" + (i + 1), (String) gruppen.getValueAt(i, 0) , null);
             }
+
             INITool.saveIni(inif);
             JOptionPane.showMessageDialog(null, "Konfiguration wurd erfolgreich in arzt.ini gespeichert.");
         } catch (Exception ex) {
@@ -464,6 +484,7 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         });
     }
 
+/*
     private String dateiDialog(String pfad) {
         String sret = "";
         final JFileChooser chooser = new JFileChooser("Verzeichnis wählen");
@@ -508,6 +529,7 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
 
         return sret;
     }
+ */
 
     class MyVorlagenTableModel extends DefaultTableModel {
         /**
@@ -598,7 +620,23 @@ public class SysUtilArzt extends JXPanel implements KeyListener, ActionListener 
         public boolean startCellEditing() {
             return false;// super.startCellEditing();//false;
         }
+    }
 
+    @Override
+    public void Abbruch() {
+        SystemInit.abbrechen();
+    }
+    @Override
+    public void Speichern() {
+        doSpeichern();
+    }
+    @Override
+    public void AddEntry(int instance) {
+        addFachgebiet();
+    }
+    @Override
+    public void RemoveEntry(int instance) {
+        loescheFachgebiet();
     }
 
 }

@@ -75,9 +75,11 @@ import CommonTools.ZeitFunk;
 import abrechnung.AbrechnungDlg;
 import dialoge.EmailDialog;
 import dialoge.InfoDialog;
+import dialoge.InfoDialogTerminInfo;
 import environment.LadeProg;
 import environment.Path;
 import gui.Cursors;
+import dialoge.InfoDialogTerminInfo;
 import hauptFenster.Reha;
 import jxTableTools.ToolTipRenderer;
 import jxTableTools.ZahlTableCellEditor;
@@ -157,7 +159,7 @@ public class SuchenSeite extends JXPanel
     public RoogleFenster eltern;
     public boolean nachfolgerloeschen = false;
 
-    public InfoDialog infoDlg = null;
+	public InfoDialogTerminInfo infoDlg = null;
     public KeyListener kl = null;
 
     public AbrechnungDlg abrDlg = null;
@@ -383,7 +385,8 @@ public class SuchenSeite extends JXPanel
                     if (reznummer.equals("")) {
                         return;
                     }
-                    infoDlg = new InfoDialog(reznummer, "terminInfo", null);
+                    // infoDlg = new InfoDialog(reznummer, "terminInfo", null);
+                    infoDlg = new InfoDialogTerminInfo(reznummer,null);
                     infoDlg.pack();
                     infoDlg.setLocationRelativeTo(null);
                     infoDlg.setVisible(true);

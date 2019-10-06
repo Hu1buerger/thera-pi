@@ -25,6 +25,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
@@ -44,12 +45,15 @@ import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
 import CommonTools.DblCellEditor;
 import CommonTools.DoubleTableCellRenderer;
+import CommonTools.OpCommon;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaRadioButton;
 import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.OOTools;
+import CommonTools.RgAfVkSelect;
+import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import CommonTools.TableTool;
@@ -63,8 +67,14 @@ import ag.ion.bion.officelayer.text.ITextField;
 import ag.ion.bion.officelayer.text.ITextFieldService;
 import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
+import ag.ion.noa.internal.printing.PrintProperties;
 
-public class OpRgafMahnungen extends JXPanel {
+import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
+import com.jgoodies.forms.layout.CellConstraints;
+import com.jgoodies.forms.layout.FormLayout;
+
+public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
 
     /**
      * 
@@ -76,7 +86,7 @@ public class OpRgafMahnungen extends JXPanel {
 
     ButtonGroup bgroup = new ButtonGroup();
     ButtonGroup artgroup = new ButtonGroup();
-    JRtaRadioButton[] rbMahnart = { null, null, null, null, null, null, null };
+    JRtaRadioButton[] rbMahnart = { null, null, null, null };
     JButton suchen = null;
     JButton kopie = null;
 
@@ -87,8 +97,6 @@ public class OpRgafMahnungen extends JXPanel {
     MyMahnungenTableModel tabmod = null;
     JXTable tab = null;
 
-    JButton[] mahnbuts = { null, null, null };
-
     File f = null;
     Font fontfett = new Font("Tahoma", Font.BOLD, 10);
 
@@ -97,15 +105,31 @@ public class OpRgafMahnungen extends JXPanel {
     HashMap<String, String> mahnParameter = new HashMap<String, String>();
     ITextDocument textDocument;
 
-    final String stmtString = "select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y')),"
-            + "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "
-            + "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "
-            + "left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
+    final String stmtString = 
+            /*
+             * "select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y')),"
+             * + "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "
+             * + "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "
+             * + "left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
+             */
+            // findet OP in RGR,AFR u. VKR (außer Rechnungsverkauf 'an Kasse')
+        "SELECT concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(t2.geboren,'%d.%m.%Y')),t1.rnr,t1.rdatum,t1.rgesamt," + 
+        "t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id,t1.pat_id " + 
+        "FROM (    SELECT v_nummer as rnr,v_datum as rdatum,v_betrag as rgesamt,v_offen as roffen, '' as rpbetrag, " + 
+                "v_bezahldatum as rbezdatum,mahndat1 as rmahndat1,mahndat2 as rmahndat2, '' as reznr,verklisteid as id,pat_id as pat_id " + 
+                "FROM verkliste where v_nummer like 'VR-%' AND v_offen > 0 " + 
+                "UNION SELECT rnr,rdatum,rgesamt,roffen,rpbetrag,rbezdatum,rmahndat1,rmahndat2,reznr,id as id,pat_intern as pat_id " + 
+                "FROM rgaffaktura WHERE roffen > 0 ) t1 " + 
+        "INNER JOIN pat5 AS t2 ON (t1.pat_id = t2.pat_intern) LEFT JOIN kass_adr AS t3 ON ( t2.kassenid = t3.id ) "; 
+//        "WHERE  ( t1.rnr like 'RGR-%'  OR t1.rnr like 'AFR-%'  OR t1.rnr like 'VR-%'  ) AND  t1.roffen >='1' ORDER by t1.id";
+
     int gefunden;
     String[] spalten = { "Name,Vorname,Geburtstag", "Rechn.Nr.", "Rechn.Datum", "Gesamtbetrag", "Offen", "Bearb.Gebühr",
             "Bezahldatum", "Mahndatum1", "Mahndatum2", "Krankenkasse", "RezeptNr.", "id" };
     String[] colnamen = { "nix", "rnr", "rdatum", "rgesamt", "roffen", "rpbetrag", "rbezdatum", "rmahndat1",
             "rmahndat2", "nix", "RezeptNr.", "id" };
+    
+    private RgAfVkSelect selPan;
 
     public OpRgafMahnungen(OpRgafTab xeltern) {
         super();
@@ -118,34 +142,19 @@ public class OpRgafMahnungen extends JXPanel {
 
     private JXPanel getContent() {
         String xwerte = "fill:0:grow(0.5),fill:0:grow(0.5),2dlu";
-        // 1 2 3 4 5 6 7
+        //                 1  2   3  4   5  6   7
         String ywerte = "0dlu,p,0dlu,p,0dlu,p,fill:0:grow(1.0)";
         content = new JXPanel();
         FormLayout lay = new FormLayout(xwerte, ywerte);
         CellConstraints cc = new CellConstraints();
         content.setLayout(lay);
 
-        content.add(getRadioPanel(), cc.xyw(1, 2, 2, CellConstraints.FILL, CellConstraints.TOP));
+        content.add(getSuchEinstellungPanel(), cc.xyw(1, 2, 2, CellConstraints.FILL, CellConstraints.TOP));
         content.add(getRechnungDatenPanel(), cc.xy(1, 4));
         content.add(getTablePanel(), cc.xy(2, 4, CellConstraints.FILL, CellConstraints.FILL));
-        content.add(getButtonPanel(), cc.xy(1, 6, CellConstraints.FILL, CellConstraints.TOP));
+        content.add(OpCommon.getMahnButtonPanel(al), cc.xy(1, 6, CellConstraints.FILL, CellConstraints.TOP));
         content.validate();
         return content;
-    }
-
-    private JXPanel getButtonPanel() {
-        JXPanel buttonpan = new JXPanel();
-        // 1 2 3 4 5 6 7
-        String xwerte = "fill:0:grow(0.25),80dlu,fill:0:grow(0.25),80dlu,fill:0:grow(0.25),80dlu,fill:0:grow(0.25)";
-        String ywerte = "15dlu,p,15dlu";
-        FormLayout lay = new FormLayout(xwerte, ywerte);
-        CellConstraints cc = new CellConstraints();
-        buttonpan.setLayout(lay);
-        buttonpan.add((mahnbuts[0] = ButtonTools.macheButton("Mahnung drucken", "mahnungstarten", al)), cc.xy(2, 2));
-        buttonpan.add((mahnbuts[1] = ButtonTools.macheButton(" << ", "vorheriger", al)), cc.xy(4, 2));
-        buttonpan.add((mahnbuts[2] = ButtonTools.macheButton(" >> ", "naechster", al)), cc.xy(6, 2));
-        buttonpan.validate();
-        return buttonpan;
     }
 
     private JXPanel getTablePanel() {
@@ -210,7 +219,7 @@ public class OpRgafMahnungen extends JXPanel {
         return tablepan;
     }
 
-    private JXPanel getRechnungDatenPanel() {
+    private JXPanel getRechnungDatenPanel() {    // links
         JXPanel rechnungpan = new JXPanel();
 
         // 1 2 3 4 5 6 7 8 9 10 11 12 13
@@ -299,77 +308,88 @@ public class OpRgafMahnungen extends JXPanel {
 
     }
 
-    private JXPanel getRadioPanel() {
-        JXPanel radiopan = new JXPanel();
-        radiopan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13
-        String xwerte = "15dlu,150dlu,2dlu,60dlu,2dlu,60dlu,2dlu,60dlu,2dlu,60dlu:g,10dlu,30dlu,0dlu:g,5dlu";
+    private JPanel getSuchEinstellungPanel(){
+        //                 1     2      3    4     5    6       7    8      9   10    11    
+        String xwerte = "15dlu,140dlu,2dlu,60dlu,2dlu,60dlu:g,2dlu,189dlu,2dlu,50dlu,1dlu";
         // 1 2 3
-        String ywerte = "10dlu,p,10dlu";
+        String ywerte = "15dlu,p,15dlu";
         FormLayout lay = new FormLayout(xwerte, ywerte);
+        PanelBuilder builder = new PanelBuilder(lay);
+        //PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel());            // debug mode
+        builder.getPanel().setOpaque(false);
         CellConstraints cc = new CellConstraints();
-        radiopan.setLayout(lay);
 
-        JLabel lab = new JLabel("Bitte die gewünschte Mahnstufe einstellen");
-        radiopan.add(lab, cc.xy(2, 2));
+        int colCnt=2, rowCnt=2;
+
+        builder.addLabel("Bitte die gewünschte Mahnstufe einstellen:", cc.xy(colCnt++, rowCnt));            // 2,2
+        
+        /********/
+        JXPanel pan = new JXPanel();
+        //pan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        //                1    2   3
+        String xwerte2 = "2dlu,p,2dlu";
+        //                  1  2 3 4
+        String ywerte2 = "9dlu,p,p,p";
+        FormLayout lay2 = new FormLayout(xwerte2,ywerte2);
+        CellConstraints cc2 = new CellConstraints();
+        pan.setLayout(lay2);
 
         rbMahnart[0] = new JRtaRadioButton("1. Mahnung");
         rbMahnart[0].setSelected(true);
         rbMahnart[0].setName("mahnung1");
         rbMahnart[0].addActionListener(al);
         bgroup.add(rbMahnart[0]);
-        radiopan.add(rbMahnart[0], cc.xy(4, 2));
-
+        pan.add(rbMahnart[0],cc2.xy(2,2));
         rbMahnart[1] = new JRtaRadioButton("2. Mahnung");
         rbMahnart[1].setName("mahnung2");
         rbMahnart[1].addActionListener(al);
         bgroup.add(rbMahnart[1]);
-        radiopan.add(rbMahnart[1], cc.xy(6, 2));
-
-        rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
+        pan.add(rbMahnart[1],cc2.xy(2,3));
+/*        rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
         rbMahnart[3].setName("mahnung4");
         rbMahnart[3].addActionListener(al);
         bgroup.add(rbMahnart[3]);
-        radiopan.add(rbMahnart[3], cc.xy(8, 2));
-        /********/
-        JXPanel pan = new JXPanel();
-        pan.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13
-        String xwerte2 = "2dlu,p,2dlu";
-        // 1 2 3
-        String ywerte2 = "p,p,p";
-        FormLayout lay2 = new FormLayout(xwerte2, ywerte2);
-        CellConstraints cc2 = new CellConstraints();
-        pan.setLayout(lay2);
-
-        rbMahnart[4] = new JRtaRadioButton("nur Ausfallrechnungen");
-        rbMahnart[4].setName("nuraf5");
-        // rbMahnart[4].addActionListener(al);
-        artgroup.add(rbMahnart[4]);
-        rbMahnart[4].setSelected(true);
-        pan.add(rbMahnart[4], cc2.xy(2, 1));
-        rbMahnart[5] = new JRtaRadioButton("nur Rezeptgebührrech.");
-        rbMahnart[5].setName("nurrg6");
-        // rbMahnart[5].addActionListener(al);
-        artgroup.add(rbMahnart[5]);
-        pan.add(rbMahnart[5], cc2.xy(2, 2));
-        rbMahnart[6] = new JRtaRadioButton("beide Rechn.Arten");
-        rbMahnart[6].setName("beides7");
-        // rbMahnart[6].addActionListener(al);
-        artgroup.add(rbMahnart[6]);
-        pan.add(rbMahnart[6], cc2.xy(2, 3));
+        pan.add(rbMahnart[3],cc2.xy(2,4));
+*/
         pan.validate();
-        radiopan.add(pan, cc.xy(10, 2, CellConstraints.FILL, CellConstraints.FILL));
+        ++colCnt;
+        builder.add(pan,cc.xywh(colCnt++, rowCnt-1,1,3,CellConstraints.FILL,CellConstraints.FILL));            // 4,1..3
         /********/
+        
+        colCnt += 2;
+        // Auswahl RGR/AFR/Verkauf
+        selPan = new RgAfVkSelect("zeige mahnfähige");                        // Subpanel mit Checkboxen anlegen
+        builder.add(selPan.getPanel(),cc.xywh(colCnt++, rowCnt-1,5,3,CellConstraints.LEFT,CellConstraints.DEFAULT));    //8..10,1..3
+        
+        selPan.setCallBackObj(this);                                        // callBack registrieren
+        //OpCommon.
+        initSelection();
+        // Ende Auswahl
 
-        suchen = new JButton("los..");
-        suchen.setActionCommand("suchen");
-        suchen.addActionListener(al);
-        radiopan.add(suchen, cc.xy(12, 2));
+        colCnt += 2;
 
-        radiopan.validate();
-        return radiopan;
+        suchen = ButtonTools.macheButton("suchen", "suchen", al);
+        suchen.setMnemonic('s');
+        builder.add(suchen,cc.xy(colCnt, rowCnt));
+        
+        return builder.getPanel();
+    }
+
+    /**
+     * letzte Checkbox-Auswahl wiederherstellen
+     * (bei Start des Moduls und bei Tab-Wechsel)
+     */
+    public void initSelection() {
+        selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());
+        selPan.setAFR(OpRgaf.iniOpRgAf.getIncAR());
+        selPan.setVKR(OpRgaf.iniOpRgAf.getIncVK());
+        selPan.disableVKR();                                                // !! nur solange VR nicht korrekt behandelt werden !!
+        if (OpRgaf.iniOpRgAf.getIncVK()){
+            selPan.setVKR(Boolean.FALSE);
+        }
+        if (selPan.useRGR() || selPan.useAFR() || selPan.useVKR()){
+            selPan.setRGR(Boolean.TRUE);    // einer sollte immer ausgewählt sein 
+        }
     }
 
     private void activateActionListener() {
@@ -380,6 +400,8 @@ public class OpRgafMahnungen extends JXPanel {
                 if (arg0.getSource() instanceof JRtaRadioButton) {
                     String componente = ((JComponent) arg0.getSource()).getName();
                     aktuelleMahnstufe = Integer.parseInt(componente.substring(componente.length() - 1));
+                    // Mahnstufe merken?
+                    //OpRgaf.iniOpRgAf.set...
                     doAllesAufNull();
                     return;
                 }
@@ -471,19 +493,20 @@ public class OpRgafMahnungen extends JXPanel {
         mahnParameter.put("<Mheute>", DatFunk.sHeute());
         mahnParameter.put("<Mmahndat1>", (rtfs[8].getText()
                                                  .trim()
-                                                 .length() == 10 ? rtfs[8].getText()
-                                                                          .trim()
+                                                 .length() == 10
+                                                         ? rtfs[8].getText()
+                                                                  .trim()
                                                          : ""));
         mahnParameter.put("<Mmahndat2>", (rtfs[9].getText()
                                                  .trim()
-                                                 .length() == 10 ? rtfs[9].getText()
-                                                                          .trim()
+                                                 .length() == 10
+                                                         ? rtfs[9].getText()
+                                                                  .trim()
                                                          : ""));
-        // mahnParameter.put("<Mmahndat3>", (rtfs[10].getText().trim().length()==10 ?
-        // rtfs[8].getText().trim() : ""));
-        String datei = (String) OpRgaf.mahnParameter.get("formular" + Integer.toString(aktuelleMahnstufe));
-        // String datei =
-        // OpRgaf.progHome+"vorlagen/"+OpRgaf.aktIK+"/RGAFMahnung"+Integer.toString(aktuelleMahnstufe)+".ott";
+        // mahnParameter.put("<Mmahndat3>",
+        // (rtfs[10].getText().trim().length()==10 ? rtfs[8].getText().trim() :
+        // ""));
+        String datei = OpRgaf.iniOpRgAf.getFormNb(aktuelleMahnstufe);
         try {
             starteMahnDruck(datei);
             if (textDocument != null) {
@@ -563,13 +586,15 @@ public class OpRgafMahnungen extends JXPanel {
 
     private void doSuchen() {
         String nichtvorDatum = eltern.getNotBefore();
-        int frist1 = (Integer) OpRgaf.mahnParameter.get("frist1");
-        int frist2 = (Integer) OpRgaf.mahnParameter.get("frist2");
-        int frist3 = (Integer) OpRgaf.mahnParameter.get("frist3");
-        // int frist1 = eltern.getFrist(1);
-        // int frist2 = eltern.getFrist(2);
-        // int frist3 = eltern.getFrist(3);
-        if (frist1 < 0 || frist2 < 0 || frist3 < 0) {
+        //int frist1 = (Integer) OpRgaf.mahnParameter.get("frist1");
+        //int frist2 = (Integer) OpRgaf.mahnParameter.get("frist2");
+        //int frist3 = (Integer) OpRgaf.mahnParameter.get("frist3");
+        int frist1 = OpRgaf.iniOpRgAf.getFrist(1);
+        int frist2 = OpRgaf.iniOpRgAf.getFrist(2);
+        int frist3 = OpRgaf.iniOpRgAf.getFrist(3);
+
+        if(frist1 < 0 || frist2 < 0 || frist3 < 0){
+             System.out.println("error Mahnparameter: Frist < 0");
             return;
         }
 
@@ -577,29 +602,21 @@ public class OpRgafMahnungen extends JXPanel {
         String vergleichsdatum = "";
         switch (aktuelleMahnstufe) {
         case 1:
-            vergleichsdatum = DatFunk.sDatInSQL(DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist1 * -1)));
-            // cmd = "select * from rliste where (r_offen > '0.00' AND r_datum
-            // <='"+vergleichsdatum+"' AND r_datum >='"+nichtvorDatum+"')";
-            cmd = stmtString + " where (roffen > '0.00' AND rdatum <='" + vergleichsdatum + "' AND rdatum >='"
-                    + nichtvorDatum + "' AND rmahndat1 IS NULL " + testArt() + ")";
+            vergleichsdatum = DatFunk.sDatInSQL( DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist1*-1)) );
+            cmd = stmtString+" where (rdatum <='"+vergleichsdatum+"' AND rdatum >='"+nichtvorDatum+"' AND rmahndat1 IS NULL "+testArt()+")";
             starteSuche(cmd);
             break;
         case 2:
-            vergleichsdatum = DatFunk.sDatInSQL(DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist2 * -1)));
-            // cmd = "select * from rliste where (r_offen > '0.00' AND r_datum
-            // <='"+vergleichsdatum+"' AND r_datum >='"+nichtvorDatum+"')";
-            cmd = stmtString + " where (roffen > '0.00' AND rmahndat1 <='" + vergleichsdatum + "' AND rdatum >='"
-                    + nichtvorDatum + "' AND rmahndat2 IS NULL " + testArt() + ")";
+            vergleichsdatum = DatFunk.sDatInSQL( DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist2*-1)) );
+            cmd = stmtString+" where (rmahndat1 <='"+vergleichsdatum+"' AND rdatum >='"+nichtvorDatum+"' AND rmahndat2 IS NULL "+testArt()+")";
             starteSuche(cmd);
             break;
         case 3:
-            vergleichsdatum = DatFunk.sDatInSQL(DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist3 * -1)));
-            // cmd = "select * from rliste where (r_offen > '0.00' AND r_datum
-            // <='"+vergleichsdatum+"' AND r_datum >='"+nichtvorDatum+"')";
-            cmd = "select * from rliste where (roffen > '0.00' AND rmahndat2 <='" + vergleichsdatum + "' AND rdatum >='"
-                    + nichtvorDatum + "' AND mahndat3 IS NULL " + testArt() + ")";
+            vergleichsdatum = DatFunk.sDatInSQL( DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist3*-1)) );
+            cmd = "select * from rliste where (rmahndat2 <='"+vergleichsdatum+"' AND rdatum >='"+nichtvorDatum+"' AND mahndat3 IS NULL "+testArt()+")";
             starteSuche(cmd);
             break;
+/*
         case 4:
             vergleichsdatum = DatFunk.sDatInSQL(DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist3 * -1)));
             // cmd = "select * from rliste where (r_offen > '0.00' AND r_datum
@@ -608,17 +625,48 @@ public class OpRgafMahnungen extends JXPanel {
                     + "' AND r_datum >='" + nichtvorDatum + "')";
             starteSuche(cmd);
             break;
-
+*/
         }
     }
-
-    private String testArt() {
-        if (this.rbMahnart[4].isSelected()) {
-            return " and rnr like 'AFR-%'";
-        } else if (this.rbMahnart[5].isSelected()) {
-            return " and rnr like 'RGR-%'";
+    private String testArt(){
+        String tmpStr = "";
+        if(OpRgaf.iniOpRgAf.getIncRG()){
+            tmpStr = " rnr like 'RGR-%'";
         }
-        return "";
+        if(OpRgaf.iniOpRgAf.getIncAR()){
+            if ( tmpStr.length() > 0){tmpStr = tmpStr + " or ";}
+            tmpStr = tmpStr + " rnr like 'AFR-%'";
+        }
+        if (OpRgaf.iniOpRgAf.getIncVK()) {
+            if (tmpStr.length() > 0) {
+                tmpStr = tmpStr + " or ";
+            }
+            tmpStr = tmpStr + " rnr like 'VR-%'";
+        }
+        if (tmpStr.length() > 0) {
+            tmpStr = " and (" + tmpStr + ")";
+        } else {
+            tmpStr = "and rnr like 'dummy'"; // nix gewählt -> nix anzeigen
+        }
+        return tmpStr;
+    }
+
+    @Override
+    public void useRGR(boolean rgr) {
+        OpRgaf.iniOpRgAf.setIncRG(rgr);
+        // searchRG = rgr;
+    }
+
+    @Override
+    public void useAFR(boolean afr) {
+        OpRgaf.iniOpRgAf.setIncAR(afr);
+        // searchAR = afr;
+    }
+
+    @Override
+    public void useVKR(boolean vkr) {
+        OpRgaf.iniOpRgAf.setIncVK(vkr);
+        // searchVK = vkr;
     }
 
     private void starteSuche(String sstmt) {
@@ -757,7 +805,7 @@ public class OpRgafMahnungen extends JXPanel {
 
     /*******************************/
 
-    class MahnungListSelectionHandler implements ListSelectionListener {
+    class MahnungListSelectionHandler implements ListSelectionListener {        // Zeile in Rechnungsliste gewählt
 
         @Override
         public void valueChanged(ListSelectionEvent e) {
@@ -788,17 +836,15 @@ public class OpRgafMahnungen extends JXPanel {
             JOptionPane.showMessageDialog(null, "Keine offene Rechnung ausgewählt");
             return;
         }
-        String id = tabmod.getValueAt(tab.convertRowIndexToModel(row), 11)
-                          .toString();
-        String cmd = // tabmod.getValueAt( tab.convertRowIndexToModel(row) ,0).toString();
-                "select t2.anrede,t2.n_name,t2.v_name,t2.strasse,t2.plz,t2.ort,"
-                        + "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rmahndat1,t1.rmahndat2 "
-                        + "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) where t1.id='"
-                        + id + "' LIMIT 1";
-
-        // String cmd = "select rnummer from faktura where rnummer = '"+rnr+"' LIMIT 1";
-        // System.out.println(cmd);
-        if (SqlInfo.gibtsSchon(cmd)) {
+        String id = tabmod.getValueAt( tab.convertRowIndexToModel(row)  ,11).toString();
+        String cmd = //tabmod.getValueAt( tab.convertRowIndexToModel(row)  ,0).toString();
+        "select t2.anrede,t2.n_name,t2.v_name,t2.strasse,t2.plz,t2.ort," +                    // !! findet nur RGR/AFR !!
+        "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rmahndat1,t1.rmahndat2 "+                    // erst anpassen, dann VR freischalten
+        "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) where t1.id='"+id+"' LIMIT 1";
+        
+        //String cmd = "select rnummer from faktura where rnummer = '"+rnr+"' LIMIT 1";
+        //System.out.println(cmd);
+        if(SqlInfo.gibtsSchon(cmd)){
             OpRgaf.thisFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
             try {
                 doFakturaGedoense(id, SqlInfo.holeFelder(cmd));
@@ -928,7 +974,9 @@ public class OpRgafMahnungen extends JXPanel {
             e.printStackTrace();
         }
         textDocument = (ITextDocument) document;
-        OOTools.druckerSetzen(textDocument, (String) OpRgaf.mahnParameter.get("drucker"));
+        //OOTools.druckerSetzen(textDocument, (String) OpRgaf.mahnParameter.get("drucker"));
+        OOTools.druckerSetzen(textDocument, OpRgaf.iniOpRgAf.getDrucker());
+
         ITextFieldService textFieldService = textDocument.getTextFieldService();
         ITextField[] placeholders = null;
         try {
@@ -965,4 +1013,5 @@ public class OpRgafMahnungen extends JXPanel {
         }
 
     }
+
 }

@@ -1801,7 +1801,7 @@ public class Reha implements FocusListener, ComponentListener, ContainerListener
             men.addActionListener(this);
             abrechnungMenu.add(men);
             abrechnungMenu.addSeparator();
-            men = new JMenuItem("Rezeptgebührrechnung/Ausfallrechnung");
+            men = new JMenuItem("OP Rezeptgebühr-/Ausfall-/Verkaufsrechnung");
             men.setActionCommand("rgaffaktura");
             men.addActionListener(this);
             abrechnungMenu.add(men);

@@ -44,10 +44,10 @@ public class OpRgafTab extends JXPanel implements ChangeListener {
         jtb.setUI(new WindowsTabbedPaneUI());
 
         opRgafPanel = new OpRgafPanel(this);
-        jtb.addTab("Rezeptgebühr-/Ausfallrechnung ausbuchen", opRgafPanel);
+        jtb.addTab("Rezeptgebühr-/Ausfall-/Verkaufsrechnungen ausbuchen", opRgafPanel);
 
         opRgafMahnungen = new OpRgafMahnungen(this);
-        jtb.addTab("Rezeptgebühr-/Ausfallrechnung Mahnungen", opRgafMahnungen);
+        jtb.addTab("Rezeptgebühr-/Ausfall-/Verkaufsrechnungen Mahnungen", opRgafMahnungen);
 
         jtb.addChangeListener(this);
         doHeader();
@@ -83,7 +83,7 @@ public class OpRgafTab extends JXPanel implements ChangeListener {
 
         vectitel.add("Mahnwesen");
         vecdescript.add("<html>Hier erzeugen Sie Mahnungen für noch nicht bezahlte Rechnungen.<br><br>"
-                + "Button <b>[los..]</b> listet die Rechnungen der gewählten Kategorie, bei denen noch <br>"
+                + "Button <b>[suchen]</b> listet die Rechnungen der gewählten Kategorie, bei denen noch <br>"
                 + "ein Betrag offen ist und die in der eingestellten Mahnstufe noch nicht gemahnt wurden.</html>");
         ss = System.getProperty("user.dir") + File.separator + "icons" + File.separator + "Mahnung.png";
         ico = new ImageIcon(ss);
@@ -110,11 +110,13 @@ public class OpRgafTab extends JXPanel implements ChangeListener {
     public void stateChanged(ChangeEvent arg0) {
         JTabbedPane pane = (JTabbedPane) arg0.getSource();
         int sel = pane.getSelectedIndex();
-        try {
+        try{
             if (sel == 0) {
                 // oppanel.setzeFocus();
+                opRgafPanel.initSelection();
             } else if (sel == 1) {
                 // rehaBillPanel.setzeFocus();
+                opRgafMahnungen.initSelection();
             }
         } catch (Exception ex) {
 

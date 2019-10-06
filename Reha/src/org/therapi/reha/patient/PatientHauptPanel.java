@@ -32,10 +32,12 @@ import org.jdesktop.swingx.JXPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import rehaInternalFrame.JPatientInternal;
+import systemEinstellungen.SystemConfig;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
-import dialoge.InfoDialog;
+import dialoge.InfoDialogRGAFoffen;
 import events.PatStammEvent;
 import events.PatStammEventClass;
 import events.PatStammEventListener;
@@ -128,8 +130,8 @@ public class PatientHauptPanel extends JXPanel {
     // Bezug zum unterliegenden JInternalFrame
     JPatientInternal patientInternal = null;
 
-    InfoDialog infoDlg = null;
-
+    
+    InfoDialogRGAFoffen infoDlg = null;
     /**
      * @param connection
      *****************************************************/
@@ -413,12 +415,15 @@ public class PatientHauptPanel extends JXPanel {
     }
 
     public void holeWichtigeInfos(String xpatint, String string) {
-        String stmt = "select t1.rdatum,t1.rnr,t1.roffen,t1.pat_intern from rgaffaktura as t1 join pat5 as t2 on (t1.pat_intern=t2.pat_intern) where t1.roffen > '0' and t1.pat_intern = '"
-                + xpatint + "' order by t1.rdatum";
+        String stmt = "select t1.rdatum,t1.rnr,t1.roffen,t1.pat_intern from rgaffaktura as t1 "+
+                      "join pat5 as t2 on (t1.pat_intern=t2.pat_intern) "+
+                      "where t1.roffen > '0' and t1.pat_intern = '"+xpatint+"' and NOT t1.rnr like 'sto%'"+
+                      "order by t1.rdatum";
         Vector<Vector<String>> vecoffen = SqlInfo.holeFelder(stmt);
-        if (vecoffen.size() > 0 || Reha.bHatMerkmale) {
+        if(vecoffen.size() > 0 || Reha.bHatMerkmale) {
             try {
-                infoDlg = new InfoDialog(xpatint, "offenRGAF", vecoffen);
+//                infoDlg = new InfoDialog(xpatint,"offenRGAF",vecoffen);
+                infoDlg = new InfoDialogRGAFoffen(xpatint,vecoffen);
                 infoDlg.pack();
                 infoDlg.setLocationRelativeTo(this);
                 infoDlg.setVisible(true);
