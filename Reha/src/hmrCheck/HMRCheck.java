@@ -21,8 +21,6 @@ public class HMRCheck {
     Vector<String> positionen = null;
     Vector<Vector<String>> preisvec = null;
     String indischluessel = null;
-//    String diszis[] = {"2","1","5","3","8","7"};
-//    String diszikurz[] = {"KG","MA","ER","LO","RH","PO"};
     int disziplin;
     int preisgruppe;
     final String maxanzahl = "Die Höchstmenge pro Rezept bei ";
@@ -33,8 +31,9 @@ public class HMRCheck {
     String reznummer = null;
     String rezdatum = null;
     String letztbeginn = null;
-    boolean AdRrezept = false;
-    boolean folgerezept = false;
+    boolean isAdRrezept = false;
+    boolean isFolgerezept = false;
+    boolean isErstVO = false;
     boolean neurezept = false;
     boolean doppelbehandlung = false;
     boolean unter18 = false;
@@ -63,7 +62,6 @@ public class HMRCheck {
         positionen = vecpositionen;
         preisgruppe = xpreisgruppe;
         preisvec = xpreisvec;
-        // rezanlage = xrezanlage;
         rezeptart = xrezeptart;
         reznummer = xreznr;
         unter18 = DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
@@ -73,27 +71,29 @@ public class HMRCheck {
         rezdatum = xrezdatum;
         letztbeginn = xletztbeginn;
         // System.out.println("IDdiszi = "+idiszi);
-        // aktualisiereHMRs();
         diszis = new Disziplinen();
     }
 
     /*
      *
-     * Abhängig vom Indikationsschlüssel muß geprüft werden 1. Ist die Anzahl pro
-     * Rezept o.k. 2. Ist das gewählte Heilmittel o.k. 3. ist das ergänzende
-     * Heilmittel o.k. 4. 5.
+     * Abhängig vom Indikationsschlüssel muß geprüft werden 
+     * 1. Ist die Anzahl pro Rezept o.k.
+     * 2. Ist das gewählte Heilmittel o.k.
+     * 3. ist das ergänzende Heilmittel o.k.
      *
      */
     public boolean check() {
-        if (reznummer.startsWith("RS") || reznummer.startsWith("FT") || reznummer.startsWith("RH")) { // McM: ist das
-                                                                                                      // korrekt? (Reha
-                                                                                                      // taucht im HMK
-                                                                                                      // nicht auf)
+        if (reznummer.startsWith("RS") || reznummer.startsWith("FT") || reznummer.startsWith("RH")) { 
+            // McM: ist das korrekt? (Reha taucht im HMK nicht auf)
             return true;
         }
-        AdRrezept = (rezeptart == 2);
-        folgerezept = (rezeptart == 1);
-        if (reznummer.startsWith("PO") && rezeptart == 0) {
+        // isAdRrezept = (rezeptart == 2);
+        isAdRrezept = chkIsAdR(rezeptart);
+        // isFolgerezept = (rezeptart == 1);
+        isFolgerezept = chkIsFolgeVO(rezeptart);
+        isErstVO = chkIsErstVO(rezeptart);
+
+        if (reznummer.startsWith("PO") && isErstVO) {
             try {
                 if (Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(3)) > 3) {
                     JOptionPane.showMessageDialog(null,
@@ -132,27 +132,28 @@ public class HMRCheck {
                                  .get(5)
                                  .split("@");
         for (int i = 0; i < vorrangig.length; i++) {
-//            vorrangig[i] = diszis[disziplin]+vorrangig[i];
             vorrangig[i] = diszis.getPrefix(disziplin) + vorrangig[i];
         }
         for (int i = 0; i < ergaenzend.length; i++) {
-//            ergaenzend[i] = diszis[disziplin]+ergaenzend[i];
             ergaenzend[i] = diszis.getPrefix(disziplin) + ergaenzend[i];
         }
         // hier einbauen:
-        // testen auf WS1,Ex1 etc. hier ist keine Folgeverordnung möglich //
+        // testen auf WS1,Ex1 etc. hier ist keine Folgeverordnung möglich
         // Status:erledigt!!
-        // testen auf Doppelbehandlung und Verordnungsmenge // Status:erledigt
-        // testen auf außerhalb des Regelfalles (hebt) die Verordnungsmenge auf //
+        // testen auf Doppelbehandlung und Verordnungsmenge
+        // Status:erledigt
+        // testen auf außerhalb des Regelfalles (hebt) die Verordnungsmenge auf
         // Status:erledigt aber halblebig
-        // testen auf Rezdatum und Behandlungsbeginn = 0.k. // Status:ausstehend
-        // testen ob Unterbrechungen zwischen den Behandlungen o.k. // Status:ausstehend
+        // testen auf Rezdatum und Behandlungsbeginn = 0.k.
+        // Status:ausstehend
+        // testen ob Unterbrechungen zwischen den Behandlungen o.k.
+        // Status:ausstehend
 
         // mögliche Höchstmenge pro Rezept wurde überschritten?
         // System.out.println("Max pro Rezept="+maxprorezept);
         // System.out.println("Anzahlen = "+anzahl);
         for (int i = 0; i < anzahl.size(); i++) {
-            if ((anzahl.get(i) > maxprorezept) && (!AdRrezept)) {
+            if ((anzahl.get(i) > maxprorezept) && (!isAdRrezept)) {
                 fehlertext = String.valueOf("<html><b>Bei Indikationsschlüssel " + indischluessel
                         + " sind maximal<br><font color='#ff0000'>" + Integer.toString(maxprorezept)
                         + " Behandlungen</font> pro Rezept erlaubt!!<br><br>"
@@ -172,7 +173,7 @@ public class HMRCheck {
         }
         // Hier den Folgeverordnungstest einbauen, bzw. testen ob Höchstverordnungsmenge
         // überschritten wird und deshalb VoAdr fällig ist
-        if (this.folgerezept) { // kann das nicht auch falsch angegeben sein?
+        if (this.isFolgerezept) { // kann das nicht auch falsch angegeben sein?
             testok = checkeVoFolgeKorrekt();
         }
         // Hier der Check ob für Kinder ein Erwachsenen-Indischlüssel verwendet wurde
@@ -199,7 +200,7 @@ public class HMRCheck {
                               .equals(positionen.get(1))) {
                     doppelbehandlung = true;
                     int doppelgesamt = anzahl.get(0) + anzahl.get(1);
-                    if ((doppelgesamt > maxprorezept) && (!AdRrezept)) {
+                    if ((doppelgesamt > maxprorezept) && (!isAdRrezept)) {
                         fehlertext = String.valueOf("<html><b>Die Doppelbehandlung bei Indikationsschlüssel "
                                 + indischluessel
                                 + ", übersteigt<br>die maximal erlaubte Höchstverordnungsmenge pro Rezept von<br><font color='#ff0000'>"
@@ -523,8 +524,8 @@ public class HMRCheck {
             // Leerzeichen zw. Diagnosengruppe (2 oder 3 Zeichen) u. Leitsymptomatik
             tmp = indiSchl.substring(0, indiSchl.length() - 1) + " " + indiSchl.substring(indiSchl.length() - 1);
         } else {
-            // System.out.println("HMRCheck: Indikationsschlüssel ohne Leitsymptomatik:
-            // "+tmp); // Norm bei Ergo/Logo - wird hier als Text angegeben
+            // System.out.println("HMRCheck: Indikationsschlüssel ohne Leitsymptomatik: "+tmp); 
+            // Norm bei Ergo/Logo - wird hier als Text angegeben
         }
         return tmp;
     }
@@ -551,8 +552,8 @@ public class HMRCheck {
         int dgIndex = getDgIndex(indiSchl);
         while (Arrays.asList(wechselOK)
                      .contains(diagGrp)) { // betrifft nur Diagnosegruppen mit numer. Index
-            if (search4indi == null) { // wenn Wechsel der Diagnosegruppe möglich kann diese bei Vorgängerrezepten
-                                       // einen niedrigeren Index haben
+            if (search4indi == null) {     // wenn Wechsel der Diagnosegruppe möglich kann diese bei
+                                           // Vorgängerrezepten einen niedrigeren Index haben
                 search4indi = "indikatschl like '" + diagGrp + "%'";
             }
             diagGrp = diagGrp.replace(Integer.toString(dgIndex), Integer.toString(dgIndex - 1));
@@ -582,16 +583,11 @@ public class HMRCheck {
         try {
 
             aktindischl = separiereLeitsymptomatik(indischluessel);
-//            if( "abcdef".indexOf( indischluessel.substring(indischluessel.length()-1,indischluessel.length())) >= 0)   {
-//            aktindischl = indischluessel.substring(0,indischluessel.length()-1)+" "+indischluessel.substring(indischluessel.length()-1);
-//        }    // Leerzeichen zw. Diagnosengruppe (2 oder 3 Zeichen) u. Leitsymptomatik
             // System.out.println(aktindischl);
 
             if (Reha.instance.patpanel != null) {
                 patintern = Reha.instance.patpanel.patDaten.get(29);
-                String selFieldsFrom = "select rez_datum,rez_nr,rezeptart,anzahl1,indikatschl,termine,pat_intern from "; // icd10,icd10_2
-                                                                                                                         // ?
-//            String selCond = "where pat_intern = '"+patintern+"'"+" and rez_nr like '"+diszis.getRezClass(disziplin)+"%' and indikatschl = '"+aktindischl+"'";
+                String selFieldsFrom = "select rez_datum,rez_nr,rezeptart,anzahl1,indikatschl,termine,pat_intern from "; 
                 String selCond = "where pat_intern = '" + patintern + "'" + " and rez_nr like '"
                         + diszis.getRezClass(disziplin) + "%' and " + mkIndiSearch(aktindischl);
                 String stmt = "(" + selFieldsFrom + " verordn " + selCond + ")" + " union " + "(" + selFieldsFrom
@@ -600,18 +596,17 @@ public class HMRCheck {
                                                                            // nach datum u. Indi-Schlüssel
 
                 // erstmal die eindeutigen Faelle aussortieren
-                if (testvec.size() == 1) { // entweder schon gespeichert, oder es gibt ein Vorrezept
-                    if (neurezept) {
-                        return true; // Hoechstverordnungsmenge kann noch nicht ueberschritten sein
-                    } else {
+
+                if (testvec.size() == 1) { // entweder schon gespeichert, oder es gibt genau ein Vorrezept
+                    if (!neurezept) {
                         String currRez = testvec.get(0)
                                                 .get(1);
-                        if (currRez.equals(reznummer)) { // schon gespeichert, kein Vorrezept
+                        if (currRez.equals(reznummer)) {          // schon gespeichert, kein Vorrezept
                             return shouldBeErstVO(rezeptart, ""); // muesste dann Erstverordnung sein
                         }
                     }
                 } else if (testvec.size() == 0 && neurezept) {
-                    return shouldBeErstVO(rezeptart, ""); // muesste auch Erstverordnung sein
+                    return shouldBeErstVO(rezeptart, "");         // muesste auch Erstverordnung sein
                 }
 
                 boolean zaehlen = false;
@@ -619,22 +614,17 @@ public class HMRCheck {
                 int aktanzahl = 0, idxVorg = 0;
                 int rezDgIdx = getDgIndex(aktindischl);
                 boolean neudummy = Boolean.valueOf(neurezept);
-                String voArt = null, rezVoArt = null;
+                String currRezVoArt = null,  vorgaengerVoArt = null;
 
-                // 0 1 2 3 4 5 6
+                //   0         1      2         3        4          5       6
                 // rez_datum,rez_nr,rezeptart,anzahl1,indikatschl,termine,pat_intern
                 for (int i = 0; i < testvec.size(); i++) {
                     String currRez = testvec.get(i)
                                             .get(1);
                     if (currRez.equals(reznummer) || zaehlen || neudummy) {
                         zaehlen = true;
-//                    if(neudummy){
-//                        aktanzahl = anzahl.get(0);        // <- Das  ist Murks! Anz. des Rez. im testvec[0] wird so nicht berücksichtigt!
-//                    }else{
-//                        aktanzahl = Integer.parseInt(testvec.get(i).get(3));
-//                    }
                         if (currRez.equals(reznummer)) {
-                            rezVoArt = testvec.get(i)
+                            currRezVoArt = testvec.get(i)
                                               .get(2);
                         }
                         int currIdx = getDgIndex(testvec.get(i)
@@ -646,12 +636,11 @@ public class HMRCheck {
                         }
 
                         // erst prüfen ob zwischen letzter Behandlung des alten Rezeptes und dem ersten
-                        // Termin der
-                        // neuen VO 12 Wochen Therapiepause lagen, sofern ja -> nicht summieren (muesste
-                        // dann Erstverordnung sein)
+                        // Termin der neuen VO 12 Wochen Therapiepause lagen, 
+                        // sofern ja -> nicht summieren (muesste dann Erstverordnung sein)
                         if (neudummy) {
-                            idxVorg = 0; // Index '0' ist Vorgänger des gerade angelegten (u. noch nicht in der DB
-                                         // gespeicherten) Rezeptes
+                            idxVorg = 0; // Index '0' ist Vorgänger des gerade angelegten
+                                         // (u. noch nicht in der DB gespeicherten) Rezeptes
                             aktanzahl = anzahl.get(0);
                         } else {
                             idxVorg = i + 1;
@@ -660,13 +649,10 @@ public class HMRCheck {
                         }
                         if (idxVorg <= testvec.size()) {
                             if (neudummy) {
-                                // startdatum_neu = DatFunk.sHeute();
                                 startdatum_neu = rezdatum; // McM: Ausstellungsdatum ist entscheidend für 12 Wochen
                                                            // Frist, nicht erster Behandlungstermin
                                 neudummy = false;
                             } else {
-                                // startdatum_neu = (testvec.get(i).get(5).length() > 0 ?
-                                // RezTools.holeErstenTermin(null, testvec.get(i).get(5)) : DatFunk.sHeute() );
                                 startdatum_neu = DatFunk.sDatInDeutsch(testvec.get(i)
                                                                               .get(0)); // McM: dito
                             }
@@ -679,32 +665,22 @@ public class HMRCheck {
                                                                           .get(3)); // die verordneten Behandlungen
                                                                                     // zaehlen trotzdem mit
                                 // test ob gesamt > maxProFall
-                                voArt = testvec.get(idxVorg)
+                                vorgaengerVoArt = testvec.get(idxVorg)
                                                .get(2);
-                                if (chkIsErstVO(voArt)) { // wenn die Uebersprungene die Erst-VO ist -> Abbruch
+                                if (chkIsErstVO(vorgaengerVoArt)) { // wenn die Uebersprungene die Erst-VO ist -> Abbruch
                                                           // (Verordnungsmenge ok)
                                     return true;
                                 }
-                                if (chkIsAdR(voArt)) { // wenn die Uebersprungene eine AdR-VO ist -> Abbruch
-                                    return shouldBeAdR(rezVoArt);
+                                if (chkIsAdR(vorgaengerVoArt)) { // wenn die Uebersprungene eine AdR-VO ist -> Abbruch
+                                    return shouldBeAdR(currRezVoArt);
                                 }
                                 idxVorg++; // jetzt Index auf Vorgänger setzen
                             }
-                            // if(idxVorg < testvec.size()){ // es ist (immer) noch ein Vorgänger vorhanden
-                            // und
-                            // if(testvec.get(idxVorg).get(5).length() > 0){ // es sind termine eingetragen
-                            // enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(idxVorg).get(5));
-                            // }
-                            // }else{ // aeltestes Rezept erreicht
-                            // enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i).get(5)); //
-                            // dummy (damit die Berechnung durchlaeuft?)
-                            // }
-                            // besser(?):
                             if ((idxVorg >= testvec.size()) || (testvec.get(idxVorg)
                                                                        .get(5)
-                                                                       .length() == 0)) { // kein Vorgänger oder VG
-                                                                                          // enthält (auch) keine
-                                                                                          // Behandlungen
+                                                                       .length() == 0)) {
+                                // kein Vorgänger oder der enthält (auch) keine Behandlungen
+                                
                                 enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i)
                                                                                        .get(5)); // dummy (damit die
                                                                                                  // Berechnung
@@ -734,13 +710,13 @@ public class HMRCheck {
                                 return false;
                             }
 
-                            voArt = testvec.get(i)
+                            vorgaengerVoArt = testvec.get(i)
                                            .get(2); // VO-Art zu currRez
-                            if (chkIsErstVO(voArt)) {
+                            if (chkIsErstVO(vorgaengerVoArt)) {
                                 return true; // Erst-VO gefunden -> Abbruch
                             }
-                            if (chkIsAdR(voArt)) {
-                                return shouldBeAdR(rezVoArt); // AdR-VO unter Vorgänger-VOs gefunden -> VO 'reznummer'
+                            if (chkIsAdR(vorgaengerVoArt)) {
+                                return shouldBeAdR(currRezVoArt); // AdR-VO unter Vorgänger-VOs gefunden -> VO 'reznummer'
                                                               // muesste auch AdR-VO sein
                             }
 
@@ -749,7 +725,7 @@ public class HMRCheck {
                             // "+Long.toString(tagedifferenz));
                             if (tagedifferenz > therapiepause) { // Therapiepause ueberschritten
                                 if (currRez.equals(reznummer)) {
-                                    return shouldBeErstVO(voArt, "Therapiepause beträgt<b><font color='#ff0000'> "
+                                    return shouldBeErstVO(vorgaengerVoArt, "Therapiepause beträgt<b><font color='#ff0000'> "
                                             + tagedifferenz + " </font></b>Tage.<br>");
                                 } else {
                                     String htmlTxt = "<html>"
@@ -816,13 +792,44 @@ public class HMRCheck {
         return shouldBeErstVO(Integer.parseInt(rezeptArt), why);
     }
 
-    private String errTxtNoAdR(String htmlTxt) {
-        htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "")
-                + "<br>A.d.R.-Verordnung unter den Vorgänger_VOs gefunden.<br><br>"
-                + "Verordnung müsste ebenfalls<b><font color='#ff0000'> A.d.R.-Verordnung </font></b>sein.<br>"
-                + "<font color='#ff0000'> Bitte v. Hd. nachprüfen! </font><br><br>";
+    private String errTxtNoFoVO(String htmlTxt, String reason) {
+        htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "") + (reason.length() > 0 ? "<br>" : "") + reason
+                + "<br>Verordnung müsste<b><font color='#ff0000'> Folgeverordnung </font></b>sein.<br><br>" + "<br><br>";
         return htmlTxt;
     }
+
+    private boolean chkIsFolgeVO(int rezeptArt) {
+        if (rezarten[rezeptArt] == "Folgeverordnung") {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean chkIsFolgeVO(String rezeptArt) {
+        return chkIsErstVO(Integer.parseInt(rezeptArt));
+    }
+
+    private boolean shouldBeFolgeVO(int rezeptArt, String why) {
+        if (chkIsErstVO(rezeptArt)) {
+            return true;
+        } else {
+            fehlertext = errTxtNoFoVO(fehlertext, why);
+            return false;
+        }
+    }
+
+    private boolean shouldBeFolgeVO(String rezeptArt, String why) {
+        return shouldBeErstVO(Integer.parseInt(rezeptArt), why);
+    }
+
+    private String errTxtNoAdR(String htmlTxt) {
+            htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "")
+                    + "<br>A.d.R.-Verordnung unter den Vorgänger_VOs gefunden.<br><br>"
+                    + "Verordnung müsste ebenfalls<b><font color='#ff0000'> A.d.R.-Verordnung </font></b>sein.<br>"
+                    + "<font color='#ff0000'> Bitte v. Hd. nachprüfen! </font><br><br>";
+            return htmlTxt;
+        }
 
     private boolean chkIsAdR(int rezeptArt) {
         if (rezarten[rezeptArt].equals("Verordnung außerhalb des Regelfalles")) {
