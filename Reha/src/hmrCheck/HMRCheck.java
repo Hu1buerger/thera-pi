@@ -26,7 +26,8 @@ public class HMRCheck {
     final String maxanzahl = "Die Höchstmenge pro Rezept bei ";
     final String rotein = "<>";
     boolean testok = true;
-    String fehlertext = "";
+    //String fehlertext = "";
+    FehlerTxt fehlertext = null;
     int rezeptart;
     String reznummer = null;
     String rezdatum = null;
@@ -72,6 +73,7 @@ public class HMRCheck {
         letztbeginn = xletztbeginn;
         // System.out.println("IDdiszi = "+idiszi);
         diszis = new Disziplinen();
+        fehlertext = new FehlerTxt();
     }
 
     /*
@@ -154,7 +156,7 @@ public class HMRCheck {
         // System.out.println("Anzahlen = "+anzahl);
         for (int i = 0; i < anzahl.size(); i++) {
             if ((anzahl.get(i) > maxprorezept) && (!isAdRrezept)) {
-                fehlertext = String.valueOf("<html><b>Bei Indikationsschlüssel " + indischluessel
+                fehlertext.add("<b>Bei Indikationsschlüssel " + indischluessel
                         + " sind maximal<br><font color='#ff0000'>" + Integer.toString(maxprorezept)
                         + " Behandlungen</font> pro Rezept erlaubt!!<br><br>"
                         + "Möglickeit -> Ändern der Rezeptart auf außerhalb des Regelfalles<br><br></b>");
@@ -166,8 +168,7 @@ public class HMRCheck {
         if ((Arrays.asList(keinefolgevo)
                    .contains(indischluessel))
                 && (rezeptart > 0)) {
-            fehlertext = fehlertext + String.valueOf((fehlertext.length() <= 0 ? "<html>" : "")
-                    + "<b>Bei Indikationsschlüssel " + indischluessel + " ist keine<br><font color='#ff0000'>"
+            fehlertext.add("<b>Bei Indikationsschlüssel " + indischluessel + " ist keine<br><font color='#ff0000'>"
                     + rezarten[rezeptart] + "</font> erlaubt!!</b><br><br>");
             testok = false;
         }
@@ -180,16 +181,14 @@ public class HMRCheck {
         // z.B. ZN2a
         if ((unter18) && (Arrays.asList(nurueber18)
                                 .contains(indischluessel))) {
-            fehlertext = fehlertext + String.valueOf((fehlertext.length() <= 0 ? "<html>" : "")
-                    + "<b>Der Indikationsschlüssel " + indischluessel + " ist nur bei <br><font color='#ff0000'>"
+            fehlertext.add("<b>Der Indikationsschlüssel " + indischluessel + " ist nur bei <br><font color='#ff0000'>"
                     + "Erwachsenen über 18 Jahren" + "</font> erlaubt!!</b><br><br>");
             testok = false;
             // Hier der Check ob für Erwachsene ein Kinder-Indischlüssel verwendet wurde
             // z.B. ZN1a
         } else if ((!unter18) && (Arrays.asList(nurunter18)
                                         .contains(indischluessel))) {
-            fehlertext = fehlertext + String.valueOf((fehlertext.length() <= 0 ? "<html>" : "")
-                    + "<b>Der Indikationsschlüssel " + indischluessel + " ist nur bei <br><font color='#ff0000'>"
+            fehlertext.add("<b>Der Indikationsschlüssel " + indischluessel + " ist nur bei <br><font color='#ff0000'>"
                     + "Kindern und Jugendlichen bis 18 Jahren" + "</font> erlaubt!!</b><br><br>");
             testok = false;
         }
@@ -201,7 +200,7 @@ public class HMRCheck {
                     doppelbehandlung = true;
                     int doppelgesamt = anzahl.get(0) + anzahl.get(1);
                     if ((doppelgesamt > maxprorezept) && (!isAdRrezept)) {
-                        fehlertext = String.valueOf("<html><b>Die Doppelbehandlung bei Indikationsschlüssel "
+                        fehlertext.add("<b>Die Doppelbehandlung bei Indikationsschlüssel "
                                 + indischluessel
                                 + ", übersteigt<br>die maximal erlaubte Höchstverordnungsmenge pro Rezept von<br><font color='#ff0000'>"
                                 + Integer.toString(maxprorezept)
@@ -237,8 +236,7 @@ public class HMRCheck {
                         if (isOptional && isoliertErlaubt && (posGesamt == 1)) {
                             // ergänzendes HM darf isoliert verordnet werden (betrifft ET,EST,US)
                         } else {
-                            fehlertext = fehlertext
-                                    + String.valueOf(getDialogText(true, getHeilmittel(currPos), currPos, vorrangig));
+                            fehlertext.add(getDialogText(true, getHeilmittel(currPos), currPos, vorrangig));
                             testok = false;
                         }
                     }
@@ -246,8 +244,7 @@ public class HMRCheck {
 
                 } else {
                     if (!isOptional) {
-                        fehlertext = fehlertext
-                                + String.valueOf(getDialogText(false, getHeilmittel(currPos), currPos, ergaenzend));
+                        fehlertext.add(getDialogText(false, getHeilmittel(currPos), currPos, ergaenzend));
                         testok = false;
                     }
                 }
@@ -258,17 +255,15 @@ public class HMRCheck {
             if (neurezept) {
                 long differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
                 if (differenz < 0) {
-                    fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                            + "<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
+                    fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                             + Long.toString(differenz)
-                            + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>";
+                            + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>");
                     testok = false;
                 }
                 if ((differenz = DatFunk.TageDifferenz(letztbeginn, DatFunk.sHeute())) > 0) {
                     // System.out.println("Differenz 2 = "+differenz);
-                    fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                            + "<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
-                            + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>";
+                    fehlertext.add("<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
+                            + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>");
                     testok = false;
                 }
             } else {
@@ -281,17 +276,15 @@ public class HMRCheck {
                     // LetzterBeginn abhandeln
                     long differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
                     if (differenz < 0) {
-                        fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                + "<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
+                        fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                                 + Long.toString(differenz)
-                                + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>";
+                                + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>");
                         testok = false;
                     }
                     if ((differenz = DatFunk.TageDifferenz(letztbeginn, DatFunk.sHeute())) > 0) {
                         // System.out.println("Differenz 2 = "+differenz);
-                        fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                + "<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
-                                + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>";
+                        fehlertext.add("<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
+                                + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>");
                         testok = false;
                     }
 
@@ -301,28 +294,25 @@ public class HMRCheck {
                                                     .get(0);
                     long differenz = DatFunk.TageDifferenz(rezdatum, erstbehandlung);
                     if (differenz < 0) {
-                        fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                + "<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
+                        fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                                 + Long.toString(differenz)
-                                + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>";
+                                + " Tag(e) </font>.<br>Behandlungsbeginn ist also <font color='#ff0000'>vor</font> dem  Ausstellungsdatum!!</b><br><br>");
                         testok = false;
                     }
                     if ((differenz = DatFunk.TageDifferenz(letztbeginn, erstbehandlung)) > 0) {
                         // System.out.println("Differenz 2 = "+differenz);
-                        fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                + "<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
-                                + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>";
+                        fehlertext.add("<br><b><font color='#ff0000'>Behandlungsbeginn ist kritisch!</font><br><br>Die Differenz zwischen <font color='#ff0000'>spätester Behandlungsbeginn</font> und 1.Behandlung<br>beträgt <font color='#ff0000'>"
+                                + Long.toString(differenz) + " Tage </font><br>" + "</b><br><br>");
                         testok = false;
                     }
                     // Test auf Anregung von Michael Schütt
                     Vector<String> vtagetest = RezTools.holeEinzelTermineAusRezept(null, termine);
                     for (int i = 0; i < vtagetest.size(); i++) {
                         if ((differenz = DatFunk.TageDifferenz(vtagetest.get(i), DatFunk.sHeute())) < 0) {
-                            fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                    + "<br><b><font color='#ff0000'>Behandlungsdatum " + vtagetest.get(i)
+                            fehlertext.add("<br><b><font color='#ff0000'>Behandlungsdatum " + vtagetest.get(i)
                                     + " ist kritisch!</font><br><br>"
                                     + "Das Behandlungsdatum <font color='#ff0000'></font> liegt in der Zukunft<br> <font color='#ff0000'>"
-                                    + "um " + Long.toString(differenz * -1) + " Tage </font><br>" + "</b><br><br>";
+                                    + "um " + Long.toString(differenz * -1) + " Tage </font><br>" + "</b><br><br>");
                             testok = false;
                         }
                     }
@@ -333,14 +323,13 @@ public class HMRCheck {
             ex.printStackTrace();
         }
         if (!testok) {
-            JOptionPane.showMessageDialog(null, fehlertext + "</html>");
+            JOptionPane.showMessageDialog(null, fehlertext.getTxt());
         }
         return testok;
     }
 
     private String getDialogText(boolean vorrangig, String heilmittel, String hmpos, String[] positionen) {
-        String meldung = (fehlertext.length() <= 0 ? "<html>" : "")
-                + "Bei dem Indikationsschlüssel <b><font color='#ff0000'>" + indischluessel + "</font></b> ist das "
+        String meldung = "Bei dem Indikationsschlüssel <b><font color='#ff0000'>" + indischluessel + "</font></b> ist das "
                 + (vorrangig ? "vorrangige " : "ergänzende") + " Heilmittel<br><br>--> <b><font color='#ff0000'>"
                 + heilmittel + "</font></b> <-- nicht erlaubt!<br><br><br>" + "Mögliche "
                 + (vorrangig ? "vorrangige " : "ergänzende") + " Heilmittel sind:<br><b><font color='#ff0000'>"
@@ -700,13 +689,12 @@ public class HMRCheck {
                             gesamt = gesamt + aktanzahl;
                             // System.out.println("Gesamt: "+gesamt);
                             if (gesamt > maxprofall) {
-                                fehlertext = fehlertext + (fehlertext.length() <= 0 ? "<html>" : "")
-                                        + "<br><b><font color='#ff0000'>Höchstverordnungsmenge ist überschritten -> "
+                                fehlertext.add("<br><b><font color='#ff0000'>Höchstverordnungsmenge ist überschritten -> "
                                         + Integer.toString(gesamt) + " Behandlungen"
                                         + "</font><br>Wechsel auf <font color='#ff0000'>außerhalb des Regelfalles</font> ist erforderlich<br>"
                                         + "Höchstverordnungsmenge im Regelfall ist<br>bei <font color='#ff0000'>"
                                         + aktindischl + " = " + Integer.toString(maxprofall)
-                                        + "</font> Behandlungen<br>" + "</b><br><br>";
+                                        + "</font> Behandlungen<br>" + "</b><br><br>");
                                 return false;
                             }
 
@@ -728,14 +716,12 @@ public class HMRCheck {
                                     return shouldBeErstVO(vorgaengerVoArt, "Therapiepause beträgt<b><font color='#ff0000'> "
                                             + tagedifferenz + " </font></b>Tage.<br>");
                                 } else {
-                                    String htmlTxt = "<html>"
-                                            + "<br>Keine <b><font color='#ff0000'> Erstverordnung </font></b>gefunden!<br>"
-                                            + "<br><b>Therapiepause <font color='#ff0000'>vor " + currRez
-                                            + "</font> beträgt <font color='#ff0000'>" + tagedifferenz
-                                            + "</font> Tage.</b><br>" + "<br>Bitte Rezeptfolge manuell prüfen!<br>"
-                                            + "<br><br>";
-
-                                    fehlertext = fehlertext + htmlTxt;
+                                    fehlertext.add(
+                                            "<br>Keine <b><font color='#ff0000'> Erstverordnung </font></b>gefunden!<br>"
+                                                    + "<br><b>Therapiepause <font color='#ff0000'>vor " + currRez
+                                                    + "</font> beträgt <font color='#ff0000'>" + tagedifferenz
+                                                    + "</font> Tage.</b><br>"
+                                                    + "<br>Bitte Rezeptfolge manuell prüfen!<br>" + "<br><br>");
                                     return false;
                                     // return shouldBeErstVO(voArt,"Therapiepause vor "+currRez+" beträgt<b><font
                                     // color='#ff0000'> "+tagedifferenz+" </font></b>Tage.<br>");
@@ -761,10 +747,21 @@ public class HMRCheck {
         return true;
     }
 
-    private String errTxtNoEVO(String htmlTxt, String reason) {
-        htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "") + (reason.length() > 0 ? "<br>" : "") + reason
-                + "<br>Verordnung müsste<b><font color='#ff0000'> Erstverordnung </font></b>sein.<br><br>" + "<br><br>";
-        return htmlTxt;
+    private class FehlerTxt {
+        String htmlTxt;
+
+        private FehlerTxt() {
+            htmlTxt = "";
+        }
+
+        private void add(String txt) {
+            htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "") + txt;
+        }
+        
+        private String getTxt() {
+            htmlTxt = htmlTxt + (htmlTxt.length() > 0 ? "</html>" : "");
+            return htmlTxt;
+        }
     }
 
     private boolean chkIsErstVO(int rezeptArt) {
@@ -783,19 +780,15 @@ public class HMRCheck {
         if (chkIsErstVO(rezeptArt)) {
             return true;
         } else {
-            fehlertext = errTxtNoEVO(fehlertext, why);
+            fehlertext.add((why.length() > 0 ? "<br>" : "") + why
+                    + "<br>Verordnung müsste<b><font color='#ff0000'> Erstverordnung </font></b>sein.<br><br>"
+                    + "<br><br>");
             return false;
         }
     }
 
     private boolean shouldBeErstVO(String rezeptArt, String why) {
         return shouldBeErstVO(Integer.parseInt(rezeptArt), why);
-    }
-
-    private String errTxtNoFoVO(String htmlTxt, String reason) {
-        htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "") + (reason.length() > 0 ? "<br>" : "") + reason
-                + "<br>Verordnung müsste<b><font color='#ff0000'> Folgeverordnung </font></b>sein.<br><br>" + "<br><br>";
-        return htmlTxt;
     }
 
     private boolean chkIsFolgeVO(int rezeptArt) {
@@ -814,7 +807,8 @@ public class HMRCheck {
         if (chkIsErstVO(rezeptArt)) {
             return true;
         } else {
-            fehlertext = errTxtNoFoVO(fehlertext, why);
+            fehlertext.add((why.length() > 0 ? "<br>" : "") + why
+                + "<br>Verordnung müsste<b><font color='#ff0000'> Folgeverordnung </font></b>sein.<br><br>" + "<br><br>");
             return false;
         }
     }
@@ -822,14 +816,6 @@ public class HMRCheck {
     private boolean shouldBeFolgeVO(String rezeptArt, String why) {
         return shouldBeErstVO(Integer.parseInt(rezeptArt), why);
     }
-
-    private String errTxtNoAdR(String htmlTxt) {
-            htmlTxt = htmlTxt + (htmlTxt.length() <= 0 ? "<html>" : "")
-                    + "<br>A.d.R.-Verordnung unter den Vorgänger_VOs gefunden.<br><br>"
-                    + "Verordnung müsste ebenfalls<b><font color='#ff0000'> A.d.R.-Verordnung </font></b>sein.<br>"
-                    + "<font color='#ff0000'> Bitte v. Hd. nachprüfen! </font><br><br>";
-            return htmlTxt;
-        }
 
     private boolean chkIsAdR(int rezeptArt) {
         if (rezarten[rezeptArt].equals("Verordnung außerhalb des Regelfalles")) {
@@ -847,7 +833,9 @@ public class HMRCheck {
         if (chkIsAdR(rezeptArt)) {
             return true;
         } else {
-            fehlertext = errTxtNoAdR(fehlertext);
+            fehlertext.add("<br>A.d.R.-Verordnung unter den Vorgänger_VOs gefunden.<br><br>"
+                    + "Verordnung müsste ebenfalls<b><font color='#ff0000'> A.d.R.-Verordnung </font></b>sein.<br>"
+                    + "<font color='#ff0000'> Bitte v. Hd. nachprüfen! </font><br><br>");
             return false;
         }
     }
