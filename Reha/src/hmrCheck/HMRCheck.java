@@ -3,6 +3,7 @@ package hmrCheck;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Vector;
 
@@ -11,6 +12,7 @@ import javax.swing.JOptionPane;
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
+import commonData.Rezept;
 import hauptFenster.Reha;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -73,6 +75,34 @@ public class HMRCheck {
         letztbeginn = xletztbeginn;
         // System.out.println("IDdiszi = "+idiszi);
         diszis = new Disziplinen();
+        fehlertext = new FehlerTxt();
+    }
+
+    public HMRCheck(Rezept rezept, String currDiszi, Vector<Vector<String>> xpreisvec) {
+        diszis = new Disziplinen();
+        anzahl = new Vector<Integer>();
+        positionen = new Vector<String>();
+        indischluessel = rezept.getIndiSchluessel().replace(" ", "");
+        disziplin = diszis.getIndex(currDiszi);
+        for (int i = 0; i < 4; i++) {
+            String tmp = rezept.getHmPos(i + 1);
+            if (tmp != "") {
+                anzahl.add(i, rezept.getAnzBeh(i + 1));
+                positionen.add(i, tmp);
+            } else {
+                break;
+            }
+        }
+//        preisgruppe = Integer.valueOf(rezept.getPreisgruppe());
+        preisvec = xpreisvec;
+        rezeptart = rezept.getRezArt();
+        reznummer = rezept.getRezNb();
+        unter18 = rezept.getUnter18();
+        rezdatum = DatFunk.sDatInDeutsch(rezept.getRezeptDatum());
+        letztbeginn = DatFunk.sDatInDeutsch(rezept.getLastDate());
+        if (reznummer.equals("")) {
+            neurezept = true;
+        }
         fehlertext = new FehlerTxt();
     }
 
@@ -581,6 +611,8 @@ public class HMRCheck {
                         + " lza " + selCond + ")" + " order by rez_datum DESC, indikatschl";
                 Vector<Vector<String>> testvec = SqlInfo.holeFelder(stmt); // alle Rezepte aus verordn u. lza, sortiert
                                                                            // nach datum u. Indi-Schlüssel
+                // Indices für Zugriffe auf testvec
+                final int REZ_DATUM = 0, REZ_NR = 1, REZEPTART = 2, ANZAHL = 3, INDIKATSCHL = 4, TERMINE = 5, PAT_INTERN = 6;
 
                 // erstmal die eindeutigen Faelle aussortieren
                 if (chkIsAdR(rezeptart)) { // AdR-VO: keine Einschränkung
@@ -591,7 +623,7 @@ public class HMRCheck {
                 if (testvec.size() == 1) { // entweder schon gespeichert, oder es gibt genau ein Vorrezept
                     if (!neurezept) {
                         String currRez = testvec.get(0)
-                                                .get(1);
+                                                .get(REZ_NR);
                         if (currRez.equals(reznummer)) {            // schon gespeichert, kein Vorrezept
                             return shouldBeErstVO(rezeptart, fail); // muesste dann Erstverordnung sein
                         }
@@ -606,20 +638,34 @@ public class HMRCheck {
                 int rezDiagGrpIdx = getDiagGrpIdx(aktindischl);
                 boolean neudummy = Boolean.valueOf(neurezept);
                 String currRezVoArt = null,  vorgaengerVoArt = null;
-
-                //   0         1      2         3        4          5       6
-                // rez_datum,rez_nr,rezeptart,anzahl1,indikatschl,termine,pat_intern
+               
+                if (neudummy) {
+                    // Daten aus Formular in testvec einfügen
+                    Vector<String> neuRez = new Vector<String>();
+                    Collections.addAll(neuRez, rezdatum, "(noch nicht gespeichert)", String.valueOf(rezeptart),
+                            String.valueOf(anzahl.get(1)), String.valueOf(anzahl.get(1)), aktindischl, "", "");
+                    testvec.insertElementAt(neuRez, 0);
+                    reznummer = neuRez.get(REZ_NR);
+                }
                 for (int i = 0; i < testvec.size(); i++) {
                     String currRez = testvec.get(i)
-                                            .get(1);
+                                            .get(REZ_NR);
                     if (currRez.equals(reznummer) || zaehlen || neudummy) {
                         zaehlen = true;
-                        if (currRez.equals(reznummer)) {
+                        neudummy = false;
+                      if (currRez.equals(reznummer)) {
+                            // beim Test geaenderte(?) Werte aus Formular verwenden
+                            testvec.get(i).set(REZ_DATUM, DatFunk.sDatInSQL(rezdatum));
+                            testvec.get(i).set(REZEPTART, String.valueOf(rezeptart));
+                            testvec.get(i).set(ANZAHL, String.valueOf(anzahl.get(0)));
+                            testvec.get(i).set(INDIKATSCHL, aktindischl);
+                            // rez_nr, termine u. pat_intern koennen im Formular nicht geändert werden
+                           
                             currRezVoArt = testvec.get(i)
-                                              .get(2);
+                                                  .get(REZEPTART);
                         }
                         int currIdx = getDiagGrpIdx(testvec.get(i)
-                                                           .get(4));
+                                                           .get(INDIKATSCHL));
                         if (rezDiagGrpIdx < currIdx) {
                             continue; // Idx darf nur kleiner werden -> Rez. ignorieren (? besser Abbruch ?)
                         } else if (rezDiagGrpIdx > currIdx) {
@@ -629,43 +675,42 @@ public class HMRCheck {
                         // erst prüfen ob zwischen letzter Behandlung des alten Rezeptes und dem ersten
                         // Termin der neuen VO 12 Wochen Therapiepause lagen, 
                         // sofern ja -> nicht summieren (muesste dann Erstverordnung sein)
-                        if (neudummy) {
-                            idxVorg = 0; // Index '0' ist Vorgänger des gerade angelegten
-                                         // (u. noch nicht in der DB gespeicherten) Rezeptes
-                            aktanzahl = anzahl.get(0);
-                        } else {
+//                        if (neudummy) {
+//                            idxVorg = 0; // Index '0' ist Vorgänger des gerade angelegten
+//                                         // (u. noch nicht in der DB gespeicherten) Rezeptes
+//                            aktanzahl = anzahl.get(0);
+//                        } else {
                             idxVorg = i + 1;
                             aktanzahl = Integer.parseInt(testvec.get(i)
-                                                                .get(3));
-                        }
+                                                                .get(ANZAHL));
+//                        }
                         if (idxVorg <= testvec.size()) {
-                            if (neudummy) {
-                                startdatum_neu = rezdatum; // McM: Ausstellungsdatum ist entscheidend für 12 Wochen
-                                                           // Frist, nicht erster Behandlungstermin
-                                neudummy = false;
-                            } else {
+//                            if (neudummy) {
+//                                startdatum_neu = rezdatum; // McM: Ausstellungsdatum ist entscheidend für 12 Wochen
+//                                                           // Frist, nicht erster Behandlungstermin
+//                            } else {
                                 startdatum_neu = DatFunk.sDatInDeutsch(testvec.get(i)
-                                                                              .get(0)); // McM: dito
-                            }
+                                                                              .get(REZ_DATUM)); // McM: dito
+//                            }
+//                            neudummy = false;
                             while ((idxVorg < testvec.size()) && (testvec.get(idxVorg)
-                                                                         .get(5)
+                                                                         .get(TERMINE)
                                                                          .length() == 0)) { // falls keine Termine
                                                                                             // eingetragen sind -> zum
                                                                                             // Vorgänger wechseln
                                 gesamt = gesamt + Integer.parseInt(testvec.get(idxVorg)
-                                                                          .get(3)); // die verordneten Behandlungen
+                                                                          .get(ANZAHL)); // die verordneten Behandlungen
                                                                                     // zaehlen trotzdem mit
                                 // test ob gesamt > maxProFall
                                 vorgaengerVoArt = testvec.get(idxVorg)
-                                                         .get(2);
+                                                         .get(REZEPTART);
+                                String vorgaengerVoNr = testvec.get(idxVorg)
+                                                               .get(REZ_NR);
                                 if (chkIsErstVO(vorgaengerVoArt)) { // wenn die Uebersprungene die Erst-VO ist -> Abbruch
-                                    return true;
+                                    return chkIf2ErstVO(currRezVoArt, vorgaengerVoNr);
                                 }
                                 if (chkIsAdR(vorgaengerVoArt)) { // wenn die Uebersprungene eine AdR-VO ist -> Abbruch
-                                    String vorgaengerVoNr = testvec.get(idxVorg)
-                                                                   .get(1);
-                                    return shouldBeAdR(currRezVoArt, "<b><font color='#ff0000'>A.d.R.-Verordnung "
-                                            + vorgaengerVoNr + "</font></b> unter den Vorgänger_VOs gefunden.<br><br>");
+                                    return chkIf2AdrVO(currRezVoArt, vorgaengerVoNr);
                                 }
                                 idxVorg++; // jetzt Index auf Vorgänger setzen
                             }
@@ -678,14 +723,14 @@ public class HMRCheck {
                                             + "  gehörige<b><font color='#ff0000'> Erstverordnung </font></b>gefunden!<br>");
                                 }
                             } else if (testvec.get(idxVorg)
-                                              .get(5)
+                                              .get(TERMINE)
                                               .length() == 0) {
                                 // Vorgänger enthält (auch) keine Behandlungen
                                 enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i)
-                                        .get(5)); // dummy (damit die Berechnung durchlaeuft)
+                                        .get(TERMINE)); // dummy (damit die Berechnung durchlaeuft)
                             } else { // Vorgänger ist vorhanden und es sind Termine eingetragen
                                 enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(idxVorg)
-                                                                                       .get(5));
+                                                                                       .get(TERMINE));
                             }
                             // System.out.println("Startdatum: "+startdatum_neu);
                             // System.out.println("Enddatum: "+enddatum_alt);
@@ -704,7 +749,7 @@ public class HMRCheck {
 
                             tagedifferenz = DatFunk.TageDifferenz(enddatum_alt, startdatum_neu);
                             vorgaengerVoArt = testvec.get(idxVorg)
-                                                     .get(2);
+                                                     .get(REZEPTART);
 
                             // System.out.println(startdatum_neu+" - "+ enddatum_alt+" -
                             // "+Long.toString(tagedifferenz));
@@ -715,45 +760,50 @@ public class HMRCheck {
                                     return shouldBeErstVO(currRezVoArt, pauseText(currRez, tagedifferenz));
                                 }
                             } else {
+                                String vorgaengerVoNr = testvec.get(idxVorg)
+                                                               .get(REZ_NR);
                                 if (chkIsErstVO(vorgaengerVoArt)) {
-                                    if (chkIsErstVO(currRezVoArt)) {
-                                        String vorgaengerVoNr = testvec.get(idxVorg)
-                                                                       .get(1);
-                                        return shouldBeFolgeVO(currRezVoArt,
-                                                "<b><font color='#ff0000'>Erstverordnung " + vorgaengerVoNr
-                                                        + " </font></b>unter den Vorgängern von <b><font color='#ff0000'>"
-                                                        + reznummer + "</font></b> gefunden.<br>");
-                                    } else {
-                                        return true; // zugehoerige Erst-VO gefunden -> Abbruch
-                                    }
+                                    return chkIf2ErstVO(currRezVoArt, vorgaengerVoNr);
                                 }
                                 if (chkIsAdR(vorgaengerVoArt)) {
-                                    String vorgaengerVoNr = testvec.get(idxVorg)
-                                                                   .get(1);
-                                    return shouldBeAdR(currRezVoArt, "<b><font color='#ff0000'>A.d.R.-Verordnung "
-                                            + vorgaengerVoNr + "</font></b> unter den Vorgänger_VOs gefunden.<br><br>");
+                                    return chkIf2AdrVO(currRezVoArt, vorgaengerVoNr);
                                 }
-                                
                             }
 
                             i = --idxVorg; // Index anpassen, falls Neurezept oder Rezepte uebersprungen wurden
                         }
 
                     } else {
-                        // System.out.println("Nicht mitgezählt: "+testvec.get(i).get(1)+" - Anzahl: "
-                        // + Integer.parseInt(testvec.get(i).get(3)));
+                        // System.out.println("Nicht mitgezählt: "+testvec.get(i).get(REZ_NR)+" - Anzahl: "
+                        // + Integer.parseInt(testvec.get(i).get(ANZAHL)));
                     }
                 }
             }
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null,
-                    "Fehler  in der Prüfung auf Folgerezepte\n\nBitte Informieren Sie den Systemadministrator");
+                    "Fehler in der Prüfung auf Folgerezepte\n\nBitte Informieren Sie den Systemadministrator");
         }
         // true damit die restliche Prüfung durchlaufen wird.
         return true;
     }
-    
+
+    private boolean chkIf2ErstVO(String currRezVoArt, String vorgaengerVoNr) {
+        if (chkIsErstVO(currRezVoArt)) {
+            return shouldBeFolgeVO(currRezVoArt,
+                    "<b><font color='#ff0000'>Erstverordnung " + vorgaengerVoNr
+                            + " </font></b>unter den Vorgängern von <b><font color='#ff0000'>"
+                            + reznummer + "</font></b> gefunden.<br>");
+        } else {
+            return true;
+        }        
+    }
+
+    private boolean chkIf2AdrVO(String currRezVoArt, String vorgaengerVoNr) {
+        return shouldBeAdR(currRezVoArt, "<b><font color='#ff0000'>A.d.R.-Verordnung "
+                + vorgaengerVoNr + "</font></b> unter den Vorgänger_VOs gefunden.<br><br>");
+    }
+
     private String pauseText (String rezNb, long pause) {
         return "Therapiepause <font color='#ff0000'>vor " + rezNb + "</font> beträgt <font color='#ff0000'>"
                 + pause + "</font> Tage.</b><br>";
