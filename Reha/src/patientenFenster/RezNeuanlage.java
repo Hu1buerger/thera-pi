@@ -793,13 +793,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             // hier der ICD-10 Code
             /********/
             jpan.addLabel("1. ICD-10-Code", cc.xy(1, 37));
-            jtf[cICD10].setName("icd10");
-            jtf[cICD10].addKeyListener(this);
-            // jtf[cICD10].addFocusListener(this);
+            allowShortCut((Component) jtf[cICD10], "icd10");
             eingabeICD = jpan.add(jtf[cICD10], cc.xy(3, 37));
 
             jpan.addLabel("2. ICD-10-Code", cc.xy(5, 37));
-            jtf[cICD10_2].setName("icd10_2");
+            allowShortCut((Component) jtf[cICD10_2], "icd10_2");
             jpan.add(jtf[cICD10_2], cc.xy(7, 37));
 
             jpan.addSeparator("Ärztliche Diagnose laut Rezept", cc.xyw(1, 39, 7));
@@ -991,6 +989,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         ;
         return String1 + String2;
 
+    }
+
+    private String chkIcdFormat(String string) {
+        int posDot = string.indexOf(".");
+        if ((string.length() > 3) && (posDot < 0)) {
+            String tmp1 = string.substring(0, 3);
+            String tmp2 = string.substring(3);
+            return tmp1 + "." + tmp2;
+        }
+        return string;
     }
 
     @Override
@@ -1715,6 +1723,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 if (ctrlIsPressed) {
                     eingabeICD.requestFocus();
                 } // zur Eingabe ICD10-Code springen
+                return;
+            }
+            if (componentName.equals("icd10")) {
+                String text = jtf[cICD10].getText();
+                jtf[cICD10].setText(chkIcdFormat(text));
+                return;
+            }
+            if (componentName.equals("icd10_2")) {
+                String text = jtf[cICD10_2].getText();
+                jtf[cICD10_2].setText(chkIcdFormat(text));
                 return;
             }
         }
