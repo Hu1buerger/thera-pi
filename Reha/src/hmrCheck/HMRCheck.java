@@ -93,7 +93,6 @@ public class HMRCheck {
                 break;
             }
         }
-//        preisgruppe = Integer.valueOf(rezept.getPreisgruppe());
         preisvec = xpreisvec;
         rezeptart = rezept.getRezArt();
         reznummer = rezept.getRezNb();
@@ -578,7 +577,6 @@ public class HMRCheck {
             dgIndex--;
         }
         if (search4indi == null) { // kein Wechsel der Diagnosegruppe möglich
-//            return "indikatschl = '"+indiSchl+"'";
             return "indikatschl like '" + diagGrp + "%'"; // aber Wechsel der Leitsymptomatik ist auch hier erlaubt
         } else {
             return "(" + search4indi + ")";
@@ -675,24 +673,12 @@ public class HMRCheck {
                         // erst prüfen ob zwischen letzter Behandlung des alten Rezeptes und dem ersten
                         // Termin der neuen VO 12 Wochen Therapiepause lagen, 
                         // sofern ja -> nicht summieren (muesste dann Erstverordnung sein)
-//                        if (neudummy) {
-//                            idxVorg = 0; // Index '0' ist Vorgänger des gerade angelegten
-//                                         // (u. noch nicht in der DB gespeicherten) Rezeptes
-//                            aktanzahl = anzahl.get(0);
-//                        } else {
                             idxVorg = i + 1;
                             aktanzahl = Integer.parseInt(testvec.get(i)
                                                                 .get(ANZAHL));
-//                        }
                         if (idxVorg <= testvec.size()) {
-//                            if (neudummy) {
-//                                startdatum_neu = rezdatum; // McM: Ausstellungsdatum ist entscheidend für 12 Wochen
-//                                                           // Frist, nicht erster Behandlungstermin
-//                            } else {
                                 startdatum_neu = DatFunk.sDatInDeutsch(testvec.get(i)
                                                                               .get(REZ_DATUM)); // McM: dito
-//                            }
-//                            neudummy = false;
                             while ((idxVorg < testvec.size()) && (testvec.get(idxVorg)
                                                                          .get(TERMINE)
                                                                          .length() == 0)) { // falls keine Termine
@@ -726,8 +712,9 @@ public class HMRCheck {
                                               .get(TERMINE)
                                               .length() == 0) {
                                 // Vorgänger enthält (auch) keine Behandlungen
-                                enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(i)
-                                        .get(TERMINE)); // dummy (damit die Berechnung durchlaeuft)
+                                enddatum_alt = RezTools.holeLetztenTermin(null, 
+                                        testvec.get(i)
+                                               .get(TERMINE)); // dummy (damit die Berechnung durchlaeuft)
                             } else { // Vorgänger ist vorhanden und es sind Termine eingetragen
                                 enddatum_alt = RezTools.holeLetztenTermin(null, testvec.get(idxVorg)
                                                                                        .get(TERMINE));
