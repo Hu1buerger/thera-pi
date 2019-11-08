@@ -1,4 +1,4 @@
-# Changelog
+﻿# Changelog
 Alle nennenswerten Änderungen werden in dieser Datei dokumentitert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -55,6 +55,8 @@ Patientenfenster:
 		  kasse.ktext:  'abc' -> 'storno_abc' (+ Einnahme löschen); 
 		 bei RGR zusätzlich:
 		  rgrfaktura.rnr: 'RGR-1' -> 'storno_RGR-1' u. rgrfaktura.reznr: 'KG13' -> 'KG13S')
+- HMR-Check prüft Abfolge der Verordnungen auch für Erst-VO 
+
 OP/OpRgaf: 
 - einheitl. Bildschirm-Aufteilung u. ergon. Abarbeitung (v.o. Suche-Daten-Action/Status; Datenbereich größer)
 - Breite v. ausgew. Tabellenspalten automat. an Inhalt anpassen
@@ -75,7 +77,7 @@ Verkaufs-Modul:
 Patientenfenster:
 - bezahlt/nicht bezahlt setzen ändert Befreiungsstatus _nicht_ (mehr)
 - HMR-Check prüft, ob opt. HM auch isoliert verordnet werden darf (ET,EST,US) (-> fix 180920)
-   + Zählung der Behandlungen endet wenn die Erst-VO gefunden wurde 	(-> fix 180920)
+- HMR-Check liefert einheitliche Ergebnisse (die waren davon abhängig, ob Eingaben vor dem Check gespeichert wurden oder nicht)
 
 OP/OpRgaf: 
 
