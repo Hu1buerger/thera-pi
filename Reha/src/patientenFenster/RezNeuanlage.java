@@ -191,6 +191,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private Component eingabeVerordnArt = null;
     private Component eingabeVerordn1 = null;
     private Component eingabeICD = null;
+    private Component eingabeDiag = null;
     private Connection connection;
 
     private Rezept myRezept = null;
@@ -543,7 +544,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);
             } else {
                 for (int i = 0; i < lang; i++) {
-//                if(this.vec.get(1).substring(0,2).equals(SystemConfig.rezeptKlassenAktiv.get(i).get(1))){
                     if (myRezept.getRezClass()
                                 .equals(SystemConfig.rezeptKlassenAktiv.get(i)
                                                                        .get(1))) {
@@ -739,7 +739,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
             jpan.addLabel("Indikationsschlüssel", cc.xy(1, 31));
             jcmb[cINDI] = new JRtaComboBox();
-            jtf[cDAUER].addKeyListener(this);
+            jcmb[cINDI].addKeyListener(this);
+            allowShortCut((Component)jcmb[cINDI],"Indikationsschluessel");
             jpan.add(jcmb[cINDI], cc.xy(3, 31));
 
             klassenReady = true;
@@ -762,8 +763,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.add(jtf[cANGEL], cc.xy(7, 33));
 
             jpan.addSeparator("ICD-10 Codes", cc.xyw(1, 35, 7));
-            // hier der ICD-10 Code
-            /********/
             jpan.addLabel("1. ICD-10-Code", cc.xy(1, 37));
             allowShortCut((Component) jtf[cICD10], "icd10");
             eingabeICD = jpan.add(jtf[cICD10], cc.xy(3, 37));
@@ -782,6 +781,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jta.setEditable(true);
             jta.setBackground(Color.WHITE);
             jta.setForeground(Color.RED);
+            eingabeDiag = jta;
             JScrollPane span = JCompTools.getTransparentScrollPane(jta);
             span.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
             jpan.add(span, cc.xywh(1, 41, 7, 2));
@@ -804,8 +804,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                    .toString()
                                                    .trim());
                 } else { // myRezept enthaelt Daten
-                    // Lemmi 20110101: das muß auch als Voraussetzung für
-                    // doKopiereLetztesRezeptDesPatienten gemacht werden
                     try {
                         String[] xartdbeh = new String[] { myRezept.getHMkurz(1), myRezept.getHMkurz(2),
                                 myRezept.getHMkurz(3), myRezept.getHMkurz(4) };
@@ -874,7 +872,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         int row = getselectedRow();
         if (row >= 0) {
             AktuelleRezepte.tabaktrez.getModel()
-                                                      .setValueAt(datum, row, 2);
+                                     .setValueAt(datum, row, 2);
         }
     }
 
@@ -887,7 +885,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         int row = getselectedRow();
         if (row >= 0) {
             AktuelleRezepte.tabaktrez.getModel()
-                                                      .setValueAt(datum, row, 4);
+                                     .setValueAt(datum, row, 4);
         }
     }
 
@@ -1206,13 +1204,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     }
 
     /*
-     * Test Rezeptdatum (aus doSpeichernNeu())
+     * Test Rezeptdatum 
      */
     private boolean neuDateTest() {
         long dattest = DatFunk.TageDifferenz(DatFunk.sHeute(), jtf[cREZDAT].getText()
                                                                            .trim());
-        // long min = -364;
-        // long max = 364;
         if ((dattest <= -364) || (dattest >= 364)) {
             int frage = JOptionPane.showConfirmDialog(null,
                     "<html><b>Das Rezeptdatum ist etwas kritisch....<br><br><font color='#ff0000'> " + "Rezeptdatum = "
@@ -1561,6 +1557,9 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
             doAbbrechen();
         }
+        if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
+            ctrlIsPressed = true;
+        }
     }
 
     @Override
@@ -1586,17 +1585,15 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                       .contains("cause=TRAVERSAL_FORWARD");
             // String evt = arg0.toString();
             // System.out.println("Focus lost: "+ componentName + " (" + evt + ")");
-            // System.out.println("Focus lost: "+ componentName);
             if (componentName.equals("RezeptClass") || componentName.equals("ktraeger")) {
                 if (ctrlIsPressed && jumpForward) {
-                    // jtf[cREZDAT].requestFocusInWindow();
-                    eingabeRezDate.requestFocusInWindow(); // zur Eingabe Rezeptdatum springen
+                    eingabeRezDate.requestFocusInWindow();
                 }
                 return;
             }
             if (componentName.equals("rez_datum") || componentName.equals("lastdate")) {
                 if (ctrlIsPressed && jumpForward) {
-                    eingabeVerordnArt.requestFocusInWindow(); // zur Auswahl 'Art d. Verordn.' springen
+                    eingabeVerordnArt.requestFocusInWindow();
                 }
                 return;
             }
@@ -1604,7 +1601,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     || componentName.equals("hbCheck") || componentName.equals("hbVollCheck")) {
                 if (ctrlIsPressed && jumpForward) {
                     eingabeVerordn1.requestFocusInWindow();
-                } // zur Eingabe der ersten Verordnung springen
+                }
                 return;
             }
             if (componentName.equals("anzahl1") && neu) {
@@ -1619,23 +1616,24 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 String test = (String) ((JRtaComboBox) arg0.getSource()).getSelectedItem();
                 if (test.equals("./.")) { // ... + kein Heilmittel ausgewählt -> zur Behandlungsfrequenz springen
                     eingabeBehFrequ.requestFocusInWindow();
-                } else {
-                    if (ctrlIsPressed) { // schöner/schneller: [STRG][TAB] bzw. [STRG][ENTER] springt zur
+                } else if (ctrlIsPressed) { // verlassen mit [STRG][TAB] bzw. [STRG][ENTER] springt auch zur
                                          // Behandlungsfrequenz
                         eingabeBehFrequ.requestFocusInWindow();
-                    }
                 }
                 return;
             }
-            if (componentName.equals("Indikationsschlüssel") && jumpForward) {
+            if (componentName.equals("Indikationsschluessel") && jumpForward) {
                 if (ctrlIsPressed) {
                     eingabeICD.requestFocusInWindow();
-                } // zur Eingabe ICD10-Code springen
+                }
                 return;
             }
             if (componentName.equals("icd10")) {
                 String text = jtf[cICD10].getText();
                 jtf[cICD10].setText(chkIcdFormat(text));
+                if (ctrlIsPressed & jumpForward) {
+                    eingabeDiag.requestFocusInWindow();
+                }
                 return;
             }
             if (componentName.equals("icd10_2")) {
@@ -1732,9 +1730,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 vec = SqlInfo.holeFelder(
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + id + "' LIMIT 1");
             }
-            // Vector<Vector<String>> vec = SqlInfo.holeFelder("select
-            // preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='"+id+"'
-            // LIMIT 1");
             // System.out.println(vec);
             if (vec.size() > 0) {
                 for (int i = 1; i < vec.get(0)
@@ -1810,22 +1805,19 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     /**
      *
-     * initialisiert ein kopiertes Rezept - aktualisiert Daten aus dem aktuellen
-     * Patienten, - löscht Daten, die nur für die Vorlage gelten (Behandlungen,
-     * Preise, Zuzahlung, ...)
+     * initialisiert ein kopiertes Rezept
+     *  - aktualisiert Daten aus dem aktuellen Patienten,
+     *  - löscht Daten, die nur für die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
     private void initRezeptKopie() {
         initRezeptAll();
 
-//        myRezept.setArzt(Reha.instance.patpanel.patDaten.get(25)+ " - "+Reha.instance.patpanel.patDaten.get(26));        // 'ne Rezeptkopie hat gute Chancen, vom gleichen Arzt zu stammen
-//        myRezept.setArztId(Reha.instance.patpanel.patDaten.get(67));
-
         // war Lemmis 'Löschen der auf jeden Fall "falsch weil alt" Komponenten'
-        myRezept.setRezNb(""); // vec.set(cVAR_REZNR, "");
-        myRezept.setRezeptDatum(""); // vec.set(cVAR_REZDATUM, "");
-        myRezept.setTermine(""); // vec.set(cVAR_TERMINE, "");
-        myRezept.setZzStat(""); // vec.set(cVAR_ZZSTAT, "");
-        myRezept.setLastDate(""); // vec.set(cVAR_LASTDAT, "");
+        myRezept.setRezNb("");
+        myRezept.setRezeptDatum("");
+        myRezept.setTermine("");
+        myRezept.setZzStat("");
+        myRezept.setLastDate("");
     }
 
     /**
@@ -1924,7 +1916,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     /***********
      *
      * lädt die Daten aus den Dialog-Feldern des Rezepts erstmalig in die
-     * Rezept-Instanz (ex doSpeichernNeu)
+     * Rezept-Instanz
      * @param thisRezept
      */
     private void copyFormToVec1stTime(Rezept thisRezept) {
@@ -1934,8 +1926,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     /***********
      *
-     * lädt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz (ex
-     * doSpeichernAlt)
+     * lädt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz
      * @param thisRezept
      */
     private void copyFormToVec(Rezept thisRezept) {
@@ -2023,7 +2014,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             thisRezept.setPreisgruppe(jtf[cPREISGR].getText());
 
             if (jcmb[cFARBCOD].getSelectedIndex() > 0) {
-                // Lemmi Frage: was bedeutet "14+" in der folgenden Zeile:
                 thisRezept.setFarbCode(13 + jcmb[cFARBCOD].getSelectedIndex());
             } else {
                 thisRezept.setFarbCode(-1);
