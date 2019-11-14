@@ -1,6 +1,8 @@
 package Suchen;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,6 +20,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -27,48 +30,71 @@ import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+
+import CommonTools.MitteRenderer;
 
 class ICDoberflaeche extends JXPanel {
 
     private final JComboBox<SearchType> suchNachCombobox = new JComboBox<SearchType>(SearchType.values());
+    private final String suchNachLabel = "";
     private final JComboBox<Integer> limitCombobox = new JComboBox<Integer>(
             new Integer[] { 0, 1, 5, 10, 20, 30, 40, 50 });
+    JTextField jTextSuchField = new JTextField("");
     private JButton jBSuchen;
     private JTextArea jtbf = null;
     private MyTBTableModel tbmod = null;
     private JXTable tbtab = null;
+    public JLabel lbltxt = new JLabel("");
 
-    JTextField jTextSuchField = new JTextField("");
     private SqlInfo sqlinfo;
 
+    // Indices der Spalten
+    final int colCode4rez = 0, colCode4ber = 1, colTitel = 2, colId = 3, colText = 4;
+    final int colCodeWitdh = 115, colOff = 0;
+
     public ICDoberflaeche(SqlInfo info) {
+        super();
         sqlinfo = info;
+        setLayout(new BorderLayout());
+        add(getContent(), BorderLayout.CENTER);
+    }
+
+    public JPanel getContent() {
         setOpaque(false);
 
-        // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17
         FormLayout layob1 = new FormLayout(
-                "0dlu,0dlu,10dlu,p,5dlu,100dlu:g,5dlu,100dlu,5dlu,p,20dlu,p,5dlu,50dlu,5dlu,right:0:grow,10dlu,0dlu,0dlu",
-                // 1 2 3 4 5 6 7 8 9 10 11
-                "0dlu,0dlu,10dlu,p,10dlu,fill:0:grow(0.5),10dlu,  fill:0:grow(0.5),10dlu,10dlu,0dlu");
+                //  1  2   3     4     5     6    7     8      9 10   11 12  13    14    15   16
+                "10dlu,p,5dlu,60dlu,10dlu,55dlu,2dlu,50dlu:g,5dlu,p,15dlu,p,5dlu,30dlu,10dlu,0dlu",
+                // 1    2     3  4    5    6                 7    8                 9    10   11
+                "0dlu,0dlu,10dlu,p,10dlu,fill:0:grow(0.5),10dlu,fill:0:grow(0.5),10dlu,10dlu,0dlu");
+        PanelBuilder builder = new PanelBuilder(layob1);
+        //PanelBuilder builder = new PanelBuilder(layob1, new FormDebugPanel()); // debug mode
+        builder.getPanel()
+        .setOpaque(false);
+
         CellConstraints c1 = new CellConstraints();
-        setLayout(layob1);
 
         JLabel lblsuche = new JLabel("Suche nach");
-        add(lblsuche, c1.xy(4, 4));
-        add(getSucheNachCombobox(), c1.xy(6, 4));
+        builder.add(lblsuche, c1.xy(2, 4));
+        builder.add(getSucheNachCombobox(), c1.xy(4, 4));
 
-        add(jTextSuchField, c1.xy(8, 4));
-        add(getButtons(), c1.xy(10, 4));
+        lbltxt.setText(searchLabel());
+        lbltxt.setHorizontalAlignment(SwingConstants.RIGHT);
+        builder.add(lbltxt, c1.xy(6, 4));
+        builder.add(jTextSuchField, c1.xy(8, 4));
+        builder.add(getButtons(), c1.xy(10, 4));
         JLabel lbllimit = new JLabel("Limit");
-        add(lbllimit, c1.xy(12, 4));
-        add(getLimitCombo(), c1.xy(14, 4));
-        add(getTabelle(), c1.xyw(4, 6, 13));
-        add(getTextarea(), c1.xywh(4, 8, 13, 2));
+        builder.add(lbllimit, c1.xy(12, 4));
+        builder.add(getLimitCombo(), c1.xy(14, 4));
+        builder.add(getTabelle(), c1.xyw(2, 6, 13));
+        builder.add(getTextarea(), c1.xywh(2, 8, 13, 2));
 
         registerActionListener(new ICDActionListener(this));
 
+        return builder.getPanel();
     }
 
     private void registerActionListener(ActionListener actionListener) {
@@ -84,10 +110,15 @@ class ICDoberflaeche extends JXPanel {
         });
 
         jBSuchen.addActionListener(listener);
+        suchNachCombobox.addActionListener(listener);
     }
 
     SearchType type() {
         return suchNachCombobox.getItemAt(suchNachCombobox.getSelectedIndex());
+    }
+
+    String searchLabel() {
+        return suchNachCombobox.getItemAt(suchNachCombobox.getSelectedIndex()).label();
     }
 
     String suchtext() {
@@ -100,7 +131,7 @@ class ICDoberflaeche extends JXPanel {
     }
 
     private JPanel getSucheNachCombobox() {
-        FormLayout comboboxPan = new FormLayout("100dlu:g", "p");
+        FormLayout comboboxPan = new FormLayout("60dlu:g", "p");
         PanelBuilder pcombox = new PanelBuilder(comboboxPan);
         pcombox.getPanel()
                .setOpaque(false);
@@ -115,7 +146,7 @@ class ICDoberflaeche extends JXPanel {
     }
 
     private JPanel getLimitCombo() {
-        FormLayout comboboxPan = new FormLayout("50dlu:g", "p");
+        FormLayout comboboxPan = new FormLayout("30dlu:g", "p");
         PanelBuilder pcombox = new PanelBuilder(comboboxPan);
         pcombox.getPanel()
                .setOpaque(false);
@@ -129,7 +160,7 @@ class ICDoberflaeche extends JXPanel {
     }
 
     private JPanel getButtons() {
-        FormLayout buttonsPan = new FormLayout("60dlu", "p");
+        FormLayout buttonsPan = new FormLayout("50dlu", "p");
         PanelBuilder pbuttons = new PanelBuilder(buttonsPan);
         pbuttons.getPanel()
                 .setOpaque(false);
@@ -147,25 +178,34 @@ class ICDoberflaeche extends JXPanel {
 
     private JScrollPane getTabelle() {
         tbmod = new MyTBTableModel();
-        tbmod.setColumnIdentifiers(new String[] { "ICD-Code o.Punkte", "Titel", "id", "text" });
+        tbmod.setColumnIdentifiers(new String[] { "Code für Rezepte","Code für E-Bericht", "Titel", "id", "text" });
         tbtab = new JXTable(tbmod);
-        tbtab.getColumn(0)
-             .setMaxWidth(150);
-        tbtab.getColumn(0)
-             .setMinWidth(150);
-        tbtab.getColumn(2)
-             .setMaxWidth(0);
-        tbtab.getColumn(2)
-             .setMinWidth(0);
-        tbtab.getColumn(2)
-             .setPreferredWidth(0);
+        tbtab.getColumn(colCode4rez)
+             .setMaxWidth(colCodeWitdh);
+        tbtab.getColumn(colCode4rez)
+             .setMinWidth(colCodeWitdh);
+        tbtab.getColumn(colCode4rez)
+             .setCellRenderer(new MitteRenderer());
+        tbtab.getColumn(colCode4ber)
+             .setMaxWidth(colCodeWitdh);
+        tbtab.getColumn(colCode4ber)
+             .setMinWidth(colCodeWitdh);
+        tbtab.getColumn(colCode4ber)
+             .setCellRenderer(new MitteRenderer());
 
-        tbtab.getColumn(3)
-             .setMaxWidth(0);
-        tbtab.getColumn(3)
-             .setMinWidth(0);
-        tbtab.getColumn(3)
-             .setPreferredWidth(0);
+        tbtab.getColumn(colId)
+             .setMaxWidth(colOff);
+        tbtab.getColumn(colId)
+             .setMinWidth(colOff);
+        tbtab.getColumn(colId)
+             .setPreferredWidth(colOff);
+
+        tbtab.getColumn(colText)
+             .setMaxWidth(colOff);
+        tbtab.getColumn(colText)
+             .setMinWidth(colOff);
+        tbtab.getColumn(colText)
+             .setPreferredWidth(colOff);
         tbtab.getSelectionModel()
              .setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tbtab.getSelectionModel()
@@ -190,7 +230,7 @@ class ICDoberflaeche extends JXPanel {
 
                 int row = tbtab.getSelectedRow();
 
-                String textValue = Optional.ofNullable((String) tbtab.getValueAt(row, 3))
+                String textValue = Optional.ofNullable((String) tbtab.getValueAt(row, 4))
                                            .orElse("Kein Text für diesen ICD-10 Code vorhanden");
                 jtbf.setText(textValue);
 
@@ -202,7 +242,7 @@ class ICDoberflaeche extends JXPanel {
 
     private JScrollPane getTextarea() {
         jtbf = new JTextArea();
-        jtbf.setFont(new Font("Courier", Font.PLAIN, 11));
+        jtbf.setFont(new Font("Courier New", Font.PLAIN, 11));
         jtbf.setLineWrap(true);
         jtbf.setName("sï¿½tze");
         jtbf.setWrapStyleWord(true);
@@ -265,6 +305,8 @@ class ICDActionListener implements ActionListener {
             oberf.doSuchen(oberf.jTextSuchField.getText()
                                                .trim(),
                     oberf.type(), oberf.limit());
+        } else if (cmd.equals("comboBoxChanged")) {
+            oberf.lbltxt.setText(oberf.searchLabel()); 
         }
     }
 

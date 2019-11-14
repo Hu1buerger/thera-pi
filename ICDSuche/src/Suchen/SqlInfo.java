@@ -84,7 +84,7 @@ class SqlInfo {
             where = "";
         }
 
-        String cmd = "select schluessel2,titelzeile,id,icdtext from icd10 where " + where + slimit;
+        String cmd = "select schluessel1,schluessel2,titelzeile,id,icdtext from icd10 where " + where + slimit;
         return holeFelder(cmd);
     }
 
