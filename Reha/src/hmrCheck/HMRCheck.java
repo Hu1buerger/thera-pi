@@ -556,8 +556,8 @@ public class HMRCheck {
                 if (neudummy) {
                     // Daten aus Formular in testvec einfügen
                     Vector<String> neuRez = new Vector<String>();
-                    Collections.addAll(neuRez, rezdatum, "(noch nicht gespeichert)", String.valueOf(rezeptart),
-                            String.valueOf(anzahl.get(1)), String.valueOf(anzahl.get(1)), aktindischl, "", "");
+                    Collections.addAll(neuRez, rezdatum, diszis.getRezClass(disziplin) + "(noch nicht gespeichert)", String.valueOf(rezeptart),
+                            String.valueOf(anzahl.get(0)), aktindischl, "", "");
                     testvec.insertElementAt(neuRez, 0);
                     reznummer = neuRez.get(REZ_NR);
                 }

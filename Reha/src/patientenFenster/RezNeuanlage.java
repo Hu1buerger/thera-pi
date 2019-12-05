@@ -791,7 +791,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
             if (this.neu) {
                 if (myRezept.isEmpty()) {
-                    initRezeptNeu(); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
+                    initRezeptNeu(myRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
                     this.holePreisGruppe(Reha.instance.patpanel.patDaten.get(68)
                                                                         .trim()); // setzt jtf[cPREISGR] u.
                                                                                   // this.preisgruppe
@@ -807,7 +807,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     try {
                         String[] xartdbeh = new String[] { myRezept.getHMkurz(1), myRezept.getHMkurz(2),
                                 myRezept.getHMkurz(3), myRezept.getHMkurz(4) };
-                        initRezeptKopie();
+                        initRezeptKopie(myRezept);
                         this.holePreisGruppe(myRezept.getKtraeger());
                         this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                           .toString()
@@ -1323,7 +1323,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             }
             tmpRezept = new Rezept();
             if (getInstance().neu) {
-                tmpRezept.setRezNb("");
+                initRezeptNeu(tmpRezept);
             } else {
                 tmpRezept.setVec_rez(myRezept.getVec_rez());
             }
@@ -1758,48 +1758,48 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein Rezept mit Daten, die immer gesetzt werden müssen
      */
-    private void initRezeptAll() {
-        myRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse; koennte sich seit Kopiervorlage geaendert
+    private void initRezeptAll(Rezept thisRezept) {
+        thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse; koennte sich seit Kopiervorlage geaendert
                                                                       // haben
-        myRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
+        thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
 
-        if (myRezept.getKtraeger()
+        if (thisRezept.getKtraeger()
                     .equals("")) { // eher ein Fall für check/speichern!
             JOptionPane.showMessageDialog(null,
                     "Achtung - kann Preisgruppe nicht ermitteln - Rezept kann später nicht abgerechnet werden!");
         }
 
         if (SystemConfig.AngelegtVonUser) {
-            myRezept.setAngelegtVon(Reha.aktUser);
+            thisRezept.setAngelegtVon(Reha.aktUser);
         } else {
-            myRezept.setAngelegtVon("");
+            thisRezept.setAngelegtVon("");
         }
-        myRezept.setAngelegtDatum(DatFunk.sDatInSQL(DatFunk.sHeute()));
+        thisRezept.setAngelegtDatum(DatFunk.sDatInSQL(DatFunk.sHeute()));
 
-        myRezept.setLastEdit(Reha.aktUser);
-        myRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
+        thisRezept.setLastEdit(Reha.aktUser);
+        thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
 
-        myRezept.setHeimbew(Reha.instance.patpanel.patDaten.get(44)); // koennte sich geaendert haben
-        myRezept.setBefreit(Reha.instance.patpanel.patDaten.get(30)); // dito
-        myRezept.setGebuehrBezahlt(false); // kann noch nicht bezahlt sein (Rezeptgebühr)
-        myRezept.setGebuehrBetrag("0.00");
+        thisRezept.setHeimbew(Reha.instance.patpanel.patDaten.get(44)); // koennte sich geaendert haben
+        thisRezept.setBefreit(Reha.instance.patpanel.patDaten.get(30)); // dito
+        thisRezept.setGebuehrBezahlt(false); // kann noch nicht bezahlt sein (Rezeptgebühr)
+        thisRezept.setGebuehrBetrag("0.00");
     }
 
     /**
      *
      * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
      */
-    private void initRezeptNeu() {
-        myRezept.createEmptyVec();
-        initRezeptAll();
+    private void initRezeptNeu(Rezept thisRezept) {
+        thisRezept.createEmptyVec();
+        initRezeptAll(thisRezept);
 
-        myRezept.setArzt(Reha.instance.patpanel.patDaten.get(25) + " - " + Reha.instance.patpanel.patDaten.get(26)); // Hausarzt
+        thisRezept.setArzt(Reha.instance.patpanel.patDaten.get(25) + " - " + Reha.instance.patpanel.patDaten.get(26)); // Hausarzt
                                                                                                                      // als
                                                                                                                      // default
-        myRezept.setArztId(Reha.instance.patpanel.patDaten.get(67));
-        myRezept.setKm(Reha.instance.patpanel.patDaten.get(48));
-        myRezept.setPatIdS(Reha.instance.patpanel.patDaten.get(66));
-        myRezept.setPatIntern(Reha.instance.patpanel.patDaten.get(29));
+        thisRezept.setArztId(Reha.instance.patpanel.patDaten.get(67));
+        thisRezept.setKm(Reha.instance.patpanel.patDaten.get(48));
+        thisRezept.setPatIdS(Reha.instance.patpanel.patDaten.get(66));
+        thisRezept.setPatIntern(Reha.instance.patpanel.patDaten.get(29));
         // Barcode
     }
 
@@ -1809,15 +1809,15 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *  - aktualisiert Daten aus dem aktuellen Patienten,
      *  - löscht Daten, die nur für die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
-    private void initRezeptKopie() {
-        initRezeptAll();
+    private void initRezeptKopie(Rezept thisRezept) {
+        initRezeptAll(thisRezept);
 
         // war Lemmis 'Löschen der auf jeden Fall "falsch weil alt" Komponenten'
-        myRezept.setRezNb("");
-        myRezept.setRezeptDatum("");
-        myRezept.setTermine("");
-        myRezept.setZzStat("");
-        myRezept.setLastDate("");
+        thisRezept.setRezNb("");
+        thisRezept.setRezeptDatum("");
+        thisRezept.setTermine("");
+        thisRezept.setZzStat("");
+        thisRezept.setLastDate("");
     }
 
     /**
