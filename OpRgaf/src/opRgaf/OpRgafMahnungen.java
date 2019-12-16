@@ -100,14 +100,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
     ITextDocument textDocument;
 
     final String stmtString =
-            /*
-             * "select concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(geboren,'%d.%m.%Y')),"
-             * +
-             * "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id "
-             * +
-             * "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) "
-             * + "left join kass_adr as t3 ON ( t2.kassenid = t3.id )";
-             */
             // findet OP in RGR,AFR u. VKR (außer Rechnungsverkauf 'an Kasse')
             "SELECT concat(t2.n_name, ', ',t2.v_name,', ',DATE_FORMAT(t2.geboren,'%d.%m.%Y')),t1.rnr,t1.rdatum,t1.rgesamt,"
                     + "t1.roffen,t1.rpbetrag,t1.rbezdatum,t1.rmahndat1,t1.rmahndat2,t3.kassen_nam1,t1.reznr,t1.id,t1.pat_id "
@@ -162,11 +154,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         tablepan.setLayout(lay);
 
         tabmod = new MyMahnungenTableModel();
-        /*
-         * Vector<Vector<String>> felder = SqlInfo.holeFelder("describe rliste");
-         * String[] spalten = new String[felder.size()]; for(int i= 0; i <
-         * felder.size();i++){ spalten[i] = felder.get(i).get(0); }
-         */
         tabmod.setColumnIdentifiers(spalten);
         tab = new JXTable(tabmod);
         tab.setHorizontalScrollEnabled(true);
@@ -290,10 +277,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         rtfs[9].setFont(fontfett);
         rechnungpan.add(rtfs[9], cc.xy(4, 20));
         /*
-         * lab = new JLabel("3. Mahnung"); rechnungpan.add(lab,cc.xy(2,22)); rtfs[10] =
-         * new JRtaTextField("DATUM",true); rtfs[10].setFont(fontfett);
-         * rechnungpan.add(rtfs[10],cc.xy(4,22));
-         * 
          * lab = new JLabel("Mahnsperre?"); rechnungpan.add(lab,cc.xy(2,24));
          * cbMahnsperre = new JRtaCheckBox("Mahnsperre verhängt");
          * rechnungpan.add(cbMahnsperre,cc.xy(4,24));
@@ -311,8 +294,7 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         String ywerte = "15dlu,p,15dlu";
         FormLayout lay = new FormLayout(xwerte, ywerte);
         PanelBuilder builder = new PanelBuilder(lay);
-        // PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel()); // debug
-        // mode
+        // PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
         builder.getPanel()
                .setOpaque(false);
         CellConstraints cc = new CellConstraints();
@@ -343,11 +325,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         rbMahnart[1].addActionListener(al);
         bgroup.add(rbMahnart[1]);
         pan.add(rbMahnart[1], cc2.xy(2, 3));
-        /*
-         * rbMahnart[3] = new JRtaRadioButton("Anwaltsliste");
-         * rbMahnart[3].setName("mahnung4"); rbMahnart[3].addActionListener(al);
-         * bgroup.add(rbMahnart[3]); pan.add(rbMahnart[3],cc2.xy(2,4));
-         */
         pan.validate();
         ++colCnt;
         builder.add(pan, cc.xywh(colCnt++, rowCnt - 1, 1, 3, CellConstraints.FILL, CellConstraints.FILL)); // 4,1..3
@@ -360,7 +337,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                 cc.xywh(colCnt++, rowCnt - 1, 5, 3, CellConstraints.LEFT, CellConstraints.DEFAULT)); // 8..10,1..3
 
         selPan.setCallBackObj(this); // callBack registrieren
-        // OpCommon.
         initSelection();
         // Ende Auswahl
 
@@ -374,8 +350,7 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
     }
 
     /**
-     * letzte Checkbox-Auswahl wiederherstellen (bei Start des Moduls und bei
-     * Tab-Wechsel)
+     * letzte Checkbox-Auswahl wiederherstellen (bei Start des Moduls und bei Tab-Wechsel)
      */
     public void initSelection() {
         selPan.setRGR(OpRgaf.iniOpRgAf.getIncRG());
@@ -499,9 +474,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                                                  .length() == 10 ? rtfs[9].getText()
                                                                           .trim()
                                                          : ""));
-        // mahnParameter.put("<Mmahndat3>",
-        // (rtfs[10].getText().trim().length()==10 ? rtfs[8].getText().trim() :
-        // ""));
         String datei = OpRgaf.iniOpRgAf.getFormNb(aktuelleMahnstufe);
         try {
             starteMahnDruck(datei);
@@ -582,9 +554,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
 
     private void doSuchen() {
         String nichtvorDatum = eltern.getNotBefore();
-        // int frist1 = (Integer) OpRgaf.mahnParameter.get("frist1");
-        // int frist2 = (Integer) OpRgaf.mahnParameter.get("frist2");
-        // int frist3 = (Integer) OpRgaf.mahnParameter.get("frist3");
         int frist1 = OpRgaf.iniOpRgAf.getFrist(1);
         int frist2 = OpRgaf.iniOpRgAf.getFrist(2);
         int frist3 = OpRgaf.iniOpRgAf.getFrist(3);
@@ -615,15 +584,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                     + "' AND mahndat3 IS NULL " + testArt() + ")";
             starteSuche(cmd);
             break;
-        /*
-         * case 4: vergleichsdatum =
-         * DatFunk.sDatInSQL(DatFunk.sDatPlusTage(DatFunk.sHeute(), (frist3 * -1))); //
-         * cmd = "select * from rliste where (r_offen > '0.00' AND r_datum //
-         * <='"+vergleichsdatum+"' AND r_datum >='"+nichtvorDatum+"')"; cmd =
-         * "select * from rliste where (r_offen > '0.00' AND mahndat3 <='" +
-         * vergleichsdatum + "' AND r_datum >='" + nichtvorDatum + "')";
-         * starteSuche(cmd); break;
-         */
         }
     }
 
@@ -655,25 +615,21 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
     @Override
     public void useRGR(boolean rgr) {
         OpRgaf.iniOpRgAf.setIncRG(rgr);
-        // searchRG = rgr;
     }
 
     @Override
     public void useAFR(boolean afr) {
         OpRgaf.iniOpRgAf.setIncAR(afr);
-        // searchAR = afr;
     }
 
     @Override
     public void useVKR(boolean vkr) {
         OpRgaf.iniOpRgAf.setIncVK(vkr);
-        // searchVK = vkr;
     }
 
     private void starteSuche(String sstmt) {
         tabmod.setRowCount(0);
         tab.validate();
-        // tab.repaint();
         Statement stmt = null;
         ResultSet rs = null;
 
@@ -712,8 +668,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                                          .equals("java.lang.Integer")) {
                         vec.add(rs.getInt(i));
                     }
-                    // vec.add( (rs.getString(i)==null ? "" : rs.getString(i)) );//r_klasse
-                    // System.out.println(rsMetaData.getColumnClassName(i));
                 }
                 tabmod.addRow((Vector<?>) vec.clone());
                 if (durchlauf > 200) {
@@ -839,15 +793,11 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         }
         String id = tabmod.getValueAt(tab.convertRowIndexToModel(row), 11)
                           .toString();
-        String cmd = // tabmod.getValueAt( tab.convertRowIndexToModel(row) ,0).toString();
-                "select t2.anrede,t2.n_name,t2.v_name,t2.strasse,t2.plz,t2.ort," + // !! findet nur RGR/AFR !!
-                        "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rmahndat1,t1.rmahndat2 " + // erst anpassen, dann VR
-                                                                                             // freischalten
-                        "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) where t1.id='"
-                        + id + "' LIMIT 1";
+        String cmd = "select t2.anrede,t2.n_name,t2.v_name,t2.strasse,t2.plz,t2.ort," // !! findet nur RGR/AFR !!
+                + "t1.rnr,t1.rdatum,t1.rgesamt,t1.roffen,t1.rmahndat1,t1.rmahndat2 "
+                + "from rgaffaktura as t1 inner join pat5 as t2 on (t1.pat_intern = t2.pat_intern) where t1.id='" + id
+                + "' LIMIT 1"; // erst anpassen, dann VR freischalten
 
-        // String cmd = "select rnummer from faktura where rnummer = '"+rnr+"' LIMIT 1";
-        // System.out.println(cmd);
         if (SqlInfo.gibtsSchon(cmd)) {
             OpRgaf.thisFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
             try {
@@ -857,12 +807,9 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                 JOptionPane.showMessageDialog(null, "Fehler beim Bezug der Rechnungsdaten (neu)");
             }
             OpRgaf.thisFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-            // bereits in der neuen faktura Datenbank enthalten also kann man sich den mit
-            // mit dbf&co sparen
         } else {
             OpRgaf.thisFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
             try {
-                // doDbfGedoense(rnr,row);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Fehler beim Bezug der Rechnungsdaten (alt)");
@@ -872,11 +819,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
     }
 
     private void doFakturaGedoense(String rnr, Vector<Vector<String>> vecx) {
-        /*
-         * Vector<Vector<String>> vecx = SqlInfo.
-         * holeFelder("select kassen_nam,kassen_na2,strasse,plz,ort from faktura where rnummer='"
-         * + rnr+"' and lfnr='0' LIMIT 1");
-         */
         if (vecx.size() <= 0) {
             JOptionPane.showMessageDialog(null, "Rechnungsdaten können nicht ermittelt werden");
             return;
@@ -903,16 +845,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         rtfs[7].setText(dcf.format(Double.parseDouble(vecx.get(0)
                                                           .get(9))));
 
-        /*
-         * rtfs[4].setText( tabmod.getValueAt(tab.convertRowIndexToModel(row),
-         * 0).toString() ); rtfs[5].setText(
-         * DatFunk.sDatInDeutsch(tabmod.getValueAt(tab.convertRowIndexToModel(row),
-         * 1).toString()) ); rtfs[6].setText(
-         * dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 5) ) );
-         * rtfs[7].setText(
-         * dcf.format((Double)tabmod.getValueAt(tab.convertRowIndexToModel(row), 6) ) );
-         */
-
         String test = vecx.get(0)
                           .get(10);
         if (test == null) {
@@ -936,17 +868,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
         } else {
             rtfs[9].setText(DatFunk.sDatInDeutsch(test.toString()));
         }
-        /*
-         * test = (Date)tabmod.getValueAt(tab.convertRowIndexToModel(row), 11);
-         * if(test==null){ rtfs[10].setText("  .  .    "); }else
-         * if(test.toString().trim().length() != 10){ rtfs[10].setText("  .  .    ");
-         * }else{ rtfs[10].setText(DatFunk.sDatInDeutsch(test.toString())); }
-         */
-        /*
-         * cbMahnsperre.setSelected(
-         * (Boolean)tabmod.getValueAt(tab.convertRowIndexToModel(row), 12) );
-         */
-
     }
 
     /*******************************/
@@ -978,8 +899,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
             e.printStackTrace();
         }
         textDocument = (ITextDocument) document;
-        // OOTools.druckerSetzen(textDocument, (String)
-        // OpRgaf.mahnParameter.get("drucker"));
         OOTools.druckerSetzen(textDocument, OpRgaf.iniOpRgAf.getDrucker());
 
         ITextFieldService textFieldService = textDocument.getTextFieldService();
@@ -991,7 +910,6 @@ public class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
             e.printStackTrace();
         }
         for (int i = 0; i < placeholders.length; i++) {
-            // boolean loeschen = false;
             boolean schonersetzt = false;
             String placeholderDisplayText = placeholders[i].getDisplayText()
                                                            .toLowerCase();
