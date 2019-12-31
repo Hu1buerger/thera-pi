@@ -614,6 +614,10 @@ public class HMRCheck {
                                 if (chkIsAdR(vorgaengerVoArt)) { // wenn die Uebersprungene eine AdR-VO ist -> Abbruch
                                     return chkIf2AdrVO(currRezVoArt, vorgaengerVoNr);
                                 }
+                                currRez = testvec.get(idxVorg)
+                                                 .get(REZ_NR);
+                                currRezVoArt = testvec.get(idxVorg)
+                                                      .get(REZEPTART);
                                 idxVorg++; // jetzt Index auf Vorgänger setzen
                             }
 
