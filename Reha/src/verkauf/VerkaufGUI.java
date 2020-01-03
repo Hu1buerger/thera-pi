@@ -742,7 +742,8 @@ public class VerkaufGUI extends JXPanel {
     private void rechnungEnde() {
         if (verkauf.getAnzahlPositionen() != 0) {
             if (((Reha.instance.patpanel != null) && (Reha.instance.patpanel.patDaten != null) && rbuts[0].isSelected())
-                    || (Reha.instance.kassenpanel != null && rbuts[1].isSelected())) {
+                    || (Reha.instance.kassenpanel != null && rbuts[1].isSelected())
+                    || rbuts[2].isSelected()) {
                 String name = null, vorname = null, adresse = null, plz = null, ort = null, anrede = null;
                 int patid = -1;
                 if (rbuts[0].isSelected()) {
