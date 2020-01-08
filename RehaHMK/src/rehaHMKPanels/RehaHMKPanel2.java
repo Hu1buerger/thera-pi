@@ -28,14 +28,11 @@ import javax.swing.UIManager;
 
 import org.jdesktop.swingworker.SwingWorker;
 import org.jdesktop.swingx.JXPanel;
+import org.thera_pi.common.image.JpegWriter;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.XMultiServiceFactory;
@@ -1071,19 +1068,12 @@ public class RehaHMKPanel2 extends JXPanel implements ScannerListener {
             File file = new File(progHome + "temp/" + RehaHMK.aktIK + "/rezkorrekt.jpg");
             try {
                 FileOutputStream fout = new FileOutputStream(file);
-                ByteArrayOutputStream os = new ByteArrayOutputStream();
-                JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-                JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam((metadata.getImage()));
-                param.setQuality(1.0f, false);
-                encoder.setJPEGEncodeParam(param);
-                encoder.encode((metadata.getImage()));
-                os.close();
+                ByteArrayOutputStream os = JpegWriter.bufferedImageToOutputStream(metadata.getImage());
+                
                 fout.write(os.toByteArray());
                 fout.flush();
                 fout.close();
             } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (ImageFormatException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();

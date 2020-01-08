@@ -27,7 +27,6 @@ import java.awt.image.RenderedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
@@ -70,12 +69,11 @@ import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.thera_pi.common.image.JpegWriter;
+
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.mysql.jdbc.PreparedStatement;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import CommonTools.INIFile;
 import crypt.Verschluesseln;
@@ -440,21 +438,6 @@ public class piTool implements MouseListener, ActionListener, WindowListener, Ch
         img = null;
         ShotBereich.setzeAusschnitt(false);
         return null;
-    }
-
-    public static byte[] bufferedImageToByteArray(BufferedImage img) throws IOException {
-        if (img != null) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-            JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(img);
-            param.setQuality(1.0f, false);
-            encoder.setJPEGEncodeParam(param);
-            encoder.encode(img);
-            os.close();
-            return os.toByteArray();
-        } else {
-            return null;
-        }
     }
 
     @Override
@@ -876,9 +859,9 @@ public class piTool implements MouseListener, ActionListener, WindowListener, Ch
 
             String select = "Insert into sshots set vorschau = ? , titel = ?, bild = ?";
             PreparedStatement ps = (PreparedStatement) piTool.app.conn.prepareStatement(select);
-            ps.setBytes(1, bufferedImageToByteArray((BufferedImage) vos));
+            ps.setBytes(1, JpegWriter.bufferedImageToByteArray((BufferedImage) vos));
             ps.setString(2, piTool.app.titel.getText());
-            ps.setBytes(3, bufferedImageToByteArray((BufferedImage) img));
+            ps.setBytes(3, JpegWriter.bufferedImageToByteArray((BufferedImage) img));
             // ps.setString(2, "vorschau");
             ps.execute();
 

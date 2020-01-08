@@ -2,7 +2,6 @@ package terminKalender;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -15,8 +14,6 @@ import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 import com.sun.star.beans.PropertyValue;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameContainer;
@@ -248,28 +245,6 @@ public class DruckeViewPanel extends SwingWorker<Void, Void> {
             e.printStackTrace();
             System.out.println("Failed to insert Graphic");
             System.out.println(url);
-        }
-    }
-
-    public static byte[] bufferedImageToByteArray(BufferedImage img) throws IOException {
-        if (img != null) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-            encoder.encode(img);
-            return os.toByteArray();
-        } else {
-            return null;
-        }
-    }
-
-    public static ByteArrayOutputStream bufferedImageToOutputStream(BufferedImage img) throws IOException {
-        if (img != null) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-            encoder.encode(img);
-            return os;
-        } else {
-            return null;
         }
     }
 
