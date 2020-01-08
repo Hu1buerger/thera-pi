@@ -60,12 +60,69 @@ import org.bouncycastle.x509.X509V3CertificateGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class is intended to store and handle the keys or key pairs in 
+ * Nebraska.
+ * 
+ * It is based mainly on the standard Java keystore and key handling 
+ * functions in package java.security and the BouncyCastle encryption 
+ * library in org.bouncycastle.
+ * 
+ * An object of this class should be the base for all encryption stuff 
+ * in Thera-Pi.
+ * 
+ * The keystore shall store the public keys (certificates) of all data
+ * recipients (Datenannahmestellen) and the private key and certificate
+ * of the sending person/organization (Leistungserbringer).
+ * All entities are referenced by their ID (IK, Institutskennzeichen).
+ * 
+ * It can store the private key and certificate pairs of multiple 
+ * senders identified by different IDs. 
+ * 
+ * The keystore uses different aliases for a newly generated key pair
+ * with self-signed certificate to be uses as a certification request
+ * (Zertifizierungsanfrage) and a key pair with certificate from the
+ * CA (ITSG) which can be used for signing the data.
+ * 
+ * In theory, Nebraska can still use an old certificate for the data 
+ * exchange while a new certification request is being processed
+ * as long as the certificate is not replaced. 
+ * 
+ * General use case:
+ * 
+ * - Use the constructor to create a NebraskaKeystore object for the 
+ * specified entity, using the specified file.
+ * - Use generateKeyPair to generate a key pair and self-signed certificate
+ * and store it in the keystore. It will not overwrite an existing key pair
+ * unless the overwrite parameter is set to true to prevent losing a key 
+ * pair already sent to the CA.
+ * - generateKeyPairAndSaveToFile does the same and exports the key pair 
+ * to a file for backup.
+ * - Use createCertificateRequest to write a certificate request to an 
+ * OutputStream. The caller can create a FileOutputStream to write to a file.
+ * One version also saves an MD5 hash as the key fingerprint to be used for 
+ * the document sent to the CA. 
+ * - Use importCertificateReply to import the certificate from the CA's 
+ * reply.
+ * - Use importReceiverCertificates to read the recipients' certificates. 
+ * - The unimplemented function deleteExpiredCertificates is intended to 
+ * delete expired certificates.
+ * - exportKey and importKeyPair (inconsistently named) can be used to 
+ * backup and restore the key pair (with a self-signed certificate).
+ * The official certificate is in the reply file from the CA. 
+ *  - getPublicKeyMD5 returns the public key fingerprint.
+ * - Use getEncryptor to get a NebraskaEncryptor object for a specified recipient
+ * ID (IK). This can be used to sign and encrypt the data.
+ * 
+ * @author Bodo
+ *
+ */
 public class NebraskaKeystore {
     private BouncyCastleProvider bcProvider;
 
-    private String keystoreFileName;
-    private String keystorePassword;
-    private String keyPassword;
+    // references and password for keystore file 
+    private String keystoreFileName; 
+    private String keystorePassword; /**< Password for keystore. */
     private File keystoreFile;
     private KeyStore keyStore;
 
@@ -73,6 +130,7 @@ public class NebraskaKeystore {
     private String institutionID;
     private String institutionName;
     private String personName;
+    private String keyPassword; /**< Password for private key. */
 
     // cache for alias strings
     /**
@@ -84,15 +142,22 @@ public class NebraskaKeystore {
      */
     private String keyCertAlias;
 
+    /**
+     * Switch to select between old hash algorithm (SHA1) and new (SHA256).
+     * The implementation is strange, it is related to variables in 
+     * NebraskaContants.
+     */
     private boolean useSHA256;
 
     private static final Logger logger = LoggerFactory.getLogger(NebraskaKeystore.class);
 
     /**
-     * Initialize key store for specified principal using specified file. This
-     * constructor can be used if the key store already contains a certificate for
-     * the specified ID. The missing fields institution name and person name can be
-     * read from the existing certificate or must be specified using setters.
+     * Initialize key store for specified principal using specified file. 
+     * 
+     * This constructor can be used if the key store already contains a 
+     * certificate for the specified ID. The missing fields institution name 
+     * and person name can be read from the existing certificate or must be 
+     * specified using setters.
      *
      * @param keystoreFileName name of key store file
      * @param keystorePassword password for key store file
@@ -114,16 +179,17 @@ public class NebraskaKeystore {
     }
 
     /**
-     * Initialize key store for specified principal using specified file. Since this
-     * constructor specifies all fields it is possible to generate a key pair or
-     * certificate request without using setters.
+     * Initialize key store for specified principal using specified file. 
+     * 
+     * Since this constructor specifies all fields it is possible to 
+     * generate a key pair or certificate request without using setters.
      *
      * @param keystoreFileName name of key store file
      * @param keystorePassword password for key store file
      * @param keyPassword      password for private key
      * @param institutionID    institution ID number (IK)
-     * @param institutionName  institution name
-     * @param personName       person name
+     * @param institutionName  institution name (null to read from certificate)
+     * @param personName       person name (null to read from certificate)
      * @throws NebraskaCryptoException on cryptography related errors
      * @throws NebraskaFileException   on I/O related errors
      */
@@ -142,9 +208,13 @@ public class NebraskaKeystore {
 
     }
 
+    /* This function was added later and should be reworked. */
     public void set256Algorithm(boolean use256) {
         this.useSHA256 = use256;
         if (this.useSHA256) {
+        	/* These static variables in  NebraskaConstants must be replaced 
+        	 * with object members here.
+        	 */
             NebraskaConstants.CERTIFICATE_SIGNATURE_ALGORITHM_USED = NebraskaConstants.CERTIFICATE_SIGNATURE_ALGORITHM_NEW;
             NebraskaConstants.CRQ_SIGNATURE_ALGORITHM_USED = NebraskaConstants.CRQ_SIGNATURE_ALGORITHM_NEW;
         } else {
@@ -154,6 +224,7 @@ public class NebraskaKeystore {
 
     }
 
+    /* FIXME This function was added later and should be reworked. */
     public boolean is256Algorithm() {
         return this.useSHA256;
     }
@@ -998,6 +1069,8 @@ public class NebraskaKeystore {
         return new NebraskaDecryptor(this);
     }
 
+    /* FIXME all functions below should be checked and maybe reworked */  
+    /* FIXME catching the exceptions a stack trace in the functions is bad design */
     public void deleteAllCerts() {
         try {
             Enumeration<?> en = keyStore.aliases();
@@ -1015,6 +1088,7 @@ public class NebraskaKeystore {
             }
             saveKeystore();
         } catch (KeyStoreException e) {
+        	/* FIXME catching the exceptions here and printing a stack trace is bad design */
             e.printStackTrace();
         } catch (NebraskaCryptoException e) {
             e.printStackTrace();
@@ -1025,6 +1099,7 @@ public class NebraskaKeystore {
         }
     }
 
+    /* FIXME catching the exceptions here and printing a stack trace is bad design */
     public void keystoreSichern() {
         try {
             saveKeystore();
@@ -1043,6 +1118,7 @@ public class NebraskaKeystore {
             while (en.hasMoreElements()) {
                 aliases = (String) en.nextElement();
                 if (aliases != null && aliases.equals(alias)) {
+                    /* FIXME why this condition if both branches do the same? */
                     if (keyStore.isCertificateEntry(aliases)) {
                         keyStore.deleteEntry(aliases);
                         return true;
@@ -1053,6 +1129,7 @@ public class NebraskaKeystore {
                 }
             }
 
+            /* FIXME catching the exceptions here and printing a stack trace is bad design */
         } catch (KeyStoreException e) {
             e.printStackTrace();
         }
@@ -1142,6 +1219,7 @@ public class NebraskaKeystore {
         return false;
     }
 
+    /* FIXME partial copy of createCertificateRequest */
     public PKCS10CertificationRequest getCertificateRequest()
             throws NebraskaCryptoException, NebraskaNotInitializedException {
         if ((institutionName == null) || (personName == null)) {
@@ -1211,8 +1289,13 @@ public class NebraskaKeystore {
         return personName;
     }
 
+    /* FIXME unclear if this is used to import my own certificate from
+     * the CA's reply or a recipient's certificate.
+     */
     public void importNewCertFromReply(String fileName, String ikToAdd)
             throws NebraskaFileException, NebraskaCryptoException {
+    	
+    	/* FIXME better use nebraskaUtil.normalizeIK which removes the string "IK" instead of adding it to both values to compare*/
         String realIkToAdd = (ikToAdd.startsWith("IK") ? ikToAdd : "IK" + ikToAdd);
         /*
          * // we must already have the private key if(!hasPrivateKey()) { throw new
@@ -1232,6 +1315,7 @@ public class NebraskaKeystore {
             for (Iterator<?> certIt = certColl.iterator(); certIt.hasNext();) {
                 X509Certificate cert = (X509Certificate) certIt.next();
                 X500Principal subject = cert.getSubjectX500Principal();
+            	/* FIXME better use nebraskaUtil.normalizeIK which removes the string "IK" instead of adding it to both values to compare*/
                 String certIK = "IK" + new NebraskaPrincipal(subject.getName()).getInstitutionID();
                 System.out.println("Durchlauf " + i + " - " + realIkToAdd);
                 System.out.println("certzIK " + i + " - " + certIK);
