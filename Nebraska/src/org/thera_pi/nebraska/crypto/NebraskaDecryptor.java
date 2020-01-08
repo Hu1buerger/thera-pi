@@ -25,6 +25,23 @@ import org.bouncycastle.cms.RecipientInformationStore;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 
+/**
+ * Class to decrypt encrypted data and check the signature.
+ * Only used for testing. The data exchange procedure defines a one-way
+ * communication only. 
+ * The decrypt function will try to decrypt an InputStream to an 
+ * OutputStream and check the signature. This is only possible if the
+ * data was encrypted (also) using my own public key. If the own 
+ * key is not part of the recipients, it will not write any data to
+ * the output.
+ * 
+ * General use case:
+ * - Get a NebraskaDecryptor from the NebraskaKeystore object.
+ * - Use the decrypt function to decrypt and check the data.
+ *
+ * @author Bodo
+ *
+ */
 public class NebraskaDecryptor {
 
     private X509Certificate certificate;

@@ -1,5 +1,12 @@
 package org.thera_pi.nebraska.crypto;
 
+/**
+ * This class is intended to store constants with descriptive names
+ * for the use inside Nebraska or by Nebraska's interface.
+ * 
+ * @author Bodo
+ *
+ */
 public class NebraskaConstants {
 
     // constants to select algorithms and data types for BC function calls
@@ -23,6 +30,7 @@ public class NebraskaConstants {
     static final String X500_PRINCIPAL_COUNTRY = "DE";
     public static final String X500_PRINCIPAL_ORGANIZATION = "ITSG TrustCenter fuer sonstige Leistungserbringer";
 
+    /* These variables don't belong here. */ 
     public static String CERTIFICATE_SIGNATURE_ALGORITHM_USED;
     public static String CRQ_SIGNATURE_ALGORITHM_USED;
 
