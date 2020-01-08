@@ -30,6 +30,13 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
  * This object can be used to encrypt data with the certificate of a specified
  * receiver. Optionally it can add an encryption using the sender's certificate
  * to allow decryption by the sender.
+ * 
+ * General use case:
+ * - Get a NebraskaEncryptor for the recipient's ID (IK) from the 
+ * NebraskaKeystore object.
+ * - Optionally use setEncryptToSelf(true) to be able to decrypt the data. 
+ * Otherwise only the specified recipient is able to decrypt it.
+ * - Use one of the encrypt functions to encrypt the data.
  *
  * @author bodo
  *
