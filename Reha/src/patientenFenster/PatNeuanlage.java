@@ -20,7 +20,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -50,6 +49,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.thera_pi.common.image.JpegWriter;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -58,8 +58,6 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 import com.mysql.jdbc.PreparedStatement;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 import CommonTools.DatFunk;
 import CommonTools.ExUndHop;
@@ -2111,7 +2109,7 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
             if (neu) {
                 String select = "Insert into patbild set bild = ? , pat_intern = ?, vorschau = ?";
                 ps = (PreparedStatement) Reha.instance.conn.prepareStatement(select);
-                ps.setBytes(1, bufferedImageToByteArray((BufferedImage) ico.getImage()));
+                ps.setBytes(1, JpegWriter.bufferedImageToByteArray((BufferedImage) ico.getImage()));
                 ps.setString(2, pat_intern);
                 BufferedImage buf = new BufferedImage(35, 40, BufferedImage.TYPE_INT_RGB);
                 Graphics2D g = buf.createGraphics();
@@ -2119,20 +2117,20 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                                .getScaledInstance(35, 44, Image.SCALE_SMOOTH),
                         null, null);
                 g.dispose();
-                ps.setBytes(3, bufferedImageToByteArray(buf));
+                ps.setBytes(3, JpegWriter.bufferedImageToByteArray(buf));
                 ps.execute();
                 buf = null;
             } else {
                 String select = "Update patbild set bild = ? , vorschau = ?  where pat_intern = ?";
                 ps = (PreparedStatement) Reha.instance.conn.prepareStatement(select);
-                ps.setBytes(1, bufferedImageToByteArray((BufferedImage) ico.getImage()));
+                ps.setBytes(1, JpegWriter.bufferedImageToByteArray((BufferedImage) ico.getImage()));
                 BufferedImage buf = new BufferedImage(35, 44, BufferedImage.TYPE_INT_RGB);
                 Graphics2D g = buf.createGraphics();
                 g.drawImage(ico.getImage()
                                .getScaledInstance(35, 44, Image.SCALE_SMOOTH),
                         null, null);
                 g.dispose();
-                ps.setBytes(2, bufferedImageToByteArray(buf));
+                ps.setBytes(2, JpegWriter.bufferedImageToByteArray(buf));
                 ps.setString(3, pat_intern);
                 ps.execute();
                 buf = null;
@@ -2153,17 +2151,6 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                     ps = null;
                 }
             }
-        }
-    }
-
-    private static byte[] bufferedImageToByteArray(BufferedImage img) throws IOException {
-        if (img != null) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-            encoder.encode(img);
-            return os.toByteArray();
-        } else {
-            return null;
         }
     }
 
