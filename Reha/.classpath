@@ -54,6 +54,6 @@
 	<classpathentry kind="src" path="/OffenePosten"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/datenbank"/>
 	<classpathentry kind="src" path="/RehaWissen"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/OpenMaps"/>
+	<classpathentry kind="src" path="/CalcKilometer"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
