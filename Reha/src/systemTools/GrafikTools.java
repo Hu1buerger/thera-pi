@@ -3,23 +3,9 @@ package systemTools;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
 
 public class GrafikTools {
-    public static byte[] bufferedImageToByteArray(BufferedImage img) throws IOException {
-        if (img != null) {
-            ByteArrayOutputStream os = new ByteArrayOutputStream();
-            JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-            encoder.encode(img);
-            return os.toByteArray();
-        } else {
-            return null;
-        }
-    }
 
     public static BufferedImage rotate90DX(BufferedImage bi) {
         int width = bi.getWidth();
