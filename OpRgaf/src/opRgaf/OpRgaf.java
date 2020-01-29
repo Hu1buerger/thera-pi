@@ -25,6 +25,7 @@ import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import environment.Path;
 import io.RehaIOMessages;
 import logging.Logging;
+import sql.DatenquellenFactory;
 
 public class OpRgaf implements WindowListener {
 
@@ -93,14 +94,14 @@ public class OpRgaf implements WindowListener {
 
                 aktIK = args[1];
 
-                iniOpRgAf = new OpRgAfIni(args[0], "ini/", args[1], "/oprgaf.ini");
+                iniOpRgAf = new OpRgAfIni(args[0], "ini/", args[1], "oprgaf.ini");
                 AbrechnungParameter(proghome);
                 FirmenDaten(proghome);
                 if (args.length >= 3) {
                     rehaReversePort = Integer.parseInt(args[2]);
                 }
             } else {
-                iniOpRgAf = new OpRgAfIni(proghome, "ini/", aktIK, "/oprgaf.ini");
+                iniOpRgAf = new OpRgAfIni(proghome, "ini/", aktIK, "oprgaf.ini");
                 AbrechnungParameter(proghome);
                 FirmenDaten(proghome);
             }
@@ -113,6 +114,7 @@ public class OpRgaf implements WindowListener {
             }
             final OpRgaf xOpRgaf = application;
 
+            application.StarteDB();
 
             application.getJFrame();
         } else {
@@ -244,6 +246,25 @@ public class OpRgaf implements WindowListener {
         }
     }
 
+    private void StarteDB() {
+        final OpRgaf obj = OpRgaf.thisClass;
+
+
+        try {
+
+            obj.conn = new DatenquellenFactory(aktIK).createConnection();
+            OpRgaf.thisClass.sqlInfo.setConnection(obj.conn);
+            OpRgaf.DbOk = true;
+            System.out.println("Datenbankkontakt hergestellt");
+        } catch (final SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+            OpRgaf.DbOk = false;
+
+        }
+        return;
+    }
 
 
     @Override

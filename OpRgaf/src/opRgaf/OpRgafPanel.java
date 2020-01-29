@@ -204,7 +204,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         // Ende Auswahl
 
         buts[btSuchen] = ButtonTools.macheButton("suchen", "suchen", al);
-        buts[btSuchen].setMnemonic('s');
+        buts[btSuchen].setMnemonic(KeyEvent.VK_S);
         builder.add(buts[btSuchen], cc.xy(17, rowCnt));
 
 //**********************
@@ -283,6 +283,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         }
 
         buts[btAusbuchen] = (JButton) builder.add(ButtonTools.macheButton("ausbuchen", "ausbuchen", al), cc.xy(17, 6));
+        buts[btAusbuchen].setMnemonic(KeyEvent.VK_A);
 //**********************
 
         rowCnt += 2;

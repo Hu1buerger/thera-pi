@@ -43,8 +43,7 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
     JCheckBox ChkLockOP = null;
     JCheckBox ChkLockOpRgAf = null;
     boolean dataValid = false, enableOP2BarKasse = false, enableVBon2BarKasse = false, enableVRhg2BarKasse = false,
-            lockSettingsOP = false, lockSettingsOpRgAf = false;
-
+            lockSettingsOP = false, lockSettingsOpRgAf = false, lockSettingsOP_ini = false, lockSettingsOpRgAf_ini = false;
     JButton abbruch = null;
     JButton speichern = null;
 
@@ -60,6 +59,11 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
         initFields();
         add(getContent(), BorderLayout.CENTER);
         add(getKnopfPanel(), BorderLayout.SOUTH);
+        initForm();
+        return;
+    }
+    
+    private void initForm() {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
@@ -71,7 +75,6 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
 
         }.execute();
         validate();
-        return;
     }
 
     private JPanel getKnopfPanel() {
@@ -116,11 +119,13 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
 
     private void setFields() {
         ChkLockOP.setSelected(lockSettingsOP);
-        ChkOP2BarKasse.showLocked(enableOP2BarKasse, lockSettingsOP);
+        ChkOP2BarKasse.showLocked(enableOP2BarKasse, lockSettingsOP_ini);
 
         ChkLockOpRgAf.setSelected(lockSettingsOpRgAf);
-        ChkVBon2BarKasse.showLocked(enableVBon2BarKasse, lockSettingsOpRgAf);
         ChkVRhg2BarKasse.showLocked(enableVRhg2BarKasse, lockSettingsOpRgAf);
+
+        ChkVBon2BarKasse.showLocked(enableVBon2BarKasse, true); // besser in SysUtilVerkauf!
+        //ChkVBon2BarKasse.setSelected(enableVBon2BarKasse);
 
     }
 
@@ -163,10 +168,13 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
                 + " und die selektierten Rechnungsarten gespeichert.</html>");
 
         rowCnt++; // 14
-        builder.add(ChkVBon2BarKasse, cc.xyw(colRight, rowCnt++, 2));
-
-        rowCnt++; // 16
         builder.add(ChkVRhg2BarKasse, cc.xyw(colRight, rowCnt++, 2));
+
+        rowCnt += 3; // 18
+        builder.addSeparator("Verkaufs-Bon", cc.xyw(1, rowCnt++, 7));
+
+        rowCnt++; // 20
+        builder.add(ChkVBon2BarKasse, cc.xyw(colRight, rowCnt++, 2));
 
         return builder.getPanel();
     }
@@ -179,6 +187,7 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
                 if (arg0.getActionCommand()
                         .equals("speicher")) {
                     doSpeichern();
+                    initForm();
                 } else if (arg0.getActionCommand()
                                .equals("abbrechen")) {
                     SystemInit.abbrechen();
@@ -224,15 +233,15 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
 
         String section = "offenePosten";
         if (iniOP.getStringProperty(section, "lockSettings") != null) { // Eintrag in ini vorhanden?
-            lockSettingsOP = iniOP.getBooleanProperty(section, "lockSettings");
+            lockSettingsOP_ini = lockSettingsOP = iniOP.getBooleanProperty(section, "lockSettings");
         } else {
-            lockSettingsOP = true; // Default-Wert setzen
+            lockSettingsOP_ini = lockSettingsOP = true; // Default-Wert setzen
         }
         enableOP2BarKasse = iniOP.getBooleanProperty(section, "erlaubeBarzahlung");
 
         enableVBon2BarKasse = iniOpRgAf.getVbCashAllowed();
         enableVRhg2BarKasse = iniOpRgAf.getVrCashAllowed();
-        lockSettingsOpRgAf = iniOpRgAf.getSettingsLocked();
+        lockSettingsOpRgAf_ini = lockSettingsOpRgAf = iniOpRgAf.getSettingsLocked();
     }
 
     private void doSpeichern() { // noch umstellen auf iniOP-Klasse! (analog iniOpRgAf)
@@ -249,29 +258,38 @@ public class SysUtilOpMahnung extends JXPanel implements ActionListener, ItemLis
                 saveChanges = true;
             }
 
-            if (lockSettingsOP != iniOP.getBooleanProperty(section, "lockSettings")) {
+            if (lockSettingsOP != lockSettingsOP_ini) {
                 iniOP.setBooleanProperty(section, "lockSettings", lockSettingsOP,
                         "Aktualisieren der Eintraege gesperrt");
                 saveChanges = true;
             }
             if (saveChanges) {
                 INITool.saveIni(iniOP);
+                JOptionPane.showMessageDialog(null, "Änderungen in offeneposten.ini gespeichert.");
             }
-            JOptionPane.showMessageDialog(null, "Konfiguration erfolgreich in offeneposten.ini gespeichert.");
         } catch (HeadlessException e) {
             JOptionPane.showMessageDialog(null, "Fehler beim speichern der Konfiguration in offeneposten.ini!!!");
         }
 
         try {
-            OpRgAfIni iniOpRgAf = new OpRgAfIni(Path.Instance.getProghome(), "ini/", Reha.getAktIK(), "/oprgaf.ini");
+            saveChanges = false;
+            OpRgAfIni iniOpRgAf = new OpRgAfIni(Path.Instance.getProghome(), "ini/", Reha.getAktIK(), "oprgaf.ini");
 
             iniOpRgAf.setVbCashAllowed(enableVBon2BarKasse);
             iniOpRgAf.setVrCashAllowed(enableVRhg2BarKasse);
-            iniOpRgAf.saveLastCashSettings();
+            if (iniOpRgAf.saveLastCashSettings()) {
+                saveChanges = true;
+            }
 
-            iniOpRgAf.setSettingsLocked(lockSettingsOpRgAf);
-            iniOpRgAf.saveLockSettings();
-            JOptionPane.showMessageDialog(null, "Konfiguration erfolgreich in oprgaf.ini gespeichert.");
+            if (lockSettingsOpRgAf != lockSettingsOpRgAf_ini) {
+                iniOpRgAf.setSettingsLocked(lockSettingsOpRgAf);
+                if (iniOpRgAf.saveLockSettings()) {
+                    saveChanges = true;
+                }
+            }
+            if (saveChanges) {
+                JOptionPane.showMessageDialog(null, "Änderungen in oprgaf.ini gespeichert.");
+            }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Fehler beim speichern der Konfiguration in oprgaf.ini!!!");
         }

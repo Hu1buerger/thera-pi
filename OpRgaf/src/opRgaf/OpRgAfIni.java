@@ -1,12 +1,16 @@
 package opRgaf;
 
+import java.io.File;
 import java.util.HashMap;
+
+import javax.swing.JOptionPane;
 
 import org.jdesktop.swingworker.SwingWorker;
 
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.OpCommon;
+import environment.Path;
 
 public class OpRgAfIni {
     public static HashMap<String, Object> mahnParam;
@@ -24,17 +28,15 @@ public class OpRgAfIni {
     /**
      * liest Einträge aus 'oprgaf.ini'
      * 
-     * @param args pfad, ik
+     * @param installationspfad, ini-verzeichnis, ik, filename
      */
-    // args[0],"ini/",args[1],"/oprgaf.ini"
+    // args[0],"ini/",args[1],"oprgaf.ini"
     public OpRgAfIni(String home, String subPath, String IK, String file) {
         progHome = home;
         aktIK = IK;
-//		path2IniFile = progHome+subPath+aktIK+file;
-//		inif = new INIFile (path2IniFile);
-        this.path2IniFile = progHome + subPath + aktIK;
+        this.path2IniFile = progHome + subPath + aktIK + "/";
         this.path2TemplateFiles = progHome + "vorlagen/" + aktIK;
-        INITool.init(path2IniFile + "/");
+        INITool.init(path2IniFile);
         this.iniFile = file;
         new SwingWorker<Void, Void>() {
             @Override
@@ -53,6 +55,10 @@ public class OpRgAfIni {
                 readCashSettings(inif);
 
                 iniValuesValid = true;
+                File f = new File(progHome + subPath + aktIK + "oprgaf.ini");
+                if (f.exists()) {
+                    boolean dummy = f.delete();
+                }
                 return null;
             }
         }.execute();
@@ -64,8 +70,8 @@ public class OpRgAfIni {
      */
     private void readLastSelectRgAfVk(INIFile inif) {
         String section = "offenePosten";
-        if (inif.getStringProperty(section, "Rezeptgebuehren") != null) { // Eintraege in ini vorhanden (alle oder
-                                                                          // keiner)
+        if (inif.getStringProperty(section, "Rezeptgebuehren") != null) { // Eintraege in ini vorhanden
+                                                                          //  (alle oder keiner)
             incRG = inif.getBooleanProperty(section, "Rezeptgebuehren");
             incAR = inif.getBooleanProperty(section, "Ausfallrechnungen");
             incVK = inif.getBooleanProperty(section, "Verkaeufe");
@@ -96,7 +102,6 @@ public class OpRgAfIni {
             mahnParam.put("inkasse", (String) "Bank");
         }
         for (int i = 1; i <= 4; i++) {
-            // addFormNb (inif,"General","FormularMahnung", "RGAFMahnung", i);
             OpCommon.addFormNb(inif, "General", "FormularMahnung", "RGAFMahnung", i, mahnParam, path2Templates);
         }
     }
@@ -117,25 +122,11 @@ public class OpRgAfIni {
         }
     }
 
-    /*
-     * private void addFormNb (INIFile inif,String section, String entry, String
-     * defaultName, int lfdNb){ if ( inif.getStringProperty(section,entry+lfdNb) !=
-     * null ){ mahnParam.put("formular"+lfdNb,
-     * getForm4aktIk(inif,section,entry+lfdNb)); }else{
-     * mahnParam.put("formular"+lfdNb, (String)
-     * progHome+"vorlagen/"+aktIK+"/"+defaultName+lfdNb+".ott" ); } }
-     * 
-     * private String getForm4aktIk(INIFile inif, String section, String entry){
-     * String forms = inif.getStringProperty(section,entry); if(forms.indexOf("/") >
-     * 0){ forms = forms.substring(forms.lastIndexOf("/")+1); } return
-     * progHome+"vorlagen/"+aktIK+"/"+forms; }
-     */
     private boolean valuesValid() {
-        int maxWait = 20;
-        int waitTimes = maxWait;
+        int waitTimes = 20;
         while ((!iniValuesValid) && (waitTimes-- > 1)) { // lesen aus ini ist noch nicht fertig...
             try {
-                Thread.sleep(25);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 ex.printStackTrace();
             }
@@ -181,8 +172,6 @@ public class OpRgAfIni {
 
     public int getVorauswahl(int max) {
         if (valuesValid()) {
-            // System.out.println("OpRgaf getVorauswahl: " + vorauswahlSuchkriterium +"(" +
-            // max + ")");
             return vorauswahlSuchkriterium < max ? vorauswahlSuchkriterium : 0;
         } else {
             // System.out.println("OpRgaf getVorauswahl: " + 0 +"(Abbruch ini-read)");
@@ -216,6 +205,7 @@ public class OpRgAfIni {
     }
 
     public void setVrCashAllowed(boolean value) {
+        valuesValid();
         allowCashInSalesReceipt = value;
     }
 
@@ -225,6 +215,7 @@ public class OpRgAfIni {
     }
 
     public void setVbCashAllowed(boolean value) {
+        valuesValid();
         allowCashSales = value;
     }
 
@@ -298,7 +289,7 @@ public class OpRgAfIni {
      * schreibt die zuletzt verwandten BarzahlungsEinstellungen (falls geändert) in
      * die oprgaf.ini
      */
-    public void saveLastCashSettings() {
+    public boolean saveLastCashSettings() {
         INIFile inif = INITool.openIni(path2IniFile, iniFile);
         String section = "offenePosten";
         boolean saveChanges = false;
@@ -313,21 +304,25 @@ public class OpRgAfIni {
             }
             if (saveChanges) {
                 INITool.saveIni(inif);
+                return true;
             }
         }
+        return false;
     }
 
     /**
      * schreibt die zuletzt verwandten Lock-Einstellungen (falls geändert) in die
      * oprgaf.ini
      */
-    public void saveLockSettings() {
+    public boolean saveLockSettings() {
         INIFile inif = INITool.openIni(path2IniFile, iniFile);
         String section = "offenePosten";
         if (settingsLocked != inif.getBooleanProperty(section, "lockSettings")) {
             inif.setBooleanProperty(section, "lockSettings", settingsLocked, "Aktualisieren der Eintraege gesperrt");
             INITool.saveIni(inif);
+            return true;
         }
+        return false;
     }
 
     private void writeSalesBon(INIFile inif) {
