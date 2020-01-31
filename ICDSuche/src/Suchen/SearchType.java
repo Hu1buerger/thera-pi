@@ -1,8 +1,8 @@
 package Suchen;
 
 public enum SearchType {
-    ICD(" ICD-10-Text","Code eingeben ->"),
-    TEXT(" ICD-10-Code","Text eingeben ->");
+    ICD(" ICD-10-Text zum Code","Code eingeben:"),
+    TEXT(" ICD-10-Code zum Text","Text eingeben:");
 
     String display;
     String label;

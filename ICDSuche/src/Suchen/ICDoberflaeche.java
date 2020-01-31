@@ -64,8 +64,8 @@ class ICDoberflaeche extends JXPanel {
         setOpaque(false);
 
         FormLayout layob1 = new FormLayout(
-                //  1  2   3     4     5     6    7     8      9 10   11 12  13    14    15   16
-                "10dlu,p,5dlu,60dlu,10dlu,55dlu,2dlu,50dlu:g,5dlu,p,15dlu,p,5dlu,30dlu,10dlu,0dlu",
+                //  1  2   3     4     5     6    7     8       9 10  11 12   13 14   15   16
+                "10dlu,p,2dlu,90dlu,10dlu,50dlu,2dlu,50dlu:g,10dlu,p,2dlu,p,15dlu,p,10dlu,0dlu",
                 // 1    2     3  4    5    6                 7    8                 9    10   11
                 "0dlu,0dlu,10dlu,p,10dlu,fill:0:grow(0.5),10dlu,fill:0:grow(0.5),10dlu,10dlu,0dlu");
         PanelBuilder builder = new PanelBuilder(layob1);
@@ -75,7 +75,7 @@ class ICDoberflaeche extends JXPanel {
 
         CellConstraints c1 = new CellConstraints();
 
-        JLabel lblsuche = new JLabel("Suche nach");
+        JLabel lblsuche = new JLabel("Suche");
         builder.add(lblsuche, c1.xy(2, 4));
         builder.add(getSucheNachCombobox(), c1.xy(4, 4));
 
@@ -83,10 +83,12 @@ class ICDoberflaeche extends JXPanel {
         lbltxt.setHorizontalAlignment(SwingConstants.RIGHT);
         builder.add(lbltxt, c1.xy(6, 4));
         builder.add(jTextSuchField, c1.xy(8, 4));
-        builder.add(getButtons(), c1.xy(10, 4));
         JLabel lbllimit = new JLabel("Limit");
-        builder.add(lbllimit, c1.xy(12, 4));
-        builder.add(getLimitCombo(), c1.xy(14, 4));
+        builder.add(lbllimit, c1.xy(10, 4));
+        builder.add(getLimitCombo(), c1.xy(12, 4));
+
+        builder.add(getButtons(), c1.xy(14, 4));
+
         builder.add(getTabelle(), c1.xyw(2, 6, 13));
         builder.add(getTextarea(), c1.xywh(2, 8, 13, 2));
 
@@ -129,7 +131,7 @@ class ICDoberflaeche extends JXPanel {
     }
 
     private JPanel getSucheNachCombobox() {
-        FormLayout comboboxPan = new FormLayout("60dlu:g", "p");
+        FormLayout comboboxPan = new FormLayout("90dlu:g", "p");
         PanelBuilder pcombox = new PanelBuilder(comboboxPan);
         pcombox.getPanel()
                .setOpaque(false);
@@ -144,7 +146,7 @@ class ICDoberflaeche extends JXPanel {
     }
 
     private JPanel getLimitCombo() {
-        FormLayout comboboxPan = new FormLayout("30dlu:g", "p");
+        FormLayout comboboxPan = new FormLayout("25dlu:g", "p");
         PanelBuilder pcombox = new PanelBuilder(comboboxPan);
         pcombox.getPanel()
                .setOpaque(false);
