@@ -567,6 +567,9 @@ public class Rezept {
     public int getAnzHB() {
         return getIntAt(64);
     }
+    public String getAnzHBS() {
+        return getStringAt(64);
+    }
 
     public void setAnzHB(String hb) {
         setIntAt(64, hb);
