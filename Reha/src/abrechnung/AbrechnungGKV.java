@@ -1370,7 +1370,7 @@ public class AbrechnungGKV extends JXPanel
             if (abrechnungsModus.equals(ABR_MODE_302)) {
                 try {
 
-                    f = new File(Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "esol0" + aktEsol
+                    f = new File(Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "tsol0" + aktEsol
                             + ".org");
                     fw = new FileWriter(f);
                     bw = new BufferedWriter(fw);
@@ -1410,7 +1410,7 @@ public class AbrechnungGKV extends JXPanel
 
                     doAuftragsDatei(originalSize, encryptedSize);
 
-                    f = new File(Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "esol0" + aktEsol
+                    f = new File(Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "tsol0" + aktEsol
                             + ".auf");
                     fw = new FileWriter(f);
                     bw = new BufferedWriter(fw);
@@ -1425,7 +1425,7 @@ public class AbrechnungGKV extends JXPanel
 
                 try {
                     if ("1".equals(SystemConfig.hmAbrechnung.get("hmaskforemail"))) {
-                        int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die Abrechnungsdatei esol0"
+                        int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie die Abrechnungsdatei tsol0"
                                 + aktEsol + " an die Adresse\n" + "--> " + ik_email + " <-- versenden?",
                                 "Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                         if (frage == JOptionPane.YES_OPTION) {
@@ -1436,7 +1436,7 @@ public class AbrechnungGKV extends JXPanel
                     }
 
                 } catch (Exception ex) {
-                    String meldung = "Die Dateien " + "esol0" + aktEsol + ".auf und " + "esol0" + aktEsol
+                    String meldung = "Die Dateien " + "tsol0" + aktEsol + ".auf und " + "tsol0" + aktEsol
                             + " sollten an die" + "Adresse " + ik_email + " gesendet werden.\n\n"
                             + "Versand ist fehlgeschlagen, bitte von Hand erneut senden";
                     JOptionPane.showMessageDialog(null, meldung);
@@ -1510,11 +1510,11 @@ public class AbrechnungGKV extends JXPanel
             boolean authx = (authent.equals("0") ? false : true);
             boolean bestaetigen = false;
             String[] encodedDat = {
-                    Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "esol0" + aktEsol,
-                    "esol0" + aktEsol };
+                    Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "tsol0" + aktEsol,
+                    "tsol0" + aktEsol };
             String[] aufDat = {
-                    Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "esol0" + aktEsol + ".auf",
-                    "esol0" + aktEsol + ".auf" };
+                    Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "tsol0" + aktEsol + ".auf",
+                    "tsol0" + aktEsol + ".auf" };
             ArrayList<String[]> attachments = new ArrayList<String[]>();
             attachments.add(encodedDat);
             attachments.add(aufDat);
@@ -1668,7 +1668,7 @@ public class AbrechnungGKV extends JXPanel
                     "123456", zertifikatVon.replace("IK", ""));
 
             NebraskaEncryptor encryptor = store.getEncryptor(ik_nutzer);
-            String inFile = Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "esol0" + aktEsol
+            String inFile = Path.Instance.getProghome() + "edifact/" + Reha.getAktIK() + "/" + "tsol0" + aktEsol
                     + ".org";
             long size = encryptor.encrypt(inFile, inFile.replace(".org", ""));
             return Integer.parseInt(Long.toString(size));
@@ -1685,7 +1685,7 @@ public class AbrechnungGKV extends JXPanel
     /***************************************************************/
     private void doAuftragsDatei(int originalSize, int encryptedSize) {
         auftragsBuf.append("500000" + "01" + "00000348" + "000");
-        auftragsBuf.append("ESOL0" + aktEsol);
+        auftragsBuf.append("TSOL0" + aktEsol);
         auftragsBuf.append("     ");
         auftragsBuf.append(
                 StringTools.fuelleMitZeichen(zertifikatVon.replace("IK", "")/* Reha.aktIK */, " ", false, 15));
@@ -1793,8 +1793,8 @@ public class AbrechnungGKV extends JXPanel
                                            .substring(2, 8)/* Reha.aktIK.substring(2,8) */
                 + "S" + getEdiMonat();
         unbBuf.append(abrDateiName + plus);
-        // unbBuf.append("0"+EOL); // Testdatei
-        unbBuf.append("2" + EOL);
+        unbBuf.append("0"+EOL); // Testdatei
+        //unbBuf.append("2" + EOL);
         // unbBuf.append(aktDfue+plus+"B"+plus+"SL"+Reha.aktIK.substring(2,8)+"S"+getEdiMonat()+plus+"2"+EOL);
 
         unbBuf.append("UNH+00001+SLGA:" + SlgaVersion + ":0:0" + EOL);
@@ -2028,7 +2028,7 @@ public class AbrechnungGKV extends JXPanel
         rechnungBuf.append("r_nummer='" + aktRechnung + "', ");
         rechnungBuf.append("r_datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ");
         rechnungBuf.append(
-                "r_kasse='" + hmKostentraeger.get("name1") + ", " + "esol0" + hmKostentraeger.get("aktesol") + "', ");
+                "r_kasse='" + hmKostentraeger.get("name1") + ", " + "tsol0" + hmKostentraeger.get("aktesol") + "', ");
         rechnungBuf.append("r_klasse='" + disziSelect.getCurrRezClass() + "', ");
         rechnungBuf.append("r_betrag='" + dfx.format(preis00[0])
                                              .replace(",", ".")
