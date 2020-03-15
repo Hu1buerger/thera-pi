@@ -170,6 +170,28 @@ public class NebraskaUtil {
         return result.toString();
     }
 
+    public static String decodeHashAlgorithm(String digestOrOID) {
+        String readable = null;
+        switch (digestOrOID) {
+        case "SHA1WithRSAEncryption":
+        case "1.3.14.3.2.26":
+            readable = "SHA-1";
+            break;
+        case "SHA256WithRSAEncryption":
+        case "2.16.840.1.101.3.4.2.1":
+            readable = "SHA-256";
+            break;
+        case "ENCRYPTION_RSA_PSS":
+        case "1.2.840.113549.1.1.10":
+            readable = "RSASSA-PSS";
+            break;
+        default:
+            readable = ("not decoded: " + digestOrOID);
+        }
+        return readable;
+    }
+
+
 //	public static void main(String args[]) {
 //		for(int i = 0; i < args.length; i++) {
 //			System.out.println("" + args[i] + " -> " + normalizeDnField(args[i]));

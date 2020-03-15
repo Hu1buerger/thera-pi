@@ -19,8 +19,12 @@
 	<classpathentry kind="lib" path="/Libraries/lib/openofficeorg/ag.ion.noa_2.2.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RehaCommon"/>
 	<classpathentry kind="lib" path="/Libraries/lib/bouncycastle/base-core.jar"/>
-	<classpathentry kind="lib" path="/Libraries/lib/bouncycastle/bcmail-jdk16-145.jar"/>
-	<classpathentry kind="lib" path="/Libraries/lib/bouncycastle/bcprov-ext-jdk16-145.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/bouncycastle/bcmail-jdk16-145.jar" sourcepath="/Libraries/src"/>
+	<classpathentry kind="lib" path="/Libraries/lib/bouncycastle/bcprov-ext-jdk16-145.jar" sourcepath="/Libraries/src">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/Libraries/doc/bouncycastle/bcprov-jdk16-1.45-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="lib" path="/Libraries/lib/swingx/pdf-renderer-1.0.5.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/swingx/swingx-1.6.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/itext/iText-2.1.6.jar"/>

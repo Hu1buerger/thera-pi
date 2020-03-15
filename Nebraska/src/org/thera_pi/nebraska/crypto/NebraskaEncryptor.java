@@ -48,7 +48,7 @@ public class NebraskaEncryptor {
     private PrivateKey senderKey;
     private CertStore certificateChain;
     private boolean encryptToSelf;
-    private boolean use256Hash;
+    private String signatureAlgorithm2use;
 
     public boolean isEncryptToSelf() {
         return encryptToSelf;
@@ -74,7 +74,7 @@ public class NebraskaEncryptor {
         senderKey = nebraskaKeystore.getSenderKey();
         senderCert = nebraskaKeystore.getSenderCertificate();
         certificateChain = nebraskaKeystore.getSenderCertChain();
-        use256Hash = nebraskaKeystore.is256Algorithm();
+        signatureAlgorithm2use = nebraskaKeystore.getCertSignatureAlgorithm(); 
     }
 
     /**
@@ -153,8 +153,21 @@ public class NebraskaEncryptor {
         // first processing step: sign data
 
         CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
-        generator.addSigner(senderKey, senderCert,
-                (use256Hash ? CMSSignedDataGenerator.DIGEST_SHA256 : CMSSignedDataGenerator.DIGEST_SHA1));
+        String digestOID = (getDigest());
+        switch (signatureAlgorithm2use) {
+        case "SHA1WithRSAEncryption":
+        case "1.3.14.3.2.26":
+        case "SHA256WithRSAEncryption":
+        case "2.16.840.1.101.3.4.2.1":
+            generator.addSigner(senderKey, senderCert, digestOID);
+            break;
+        case "SHA256WithRSAandMGF1":
+        case "1.2.840.113549.1.1.10":
+            generator.addSigner(senderKey, senderCert, CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, digestOID);
+            break;
+        default:
+           System.out.println("NebraskaEncryptor.getDigest: unknown SignatureAlgorithm: " + signatureAlgorithm2use);
+        }
 
         try {
             generator.addCertificatesAndCRLs(certificateChain);
@@ -221,6 +234,25 @@ public class NebraskaEncryptor {
         } catch (IOException e) {
             throw new NebraskaFileException(e);
         }
+    }
+
+    private String getDigest() {
+        String retVal = CMSSignedDataGenerator.DIGEST_SHA256;
+        switch (signatureAlgorithm2use) {
+        case "SHA1WithRSAEncryption":
+        case "1.3.14.3.2.26":
+            retVal = CMSSignedDataGenerator.DIGEST_SHA1;
+            break;
+        case "SHA256WithRSAEncryption":
+        case "2.16.840.1.101.3.4.2.1":
+        case "SHA256WithRSAandMGF1":    // Hash ist auch SHA256
+        case "1.2.840.113549.1.1.10":
+            // default bleibt
+            break;
+        default:
+           System.out.println("NebraskaEncryptor.getDigest: unknown SignatureAlgorithm: " + signatureAlgorithm2use + ", use default");
+        }
+        return retVal;
     }
 
 }

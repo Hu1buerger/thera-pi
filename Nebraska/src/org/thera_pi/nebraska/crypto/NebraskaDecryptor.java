@@ -64,7 +64,6 @@ public class NebraskaDecryptor {
         issuer = certificate.getIssuerDN()
                             .getName();
         serial = certificate.getSerialNumber();
-        nebraskaKeystore.is256Algorithm();
     }
 
     /**

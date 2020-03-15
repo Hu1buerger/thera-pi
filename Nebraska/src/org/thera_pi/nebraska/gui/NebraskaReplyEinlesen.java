@@ -1,6 +1,7 @@
 package org.thera_pi.nebraska.gui;
 
 import java.awt.Color;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -37,6 +38,8 @@ public class NebraskaReplyEinlesen extends JDialog {
     private JButton[] actionbuts = { null, null };
     private JButton[] buts = { null, null };
     private NebraskaZertAntrag eltern;
+    private String RECEIVER_KEY_FILE = "annahme-rsa4096.key";
+    private String receiverKeyFile2use = RECEIVER_KEY_FILE;
 
     public NebraskaReplyEinlesen(NebraskaZertAntrag xeltern) {
         super();
@@ -139,36 +142,39 @@ public class NebraskaReplyEinlesen extends JDialog {
     }
 
     private void doReplywahl() {
-        String replykurz = eltern.getIK()
-                                 .substring(0, 8)
-                + ".p7c";
-        System.out.println("Replyfile = " + replykurz);
-        File f = new File(this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/" + replykurz);
-        if (!f.exists()) {
-            replyfile.setText("keine Reply-Datei ausgewählt....");
+        String ik = eltern.getIK();
+        String replykurz = ik.substring(0, 8) + ".";
+        String location = (this.eltern.therapidir + "/keystore/"  + ik);
+        File folderToScan = new File(location); 
+        String replyFileName = "";
+
+        File[] listOfFiles = folderToScan.listFiles();
+        List foundFiles = new List();
+
+        for (int i = 0; i < listOfFiles.length; i++) {
+            if (listOfFiles[i].isFile()) {
+                replyFileName = listOfFiles[i].getName();
+                if (replyFileName.startsWith(replykurz)         // findet sowohl 12345678.p7c
+                        && replyFileName.endsWith(".p7c")) {    // als auch 12345678.654321.p7c (neu)
+                    foundFiles.add(replyFileName);
+                    System.out.println("Replyfile = " + replyFileName);
+                }
+            }
+        }
+        if (foundFiles.getItemCount() > 1) {
             JOptionPane.showMessageDialog(null,
-                    "Fehler:  die Datei " + replykurz
-                            + " und(!) die Datei annahme-sha256.key\nmüssen sich im Verzeichnis "
-                            + this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/befinden");
+                    "Fehler:  \nEs darf sich nur eine Zertifikatrequest-Antwortdatei (*.p7c) \nim Verzeichnis "
+                            + location + " befinden!");
             return;
         }
-        f = new File(this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/annahme-sha256.key");
-        if (!f.exists()) {
-            replyfile.setText("keine Reply-Datei ausgewählt....");
-            JOptionPane.showMessageDialog(null, "Fehler:  die Datei annahme-sha256.key muß sich im Verzeichnis\n "
-                    + this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/befinden");
+        File f = new File(location + "/" + receiverKeyFile2use);
+        if ((foundFiles.getItemCount() == 0) || (!f.exists())) {
+            JOptionPane.showMessageDialog(null, 
+                    "Fehler: \nDie Zertifikatrequest-Antwortdatei (*.p7c) und(!) die Datei " + receiverKeyFile2use
+                            + "\nmüssen sich im Verzeichnis " + location + " befinden!");
             return;
         }
-        /*
-         * String reply =
-         * FileStatics.dirChooser(this.eltern.therapidir+"/keystore/"+eltern.getIK(),
-         * "Reply-Datei auswählen (.p7c-Datei)"); if(reply==null){return;} reply =
-         * reply.replace("\\", "/"); if(reply.trim().equals("")){
-         * System.out.println("Replyfile = "+reply);
-         * replyfile.setText("keine Reply-Datei ausgewählt...."); }else{
-         * replyfile.setText(reply); }
-         */
-        replyfile.setText(this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/" + replykurz);
+        replyfile.setText(location + "/" + foundFiles.getItem(0));
     }
 
     /*
@@ -280,7 +286,7 @@ public class NebraskaReplyEinlesen extends JDialog {
             nebraskastore.importCertificateReply(requestfile);
             System.out.println("fertig mit dem Reply-Import");
             nebraskastore.importReceiverCertificates(
-                    this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/annahme-sha256.key");
+                    this.eltern.therapidir + "/keystore/" + eltern.getIK() + "/" + receiverKeyFile2use);
             System.out.println("fertig mit Import der Datenannahmestellen");
             JOptionPane.showMessageDialog(null,
                     "<html>Glückwunsch - die Zertifikatsdatenbank wurde erfolgreich erstellt"

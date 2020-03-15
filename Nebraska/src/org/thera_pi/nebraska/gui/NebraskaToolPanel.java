@@ -2,8 +2,10 @@ package org.thera_pi.nebraska.gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Vector;
@@ -15,6 +17,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
+import org.bouncycastle.cms.CMSSignedDataGenerator;
 import org.jdesktop.swingx.JXPanel;
 import org.thera_pi.nebraska.crypto.NebraskaCryptoException;
 import org.thera_pi.nebraska.crypto.NebraskaFileException;
@@ -43,6 +46,9 @@ public class NebraskaToolPanel extends JXPanel {
     SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
     JLabel dateilabel = null;
     String annahmekey;
+    private String RECEIVER_KEY_FILE_2048 = "annahme-sha256.key";
+    private String RECEIVER_KEY_FILE_4096 = "annahme-rsa4096.key";
+    private String receiverKeyFile2use = RECEIVER_KEY_FILE_2048;
 
     public NebraskaToolPanel(NebraskaJTabbedPaneOrganizer xeltern) {
         super();
@@ -60,7 +66,7 @@ public class NebraskaToolPanel extends JXPanel {
           .setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         pb.addSeparator("Zertifikate nach Gültikeitsdatum löschen (gültig bis)", c1.xyw(2, 2, 2));
         pb.add(getAbschnitt1(), c1.xyw(2, 4, 2));
-        pb.addSeparator("Neue Zertifikate der Datenannahmestellen einlesen (annahme-pkcs.key bzw. annahme-sha256.key)",
+        pb.addSeparator("Neue Zertifikate der Datenannahmestellen einlesen (Nebraska wählt den Dateinamen passend zur Länge des eigenen Schlüssels)",
                 c1.xyw(2, 6, 2));
         pb.add(getAbschnitt2(), c1.xyw(2, 8, 2));
 
@@ -114,7 +120,7 @@ public class NebraskaToolPanel extends JXPanel {
             a1.getPanel()
               .setOpaque(false);
             CellConstraints c2 = new CellConstraints();
-            JLabel lbl0 = new JLabel("Datei für Datenannahmest. wählen");
+            JLabel lbl0 = new JLabel("  Button betätigen zum");
             a1.add(lbl0, c2.xy(2, 1));
             buts[1] = ButtonTools.macheBut("Datei wählen", "selectannahme", al);
             a1.add(buts[1], c2.xy(4, 1));
@@ -152,14 +158,21 @@ public class NebraskaToolPanel extends JXPanel {
         };
     }
 
-    private void readAnnahme() {
+    private boolean chkMandantSelectionOK () {
         if (eltern.zertExplorer.jcombo.getSelectedItem()
                                       .toString()
                                       .trim()
                                       .length() != 11) {
-            JOptionPane.showMessageDialog(null, "Wählen Sie zuerst auf der Seite Zertifikate auswerten...\n"
-                    + "\neinen gültigen Mandanten (IK) aus");
+            JOptionPane.showMessageDialog(null, "Bitte wählen Sie zuerst auf der Seite Zertifikate auswerten...\n"
+                    + "\neinen gültigen Mandanten (IK) aus!");
             eltern.jtb.setSelectedIndex(0);
+            return false;
+        }
+        return true;
+    }
+
+    private void readAnnahme() {
+        if (!chkMandantSelectionOK()) {
             return;
         }
         if (!this.dateilabel.getText()
@@ -181,28 +194,43 @@ public class NebraskaToolPanel extends JXPanel {
     }
 
     private void selectAnnahme() {
-        if (eltern.zertExplorer.jcombo.getSelectedItem()
-                                      .toString()
-                                      .trim()
-                                      .length() != 11) {
-            JOptionPane.showMessageDialog(null, "Wählen Sie zuerst auf der Seite Zertifikate auswerten...\n"
-                    + "\neinen gültigen Mandanten (IK) aus");
-            eltern.jtb.setSelectedIndex(0);
+        if (!chkMandantSelectionOK()) {
             return;
         }
-        String ikdir = eltern.zertExplorer.jcombo.getSelectedItem()
+        String ikDir = eltern.zertExplorer.jcombo.getSelectedItem()
                                                  .toString()
                                                  .substring(2);
-        annahmekey = FileStatics.dirChooser(eltern.zertAntrag.therapidir + "/keystore/" + ikdir, "Datei auswählen");
-        annahmekey = annahmekey.replace("\\", "/");
-        System.out.println(annahmekey);
-        if (annahmekey.endsWith("annahme-pkcs.key") || annahmekey.endsWith("annahme-sha256.key")) {
-            this.dateilabel.setText("Datei = o.k.");
-            dateilabel.setForeground(Color.BLUE);
-        } else {
+        String location = (this.eltern.zertAntrag.therapidir + "/keystore/" + ikDir);
+        location = location.replace("\\", "/");
+
+        // Dateinamen anhand des eig. Zertifikats bestimmen
+        int keyLen = eltern.zertExplorer.keystore.getOwnCertLength();
+        switch (keyLen) {
+        case 2048:
+            receiverKeyFile2use = RECEIVER_KEY_FILE_2048;
+            break;
+        case 4096:
+            receiverKeyFile2use = RECEIVER_KEY_FILE_4096;
+            break;
+        default:
+            System.out.println("NebraskaToolPanel.selectAnnahme(): unknown key lenght found: " + keyLen
+                    + ", use default receiverKeyFile: " + receiverKeyFile2use);
+        }
+
+        System.out.println("NebraskaToolPanel receiverKeyFile2use: " + receiverKeyFile2use);
+        annahmekey = (location + "/" + receiverKeyFile2use);
+        File f = new File(annahmekey);
+        if (!f.exists()) {
+            JOptionPane.showMessageDialog(null, "Fehler: \nDie Datei " + receiverKeyFile2use
+                    + "\nmuß sich im Verzeichnis " + location + " befinden!");
             this.dateilabel.setText("Datei = nicht o.k.!");
             dateilabel.setForeground(Color.RED);
+            return;
         }
+
+        System.out.println(annahmekey);
+        this.dateilabel.setText("Datei = o.k.");
+        dateilabel.setForeground(Color.BLUE);
     }
 
     /*******************

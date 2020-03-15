@@ -31,6 +31,7 @@ import org.thera_pi.nebraska.crypto.NebraskaEncryptor;
 import org.thera_pi.nebraska.crypto.NebraskaFileException;
 import org.thera_pi.nebraska.crypto.NebraskaKeystore;
 import org.thera_pi.nebraska.crypto.NebraskaNotInitializedException;
+import org.thera_pi.nebraska.crypto.NebraskaUtil;
 import org.thera_pi.nebraska.gui.utils.ButtonTools;
 import org.thera_pi.nebraska.gui.utils.FileStatics;
 import org.thera_pi.nebraska.gui.utils.JRtaCheckBox;
@@ -262,49 +263,44 @@ public class NebraskaZertExplorer extends JXPanel implements ListSelectionListen
         }
         String ik = tab.getValueAt(row, 0)
                        .toString();
+        String ikStoreOwner = jcombo.getSelectedItem()
+                                    .toString()
+                                    .trim();
+        String ikSelectedRow = null;
         if (tabmod.getRowCount() > 0) {
             Vector<X509Certificate> certs = keystore.getAllCerts();
             for (int i = 0; i < certs.size(); i++) {
                 try {
-                    if (ik.equals(certs.get(i)
-                                       .getSubjectDN()
-                                       .toString()
-                                       .split(",")[3].split("=")[1])
-                            && !ik.equals(jcombo.getSelectedItem()
-                                                .toString()
-                                                .trim())) {
-                        ((NebraskaJTabbedPaneOrganizer) this.getParent()
-                                                            .getParent()).setAlgText(
-                                                                    "Hash-Algorithmus Zertifikat " + ik + ": "
-                                                                            + (certs.get(i)
-                                                                                    .getSigAlgName()
-                                                                                    .toString()
-                                                                                    .equals("SHA256WithRSAEncryption")
-                                                                                            ? "SHA-256"
-                                                                                            : "SHA-1"));
-
-                    } else if (ik.equals(certs.get(i)
-                                              .getSubjectDN()
-                                              .toString()
-                                              .split(",")[3].split("=")[1])
-                            && ik.equals(jcombo.getSelectedItem()
-                                               .toString()
-                                               .trim())) {
-                        ((NebraskaJTabbedPaneOrganizer) this.getParent()
-                                                            .getParent()).setAlgText(
-                                                                    "Hash-Algorithmus eigenes Zertifikat: "
-                                                                            + (certs.get(i)
-                                                                                    .getSigAlgName()
-                                                                                    .toString()
-                                                                                    .equals("SHA256WithRSAEncryption")
-                                                                                            ? "SHA-256"
-                                                                                            : "SHA-1"));
+                    String hashAlgorithm = NebraskaUtil.decodeHashAlgorithm(certs.get(i)
+                                                                                 .getSigAlgName()
+                                                                                 .toString());
+                    ikSelectedRow = certs.get(i)
+                                         .getSubjectDN()
+                                         .toString()
+                                         .split(",")[3].split("=")[1];
+                    if (ik.equals(ikSelectedRow)) {
+                        if (ik.equals(ikStoreOwner)) {
+                            showHash(ik, hashAlgorithm, true);
+                        } else {
+                            showHash(ik, hashAlgorithm, false);
+                        }
                     }
                 } catch (Exception ex) {
                 }
             }
         }
 
+    }
+
+    private void showHash(String ik, String hashAlgorithm, boolean ownCert) {
+        String show = "Hash-Algorithmus ";
+        if (ownCert) {
+            show = (show + "eigenes Zertifikat:  ");
+        } else {
+            show = (show + "Zertifikat von " + ik + ":  ");
+        }
+        ((NebraskaJTabbedPaneOrganizer) this.getParent()
+                .getParent()).setAlgText(show + hashAlgorithm);
     }
 
     public void erstTest() {
@@ -367,15 +363,10 @@ public class NebraskaZertExplorer extends JXPanel implements ListSelectionListen
                             tabmod.addRow((Vector<?>) vec.clone());
                             ownCertOk = true;
                             try {
-                                ((NebraskaJTabbedPaneOrganizer) this.getParent()
-                                                                    .getParent()).setAlgText(
-                                                                            "Hash-Algorithmus eigenes Zertifikat: "
-                                                                                    + (certs.get(i)
-                                                                                            .getSigAlgName()
-                                                                                            .toString()
-                                                                                            .equals("SHA256WithRSAEncryption")
-                                                                                                    ? "SHA-256"
-                                                                                                    : "SHA-1"));
+                                String hashAlgorithm = NebraskaUtil.decodeHashAlgorithm(certs.get(i)
+                                                                                             .getSigAlgName()
+                                                                                             .toString());
+                                showHash(ik, hashAlgorithm, true);
                             } catch (Exception ex) {
                             }
                         }

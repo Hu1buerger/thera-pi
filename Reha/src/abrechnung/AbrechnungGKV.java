@@ -627,6 +627,10 @@ public class AbrechnungGKV extends JXPanel
                         return null;
                     }
                     treeKasse.setEnabled(true);
+                    String kassenName = vecKassen.get(0)
+                                                 .get(0)
+                                                 .trim()
+                                                 .toUpperCase();
                     String ktraeger = vecKassen.get(0)
                                                .get(1)
                                                .trim();
@@ -636,14 +640,16 @@ public class AbrechnungGKV extends JXPanel
                     String ikpapier = vecKassen.get(0)
                                                .get(4)
                                                .trim();
-                    String kas = getKassenName(ikkasse);
+                    if (!ikkasse.isEmpty()) {
+                        kassenName = getKassenName(ikkasse);
+                    }
                     existiertschon.add(ktraeger);
 //                    //customIconList.add(ktraeger); neee, der erste bleibt 'original'
 //                    toggleIcons = 0;
 //                    KeepIkPap myIkPap = new KeepIkPap(ikpapier);
 
                     int aeste = 0;
-                    KnotenObjekt newNode = astAnhaengen(kas, ktraeger, ikkasse, ikpapier).getObject();
+                    KnotenObjekt newNode = astAnhaengen(kassenName, ktraeger, ikkasse, ikpapier).getObject();
                     rezepteAnhaengen(aeste);
                     /*
                      * System.out.println(ktraeger);
@@ -664,9 +670,9 @@ public class AbrechnungGKV extends JXPanel
                             ikpapier = vecKassen.get(i)
                                                 .get(4)
                                                 .trim();
-                            kas = getKassenName(ikkasse);
+                            kassenName = getKassenName(ikkasse);
                             existiertschon.add(ktraeger);
-                            astAnhaengen(kas, ktraeger, ikkasse, ikpapier);
+                            astAnhaengen(kassenName, ktraeger, ikkasse, ikpapier);
                             rezepteAnhaengen(aeste);
                             aeste++;
 
