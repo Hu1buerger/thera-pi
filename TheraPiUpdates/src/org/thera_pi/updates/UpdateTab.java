@@ -5,40 +5,24 @@ import java.awt.BorderLayout;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.apache.commons.net.ftp.FTPFile;
-import org.jdesktop.swingx.JXHeader;
 import org.jdesktop.swingx.JXPanel;
-import org.jdesktop.swingx.JXTitledPanel;
 
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
-public class UpdateTab extends JXPanel implements ChangeListener {
+public class UpdateTab extends JXPanel {
 
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
-    TheraPiUpdates eltern;
-    JTabbedPane updateTab = null;
-    public JXTitledPanel jxTitel;
-    public JXHeader jxh;
-    UpdatePanel tab1 = null;
-    JXPanel tab2 = null;
-    JXPanel tab3 = null;
-    JXPanel tab4 = null;
+    private UpdatePanel tab1 ;
 
-    UpdateTab(TheraPiUpdates xeltern, JFrame jFrame) {
+    UpdateTab(JFrame jFrame) {
         super();
-        eltern = xeltern;
         setLayout(new BorderLayout());
         setBorder(BorderFactory.createRaisedBevelBorder());
-        updateTab = new JTabbedPane();
+        JTabbedPane updateTab = new JTabbedPane();
         updateTab.setUI(new WindowsTabbedPaneUI());
-        tab1 = new UpdatePanel(eltern, jFrame, this);
-        tab2 = new EntwicklerPanel(eltern, this);
+        tab1 = new UpdatePanel(jFrame);
+        JXPanel tab2 = new EntwicklerPanel(this);
         updateTab.add("<html>Anwenderseite</html>", tab1);
         updateTab.add("<html>Entwicklerseite</html>", tab2);
 
@@ -48,17 +32,8 @@ public class UpdateTab extends JXPanel implements ChangeListener {
 
     public void starteFTP() {
         tab1.starteFTP();
-
     }
 
-    public void activateUpdateCheck() {
-        tab1.doUpdateCheck();
-    }
-
-    @Override
-    public void stateChanged(ChangeEvent arg0) {
-
-    }
 
     public FTPFile[] getFilesFromUpdatePanel() {
         return tab1.ffile;

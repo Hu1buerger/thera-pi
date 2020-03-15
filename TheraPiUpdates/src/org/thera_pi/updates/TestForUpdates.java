@@ -6,17 +6,22 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTPFile;
+
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 
 import CommonTools.INIFile;
 import environment.Path;
 
 public class TestForUpdates {
 
-    private static Vector<Vector<String>> updatefiles = new Vector<Vector<String>>();
-    private static Vector<String[]> mandvec = new Vector<String[]>();
+    private static final Logger LOG = LoggerFactory.getLogger(TestForUpdates.class);
+
+    private static Vector<Vector<String>> updatefiles = new Vector<>();
+    private static Vector<String[]> mandvec = new Vector<>();
 
     public TestForUpdates() {
         try {
@@ -26,43 +31,22 @@ public class TestForUpdates {
         }
     }
 
-    /*******************/
-
-    /*******************/
     private void doHoleUpdateConfSilent() {
-
         try {
-
             FTPTools ftpt = new FTPTools();
-
-            ftpt.holeDateiSilent("update.files", Path.Instance.getProghome(), false);
-
+            ftpt.holeDateiSilent("update.files", Path.Instance.getProghome());
             updateCheck(Path.Instance.getProghome() + "update.files");
-
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("", ex);
         }
-
-        /*
-         * 
-         * try{
-         * 
-         * FTPTools ftpt = new FTPTools(); ftpt.holeDateiSilent("update.files",
-         * UpdateConfig.getProghome(), false); updateCheck(UpdateConfig.getProghome() +
-         * "update.files"); }catch(Exception ex){ ex.printStackTrace(); }
-         */
-
     }
 
     public boolean doFtpTest() {
-        // System.out.println("doFtpTest");
-
         FTPTools ftpt = new FTPTools();
         FTPFile[] ffile = ftpt.holeDatNamen();
         for (int i = 0; i < ffile.length; i++) {
             try {
                 String name = ffile[i].getName()
-                                      .toString()
                                       .trim();
                 if ((!name.equals(".")) && (!name.equals("..")) && (!name.startsWith("update."))) {
                     if (mussUpdaten(name, ffile[i].getTimestamp()
@@ -73,8 +57,8 @@ public class TestForUpdates {
                     }
                 }
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Fehler beim Bezug der Datei Nr. " + Integer.toString(i + 1));
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Fehler beim Bezug der Datei Nr. " + (i + 1));
+                LOG.error("Fehler beim Bezug der Datei Nr. " + (i + 1), ex);
             }
         }
         ftpt.connectTest();
@@ -83,31 +67,21 @@ public class TestForUpdates {
 
     private boolean mussUpdaten(String datei, Long datum) {
         try {
-            File f = null;
-            // JOptionPane.showMessageDialog(null, "Vector-Size = "+updatefiles.size());
-            for (int i = 0; i < updatefiles.size(); i++) {
-                if (updatefiles.get(i)
-                               .get(0)
-                               .equals(datei)) {
-                    f = new File(updatefiles.get(i)
-                                            .get(1));
+            File f;
+            for (Vector<String> updatefile : updatefiles) {
+                if (updatefile.get(0)
+                              .equals(datei)) {
+                    f = new File(updatefile.get(1));
                     if (!f.exists()) {
-                        // System.out.println("Datei existiert nicht: " + datei);
-                        // JOptionPane.showMessageDialog(null, "Es muß updated werden-1");
                         return true;
                     }
                     if (f.lastModified() < datum) {
-                        // System.out.println("Zeitunterschied = "+(f.lastModified()-datum));
-                        // System.out.println(datumsFormat.format(f.lastModified()));
-                        // System.out.println(datumsFormat.format(datum));
-                        // JOptionPane.showMessageDialog(null, "Es muß updated werden-2");
                         return true;
                     }
                 }
             }
-            // System.out.println("Zeitunterschied = "+(f.lastModified()-datum));
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("", ex);
         }
         return false;
     }
@@ -116,18 +90,15 @@ public class TestForUpdates {
     private void updateCheck(String xupdatefile) {
 
         String updatedir = "";
-        String zeile = "";
-        FileReader reader = null;
-        BufferedReader in = null;
+        String zeile;
 
-        /************************/
         INIFile inif = new INIFile(Path.Instance.getProghome() + "ini/mandanten.ini");
         try {
             int AnzahlMandanten = inif.getIntegerProperty("TheraPiMandanten", "AnzahlMandanten");
             for (int i = 0; i < AnzahlMandanten; i++) {
                 String[] mand = { null, null };
-                mand[0] = new String(inif.getStringProperty("TheraPiMandanten", "MAND-IK" + (i + 1)));
-                mand[1] = new String(inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + (i + 1)));
+                mand[0] = inif.getStringProperty("TheraPiMandanten", "MAND-IK" + (i + 1));
+                mand[1] = inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + (i + 1));
                 mandvec.add(mand);
             }
 
@@ -135,27 +106,16 @@ public class TestForUpdates {
             ex.printStackTrace();
         }
 
-        /************************/
-        try {
-            Vector<String> dummy = new Vector<String>();
-            zeile = "";
-            reader = new FileReader(xupdatefile);
-            in = new BufferedReader(reader);
-            // String pfad = "";
-            String[] sourceAndTarget = { null, null };
-            Vector<Object> targetvec = new Vector<Object>();
+        try (FileReader reader = new FileReader(xupdatefile); BufferedReader in = new BufferedReader(reader)) {
+            Vector<String> dummy = new Vector<>();
+
+            String[] sourceAndTarget;
+            Vector<Object> targetvec = new Vector<>();
             while ((zeile = in.readLine()) != null) {
                 if (!zeile.startsWith("#")) {
                     if (zeile.length() > 5) {
                         sourceAndTarget = zeile.split("@");
-                        // System.out.println(zeile);
-                        // System.out.println(sourceAndTarget[0].trim());
-                        // System.out.println(sourceAndTarget[1].trim().replace("%proghome%",
-                        // proghome));
-                        // System.out.println(sourceAndTarget.length);
                         if (sourceAndTarget.length == 2) {
-                            // nur dann Dateien eintrgen
-                            // pfad = zeile;
                             if (sourceAndTarget[1].contains("%proghome%")) {
                                 dummy.clear();
                                 dummy.add(updatedir + sourceAndTarget[0].trim());
@@ -163,19 +123,19 @@ public class TestForUpdates {
                                                             .replace("%proghome%", Path.Instance.getProghome())
                                                             .replace("//", "/"));
                                 if (!targetvec.contains(dummy.get(1))) {
-                                    targetvec.add(new String(dummy.get(1)));
-                                    updatefiles.add(new Vector<String>(dummy));
+                                    targetvec.add(dummy.get(1));
+                                    updatefiles.add(new Vector<>(dummy));
                                 }
                             } else if (sourceAndTarget[1].contains("%userdir%")) {
                                 String home = sourceAndTarget[1].trim()
                                                                 .replace("%userdir%", Path.Instance.getProghome())
                                                                 .replace("//", "/");
-                                for (int i = 0; i < mandvec.size(); i++) {
+                                for (String[] strings : mandvec) {
                                     dummy.clear();
                                     dummy.add(updatedir + sourceAndTarget[0].trim());
-                                    dummy.add(home.replace("%mandantik%", mandvec.get(i)[0]));
+                                    dummy.add(home.replace("%mandantik%", strings[0]));
                                     if (!targetvec.contains(dummy.get(1))) {
-                                        updatefiles.add(new Vector<String>(dummy));
+                                        updatefiles.add(new Vector<>(dummy));
                                     }
                                 }
                             }
@@ -184,20 +144,14 @@ public class TestForUpdates {
                     }
                 }
             }
-            in.close();
-            reader.close();
             if (updatefiles.size() > 0) {
-                // System.out.println(updatefiles);
-                System.out.println("Anzahl Update-Dateien = " + updatefiles.size());
-                // kopiereUpdate();
+                LOG.debug("Anzahl Update-Dateien = " + updatefiles.size());
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Fehler beim Bezug der Update-Informationen.\nBitte informieren Sie den Administrator umgehend",
+                    e);
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Bezug der Update-Informationen.\nBitte informieren Sie den Administrator umgehend");
         }
     }
-
-    /************************************************************************/
-
 }

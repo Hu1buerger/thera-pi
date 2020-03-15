@@ -15,13 +15,9 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 public class UpdateDlg extends JDialog {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = -2903001967749371315L;
+
     private JLabel textlab;
-    private JLabel bildlab;
-    Font font = new Font("Arial", Font.PLAIN, 12);
+    private Font font = new Font("Arial", Font.PLAIN, 12);
 
     public UpdateDlg() {
         super();
@@ -42,7 +38,7 @@ public class UpdateDlg extends JDialog {
                 "fill:0:grow(0.5),p,15dlu,p,fill:0:grow(0.5)");
         jpan.setLayout(lay);
         CellConstraints cc = new CellConstraints();
-        bildlab = new JLabel(" ");
+        JLabel bildlab = new JLabel(" ");
         bildlab.setIcon(new ImageIcon(TheraPiUpdates.imgtporg));
         jpan.add(bildlab, cc.xy(2, 2));
         textlab = new JLabel(" ");

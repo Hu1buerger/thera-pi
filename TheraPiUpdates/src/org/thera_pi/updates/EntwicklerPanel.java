@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 
 import javax.swing.JButton;
@@ -28,26 +26,20 @@ import com.jgoodies.forms.layout.FormLayout;
 import environment.Path;
 
 public class EntwicklerPanel extends JXPanel implements ActionListener {
-    /**
-     * 
-     */
-    private static final long serialVersionUID = 1L;
 
-    private UpdateTab updateTab = null;
+    private UpdateTab updateTab;
     private JPasswordField pw = null;
     private JTextArea talog = null;
     private JTextArea tafiles = null;
     private JLabel uploadfile = null;
     private JButton hochladen = null;
-    private JButton dateiwahl = null;
-    private JButton beenden = null;
 
     private String updatepfad = null;
     private String updatedatei = null;
     private JProgressBar pbar = null;
     private String entwicklerpw = "therapi1updates2";
 
-    EntwicklerPanel(TheraPiUpdates xeltern, UpdateTab xupdatetab) {
+    EntwicklerPanel(UpdateTab xupdatetab) {
         super();
         updateTab = xupdatetab;
         setLayout(new BorderLayout());
@@ -69,12 +61,10 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         pw = new JPasswordField();
         jpan.add(pw, cc.xy(4, 2));
 
-        // jpan.add(new JLabel("Update-Datei wählen"),cc.xy(2,
-        // 4,CellConstraints.RIGHT,CellConstraints.DEFAULT));
         uploadfile = new JLabel(" ");
         uploadfile.setForeground(Color.BLUE);
         jpan.add(uploadfile, cc.xy(4, 4));
-        dateiwahl = new JButton("Datei wählen");
+        JButton dateiwahl = new JButton("Datei wählen");
         dateiwahl.setActionCommand("datwahl");
         dateiwahl.addActionListener(this);
         jpan.add(dateiwahl, cc.xy(2, 4));
@@ -84,7 +74,6 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         talog.setFont(new Font("Courier", Font.PLAIN, 12));
         talog.setLineWrap(true);
         talog.setWrapStyleWord(true);
-        // talog.setEditable(false);
         talog.setBackground(Color.WHITE);
         talog.setForeground(Color.BLUE);
         JScrollPane jscr = JCompTools.getTransparentScrollPane(talog);
@@ -96,7 +85,6 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         tafiles.setFont(new Font("Courier", Font.PLAIN, 12));
         tafiles.setLineWrap(true);
         tafiles.setWrapStyleWord(true);
-        // tafiles.setEditable(false);
         tafiles.setBackground(Color.WHITE);
         tafiles.setForeground(Color.BLUE);
         jscr = JCompTools.getTransparentScrollPane(tafiles);
@@ -113,7 +101,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         jpan.add(hochladen, cc.xy(4, 12));
         hochladen.setEnabled(false);
 
-        beenden = new JButton("beenden");
+        JButton beenden = new JButton("beenden");
         beenden.setActionCommand("beenden");
         beenden.addActionListener(this);
         jpan.add(beenden, cc.xy(6, 12));
@@ -128,7 +116,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         if (cmd.equals("datwahl")) {
             new SwingWorker<Void, Void>() {
                 @Override
-                protected Void doInBackground() throws Exception {
+                protected Void doInBackground()   {
                     doDateiwahl();
                     return null;
                 }
@@ -137,7 +125,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         if (cmd.equals("hochladen")) {
             new SwingWorker<Void, Void>() {
                 @Override
-                protected Void doInBackground() throws Exception {
+                protected Void doInBackground()   {
                     doHochladen();
                     JOptionPane.showMessageDialog(null, "Update erfolgreich beendet");
                     return null;
@@ -178,10 +166,9 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         uploadfile.setText(updatepfad.replace("\\", "/"));
         FTPFile[] ffile = updateTab.getFilesFromUpdatePanel();
         boolean holeAltenLog = false;
-        for (int i = 0; i < ffile.length; i++) {
-            if (ffile[i].getName()
-                        .toString()
-                        .equals(updatedatei + ".log")) {
+        for (FTPFile ftpFile : ffile) {
+            if (ftpFile.getName()
+                    .equals(updatedatei + ".log")) {
                 holeAltenLog = true;
                 break;
             }
@@ -227,8 +214,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         return ftp.holeLogDateiSilent(logDatei);
     }
 
-    private String dateiDialog(String pfad) {
-        String sret = "";
+    private void dateiDialog(String pfad) {
         final JFileChooser chooser = new JFileChooser("Verzeichnis wählen");
         chooser.setDialogType(JFileChooser.OPEN_DIALOG);
         chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
@@ -236,18 +222,11 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
 
         chooser.setCurrentDirectory(file);
 
-        chooser.addPropertyChangeListener(new PropertyChangeListener() {
-            @Override
-            public void propertyChange(PropertyChangeEvent e) {
-                if (e.getPropertyName()
-                     .equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)
-                        || e.getPropertyName()
-                            .equals(JFileChooser.DIRECTORY_CHANGED_PROPERTY)) {
-                    // FIXME File f is a local variable and cannot be used anywhere else
-                    // final File f = (File) e.getNewValue();
-                }
+        chooser.addPropertyChangeListener(e -> {
+            if (!e.getPropertyName()
+                    .equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
+                e.getPropertyName();
             }
-
         });
         chooser.setVisible(true);
 
@@ -257,20 +236,17 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
             File inputVerzFile = chooser.getSelectedFile();
             updatepfad = inputVerzFile.getPath();
 
-            if (inputVerzFile.getName()
-                             .trim()
-                             .equals("")) {
+            if (inputVerzFile.getName().trim().equals("")) {
                 updatedatei = "";
             } else {
                 updatedatei = inputVerzFile.getName()
                                            .trim();
             }
         } else {
-            updatedatei = ""; // vorlagenname.setText(SystemConfig.oTerminListe.NameTemplate);
+            updatedatei = "";
         }
         chooser.setVisible(false);
 
-        return sret;
     }
 
 }

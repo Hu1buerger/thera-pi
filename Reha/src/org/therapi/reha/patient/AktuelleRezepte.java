@@ -1,4 +1,4 @@
-﻿package org.therapi.reha.patient;
+package org.therapi.reha.patient;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

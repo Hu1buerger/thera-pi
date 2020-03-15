@@ -3,10 +3,13 @@ package org.thera_pi.updates;
 import java.io.File;
 
 import CommonTools.INIFile;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 import crypt.Verschluesseln;
 import environment.Path;
 
 public class UpdateConfig {
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateConfig.class);
     private static final String NONRTASPEZIALSCHLUESSEL = "NurFuerRegistrierteUserjeLaengerJeBesserPasswortRehaVerwaltung";
     private String updateDir = "";
     private String updateHost = "";
@@ -14,17 +17,12 @@ public class UpdateConfig {
     private String updatePasswd = "";
     private boolean useActiveMode = false;
     private boolean developerMode = false;
-    private boolean checkUpdates = false;
-    public static boolean isrta = false;
 
     private static UpdateConfig instance = null;
 
     private static String proghome = Path.Instance.getProghome();
 
-    private UpdateConfig()
-
-    {
-
+    private UpdateConfig() {
         readIniFile();
     }
 
@@ -39,22 +37,18 @@ public class UpdateConfig {
 
         File f = new File(proghome + "ini/tpupdateneu.ini");
         if (f.exists()) {
-            UpdateConfig.isrta = false;
             INIFile ini = new INIFile(proghome + "/ini/tpupdateneu.ini");
 
             Verschluesseln man = Verschluesseln.getInstance(NONRTASPEZIALSCHLUESSEL);
-            ;
             updateHost = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateFTP"));
             updateDir = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateVerzeichnis"));
             updateUser = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateUser"));
             updatePasswd = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdatePasswd"));
-            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")) ? true : false);
-            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")) ? true : false);
-            checkUpdates = ("0".equals(ini.getStringProperty("TheraPiUpdates", "UpdateChecken")) ? false : true);
+            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")));
+            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")));
         } else {
-            UpdateConfig.isrta = true;
             INIFile ini = new INIFile(proghome + "/ini/tpupdate.ini");
-            System.out.println(ini.getFileName());
+            LOG.debug(ini.getFileName());
 
             updateHost = ini.getStringProperty("TheraPiUpdates", "UpdateFTP");
             updateDir = ini.getStringProperty("TheraPiUpdates", "UpdateVerzeichnis");
@@ -64,17 +58,14 @@ public class UpdateConfig {
             Verschluesseln man = Verschluesseln.getInstance();
 
             if (pw.length() <= 20) {
-                ini.setStringProperty("TheraPiUpdates", "UpdatePasswd", man.encrypt(String.valueOf(pw)), null);
+                ini.setStringProperty("TheraPiUpdates", "UpdatePasswd", man.encrypt(pw), null);
                 ini.save();
-                updatePasswd = String.valueOf(pw);
+                updatePasswd = pw;
             } else {
                 updatePasswd = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdatePasswd"));
             }
-            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")) ? true : false);
-            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")) ? true : false);
-            checkUpdates = ("0".equals(ini.getStringProperty("TheraPiUpdates", "UpdateChecken")) ? false : true);
-            // checkUpdates = ("1".equals(ini.getStringProperty("TheraPiUpdates", "IsRta"))
-            // ? true : false);
+            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")));
+            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")));
         }
     }
 
@@ -101,9 +92,4 @@ public class UpdateConfig {
     public boolean isDeveloperMode() {
         return developerMode;
     }
-
-    public boolean isCheckUpdates() {
-        return checkUpdates;
-    }
-
 }

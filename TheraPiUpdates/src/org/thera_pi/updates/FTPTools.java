@@ -1,30 +1,22 @@
 package org.thera_pi.updates;
 
-import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.SocketException;
+import java.io.*;
 
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTP;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 import org.apache.commons.net.ftp.FTPReply;
 
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
+
 public class FTPTools {
+    private static final Logger LOG = LoggerFactory.getLogger(SqlInfo.class);
     private FTPClient ftpClient = null;
-    // private static final int BUFFER_SIZE = 1024*1024;
     private static final int BUFFER_SIZE = 1024 * 8;
-    private org.apache.commons.net.ftp.FTPFile[] files;
+    private FTPFile[] files;
     private UpdateConfig updateConfig;
 
     public FTPTools() {
@@ -32,12 +24,8 @@ public class FTPTools {
             updateConfig = UpdateConfig.getInstance();
             ftpClient = new FTPClient();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception: ", ex);
         }
-        /*
-         * ftpClient.addProtocolCommandListener((ProtocolCommandListener) new
-         * PrintCommandListener( new PrintWriter(System.out)));
-         */
     }
 
     public FTPFile[] holeDatNamen() {
@@ -62,20 +50,12 @@ public class FTPTools {
 
             files = ftpClient.listFiles();
 
-        } catch (SocketException e1) {
-            // JOptionPane.showMessageDialog(null, "Exception-1\n"+e1.getMessage());
-            System.out.println("Exeption-1");
-            e1.printStackTrace();
-        } catch (IOException e2) {
-            // JOptionPane.showMessageDialog(null, "Exception-2\n"+e2.getMessage());
-            System.out.println("Exeption-2");
-            e2.printStackTrace();
-
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
         return files;
     }
 
-    /*****************************************************/
     public boolean holeDatei(String datfern, String vznah, boolean doprogress, final UpdatePanel eltern, long groesse) {
         try {
             if (ftpClient == null) {
@@ -93,31 +73,29 @@ public class FTPTools {
             } else {
                 ftpClient.enterLocalPassiveMode();
             }
-            // System.out.println("Entering Active-Mode = "+updateConfig.isUseActiveMode());
 
             ftpClient.setUseEPSVwithIPv4(true);
 
-            // System.out.println("Beziehe Daten über Port "+ftpClient.getLocalPort());
             try {
                 if (files == null) {
                     files = ftpClient.listFiles();
                 } else {
-                    System.out.println("files bereits eingelesen");
+                    LOG.debug("files bereits eingelesen");
                 }
 
                 // Untersuchen ob Datei vorhanden
 
                 long max = -1;
                 if (groesse < 0) {
-                    for (int i = 0; i < files.length; i++) {
-                        if (files[i].getName()
-                                    .equals(datfern)) {
-                            max = files[i].getSize();
-                            System.out.println(files[i].getName());
+                    for (FTPFile file : files) {
+                        if (file.getName()
+                                .equals(datfern)) {
+                            max = file.getSize();
+                            LOG.debug(file.getName());
                         }
                     }
                 } else {
-                    max = Long.valueOf(groesse);
+                    max = groesse;
                 }
                 if (max < 0) {
                     ftpClient.logout();
@@ -125,22 +103,12 @@ public class FTPTools {
                     return false;
                 }
 
-                // ftpClient.setFileType(FTP.ASCII_FILE_TYPE);
                 ftpClient.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
+                InputStream uis = ftpClient.retrieveFileStream(datfern);
+                FileOutputStream fos = new FileOutputStream(vznah + /* "test/"+ */datfern);
 
-                InputStream uis = null;
-                uis = ftpClient.retrieveFileStream(datfern);
-
-                // System.out.println("**********************available**********************
-                // "+max+" Bytes");
-
-                FileOutputStream fos = null;
-                fos = new FileOutputStream(vznah + /* "test/"+ */datfern);
-
-                int n = 0;
+                int n;
                 byte[] buf = new byte[BUFFER_SIZE];
-
-                int gesamt = 0;
 
                 if (doprogress) {
                     eltern.pbar.setMinimum(0);
@@ -148,47 +116,34 @@ public class FTPTools {
                 }
 
                 while ((n = uis.read(buf, 0, buf.length)) > 0) {
-                    gesamt = gesamt + n;
                     fos.write(buf, 0, n);
                     if (doprogress) {
-                        final int xgesamt = gesamt;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                eltern.pbar.setValue(xgesamt);
-                            }
-                        });
+                        final int xgesamt = n;
+                        SwingUtilities.invokeLater(() -> eltern.pbar.setValue(xgesamt));
 
                     }
                 }
                 if (doprogress) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            // eltern.pbar.setValue(0);
-                            eltern.setDoneIcon();
-                        }
-                    });
+                    SwingUtilities.invokeLater(eltern::setDoneIcon);
                 }
 
-                System.out.println("Datei " + datfern + " wurde erfolgreich übertragen");
+                LOG.debug("Datei " + datfern + " wurde erfolgreich übertragen");
                 fos.flush();
                 fos.close();
                 uis.close();
-                fos = null;
-                uis = null;
 
-            } catch (IOException e1) {
-
+            } catch (IOException ex) {
                 JOptionPane.showMessageDialog(null,
                         "Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch");
-                e1.printStackTrace();
+
+                LOG.error("Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch", ex);
                 return false;
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
                     "Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch");
-            ex.printStackTrace();
+
+            LOG.error("Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch", ex);
             return false;
         }
 
@@ -211,53 +166,43 @@ public class FTPTools {
             } else {
                 ftpClient.enterLocalPassiveMode();
             }
-            // System.out.println("Remote-System ist " + ftpClient.getSystemType());
             ftpClient.setUseEPSVwithIPv4(true);
             ftpClient.getReplyStrings();
 
             try {
-                InputStream uis = null;
-                uis = ftpClient.retrieveFileStream(datfern);
-
+                InputStream uis = ftpClient.retrieveFileStream(datfern);
                 String ret = convertStreamToString(uis);
                 uis.close();
-                uis = null;
-                // System.out.println("Nach Logout = "+reply);
                 ftpClient.getReplyStrings();
                 ftpClient.logout();
-                // System.out.println("Nach Disconnect = "+reply);
                 ftpClient.disconnect();
-                return String.valueOf(ret);
-            } catch (IOException e1) {
-                e1.printStackTrace();
-            } catch (Exception e) {
-                e.printStackTrace();
+                return ret;
+            } catch (Exception ex) {
+                LOG.error("Exception: ", ex);
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Bezug der Updatebeschreibung, bitte versuchen Sie es erneut");
+            LOG.error("Fehler beim Bezug der Updatebeschreibung, bitte versuchen Sie es erneut", ex);
         }
         return "Fehler beim Bezug der Log-Datei";
     }
 
-    public boolean ftpTransferString(String datfern, String string, JProgressBar jprog) {
+    public void ftpTransferString(String datfern, String string, JProgressBar jprog) {
         if (ftpClient == null) {
-            System.out.println("ftpClient = null");
-            return false;
+            LOG.debug("ftpClient = null");
+            return;
         }
         if (!ftpClient.isConnected()) {
-            // System.out.println("nicht connected");
             if (!nurConnect()) {
-                return false;
+                return;
             }
-            // System.out.println("connected");
-
         }
 
         try {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
 
         if (updateConfig.isUseActiveMode()) {
@@ -270,9 +215,9 @@ public class FTPTools {
             ftpClient.deleteFile(datfern);
             InputStream ins = null;
             try {
-                ins = convertStringToStream(ins, string);
-            } catch (Exception e) {
-                e.printStackTrace();
+                ins = convertStringToStream(string);
+            } catch (Exception ex) {
+                LOG.error("Exception: ", ex);
             }
             if (updateConfig.isUseActiveMode()) {
                 ftpClient.enterLocalActiveMode();
@@ -280,23 +225,10 @@ public class FTPTools {
                 ftpClient.enterLocalPassiveMode();
             }
 
-            /*********************************/
-
             ftpClient.setSendBufferSize(1024 * 8);
-            // System.out.println(ftpClient.getReplyString());
 
             OutputStream fos = ftpClient.storeFileStream(datfern);
-            if (!FTPReply.isPositiveIntermediate(ftpClient.getReplyCode())) {
-                // ins.close();
-                // fos.close();
-                // ftpClient.logout();
-                // ftpClient.disconnect();
-                // System.err.println("Scheiß-Transfer fehlgeschlagen");
-                // System.out.println("Datei = "+quelldat);
 
-            }
-
-            int n = 0;
             byte[] buf = new byte[1024 * 8];
 
             int gesamt = 0;
@@ -305,47 +237,39 @@ public class FTPTools {
             final JProgressBar xprog = jprog;
             final int xgross = string.length();
             if (jprog != null) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setStringPainted(true);
-                        xprog.setMinimum(0);
-                        xprog.setMaximum(xgross);
-                        xprog.repaint();
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    xprog.setStringPainted(true);
+                    xprog.setMinimum(0);
+                    xprog.setMaximum(xgross);
+                    xprog.repaint();
                 });
                 progresszeigen = true;
             }
 
-            /*****************************************/
-
+            int n;
             while ((n = ins.read(buf, 0, buf.length)) > 0) {
                 try {
-                    gesamt = gesamt + n;
+                    gesamt += n;
                     fos.write(buf, 0, n);
 
                     if (progresszeigen) {
                         final int xgesamt = gesamt;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                xprog.setValue(xgesamt);
-                                xprog.repaint();
-                            }
+                        SwingUtilities.invokeLater(() -> {
+                            xprog.setValue(xgesamt);
+                            xprog.repaint();
                         });
                     }
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOG.error("Exception: ", ex);
                 }
 
             }
-            System.out.println("Datei " + datfern + " auf Server geschrieben mit " + gesamt + " Bytes");
+            LOG.debug("Datei " + datfern + " auf Server geschrieben mit " + gesamt + " Bytes");
 
             fos.flush();
             fos.close();
             ins.close();
-            // System.out.println(ftpClient.getReplyString());
             if (!ftpClient.completePendingCommand()) {
                 ftpClient.logout();
                 ftpClient.disconnect();
@@ -354,49 +278,35 @@ public class FTPTools {
                 System.err.println(
                         "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
             }
-            // System.out.println(ftpClient.getReplyString());
-            ins = null;
-            fos = null;
             if (progresszeigen) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setValue(0);
-                        xprog.repaint();
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    xprog.setValue(0);
+                    xprog.repaint();
                 });
             }
-
-            /*********************************/
-            // ftpClient.logout();
-
-            // ftpClient.disconnect();
-
-        } catch (IOException e1) {
-
-            e1.printStackTrace();
-            return false;
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
-
-        return true;
     }
 
     /********************************************************/
 
-    public static String convertStreamToString(InputStream is) throws Exception {
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+    public static String convertStreamToString(InputStream is)   {
         StringBuilder sb = new StringBuilder();
-        String line = null;
-        while ((line = reader.readLine()) != null) {
-            sb.append(line + "\n");
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line)
+                  .append("\n");
+            }
+        }catch (Exception ex){
+            LOG.error("Exception: ", ex);
         }
-        is.close();
         return sb.toString();
     }
 
-    public static InputStream convertStringToStream(InputStream ins, String string) throws Exception {
-        ins = new ByteArrayInputStream(string.getBytes());
-        return ins;
+    public static InputStream convertStringToStream(String string) {
+        return new ByteArrayInputStream(string.getBytes());
     }
 
     private boolean nurConnect() {
@@ -407,35 +317,31 @@ public class FTPTools {
                 ftpClient.login(updateConfig.getUpdateUser(), updateConfig.getUpdatePasswd());
 
                 ftpClient.changeWorkingDirectory("." + updateConfig.getUpdateDir());
-                // ftpClient.setFileType(FTP.ASCII_FILE_TYPE);
                 ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             } else {
                 if (ftpClient == null) {
-                    System.out.println("ftpClient == null");
+                    LOG.debug("ftpClient == null");
                 } else if (ftpClient.isConnected()) {
-                    System.out.println("ftpClient == bereits connected");
+                    LOG.debug("ftpClient == bereits connected");
                 }
             }
 
-        } catch (SocketException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
             return false;
         }
         return true;
     }
 
     /*****************************************************/
-    public boolean holeDateiSilent(String datfern, String vznah, boolean doprogress) {
+    public void holeDateiSilent(String datfern, String vznah) {
         try {
             if (ftpClient == null) {
-                return false;
+                return;
             }
             if (!ftpClient.isConnected()) {
                 if (!nurConnect()) {
-                    return false;
+                    return;
                 }
 
             }
@@ -445,24 +351,18 @@ public class FTPTools {
                 ftpClient.enterLocalPassiveMode();
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception: ", ex);
         }
 
-        try {
+        try (InputStream uis = ftpClient.retrieveFileStream(datfern);
+                FileOutputStream fos = new FileOutputStream(vznah + datfern)) {
 
             files = ftpClient.listFiles();
             // Untersuchen ob Datei vorhanden
 
-            InputStream uis = null;
-            uis = ftpClient.retrieveFileStream(datfern);
-
             ftpClient.getReplyString();
-            FileOutputStream fos = null;
-            fos = new FileOutputStream(vznah + datfern);
-
-            int n = 0;
+            int n;
             byte[] buf = new byte[BUFFER_SIZE];
-
             int gesamt = 0;
 
             while ((n = uis.read(buf, 0, buf.length)) > 0) {
@@ -470,48 +370,38 @@ public class FTPTools {
                 fos.write(buf, 0, n);
             }
 
-            // System.out.println("Datei "+datfern+" wurde erfolgreich übertragen");
             fos.flush();
-            fos.close();
-            uis.close();
-            fos = null;
-            uis = null;
             ftpClient.getReplyString();
-            // System.out.println("Nach Logout = "+reply);
             ftpClient.logout();
             ftpClient.getReplyString();
-            // System.out.println("Nach Disconnect = "+reply);
             ftpClient.disconnect();
-        } catch (IOException e1) {
-
-            e1.printStackTrace();
-            return false;
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
 
-        return true;
     }
 
     /********************************************************/
-    public boolean ftpTransferDatei(String datfern, String quelldat, long groesse, JProgressBar jprog) {
+    public void ftpTransferDatei(String datfern, String quelldat, long groesse, JProgressBar jprog) {
 
         if (ftpClient == null) {
-            System.out.println("ftpClient = null");
-            return false;
+            LOG.debug("ftpClient = null");
+            return;
         }
         if (!ftpClient.isConnected()) {
-            System.out.println("nicht connected");
+            LOG.debug("nicht connected");
             if (!nurConnect()) {
-                return false;
+                return;
             }
-            System.out.println("connected");
+            LOG.debug("connected");
 
         }
 
         try {
             ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
             ftpClient.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
 
         if (updateConfig.isUseActiveMode()) {
@@ -521,10 +411,8 @@ public class FTPTools {
         }
 
         try {
-            // files = ftpClient.listFiles();
 
             ftpClient.deleteFile(datfern);
-            // ftpClient.sendCommand("OPTS LATIN1 ON");
 
             File src = new File(quelldat);
             InputStream ins = new FileInputStream(src);
@@ -535,27 +423,15 @@ public class FTPTools {
                 ftpClient.enterLocalPassiveMode();
             }
 
-            /*
-             * ftpClient.storeFile(datfern, ins); ins.close(); ins = null;
-             */
-
-            /*********************************/
-
             ftpClient.setSendBufferSize(1024 * 8);
-            // System.out.println(ftpClient.getReplyString());
 
             OutputStream fos = ftpClient.storeFileStream(datfern);
             if (!FTPReply.isPositiveIntermediate(ftpClient.getReplyCode())) {
-                // ins.close();
-                // fos.close();
-                // ftpClient.logout();
-                // ftpClient.disconnect();
-                // System.err.println("Scheiß-Transfer fehlgeschlagen");
-                System.out.println("Datei = " + quelldat);
+                LOG.debug("Datei = " + quelldat);
 
             }
 
-            int n = 0;
+            int n;
             byte[] buf = new byte[1024 * 8];
 
             int gesamt = 0;
@@ -564,19 +440,14 @@ public class FTPTools {
             final JProgressBar xprog = jprog;
             final long xgross = groesse;
             if (jprog != null) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setStringPainted(true);
-                        xprog.setMinimum(0);
-                        xprog.setMaximum(new Long(xgross).intValue());
-                        xprog.repaint();
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    xprog.setStringPainted(true);
+                    xprog.setMinimum(0);
+                    xprog.setMaximum(new Long(xgross).intValue());
+                    xprog.repaint();
                 });
                 progresszeigen = true;
             }
-
-            /*****************************************/
 
             while ((n = ins.read(buf, 0, buf.length)) > 0) {
                 try {
@@ -585,12 +456,9 @@ public class FTPTools {
 
                     if (progresszeigen) {
                         final int xgesamt = gesamt;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                xprog.setValue(xgesamt);
-                                xprog.repaint();
-                            }
+                        SwingUtilities.invokeLater(() -> {
+                            xprog.setValue(xgesamt);
+                            xprog.repaint();
                         });
                     }
                 } catch (Exception ex) {
@@ -598,12 +466,11 @@ public class FTPTools {
                 }
 
             }
-            System.out.println("Datei " + datfern + " auf Server geschrieben mit " + gesamt + "Bytes");
+            LOG.debug("Datei " + datfern + " auf Server geschrieben mit " + gesamt + "Bytes");
 
             fos.flush();
             fos.close();
             ins.close();
-            // System.out.println(ftpClient.getReplyString());
             if (!ftpClient.completePendingCommand()) {
                 ftpClient.logout();
                 ftpClient.disconnect();
@@ -612,190 +479,21 @@ public class FTPTools {
                 System.err.println(
                         "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
             }
-            // System.out.println(ftpClient.getReplyString());
-            ins = null;
-            fos = null;
             if (progresszeigen) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setValue(0);
-                        xprog.repaint();
-                    }
+                SwingUtilities.invokeLater(() -> {
+                    xprog.setValue(0);
+                    xprog.repaint();
                 });
             }
-
-            /*********************************/
-
-            // ftpClient.appendFile(remote, local)
-            ftpClient.logout();
-            // System.out.println(ftpClient.getReplyString());
-            ftpClient.disconnect();
-
-        } catch (IOException e1) {
-
-            e1.printStackTrace();
-            return false;
-        }
-
-        return true;
-    }
-
-    /********************************************************/
-    /********************************************************/
-    public boolean ftpTransferByteArray(String datfern, byte[] b, long groesse, JProgressBar jprog) {
-
-        if (ftpClient == null) {
-            System.out.println("ftpClient = null");
-            return false;
-        }
-        if (!ftpClient.isConnected()) {
-            System.out.println("nicht connected");
-            if (!nurConnect()) {
-                return false;
-            }
-            System.out.println("connected");
-
-        }
-
-        try {
-            ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        if (updateConfig.isUseActiveMode()) {
-            ftpClient.enterLocalActiveMode();
-        } else {
-            ftpClient.enterLocalPassiveMode();
-        }
-
-        try {
-            // files = ftpClient.listFiles();
-
-            ftpClient.deleteFile(datfern);
-
-            InputStream ins = new ByteArrayInputStream(b);
-
-            if (updateConfig.isUseActiveMode()) {
-                ftpClient.enterLocalActiveMode();
-            } else {
-                ftpClient.enterLocalPassiveMode();
-            }
-
-            /*********************************/
-
-            ftpClient.setSendBufferSize(1024 * 8);
-            // System.out.println(ftpClient.getReplyString());
-
-            OutputStream fos = ftpClient.storeFileStream(datfern);
-
-            if (!FTPReply.isPositiveIntermediate(ftpClient.getReplyCode())) {
-                // System.err.println("Scheiß-Transfer fehlgeschlagen");
-                System.out.println("Datei = " + datfern + " !isPositiveIntermediate");
-            }
-
-            int n = 0;
-            byte[] buf = new byte[1024 * 8];
-
-            int gesamt = 0;
-
-            boolean progresszeigen = false;
-            final JProgressBar xprog = jprog;
-            final long xgross = groesse;
-            if (jprog != null) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setStringPainted(true);
-                        xprog.setMinimum(0);
-                        xprog.setMaximum(new Long(xgross).intValue());
-                        xprog.repaint();
-                    }
-                });
-                progresszeigen = true;
-            }
-
-            /*****************************************/
-
-            while ((n = ins.read(buf, 0, buf.length)) > 0) {
-                try {
-                    gesamt = gesamt + n;
-                    fos.write(buf, 0, n);
-
-                    if (progresszeigen) {
-                        final int xgesamt = gesamt;
-                        SwingUtilities.invokeLater(new Runnable() {
-                            @Override
-                            public void run() {
-                                xprog.setValue(xgesamt);
-                                xprog.repaint();
-                            }
-                        });
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-
-            }
-            System.out.println("Datei " + datfern + " auf Server geschrieben mit " + gesamt + "Bytes");
-
-            fos.flush();
-            fos.close();
-            ins.close();
-            // System.out.println(ftpClient.getReplyString());
-            if (!ftpClient.completePendingCommand()) {
-                ftpClient.logout();
-                ftpClient.disconnect();
-                JOptionPane.showMessageDialog(null,
-                        "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
-                System.err.println(
-                        "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
-            }
-
-            ins = null;
-            fos = null;
-            if (progresszeigen) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        xprog.setValue(0);
-                        xprog.repaint();
-                    }
-                });
-            }
-
-            /*********************************/
 
             ftpClient.logout();
-
             ftpClient.disconnect();
 
-        } catch (IOException e1) {
-
-            e1.printStackTrace();
-            return false;
+        } catch (IOException ex) {
+            LOG.error("Exception: ", ex);
         }
 
-        return true;
     }
-
-    /********************************************************/
-
-    /*
-     * private boolean nurConnect(){ try {
-     * ftpClient.connect(TheraPiUpdates.HilfeFTP); ftpClient.getReplyString();
-     * //System.out.println(ftpClient.getReplyString());
-     * ftpClient.login(TheraPiUpdates.HilfeUser, TheraPiUpdates.HilfePasswd);
-     * ftpClient.getReplyString(); //System.out.println(ftpClient.getReplyString());
-     * ftpClient.cwd("./updates");
-     * ftpClient.setFileTransferMode(FTP.BINARY_FILE_TYPE);
-     * ftpClient.setFileType(FTP.BINARY_FILE_TYPE); ftpClient.getReplyString();
-     * //System.out.println(ftpClient.getReplyString());
-     * 
-     * } catch (SocketException e) { e.printStackTrace(); return false; } catch
-     * (IOException e) { e.printStackTrace(); return false; } return true; }
-     */
 
     public void connectTest() {
         if (ftpClient != null) {
@@ -803,16 +501,16 @@ public class FTPTools {
                 try {
                     ftpClient.logout();
                 } catch (Exception ex) {
-
+                    LOG.error("Exception: ", ex);
                 }
                 try {
                     ftpClient.disconnect();
                 } catch (Exception ex) {
+                    LOG.error("Exception: ", ex);
 
                 }
 
             }
         }
     }
-
 }

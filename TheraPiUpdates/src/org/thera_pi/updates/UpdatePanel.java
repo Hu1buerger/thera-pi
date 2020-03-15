@@ -1,40 +1,17 @@
 package org.thera_pi.updates;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Cursor;
-import java.awt.Font;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.LineNumberReader;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.DateFormat;
-import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.TimeZone;
-import java.util.Vector;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -47,6 +24,8 @@ import org.jdesktop.swingx.JXTable;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import com.sun.org.slf4j.internal.Logger;
+import com.sun.org.slf4j.internal.LoggerFactory;
 
 import CommonTools.INIFile;
 import environment.Path;
@@ -54,64 +33,42 @@ import sql.DatenquellenFactory;
 
 public class UpdatePanel extends JXPanel {
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 8445390544969581869L;
+    private static final Logger LOG = LoggerFactory.getLogger(TheraPiUpdates.class);
     private static final String PROGHOME = Path.Instance.getProghome();
-    TheraPiUpdates eltern = null;
-    UpdateTab updateTab = null;
 
-    UpdateTableModel tabmod = null;
-    JXTable tab = null;
+    private UpdateTableModel tabmod = null;
+    private JXTable tab = null;
 
     public JProgressBar pbar = null;
 
     public JTextArea ta = null;
     public UpdateDlg abrdlg;
 
-    DecimalFormat dcf = new DecimalFormat("##########0.00");
-    SimpleDateFormat datumsFormat = new SimpleDateFormat("dd.MM.yyyy  HH:mm:ss"); // Konv.
-    SimpleDateFormat dformatter = new SimpleDateFormat("yyyy-MM-dd");
-    Date currentTime = new Date();
-
-    public static Vector<Vector<String>> updatefiles = new Vector<Vector<String>>();
-    public static Vector<String[]> mandvec = new Vector<String[]>();
+    public static Vector<Vector<String>> updatefiles = new Vector<>();
+    public static Vector<String[]> mandvec = new Vector<>();
 
     public UpdateListSelectionHandler updateListener = null;
 
-    DateFormat dataformat = DateFormat.getDateInstance(DateFormat.LONG);
+    public static Vector<String> inupdatelist = new Vector<>();
 
-    public static Vector<String> inupdatelist = new Vector<String>();
+    private FTPTools ftpt = null;
 
-    FTPTools ftpt = null;
-
-    Image imgkeinupdate = new ImageIcon(PROGHOME + "icons/clean.png").getImage()
+    private Image imgkeinupdate = new ImageIcon(PROGHOME + "icons/clean.png").getImage()
                                                                      .getScaledInstance(16, 16, Image.SCALE_SMOOTH);
-    Image imgupdate = new ImageIcon(PROGHOME + "icons/application-exit.png").getImage()
+    private  Image imgupdate = new ImageIcon(PROGHOME + "icons/application-exit.png").getImage()
                                                                             .getScaledInstance(16, 16,
                                                                                     Image.SCALE_SMOOTH);
-    ImageIcon icokeinupdate;
-    ImageIcon icoupdate;
+    private ImageIcon icokeinupdate;
+    private ImageIcon icoupdate;
     public FTPFile[] ffile = null;
-
-
-    public static boolean DbOk;
 
     private JFrame jFrame;
 
     private int xaktrow;
 
-    // Verschluesseln man = Verschluesseln.getInstance();
-
-    UpdatePanel(TheraPiUpdates xeltern, JFrame jFrame, UpdateTab xupdateTab) {
-
+    UpdatePanel(JFrame jFrame) {
         super();
-        eltern = xeltern;
         this.jFrame = jFrame;
-        if (xupdateTab != null) {
-            updateTab = xupdateTab;
-        }
         setLayout(new BorderLayout());
         add(getHeader(), BorderLayout.NORTH);
         add(getContent(), BorderLayout.CENTER);
@@ -124,7 +81,7 @@ public class UpdatePanel extends JXPanel {
     public void doUpdateCheck() {
         new SwingWorker<Void, Void>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() {
                 try {
                     icokeinupdate = new ImageIcon(imgkeinupdate);
                     icoupdate = new ImageIcon(imgupdate);
@@ -132,7 +89,7 @@ public class UpdatePanel extends JXPanel {
                     updateCheck(PROGHOME + "update.files");
                     doFtpTest();
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOG.error("Exception: ",ex);
                 }
                 return null;
             }
@@ -143,7 +100,7 @@ public class UpdatePanel extends JXPanel {
         JXHeader head = new JXHeader();
         String titel = "<html><font size='5'><font color='e77817'>Thera-Pi</font>&nbsp;&nbsp; Update-Explorer (Vers. 2016-01)</font></html>";
         head.setTitle(titel);
-        String description = "<html>Ein rotes " + "<img src='file:///" + PROGHOME
+        String description = "<html>Ein rotes <img src='file:///" + PROGHOME
                 + "icons/application-exit.png' width='16' height='16' align=\"bottom\">"
                 + "signalisiert, daß die angezeigte Datei <b>neuer</b> ist als die Datei die sich auf Ihrem Rechner befindet.<br>"
                 + "Wenn Sie in der Tabelle einen Doppelklick auf einer dieser Dateien ausführen, kopieren Sie diese Datei in Ihre Thera-Pi-Installation."
@@ -174,8 +131,6 @@ public class UpdatePanel extends JXPanel {
                     if (!TheraPiUpdates.updateallowed) {
                         JOptionPane.showMessageDialog(null,
                                 "Keine gültigen Zugangsdaten eingegeben!\nUpdates können nicht heruntergeladen werden!");
-                        // jFrame.dispose();
-                        // System.exit(0);
                         return;
                     }
                     testeObUpdate(tab.getSelectedRow());
@@ -204,25 +159,20 @@ public class UpdatePanel extends JXPanel {
         jpan.add(jscr, cc.xy(2, 8, CellConstraints.FILL, CellConstraints.FILL));
 
         JButton but = new JButton("Update-Explorer beenden");
-        but.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent arg0) {
-                if (TheraPiUpdates.starteTheraPi) {
-                    int anfrage = JOptionPane.showConfirmDialog(null, "Wollen Sie Thera-Pi 1.0 jetzt starten?",
-                            "Thera-Pi starten?", JOptionPane.YES_NO_OPTION);
-                    if (anfrage == JOptionPane.YES_OPTION) {
-                        try {
-                            Runtime.getRuntime()
-                                   .exec("java -jar " + PROGHOME + "TheraPi.jar");
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+        but.addActionListener(arg0 -> {
+            if (TheraPiUpdates.starteTheraPi) {
+                int anfrage = JOptionPane.showConfirmDialog(null, "Wollen Sie Thera-Pi 1.0 jetzt starten?",
+                        "Thera-Pi starten?", JOptionPane.YES_NO_OPTION);
+                if (anfrage == JOptionPane.YES_OPTION) {
+                    try {
+                        Runtime.getRuntime()
+                               .exec("java -jar " + PROGHOME + "TheraPi.jar");
+                    } catch (IOException ex) {
+                        LOG.error("Exception: ",ex);
                     }
-                    System.exit(0);
-                } else {
-                    System.exit(0);
                 }
             }
+            System.exit(0);
         });
         jpan.add(but, cc.xy(2, 10, CellConstraints.RIGHT, CellConstraints.BOTTOM));
         jpan.validate();
@@ -233,7 +183,7 @@ public class UpdatePanel extends JXPanel {
     private void testeObUpdate(int row) {
         String upddatei = tab.getValueAt(row, 0)
                              .toString();
-        Long gross = Long.parseLong(tab.getValueAt(row, 2)
+        long gross = Long.parseLong(tab.getValueAt(row, 2)
                                        .toString());
         if (tab.getValueAt(row, 3)
                .equals(this.icokeinupdate)) {
@@ -241,7 +191,6 @@ public class UpdatePanel extends JXPanel {
                     "Die Datei --> " + upddatei + " <-- ist bereits auf dem neuesten Stand. Update nicht erforderlich");
             return;
         }
-        boolean ok = true;
         for (int i = 0; i < updatefiles.size(); i++) {
             if (updatefiles.get(i)
                            .get(0)
@@ -284,7 +233,7 @@ public class UpdatePanel extends JXPanel {
 
                     new SwingWorker<Void, Void>() {
                         @Override
-                        protected Void doInBackground() throws Exception {
+                        protected Void doInBackground() {
 
                             try {
                                 pbar.setValue(0);
@@ -294,11 +243,11 @@ public class UpdatePanel extends JXPanel {
                                                                                    .get(1)
                                                                                    .lastIndexOf("/")
                                                                   + 1);
-                                System.out.println(updatefiles.get(ix)
-                                                              .get(1));
-                                System.out.println(updatefiles.get(ix)
-                                                              .get(0));
-                                System.out.println(nurvz);
+                                LOG.debug(updatefiles.get(ix)
+                                                     .get(1));
+                                LOG.debug(updatefiles.get(ix)
+                                                     .get(0));
+                                LOG.debug(nurvz);
                                 try {
                                     if (updatefiles.get(ix)
                                                    .get(1)
@@ -310,80 +259,61 @@ public class UpdatePanel extends JXPanel {
                                                                        .replace(".ini", ".bak")));
                                     }
                                 } catch (Exception ex) {
+                                    LOG.error("Fehler beim Umbenennen der Datei " + updatefiles.get(ix)
+                                            .get(1),ex);
                                     JOptionPane.showMessageDialog(null,
                                             "Fehler beim Umbenennen der Datei " + updatefiles.get(ix)
                                                                                              .get(1));
                                 }
-                                System.out.println("hole Datei -> " + updatefiles.get(ix)
-                                                                                 .get(1)
+                                LOG.debug("hole Datei -> " + updatefiles.get(ix)
+                                                                        .get(1)
                                         + " Schleifendurchlauf -> " + ix);
                                 xaktrow = xrow;
                                 try {
                                     ftpt = new FTPTools();
                                     ftpt.holeDatei(xupdate, nurvz, true, getInstance(), xgross);
                                 } catch (Exception ex) {
+                                    LOG.error("Bezug der Datei " + xupdate
+                                            + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch",ex);
                                     JOptionPane.showMessageDialog(null, "Bezug der Datei " + xupdate
                                             + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch");
                                     ftpt = null;
                                     pbar.setValue(0);
-                                    // return null;
                                     return null;
                                 }
                                 ftpt = null;
-                                // pbar.setValue(0);
-                                SwingUtilities.invokeLater(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        /*
-                                         * for(int i = 0; i < 6;i++){
-                                         * System.out.println(i+" Divisionsrest = "+(eltern.userdaten.get(i).length() %
-                                         * 8)); }
-                                         */
-                                        try {
-                                            if (eltern.userdaten != null) {
-                                                // System.out.println(eltern.userdaten);
-                                                String stmt = "insert into updated set ik='" + eltern.userdaten.get(0)
-                                                        + "', datei='" + xupdate + "', userid='"
-                                                        + eltern.userdaten.get(6) + "', datum='"
-                                                        + dformatter.format(currentTime) + "', " + "mac='"
-                                                        + eltern.strMACAdr + "'";
-                                                try {
-                                                    SqlInfo.sqlAusfuehren(TheraPiUpdates.conn, stmt);
-                                                } catch (SQLException e) {
-                                                    e.printStackTrace();
-                                                }
+                                SwingUtilities.invokeLater(() -> {
+
+                                    try {
+                                        if (TheraPiUpdates.userdaten != null) {
+                                            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+                                            LocalDateTime currentTime = LocalDateTime.now();
+                                            String stmt = "insert into updated set ik='" + TheraPiUpdates.userdaten.get(0)
+                                                    + "', datei='" + xupdate + "', userid='" + TheraPiUpdates.userdaten.get(6)
+                                                    + "', datum='" + dateTimeFormatter.format(currentTime) + "', " + "mac='"
+                                                    + TheraPiUpdates.strMACAdr + "'";
+                                            try {
+                                                SqlInfo.sqlAusfuehren(TheraPiUpdates.conn, stmt);
+                                            } catch (SQLException ex) {
+                                                LOG.error("Exception: ",ex);
                                             }
-
-                                        } catch (Exception ex) {
-
                                         }
 
+                                    } catch (Exception ex) {
+                                        LOG.error("Bezug der Datei " + xupdate
+                                                + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch",ex);
                                     }
-                                    // TheraPiUpdates.RunAjax("http://www.thera-pi.org/html/updates.php",
-                                    // "updated.txt", xupdate);
-
                                 });
-
-                                // tabmod.setValueAt((ImageIcon) icokeinupdate,xrow, 3);
-                                // x
-                            } catch (Exception ex2) {
-
+                            } catch (Exception ex) {
+                                LOG.error("Bezug der Datei " + xupdate
+                                        + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch",ex);
                             }
-
                             return null;
                         }
-
                     }.execute();
-
-                } else {
-                    ok = false;
                 }
             }
         }
-        if (ok) {
-            // tabmod.setValueAt((ImageIcon) this.icokeinupdate,row, 3);
-        }
-
     }
 
     public void setDoneIcon() {
@@ -403,54 +333,45 @@ public class UpdatePanel extends JXPanel {
             }
             ftpt = null;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception: ",ex);
         }
     }
 
     private void doFtpTest() {
         new SwingWorker<Void, Void>() {
             @Override
-            protected Void doInBackground() throws Exception {
+            protected Void doInBackground() {
                 try {
                     jFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
                     ftpt = new FTPTools();
 
                     ffile = ftpt.holeDatNamen();
-                    Vector<Object> vec = new Vector<Object>();
-                    for (int i = 0; i < ffile.length; i++) {
-                        if ((!ffile[i].getName()
-                                      .toString()
-                                      .trim()
-                                      .equals("."))
-                                && (!ffile[i].getName()
-                                             .toString()
-                                             .trim()
-                                             .equals(".."))
-                                && (!ffile[i].getName()
-                                             .toString()
-                                             .startsWith("update."))) {
+                    Vector<Object> vec = new Vector<>();
+                    for (FTPFile ftpFile : ffile) {
+                        if ((!ftpFile.getName()
+                                     .trim()
+                                     .equals("."))
+                                && (!ftpFile.getName()
+                                            .trim()
+                                            .equals(".."))
+                                && (!ftpFile.getName()
+                                            .startsWith("update."))) {
+                            SimpleDateFormat datumsFormat = new SimpleDateFormat("dd.MM.yyyy  HH:mm:ss"); // Konv.
                             vec.clear();
-                            vec.add(ffile[i].getName()
-                                            .toString());
-                            vec.add(datumsFormat.format(ffile[i].getTimestamp()
-                                                                .getTime()
-                                                                .getTime()));
-                            vec.add(Long.valueOf(ffile[i].getSize())
+                            vec.add(ftpFile.getName());
+                            vec.add(datumsFormat.format(ftpFile.getTimestamp()
+                                                               .getTime()
+                                                               .getTime()));
+                            vec.add(Long.valueOf(ftpFile.getSize())
                                         .toString());
-                            if (mussUpdaten(ffile[i].getName()
-                                                    .toString()
-                                                    .trim(),
-                                    ffile[i].getTimestamp()
-                                            .getTime()
-                                            .getTime())) {
+                            if (mussUpdaten(ftpFile.getName()
+                                                   .trim(),
+                                    ftpFile.getTimestamp()
+                                           .getTime()
+                                           .getTime())) {
                                 vec.add(icoupdate);
                                 tabmod.addRow((Vector<?>) vec.clone());
                             }
-                            // System.out.println(ffile[i].getName());
-                            // System.out.println(ffile[i].getTimestamp().getTime().getTime());
-                            // System.out.println(ffile[i].getSize() + " Bytes");
-                        } else {
-
                         }
                     }
                     if (tabmod.getRowCount() > 0) {
@@ -458,22 +379,14 @@ public class UpdatePanel extends JXPanel {
                     } else {
                         JOptionPane.showMessageDialog(null, "Ihre Thera-Pi-Installation ist auf dem aktuellen Stand.");
                     }
-                    System.out.println("\n*********************************");
-                    System.out.println("   Insgesamt getestete Files: " + ffile.length);
-                    System.out.println("Davon muessen updated werden: " + tabmod.getRowCount());
-                    System.out.println("*********************************\n");
-                    /*
-                     * System.out.println("Insgesamt = "+ffile.length+" Dateien"); File file = new
-                     * File("C:/RehaVerwaltung/Reha.jar");
-                     * System.out.println("Größe Originaldatei  = "+file.length()+" Bytes");
-                     * System.out.println(file.lastModified()); ftpt.holeDatei("update.files",
-                     * "C:/ftptests/", true, getInstance(),-1); Thread.sleep(100); pbar.setValue(0);
-                     * ftpt.holeDatei("Reha.jar", "C:/ftptests/", true, getInstance(),-1);
-                     */
+                    LOG.debug("\n*********************************");
+                    LOG.debug("   Insgesamt getestete Files: " + ffile.length);
+                    LOG.debug("Davon muessen updated werden: " + tabmod.getRowCount());
+                    LOG.debug("*********************************\n");
                     ftpt = null;
                     jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOG.error("Exception: ",ex);
                     ftpt = null;
                 }
                 return null;
@@ -485,37 +398,27 @@ public class UpdatePanel extends JXPanel {
 
     private boolean mussUpdaten(String datei, Long datum) {
         try {
-            File f = null;
-            for (int i = 0; i < updatefiles.size(); i++) {
-                if (updatefiles.get(i)
-                               .get(0)
-                               .equals(datei)) {
-                    f = new File(updatefiles.get(i)
-                                            .get(1));
+            for (Vector<String> updatefile : updatefiles) {
+                if (updatefile.get(0)
+                              .equals(datei)) {
+                    File f = new File(updatefile.get(1));
                     if (!f.exists()) {
                         testeDirectory(f);
                         return true;
                     }
-                    System.out.println("\nDatei: -----> " + f.getName()
-                                                             .toString()
-                            + "\n       Dateidatum lokal: " + usingDateFormatterWithTimeZone(f.lastModified())
-                            + "\nDateidatum Updateserver: " + usingDateFormatterWithTimeZone(datum));
+                    LOG.debug("\nDatei: -----> " + f.getName() + "\n       Dateidatum lokal: "
+                            + usingDateFormatterWithTimeZone(f.lastModified()) + "\nDateidatum Updateserver: "
+                            + usingDateFormatterWithTimeZone(datum));
                     if (f.lastModified() < datum) {
-                        System.out.println(
-                                "lokale Datei ist aelter -> muss updated werden!!!!!" + "\n****************");
-                        // System.out.println("Zeitunterschied = "+(f.lastModified()-datum));
-                        // System.out.println(datumsFormat.format(f.lastModified()));
-                        // System.out.println(datumsFormat.format(datum));
+                        LOG.debug("lokale Datei ist aelter -> muss updated werden!!!!!" + "\n****************");
                         return true;
                     } else {
-                        System.out.println(
-                                "lokale Datei ist juenger -> darf nicht updated werden" + "\n****************");
+                        LOG.debug("lokale Datei ist juenger -> darf nicht updated werden" + "\n****************");
                     }
                 }
             }
-            // System.out.println("Zeitunterschied = "+(f.lastModified()-datum));
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception: ",ex);
         }
         return false;
     }
@@ -526,10 +429,13 @@ public class UpdatePanel extends JXPanel {
         String dir = abspfad.substring(0, abspfad.lastIndexOf("/"));
         File d = new File(dir);
         if (!d.exists()) {
-            System.out.println("Erstelle Verzeichnis " + d.getAbsolutePath());
+            LOG.debug("Erstelle Verzeichnis " + d.getAbsolutePath());
             try {
                 d.mkdir();
             } catch (Exception ex) {
+                LOG.error("Verzeichnis " + d.getAbsolutePath()
+                        + " konnte nicht erstellt werden\n"
+                        + "Bitte erstellen die das Verzeichnis von Hand und starten danach den Update-Explorer erneut",ex);
                 JOptionPane.showMessageDialog(null, "Verzeichnis " + d.getAbsolutePath()
                         + " konnte nicht erstellt werden\n"
                         + "Bitte erstellen die das Verzeichnis von Hand und starten danach den Update-Explorer erneut");
@@ -548,46 +454,29 @@ public class UpdatePanel extends JXPanel {
 
     }
 
-    /************************************************************************/
+    // ************************************************************************
     private static void updateCheck(String xupdatefile) {
-        String updatedir = "";
-        String zeile = "";
-        FileReader reader = null;
-        BufferedReader in = null;
-
-        /************************/
         INIFile inif = new INIFile(PROGHOME + "ini/mandanten.ini");
         int AnzahlMandanten = inif.getIntegerProperty("TheraPiMandanten", "AnzahlMandanten");
         for (int i = 0; i < AnzahlMandanten; i++) {
             String[] mand = { null, null };
-            mand[0] = new String(inif.getStringProperty("TheraPiMandanten", "MAND-IK" + (i + 1)));
-            mand[1] = new String(inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + (i + 1)));
+            mand[0] = inif.getStringProperty("TheraPiMandanten", "MAND-IK" + (i + 1));
+            mand[1] = inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + (i + 1));
             mandvec.add(mand);
         }
 
-        /************************/
-
-        try {
-            Vector<String> dummy = new Vector<String>();
-            zeile = "";
-            reader = new FileReader(xupdatefile);
-            in = new BufferedReader(reader);
-            // String pfad = "";
-            String[] sourceAndTarget = { null, null };
-            Vector<Object> targetvec = new Vector<Object>();
+        try (FileReader reader = new FileReader(xupdatefile); BufferedReader in = new BufferedReader(reader)) {
+            Vector<String> dummy = new Vector<>();
+            String[] sourceAndTarget;
+            Vector<Object> targetvec = new Vector<>();
             inupdatelist.clear();
+            String zeile;
             while ((zeile = in.readLine()) != null) {
                 if (!zeile.startsWith("#")) {
                     if (zeile.length() > 5) {
                         sourceAndTarget = zeile.split("@");
-                        // System.out.println(zeile);
-                        // System.out.println(sourceAndTarget[0].trim());
-                        // System.out.println(sourceAndTarget[1].trim().replace("%proghome%",
-                        // proghome));
-                        // System.out.println(sourceAndTarget.length);
                         if (sourceAndTarget.length == 2) {
-                            // nur dann Dateien eintrgen
-                            // pfad = zeile;
+                            String updatedir = "";
                             if (sourceAndTarget[1].contains("%proghome%")) {
                                 dummy.clear();
                                 dummy.add(updatedir + sourceAndTarget[0].trim());
@@ -595,38 +484,30 @@ public class UpdatePanel extends JXPanel {
                                                             .replace("%proghome%", PROGHOME)
                                                             .replace("//", "/"));
                                 if (!targetvec.contains(dummy.get(1))) {
-                                    targetvec.add(new String(dummy.get(1)));
-                                    updatefiles.add(new Vector<String>(dummy));
+                                    targetvec.add(dummy.get(1));
+                                    updatefiles.add(new Vector<>(dummy));
                                 }
                             } else if (sourceAndTarget[1].contains("%userdir%")) {
                                 String home = sourceAndTarget[1].trim()
                                                                 .replace("%userdir%", PROGHOME)
                                                                 .replace("//", "/");
 
-                                for (int i = 0; i < mandvec.size(); i++) {
+                                for (String[] strings : mandvec) {
                                     dummy.clear();
                                     dummy.add(updatedir + sourceAndTarget[0].trim());
-                                    dummy.add(home.replace("%mandantik%", mandvec.get(i)[0]));
+                                    dummy.add(home.replace("%mandantik%", strings[0]));
                                     if (!targetvec.contains(dummy.get(1))) {
-                                        updatefiles.add(new Vector<String>(dummy));
+                                        updatefiles.add(new Vector<>(dummy));
                                     }
-                                    targetvec.add(String.valueOf(home.replace("%mandantik%", mandvec.get(i)[0])));
+                                    targetvec.add(home.replace("%mandantik%", strings[0]));
                                 }
                             }
-                            // Ende nur dann Dateien eintragen
                         }
                     }
                 }
             }
-            in.close();
-            reader.close();
-            if (updatefiles.size() > 0) {
-                // System.out.println(updatefiles);
-                // System.out.println("Anzahl Update-Dateien = "+updatefiles.size());
-                // kopiereUpdate();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException ex) {
+            LOG.error("Fehler beim Bezug der Update-Informationen.\nBitte informieren Sie den Administrator umgehend",ex);
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Bezug der Update-Informationen.\nBitte informieren Sie den Administrator umgehend");
         }
@@ -635,52 +516,36 @@ public class UpdatePanel extends JXPanel {
     /*******************************************************/
     private void doProgExecute() {
         ftpt = new FTPTools();
-        Long xgross = Long.parseLong(tab.getValueAt(tab.getSelectedRow(), 2)
+        long xgross = Long.parseLong(tab.getValueAt(tab.getSelectedRow(), 2)
                                         .toString());
         ftpt.holeDatei("ProgrammAusfuehren.sql", PROGHOME, true, getInstance(), xgross);
         ftpt = null;
         pbar.setValue(0);
-        File file = null;
-        FileReader freader = null;
-        LineNumberReader lnreader = null;
-        Vector<String> vecstmt = new Vector<String>();
-        try {
-            file = new File(PROGHOME + "ProgrammAusfuehren.sql");
-            freader = new FileReader(file);
-            lnreader = new LineNumberReader(freader);
-            String line = "";
+        File file = new File(PROGHOME + "ProgrammAusfuehren.sql");
+
+        Vector<String> vecstmt = new Vector<>();
+        try (FileReader freader = new FileReader(file); LineNumberReader lnreader = new LineNumberReader(freader)) {
+            String line;
             while ((line = lnreader.readLine()) != null) {
-                if (!String.valueOf(line)
-                           .trim()
-                           .equals("")) {
-                    vecstmt.add(String.valueOf(line));
+                if (!line.trim()
+                         .equals("")) {
+                    vecstmt.add(line);
                 }
-                System.out.println("Statement = " + line);
+                LOG.debug("Statement = " + line);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                freader.close();
-                lnreader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException ex) {
+            LOG.error("Exception: ",ex);
         }
         if (vecstmt.size() > 0) {
-            String cmd = vecstmt.get(0);
-            cmd = cmd.replace("@proghome/", PROGHOME);
-            final String command = String.valueOf(cmd);
+            String cmd = vecstmt.get(0)
+                                .replace("@proghome/", PROGHOME);
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
                     Runtime.getRuntime()
-                           .exec(command);
+                           .exec(cmd);
                     return null;
                 }
-
             }.execute();
         } else {
             JOptionPane.showMessageDialog(null, "Keine Programm zur Ausführung gefunden");
@@ -689,71 +554,51 @@ public class UpdatePanel extends JXPanel {
     }
 
     public static String Escaped(String string) {
-        String escaped = string.replaceAll("\'", "\\\\'");
+        String escaped = string.replaceAll("'", "\\\\'");
         escaped = escaped.replaceAll("\"", "\\\\\"");
         return escaped;
     }
 
     private void doTabellenUpdate() {
-        String ik = "";
+        String ik;
         ftpt = new FTPTools();
-        Long xgross = Long.parseLong(tab.getValueAt(tab.getSelectedRow(), 2)
+        long xgross = Long.parseLong(tab.getValueAt(tab.getSelectedRow(), 2)
                                         .toString());
         ftpt.holeDatei("TabellenUpdate.sql", PROGHOME, true, getInstance(), xgross);
         ftpt = null;
         pbar.setValue(0);
-        File file = null;
-        FileReader freader = null;
-        LineNumberReader lnreader = null;
-        Vector<String> vecstmt = new Vector<String>();
-        try {
-            file = new File(PROGHOME + "TabellenUpdate.sql");
-            freader = new FileReader(file);
-            lnreader = new LineNumberReader(freader);
-            String line = "";
+        File file = new File(PROGHOME + "TabellenUpdate.sql");
+        Vector<String> vecstmt = new Vector<>();
+        try (FileReader freader = new FileReader(file); LineNumberReader lnreader = new LineNumberReader(freader)) {
+
+            String line;
             while ((line = lnreader.readLine()) != null) {
-                if (!String.valueOf(line)
-                           .trim()
-                           .equals("")) {
-                    // vecstmt.add(String.valueOf(Escaped(line)));
-                    vecstmt.add(String.valueOf(line));
+                if (!line.trim()
+                         .equals("")) {
+                    vecstmt.add(line);
                 }
-                System.out.println("Statement = " + line);
+                LOG.debug("Statement = " + line);
             }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                freader.close();
-                lnreader.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException ex) {
+            LOG.error("Exception: ",ex);
         }
         if (vecstmt.size() > 0) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    jFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                }
-            });
+            SwingUtilities.invokeLater(() -> jFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR)));
 
-            for (int i = 0; i < mandvec.size(); i++) {
-                ik = mandvec.get(i)[0];
+            for (String[] strings : mandvec) {
+                ik = strings[0];
                 int frage = JOptionPane.showConfirmDialog(null,
                         "Wollen Sie die Tabellen der Datenbank für IK ->" + ik + " jetzt anpassen",
                         "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                 if (frage == JOptionPane.YES_OPTION) {
                     try {
 
-                       Connection  conn = new DatenquellenFactory(ik).createConnection();
-                        for (int x = 0; x < vecstmt.size(); x++) {
+                        Connection conn = new DatenquellenFactory(ik).createConnection();
+                        for (String s : vecstmt) {
                             try {
-                                System.out.println("Execute = " + vecstmt.get(x));
-                                SqlInfo.sqlAusfuehren(conn, vecstmt.get(x));
-                                System.out.println("Execute = " + vecstmt.get(x));
+                                LOG.debug("Execute = " + s);
+                                SqlInfo.sqlAusfuehren(conn, s);
+                                LOG.debug("Execute = " + s);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
@@ -761,27 +606,21 @@ public class UpdatePanel extends JXPanel {
 
                         conn.close();
                     } catch (Exception ex) {
+                        LOG.error("Fehler beim öffnen der Datenbank\nBetroffene IK: " + ik
+                                + "\nFehlertext: " + (ex.getMessage() == null ? "nicht verfügbar" : ex.getMessage()),ex);
                         JOptionPane.showMessageDialog(null, "Fehler beim öffnen der Datenbank\nBetroffene IK: " + ik
                                 + "\nFehlertext: " + (ex.getMessage() == null ? "nicht verfügbar" : ex.getMessage()));
                     }
                 }
             }
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
-                }
-            });
+            SwingUtilities.invokeLater(() -> jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR)));
 
         } else {
             JOptionPane.showMessageDialog(null, "Keine Statements für Tabellen-Update gefunden");
         }
     }
 
-
-    class UpdateTableModel extends DefaultTableModel {
-
-        private static final long serialVersionUID = 1L;
+    static class UpdateTableModel extends DefaultTableModel {
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {
@@ -800,9 +639,9 @@ public class UpdatePanel extends JXPanel {
     }
 
     private boolean testeObLogVorhanden(String datei) {
-        for (int i = 0; i < ffile.length; i++) {
-            if (ffile[i].getName()
-                        .equals(datei + ".log")) {
+        for (FTPFile ftpFile : ffile) {
+            if (ftpFile.getName()
+                       .equals(datei + ".log")) {
                 return true;
             }
         }
@@ -823,9 +662,7 @@ public class UpdatePanel extends JXPanel {
             if (isAdjusting) {
                 return;
             }
-            if (lsm.isSelectionEmpty()) {
-
-            } else {
+            if (!lsm.isSelectionEmpty()) {
                 int minIndex = lsm.getMinSelectionIndex();
                 int maxIndex = lsm.getMaxSelectionIndex();
                 for (int i = minIndex; i <= maxIndex; i++) {
@@ -835,7 +672,7 @@ public class UpdatePanel extends JXPanel {
                         new SwingWorker<Void, Void>() {
 
                             @Override
-                            protected Void doInBackground() throws Exception {
+                            protected Void doInBackground() {
                                 try {
                                     int modi = tab.convertRowIndexToModel(ix);
                                     pbar.setValue(0);
@@ -846,15 +683,13 @@ public class UpdatePanel extends JXPanel {
                                         new SwingWorker<Void, Void>() {
 
                                             @Override
-                                            protected Void doInBackground() throws Exception {
-                                                // System.out.println("Starte AbrDlg");
+                                            protected Void doInBackground() {
                                                 abrdlg = new UpdateDlg();
                                                 abrdlg.setzeLabel("<html>Beziehe Log-Datei für "
                                                         + tabmod.getValueAt(imodi, 0)
                                                                 .toString()
                                                         + "<br><br>Bitte warten....<br></html>");
                                                 abrdlg.setModal(true);
-                                                // abrdlg.setPreferredSize(new Dimension(200,200));
                                                 abrdlg.setAlwaysOnTop(true);
 
                                                 abrdlg.pack();
@@ -876,7 +711,7 @@ public class UpdatePanel extends JXPanel {
                                                 tab.setRowSelectionInterval(modi, modi);
                                             }
                                         } catch (Exception ex) {
-                                            ex.printStackTrace();
+                                            LOG.error("Fehler beim Bezug der Log-Datei",ex);
                                             ta.setText("Fehler beim Bezug der Log-Datei");
                                         }
                                         jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
@@ -887,23 +722,19 @@ public class UpdatePanel extends JXPanel {
 
                                     }
                                 } catch (Exception ex) {
-                                    ex.printStackTrace();
+                                    LOG.error("Exception",ex);
                                 }
-                                // System.out.println("Beende AbrDlg");
                                 if (abrdlg != null) {
                                     abrdlg.setVisible(false);
                                     abrdlg = null;
                                 }
                                 return null;
                             }
-
                         }.execute();
-
                         break;
                     }
                 }
             }
         }
     }
-
 }
