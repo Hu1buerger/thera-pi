@@ -19,7 +19,6 @@ public class RehaReverseServer extends SwingWorker<Void, Void> {
     StringBuffer sb = new StringBuffer();
     InputStream input = null;
     OutputStream output = null;
-    // public int port = 6000;
     public static boolean RehaHMKIsActive = false;
     public static boolean offenePostenIsActive = false;
 
@@ -32,14 +31,15 @@ public class RehaReverseServer extends SwingWorker<Void, Void> {
         return Integer.toString(RehaHMK.xport);
     }
 
-    private void doReha(String op) {
-        if (op.split("#")[1].equals(RehaIOMessages.MUST_GOTOFRONT)) {
+    private void msgFromReha(String op) {
+        String data[] = op.split("#");
+        String msg = data[1];
+        if (msg.equals(RehaIOMessages.MUST_GOTOFRONT)) {
             System.out.println("Meldung in RehaHMK eingetroffen: in den Vordergund");
             RehaHMK.thisFrame.setVisible(true);
-        } else if (op.split("#")[1].equals(RehaIOMessages.MUST_REZFIND)) {
-
+        } else if (msg.equals(RehaIOMessages.NEED_AKTUSER)) {
+            RehaHMK.aktUser = data[2];             
         }
-
     }
 
     @Override
@@ -98,7 +98,7 @@ public class RehaReverseServer extends SwingWorker<Void, Void> {
 
             if (sb.toString()
                   .startsWith("Reha#")) {
-                doReha(String.valueOf(sb.toString()));
+                msgFromReha(String.valueOf(sb.toString()));
             }
         }
 
