@@ -543,12 +543,12 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                                     .toString();
 
         if (bar.isSelected()) {
+            String ktext = rgaf_rechnum + "," + tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Name);
+            // Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
+            if (ktext.length() > 35) { ktext = ktext.substring(0, 34);}
             cmd = "insert into kasse set einnahme='" + dcf.format(eingang)
                                                           .replace(",", ".")
-                    + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='" + rgaf_rechnum + ","
-                    + tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Name) + "'," + // Name, Vorname,
-                                                                                               // Geburtstag (soweit 35
-                                                                                               // Zeichen reichen)
+                    + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='" + ktext + "'," + 
                     "rez_nr='" + rgaf_reznum + "'";
             // System.out.println(cmd);
             SqlInfo.sqlAusfuehren(cmd);
