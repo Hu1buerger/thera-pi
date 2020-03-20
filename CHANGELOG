@@ -14,12 +14,24 @@ Patientenfenster:
 Abrechnung $302:
 - InfoDialog (F1) markiert volle/abgebrochene VOs farbig
 ### changed
-Abrechnung $302
-- Verschlüsselung mit 4096er Schlüssellänge #315
+Abrechnung $302:
+- Verschlüsselung mit 4096bit Schlüssellänge + Signatur mit RSASSA-PSS #315
 - Datenaustausch 302 TA1 Version 13 #250
 - neue Vorlagen für Zertifikatsantrag
+- im Info-Dialog ([F1] im Kassenbaum) sind links auf volle und abgebrochene VOs farbig markiert
+ICD10-Recherche:
+- Layout geändert
 ### fixed
+Patientenfenster:
+- Korrekturfax (HMR-Tool) kann wieder in Patientenakte vermerkt werden #309
+- HMR-Check für Podo-VOs ist wieder auf Stand der v1.0  #56, #314
+- doppelt angezeigte LANR behoben #313
+OpRgAf:
 - Tastenkombination Alt + A funktioniert nicht bei RGR/AFR #330
+- in VR können die Beträge editiert (also auch 0 gesetzt) werden
+Abrechnung $302:
+- im Kassenbaum werden die aktuellen Kassennamen angezeigt #302
+
 
 ## [1.1.3] - 2019-12-05
 
