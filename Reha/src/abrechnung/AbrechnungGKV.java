@@ -2159,7 +2159,8 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                     rechnungBuf.append("ort='" + hmAnnahme.get("<gkv4>")
                                                           .split(" ")[1]
                             + "', ");
-                    rechnungBuf.append("name='" + kopf[9].split("=")[1] + "', ");
+                    String patName = StringTools.Escaped(kopf[9].split("=")[1]);
+                    rechnungBuf.append("name='" + patName + "', ");
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null, "Fehler in der Adressaufbereitung - Tabelle=Faktura");
                     ex.printStackTrace();
