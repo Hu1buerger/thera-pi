@@ -13,13 +13,16 @@ import org.jdesktop.swingx.JXPanel;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class UpdateDlg extends JDialog {
+    private static final Logger LOG = LoggerFactory.getLogger(UpdateDlg.class);
 
     private JLabel textlab;
-    private Font font = new Font("Arial", Font.PLAIN, 12);
+    private Font textlabFont = new Font("Arial", Font.PLAIN, 12);
 
-    public UpdateDlg() {
+    UpdateDlg() {
         super();
         setUndecorated(true);
         setModal(false);
@@ -42,7 +45,7 @@ public class UpdateDlg extends JDialog {
         bildlab.setIcon(new ImageIcon(TheraPiUpdates.imgtporg));
         jpan.add(bildlab, cc.xy(2, 2));
         textlab = new JLabel(" ");
-        textlab.setFont(font);
+        textlab.setFont(textlabFont);
         textlab.setForeground(Color.BLUE);
         jpan.add(textlab, cc.xy(2, 4, CellConstraints.CENTER, CellConstraints.CENTER));
         jpan.validate();
@@ -57,7 +60,7 @@ public class UpdateDlg extends JDialog {
         try {
             Thread.sleep(50);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOG.error("Exception: "+ e.getMessage(),e);
         }
     }
 

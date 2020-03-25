@@ -14,15 +14,14 @@ import java.sql.Statement;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class SqlInfo {
 
-    private static Logger logger = LoggerFactory.getLogger(SqlInfo.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SqlInfo.class);
     private static JFrame frame = null;
     static Connection conn = null;
     private static InetAddress dieseMaschine;
@@ -870,49 +869,23 @@ public class SqlInfo {
 
     /*****************************************/
     public static String holeEinzelFeld(String xstmt) {
-        Statement stmt = null;
-        ResultSet rs = null;
         String ret = "";
-        try {
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-        } catch (SQLException e) {
-            e.printStackTrace();
-            return "";
+        if (frame != null) {
+            frame.setCursor(wartenCursor);
         }
-        try {
-            if (frame != null)
-                frame.setCursor(wartenCursor);
-            String sstmt = xstmt;
-            rs = stmt.executeQuery(sstmt);
-            while (rs.next()) {
+        try (Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
+                ResultSet rs = stmt.executeQuery(xstmt)) {
+            if (rs.next()) {
                 ret = (rs.getString(1) == null ? "" : rs.getString(1)).trim();
-                break;
             }
-            if (frame != null)
-                frame.setCursor(normalCursor);
             return ret;
-        } catch (SQLException ev) {
-            // System.out.println("SQLException: " + ev.getMessage());
-            // System.out.println("SQLState: " + ev.getSQLState());
-            // System.out.println("VendorError: " + ev.getErrorCode());
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                    rs = null;
-                } catch (SQLException sqlEx) { // ignore }
-                    rs = null;
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                    stmt = null;
-                } catch (SQLException sqlEx) { // ignore }
-                    stmt = null;
-                }
-            }
+        } catch (SQLException ex) {
+            LOG.error("SQLException: {}", ex.getMessage());
+            LOG.error("SQLState: {}", ex.getSQLState());
+            LOG.error("VendorError: " + ex.getErrorCode(), ex);
         }
+        if (frame != null)
+            frame.setCursor(normalCursor);
         return ret;
     }
 
@@ -954,7 +927,7 @@ public class SqlInfo {
             retvec.clear();
             retvec = null;
         } catch (SQLException ev) {
-            logger.error("", ev);
+            LOG.error("", ev);
             // System.out.println("SQLState: " + ev.getSQLState());
             // System.out.println("VendorError: " + ev.getErrorCode());
         }
@@ -1214,88 +1187,60 @@ public class SqlInfo {
         return ret;
     }
 
-    public static InputStream liesIniAusTabelle(String inifilename) {
-        InputStream retStream = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-        try {
-            stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-            String test = "select inhalt from inidatei where dateiname='" + inifilename + "' LIMIT 1";
+    public static String liesIniAusTabelle(String inifilename) {
+        String result = null;
 
-            rs = stmt.executeQuery(test);
-            if (rs.next()) {
-                retStream = rs.getBinaryStream(1);
+        final String preparedStatementString = "SELECT inhalt FROM inidatei WHERE dateiname=? LIMIT 1";
+        try (PreparedStatement preparedStatement = conn.prepareStatement(preparedStatementString,
+                ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
+            preparedStatement.setString(1, inifilename);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (rs.next()) {
+                    result = rs.getString("inhalt");
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException sqlEx) { // ignore }
-                    rs = null;
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException sqlEx) { // ignore }
-                    stmt = null;
-                }
-            }
-
         }
-        return retStream;
+        return result;
     }
 
     public static boolean schreibeIniInTabelle(String inifilename, byte[] buf) {
-        boolean ret = false;
-        try {
-            Statement stmt = null;
-            ResultSet rs = null;
-            PreparedStatement ps = null;
-            try {
-                stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-                String select = null;
-                if (SqlInfo.holeEinzelFeld(
-                        "select dateiname from inidatei where dateiname='" + inifilename + "' LIMIT 1")
-                           .equals("")) {
-                    select = "insert into inidatei set dateiname = ? , inhalt = ?";
-                } else {
-                    select = "update inidatei set dateiname = ? , inhalt = ? where dateiname = '" + inifilename + "'";
-                }
-                ps = conn.prepareStatement(select);
-                ps.setString(1, inifilename);
-                ps.setBytes(2, buf);
-                ps.execute();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            } finally {
-                if (rs != null) {
-                    try {
-                        rs.close();
-                    } catch (SQLException sqlEx) {
-                        rs = null;
-                    }
-                }
-                if (stmt != null) {
-                    try {
-                        stmt.close();
-                    } catch (SQLException sqlEx) { // ignore }
-                        stmt = null;
-                    }
-                }
-                if (ps != null) {
-                    ps.close();
-                }
-            }
-            ret = true;
-        } catch (Exception ex) {
 
+        boolean result;
+        String insertOrUpdateStatementString = determineIfInsertOrUpdateMustPerformed(inifilename);
+        try (PreparedStatement ps = conn.prepareStatement(insertOrUpdateStatementString,
+                ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
+            ps.setString(1, inifilename);
+            ps.setBytes(2, buf);
+            ps.execute();
+            result = true;
+        } catch (SQLException ex) {
+            LOG.error("Exception during performing sql statement " + insertOrUpdateStatementString
+                    + " with following values. dateiname=" + inifilename + ", inhalt=" + buf, ex);
+            result = false;
+        } catch (Exception ex) {
+            LOG.error("Exception during check if update or insert is needed!", ex);
+            result = false;
         }
-        return ret;
+        return result;
+    }
+
+    private static String determineIfInsertOrUpdateMustPerformed(String inifilename) {
+        final String existsEntryStatementString = "select dateiname from inidatei where dateiname='" + inifilename
+                + "' LIMIT 1";
+        String insertOrUpdateStatementString;
+        try {
+            if (SqlInfo.holeEinzelFeld(existsEntryStatementString)
+                       .isEmpty()) {
+                insertOrUpdateStatementString = "insert into inidatei set inhalt = ?, dateiname = ?";
+            } else {
+                insertOrUpdateStatementString = "update inidatei set inhalt = ? where dateiname = ?";
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception during performing sql statement " + existsEntryStatementString, ex);
+        }
+        return insertOrUpdateStatementString;
     }
 
 }

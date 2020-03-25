@@ -1,13 +1,20 @@
 package org.thera_pi.updates;
 
-import java.awt.Component;
-import java.awt.LayoutManager;
+import java.awt.*;
 
-import javax.swing.JScrollPane;
+import javax.swing.*;
 
 import org.jdesktop.swingx.JXPanel;
 
 public class JCompTools {
+
+    /**
+     * private CTor to avoid creating an instance of a class with only static
+     * methods.
+     */
+    private JCompTools() {
+        // nothing to do here
+    }
 
     public static JScrollPane getTransparentScrollPane(JXPanel jpan) {
         JScrollPane jscr = new JScrollPane();
@@ -32,30 +39,4 @@ public class JCompTools {
         jscr.validate();
         return jscr;
     }
-
-    public static JScrollPane getTransparent2ScrollPane(JScrollPane jpan) {
-        JScrollPane jscr = new JScrollPane();
-        jscr.setOpaque(false);
-        jscr.getViewport()
-            .setOpaque(false);
-        jscr.setBorder(null);
-        jscr.setViewportBorder(null);
-        jscr.setViewportView(jpan);
-        jscr.validate();
-        return jscr;
-    }
-
-    public static JXPanel getEmptyJXPanel(LayoutManager lay) {
-        JXPanel jpan = new JXPanel();
-        jpan.setBorder(null);
-        jpan.setLayout(lay);
-        return jpan;
-    }
-
-    public static JXPanel getEmptyJXPanel() {
-        JXPanel jpan = new JXPanel();
-        jpan.setBorder(null);
-        return jpan;
-    }
-
 }

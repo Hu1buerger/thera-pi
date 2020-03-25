@@ -1,7 +1,11 @@
 package org.thera_pi.updates;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -31,16 +35,16 @@ public class TheraPiUpdates extends WindowAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheraPiUpdates.class);
     private static final String PROGHOME = Path.Instance.getProghome();
+    private static final String LIB_SIG_JAR = "Libraries/lib/ocf/sig.jar";
+    private static boolean showpwdlg = true;
+    private static boolean macNotMatch = true;
+    private static boolean dbok = false;
     private JFrame jFrame = null;
-    private JXDialog dlg;
     private UpdatePanel updatePanel;
     private UpdateTab updateTab;
     private String email;
     private String pw;
     static boolean updateallowed = false;
-    static boolean showpwdlg = true;
-    static boolean macNotMatch = true;
-    static boolean dbok = false;
     static Image imgtporg;
     static List<String> userdaten;
     static Connection conn = null;
@@ -60,7 +64,7 @@ public class TheraPiUpdates extends WindowAdapter {
             LOG.debug("FTP-Modus = PassiveMode");
         }
 
-        LOG.debug("program home: " + PROGHOME);
+        LOG.debug("program home: {}", PROGHOME);
 
         TheraPiUpdates application = new TheraPiUpdates();
 
@@ -76,7 +80,7 @@ public class TheraPiUpdates extends WindowAdapter {
                 TheraPiUpdates.updateallowed = false;
                 JOptionPane.showMessageDialog(null,
                         "Sie haben zwar eine Zugangsdatei in Ihrem System integriert, die Zugangsdaten sind allderdings falsch");
-                File ftest = new File(PROGHOME + "Libraries/lib/ocf/sig.jar");
+                File ftest = new File(PROGHOME + LIB_SIG_JAR);
                 if (ftest.exists()) {
                     ftest.delete();
                 }
@@ -84,8 +88,8 @@ public class TheraPiUpdates extends WindowAdapter {
                     try {
                         Runtime.getRuntime()
                                .exec("java -jar " + PROGHOME + "TheraPi.jar");
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } catch (IOException ex) {
+                        LOG.error("Exception :" + ex.getMessage(), ex);
                     }
                     System.exit(0);
                 }
@@ -96,7 +100,7 @@ public class TheraPiUpdates extends WindowAdapter {
 
     }
 
-    public void starteFTP() {
+    private void starteFTP() {
         if (UpdateConfig.getInstance()
                         .isDeveloperMode()) {
             updateTab.starteFTP();
@@ -105,18 +109,18 @@ public class TheraPiUpdates extends WindowAdapter {
         }
     }
 
-    public boolean testeZugang() {
+    private boolean testeZugang() {
         String cmd = "select id from regtpuser where email='" + this.email + "' and pw='" + this.pw + "' LIMIT 1";
         List<String> testvec = SqlInfo.holeFeld(conn, cmd);
-        return testvec.size() > 0;
+        return !testvec.isEmpty();
     }
 
-    public void createJFrame() {
+    private void createJFrame() {
         try {
             UIManager.setLookAndFeel("com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel");
         } catch (ClassNotFoundException | UnsupportedLookAndFeelException | IllegalAccessException
                 | InstantiationException e) {
-            LOG.error("Exception: ", e);
+            LOG.error("Exception: " + e.getMessage(), e);
         }
 
         new DatenbankStarten().run();
@@ -140,10 +144,10 @@ public class TheraPiUpdates extends WindowAdapter {
         jFrame.setTitle("Thera-Pi  Update-Explorer");
         jFrame.setSize(Math.max(ssize.width * 3 / 4, 800), Math.max(ssize.height / 2, 600));
         jFrame.setPreferredSize(new Dimension(Math.max(ssize.width * 3 / 4, 800), Math.max(ssize.height / 2, 600)));
-        jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         jFrame.setLocationRelativeTo(null);
         try {
-            strMACAdr = getMacAddress();
+            TheraPiUpdates.strMACAdr = TheraPiUpdates.getMacAddress();
         } catch (Exception ex) {
             LOG.error("Exception: ", ex);
         }
@@ -154,13 +158,12 @@ public class TheraPiUpdates extends WindowAdapter {
             LOG.debug("Datei existiert nicht");
         }
         // ************** Testen ob die sig.jar noch altes Format hat *************/
-        File ftest = new File(PROGHOME + "Libraries/lib/ocf/sig.jar");
+        File ftest = new File(PROGHOME + LIB_SIG_JAR);
         if (ftest.exists()) {
-            try (FileReader fileReader = new FileReader(PROGHOME + "Libraries/lib/ocf/sig.jar");
+            try (FileReader fileReader = new FileReader(PROGHOME + LIB_SIG_JAR);
                     BufferedReader in = new BufferedReader(fileReader)) {
                 String test = in.readLine()
                                 .trim();
-                in.close();
                 if (!test.startsWith("[Updates]")) {
                     ftest.delete();
                 }
@@ -170,30 +173,30 @@ public class TheraPiUpdates extends WindowAdapter {
 
         }
 
-        File f = new File(PROGHOME + "Libraries/lib/ocf/sig.jar");
+        File f = new File(PROGHOME + LIB_SIG_JAR);
         if (!f.exists()) {
             LOG.debug("sig nicht vorhanden");
-            showpwdlg = true;
+            TheraPiUpdates.showpwdlg = true;
         } else {
             try {
-                INIFile inif = new INIFile(PROGHOME + "Libraries/lib/ocf/sig.jar");
+                INIFile inif = new INIFile(PROGHOME + LIB_SIG_JAR);
 
                 String macAdr = inif.getStringProperty("Updates", "1");
                 this.email = inif.getStringProperty("Updates", "2");
                 this.pw = inif.getStringProperty("Updates", "3");
-                LOG.debug("Client = " + macAdr);
+                LOG.debug("Client = {}", macAdr);
 
                 if (!macAdr.equals(strMACAdr)) {
                     JOptionPane.showMessageDialog(null,
                             "Der Updatekanal wurde für diesen Rechner noch nicht freigeschaltet");
-                    showpwdlg = true;
-                    macNotMatch = true;
+                    TheraPiUpdates.showpwdlg = true;
+                    TheraPiUpdates.macNotMatch = true;
                 } else {
-                    showpwdlg = false;
+                    TheraPiUpdates.showpwdlg = false;
                 }
-                imgtporg = new ImageIcon(PROGHOME + "icons/TPorgKlein.png").getImage()
-                                                                           .getScaledInstance(246, 35,
-                                                                                   Image.SCALE_SMOOTH);
+                TheraPiUpdates.imgtporg = new ImageIcon(PROGHOME + "icons/TPorgKlein.png").getImage()
+                                                                                          .getScaledInstance(246, 35,
+                                                                                                  Image.SCALE_SMOOTH);
 
             } catch (Exception e) {
                 LOG.error("Exception: ", e);
@@ -205,11 +208,11 @@ public class TheraPiUpdates extends WindowAdapter {
 
         if (UpdateConfig.getInstance()
                         .isDeveloperMode()) {
-            jFrame.getContentPane()
-                  .add(updateTab = new UpdateTab(jFrame));
+            updateTab = new UpdateTab(jFrame);
+            jFrame.getContentPane().add(updateTab);
         } else {
-            jFrame.getContentPane()
-                  .add(updatePanel = new UpdatePanel(jFrame));
+            updatePanel = new UpdatePanel(jFrame);
+            jFrame.getContentPane().add(updatePanel);
         }
         jFrame.pack();
         jFrame.setVisible(true);
@@ -242,7 +245,8 @@ public class TheraPiUpdates extends WindowAdapter {
     }
 
     static final class DatenbankStarten implements Runnable {
-        void StarteDB() {
+        @Override
+        public void run() {
             try {
                 Class.forName("de.root1.jpmdbc.Driver");
             } catch (final Exception e) {
@@ -263,23 +267,17 @@ public class TheraPiUpdates extends WindowAdapter {
                 TheraPiUpdates.dbok = true;
 
                 LOG.debug("Kontakt zur Update-Datenbank hergestellt");
-
             } catch (final SQLException ex) {
                 LOG.error("Exception: ", ex);
                 JOptionPane.showMessageDialog(null,
                         "Fehler: Datenbankkontakt zum Update-Server konnte nicht hergestellt werden.");
             }
         }
-
-        @Override
-        public void run() {
-            StarteDB();
-        }
     }
 
     private void getPwDialog() {
         final JXPanel pan = new JXPanel();
-        dlg = new JXDialog(jFrame, pan);
+        JXDialog dlg = new JXDialog(jFrame, pan);
         final JTextField field1 = new JTextField();
         final JPasswordField field2 = new JPasswordField();
         final JButton[] buts = { null, null };
@@ -301,34 +299,31 @@ public class TheraPiUpdates extends WindowAdapter {
                 JOptionPane.showMessageDialog(null, "Emailadresse muß angegeben werden");
                 return;
             }
-            String pw = new String(field2.getPassword());
-            if (pw.trim()
+            String password = new String(field2.getPassword());
+            if (password.trim()
                   .equals("")) {
                 JOptionPane.showMessageDialog(null, "Passwort muß angegeben werden");
                 field2.requestFocus();
                 return;
             }
-            boolean knownUser = sucheUser(field1.getText()
-                                                .trim(),
-                    pw.trim());
-            LOG.debug("Benutzer is bekannt: " + knownUser);
+            boolean knownUser = sucheUser(field1.getText().trim(),password.trim());
+            LOG.debug("Benutzer is bekannt: {}", knownUser);
             if (!knownUser) {
                 JOptionPane.showMessageDialog(null,
                         "Emailadresse und/oder Passwort sind nicht registriert,\noder passen nicht zusammen!");
                 field1.requestFocus();
                 return;
             }
-            LOG.debug("MacNotMatch = " + macNotMatch);
+            LOG.debug("MacNotMatch = {}", macNotMatch);
             if (macNotMatch) {
                 try {
-                    INIFile inif = new INIFile(PROGHOME + "Libraries/lib/ocf/sig.jar");
+                    INIFile inif = new INIFile(PROGHOME + LIB_SIG_JAR);
                     inif.setStringProperty("Updates", "1", strMACAdr.trim(), null);
                     inif.setStringProperty("Updates", "2", field1.getText(), null);
-                    inif.setStringProperty("Updates", "3", pw, null);
+                    inif.setStringProperty("Updates", "3", password, null);
                     inif.save();
                 } catch (Exception ex) {
                     LOG.error("Exception: ", ex);
-                    ex.printStackTrace();
                 }
 
             }
@@ -353,7 +348,6 @@ public class TheraPiUpdates extends WindowAdapter {
                                .exec("java -jar " + PROGHOME + "TheraPi.jar");
                     } catch (IOException ex) {
                         LOG.error("Exception: ", ex);
-                        ex.printStackTrace();
                     }
                 }
             }
@@ -381,29 +375,28 @@ public class TheraPiUpdates extends WindowAdapter {
         field1.requestFocus();
     }
 
-    public boolean sucheUser(String email, String pw) {
+    private boolean sucheUser(String email, String pw) {
         try {
-            userdaten = SqlInfo.holeSatz(TheraPiUpdates.conn, "regtpuser", " * ",
+            TheraPiUpdates.userdaten = SqlInfo.holeSatz(TheraPiUpdates.conn, "regtpuser", " * ",
                     "email='" + email + "' and pw='" + pw + "'");
-            if (userdaten.size() > 0) {
+            if (!userdaten.isEmpty()) {
                 return true;
             }
         } catch (Exception ex) {
             LOG.error("Exception: ", ex);
-            ex.printStackTrace();
         }
         return false;
     }
 
-    public static String getMacAddress() {
+    private static String getMacAddress() {
 
         StringBuilder result = new StringBuilder();
         try {
             for (NetworkInterface ni : Collections.list(NetworkInterface.getNetworkInterfaces())) {
                 byte[] hardwareAddress = ni.getHardwareAddress();
                 if (hardwareAddress != null) {
-                    for (int i = 0; i < hardwareAddress.length; i++) {
-                        result.append(String.format((i == 0 ? "" : "") + "%02X", hardwareAddress[i]));
+                    for (byte address : hardwareAddress) {
+                        result.append(String.format("%02X", address));
                     }
                     if (result.length() > 0 && !ni.isLoopback()) {
                         return result.toString();
@@ -412,7 +405,6 @@ public class TheraPiUpdates extends WindowAdapter {
             }
         } catch (Exception e) {
             LOG.error("Exception: ", e);
-            e.printStackTrace();
         }
         return result.toString();
     }

@@ -12,6 +12,7 @@ import environment.Path;
 public class UpdateConfig {
     private static final Logger LOG = LoggerFactory.getLogger(UpdateConfig.class);
     private static final String NONRTASPEZIALSCHLUESSEL = "NurFuerRegistrierteUserjeLaengerJeBesserPasswortRehaVerwaltung";
+    private static final String SECTION_THERA_PI_UPDATES = "TheraPiUpdates";
     private String updateDir = "";
     private String updateHost = "";
     private String updateUser = "";
@@ -41,56 +42,56 @@ public class UpdateConfig {
             INIFile ini = new INIFile(proghome + "/ini/tpupdateneu.ini");
 
             Verschluesseln man = Verschluesseln.getInstance(NONRTASPEZIALSCHLUESSEL);
-            updateHost = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateFTP"));
-            updateDir = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateVerzeichnis"));
-            updateUser = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdateUser"));
-            updatePasswd = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdatePasswd"));
-            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")));
-            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")));
+            updateHost = man.decrypt(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateFTP"));
+            updateDir = man.decrypt(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateVerzeichnis"));
+            updateUser = man.decrypt(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateUser"));
+            updatePasswd = man.decrypt(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdatePasswd"));
+            developerMode = ("1".equals(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateEntwickler")));
+            useActiveMode = ("1".equals(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UseFtpActiveMode")));
         } else {
             INIFile ini = new INIFile(proghome + "/ini/tpupdate.ini");
             LOG.debug(ini.getFileName());
 
-            updateHost = ini.getStringProperty("TheraPiUpdates", "UpdateFTP");
-            updateDir = ini.getStringProperty("TheraPiUpdates", "UpdateVerzeichnis");
-            updateUser = ini.getStringProperty("TheraPiUpdates", "UpdateUser");
+            updateHost = ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateFTP");
+            updateDir = ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateVerzeichnis");
+            updateUser = ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateUser");
 
-            String pw = ini.getStringProperty("TheraPiUpdates", "UpdatePasswd");
+            String pw = ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdatePasswd");
             Verschluesseln man = Verschluesseln.getInstance();
 
             if (pw.length() <= 20) {
-                ini.setStringProperty("TheraPiUpdates", "UpdatePasswd", man.encrypt(pw), null);
+                ini.setStringProperty(SECTION_THERA_PI_UPDATES, "UpdatePasswd", man.encrypt(pw), null);
                 ini.save();
                 updatePasswd = pw;
             } else {
-                updatePasswd = man.decrypt(ini.getStringProperty("TheraPiUpdates", "UpdatePasswd"));
+                updatePasswd = man.decrypt(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdatePasswd"));
             }
-            developerMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UpdateEntwickler")));
-            useActiveMode = ("1".equals(ini.getStringProperty("TheraPiUpdates", "UseFtpActiveMode")));
+            developerMode = ("1".equals(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UpdateEntwickler")));
+            useActiveMode = ("1".equals(ini.getStringProperty(SECTION_THERA_PI_UPDATES, "UseFtpActiveMode")));
         }
     }
 
-    public String getUpdateDir() {
+    String getUpdateDir() {
         return updateDir;
     }
 
-    public String getUpdateHost() {
+    String getUpdateHost() {
         return updateHost;
     }
 
-    public String getUpdateUser() {
+    String getUpdateUser() {
         return updateUser;
     }
 
-    public String getUpdatePasswd() {
+    String getUpdatePasswd() {
         return updatePasswd;
     }
 
-    public boolean isUseActiveMode() {
+    boolean isUseActiveMode() {
         return useActiveMode;
     }
 
-    public boolean isDeveloperMode() {
+    boolean isDeveloperMode() {
         return developerMode;
     }
 }

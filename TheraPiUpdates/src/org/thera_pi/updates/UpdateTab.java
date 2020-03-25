@@ -11,7 +11,7 @@ import org.jdesktop.swingx.JXPanel;
 
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
-public class UpdateTab extends JXPanel {
+class UpdateTab extends JXPanel {
 
     private UpdatePanel tab1 ;
 
@@ -30,12 +30,12 @@ public class UpdateTab extends JXPanel {
         validate();
     }
 
-    public void starteFTP() {
+    void starteFTP() {
         tab1.starteFTP();
     }
 
 
-    public FTPFile[] getFilesFromUpdatePanel() {
+    FTPFile[] getFilesFromUpdatePanel() {
         return tab1.ffile;
     }
 

@@ -1,20 +1,11 @@
 package org.thera_pi.updates;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 
 import org.apache.commons.net.ftp.FTPFile;
 import org.jdesktop.swingworker.SwingWorker;
@@ -26,6 +17,16 @@ import com.jgoodies.forms.layout.FormLayout;
 import environment.Path;
 
 public class EntwicklerPanel extends JXPanel implements ActionListener {
+
+    /**
+     * constant value, used as button text
+     */
+    private static final String BUTTON_TEXT_BEENDEN = "beenden";
+
+    /**
+     * constant value, used as action command for button beenden.
+     */
+    private static final String ACTION_COMMAND_BEENDEN = "beenden";
 
     private UpdateTab updateTab;
     private JPasswordField pw = null;
@@ -101,8 +102,8 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         jpan.add(hochladen, cc.xy(4, 12));
         hochladen.setEnabled(false);
 
-        JButton beenden = new JButton("beenden");
-        beenden.setActionCommand("beenden");
+        JButton beenden = new JButton(BUTTON_TEXT_BEENDEN);
+        beenden.setActionCommand(ACTION_COMMAND_BEENDEN);
         beenden.addActionListener(this);
         jpan.add(beenden, cc.xy(6, 12));
 
@@ -116,7 +117,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         if (cmd.equals("datwahl")) {
             new SwingWorker<Void, Void>() {
                 @Override
-                protected Void doInBackground()   {
+                protected Void doInBackground() {
                     doDateiwahl();
                     return null;
                 }
@@ -125,7 +126,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         if (cmd.equals("hochladen")) {
             new SwingWorker<Void, Void>() {
                 @Override
-                protected Void doInBackground()   {
+                protected Void doInBackground() {
                     doHochladen();
                     JOptionPane.showMessageDialog(null, "Update erfolgreich beendet");
                     return null;
@@ -134,17 +135,17 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
             hochladen.setEnabled(false);
 
         }
-        if (cmd.equals("beenden")) {
+        if (cmd.equals(ACTION_COMMAND_BEENDEN)) {
             doBeenden();
         }
 
     }
 
-    public void doBeenden() {
+    private void doBeenden() {
         System.exit(0);
     }
 
-    public void doDateiwahl() {
+    private void doDateiwahl() {
         String passw = new String(pw.getPassword());
         if (!passw.equals(entwicklerpw)) {
             JOptionPane.showMessageDialog(null,
@@ -168,7 +169,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         boolean holeAltenLog = false;
         for (FTPFile ftpFile : ffile) {
             if (ftpFile.getName()
-                    .equals(updatedatei + ".log")) {
+                       .equals(updatedatei + ".log")) {
                 holeAltenLog = true;
                 break;
             }
@@ -184,7 +185,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         hochladen.setEnabled(true);
     }
 
-    public void doHochladen() {
+    private void doHochladen() {
         String passw = new String(pw.getPassword());
         if (!passw.equals(entwicklerpw)) {
             JOptionPane.showMessageDialog(null,
@@ -203,7 +204,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
         }
         long gross = new File(updatepfad).length();
         FTPTools ftpClient = new FTPTools();
-        ftpClient.ftpTransferDatei(updatedatei, updatepfad, gross, pbar);
+        ftpClient.ftpTransferDatei(updatedatei, updatepfad, (int) gross, pbar);
         ftpClient.ftpTransferString(updatedatei + ".log", talog.getText(), pbar);
         ftpClient.ftpTransferString("update.files", tafiles.getText(), pbar);
 
@@ -224,7 +225,7 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
 
         chooser.addPropertyChangeListener(e -> {
             if (!e.getPropertyName()
-                    .equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
+                  .equals(JFileChooser.SELECTED_FILE_CHANGED_PROPERTY)) {
                 e.getPropertyName();
             }
         });
@@ -236,7 +237,9 @@ public class EntwicklerPanel extends JXPanel implements ActionListener {
             File inputVerzFile = chooser.getSelectedFile();
             updatepfad = inputVerzFile.getPath();
 
-            if (inputVerzFile.getName().trim().equals("")) {
+            if (inputVerzFile.getName()
+                             .trim()
+                             .equals("")) {
                 updatedatei = "";
             } else {
                 updatedatei = inputVerzFile.getName()

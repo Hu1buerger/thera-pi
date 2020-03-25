@@ -1,21 +1,32 @@
 package org.thera_pi.updates;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 public class SqlInfo {
 
     private static final Logger LOG = LoggerFactory.getLogger(SqlInfo.class);
 
+    /**
+     * private CTor to avoid creating an instance of a class with only static
+     * methods.
+     */
+    private SqlInfo() {
+        // nothing to do here
+    }
+
     public static void sqlAusfuehren(Connection conn, String sstmt) throws SQLException {
-        Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
-        stmt.execute(sstmt);
-        stmt.close();
+        try (Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
+            stmt.execute(sstmt);
+        }
     }
 
     public static List<String> holeSatz(Connection conn, String tabelle, String felder, String kriterium) {
@@ -31,14 +42,14 @@ public class SqlInfo {
                 }
             }
         } catch (SQLException ev) {
-            LOG.error("SQLException: " + ev.getMessage());
-            LOG.error("SQLState: " + ev.getSQLState());
-            LOG.error("VendorError: " + ev.getErrorCode(), ev);
+            LOG.error("SQLException: {}", ev.getMessage());
+            LOG.error("SQLState: {}", ev.getSQLState());
+            LOG.error("VendorError: {}", ev.getErrorCode(), ev);
         }
         return retvec;
     }
 
-    public static List<String> holeFeld(Connection conn, String sstmt) {
+    static List<String> holeFeld(Connection conn, String sstmt) {
         String ret;
         List<String> result = new ArrayList<>();
         try (Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
@@ -48,9 +59,9 @@ public class SqlInfo {
                 result.add(String.valueOf(ret));
             }
         } catch (SQLException ev) {
-            LOG.error("SQLException: " + ev.getMessage());
-            LOG.error("SQLState: " + ev.getSQLState());
-            LOG.error("VendorError: " + ev.getErrorCode(), ev);
+            LOG.error("SQLException: {}", ev.getMessage());
+            LOG.error("SQLState: {}", ev.getSQLState());
+            LOG.error("VendorError: {}", ev.getErrorCode(), ev);
         }
         return result;
     }

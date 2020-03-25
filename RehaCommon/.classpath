@@ -1,7 +1,8 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="tests"/>
+	<classpathentry kind="src" path="testResources"/>
 	<classpathentry kind="lib" path="/Libraries/lib/swingx/grad.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/openofficeorg/ag.ion.noa_2.2.3.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/openofficeorg/bootstrapconnector.jar"/>

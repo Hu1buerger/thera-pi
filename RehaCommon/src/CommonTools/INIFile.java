@@ -1,47 +1,28 @@
 package CommonTools;
 
-/*------------------------------------------------------------------------------
- * based on
- * PACKAGE: com.freeware.inifiles
- * FILE   : iniFile.java
- * CREATED: Jun 30, 2004
- * AUTHOR : Prasad P. Khandekar
- *------------------------------------------------------------------------------
- * Change Log:
- * 05/07/2004    - Added support for date time formats.
- *                 Added support for environment variables.
- * 07/07/2004    - Added support for data type specific getters and setters.
- *                 Updated main method to reflect above changes.
- * 26/08/2004    - Added support for section level and property level comments.
- *                 Introduction of seperate class for property values.
- *                 Added addSection method.
- *                 Sections and properties now retail their order (LinkedHashMap)
- *                 Method implementation changes.
- *-----------------------------------------------------------------------------*/
-//package com.freeware.inifiles;
-
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
-import java.io.Writer;
 import java.sql.Timestamp;
-import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Properties;
-import java.util.Set;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,115 +30,125 @@ import org.slf4j.LoggerFactory;
 /**
  * INIFile class provides methods for manipulating (Read/Write) windows ini
  * files.
- *
- * @author Prasad P. Khandekar
- * @version 1.0
- * @since 1.0
  */
 public final class INIFile {
-    /** Variable to represent the date format */
-    private String mstrDateFmt = "dd.mm.yyyy";
 
-    /** Variable to represent the timestamp format */
-    private String mstrTimeStampFmt = "dd.mm.yyyy hh:mm:ss";
+    /**
+     * Logger for logging any output via logging framework.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(INIFile.class);
 
-    /** Variable to denote the successfull load operation. */
-    private boolean mblnLoaded = false;
+    /**
+     * Constant string part, used in error logging output about a parsing error of
+     * an string value into the target type.
+     */
+    private static final String PARSE_EXCEPTION_BASE_MESSAGE = "File %s: Unable to parse the value for sectionKey %s, property %s %s ";
 
-    /** Variable to hold the ini file name and full path */
-    private String mstrFile;
+    /**
+     * Constant field, used as String representation for a boolean <code>true</code>
+     * value.
+     */
+    static final String INI_FILE_BOOLEAN_VALUE_STRING_TRUE = "TRUE";
 
-    /** Variable to hold inputstream of the inifile-content in a table */
-    private InputStream streamin;
+    /**
+     * Constant field, used as String representation for a boolean
+     * <code>false</code> value.
+     */
+    static final String INI_FILE_BOOLEAN_VALUE_STRING_FALSE = "FALSE";
 
-    /** Variable to hold the sections in an ini file. */
-    private LinkedHashMap<String, INISection> mhmapSections;
+    /**
+     * Constant field, used as String representation for am empty/not set comment.
+     */
+    static final String EMPTY_COMMENTS = "";
 
-    /** Variable to hold environment variables **/
-    private Properties mpropEnv;
+    /**
+     * Variable to represent the date format
+     */
+    private String dateFormatString = "dd.MM.yyyy";
 
-    Logger logger = LoggerFactory.getLogger(INIFile.class);
+    /**
+     * Variable to represent the timestamp format
+     */
+
+    private String timeStampFormatString = "dd.MM.yyyy HH:mm:ss";
+
+    /**
+     * Variable to hold the ini file name and full path
+     */
+    private String absoluteFileNamePath;
+
+    /**
+     * Variable to hold the sections in an ini file.
+     */
+    private LinkedHashMap<String, INISection> sectionMap;
 
     /**
      * Create a iniFile object from the file named in the parameter.
-     * 
-     * @param pstrPathAndName The full path and name of the ini file to be used.
+     *
+     * @param absoluteFileNamePath The full path and name of the ini file to be
+     *                             used.
      */
-    public INIFile(String pstrPathAndName) {
-        if (pstrPathAndName == null || !new File(pstrPathAndName).exists()) {
-            logger.error("Inifile does not exist:" + pstrPathAndName);
+
+    public INIFile(String absoluteFileNamePath) {
+        if (absoluteFileNamePath == null) {
+            throw new NullPointerException("Parameter [absoluteFileNamePath] must not be null!");
         }
-        this.mpropEnv = getEnvVars();
-        this.mhmapSections = new LinkedHashMap<String, INISection>();
-        this.mstrFile = pstrPathAndName;
+
+        if (!new File(absoluteFileNamePath).exists()) {
+            LOG.error("Inifile does not exist: {}", absoluteFileNamePath);
+        }
+
+        this.sectionMap = new LinkedHashMap<>();
+        this.absoluteFileNamePath = absoluteFileNamePath;
+
         // Load the specified INI file.
-        if (checkFile(pstrPathAndName))
-            loadFile();
-    }
-
-    public INIFile(InputStream istream, String pstrPathAndName) {
-        if (!new File(pstrPathAndName).exists()) {
-            logger.debug("loading from Stream:" + pstrPathAndName);
+        if (checkFile(absoluteFileNamePath)) {
+            loadFile(absoluteFileNamePath);
         }
-        this.mpropEnv = getEnvVars();
-        this.mhmapSections = new LinkedHashMap<String, INISection>();
-        this.mstrFile = pstrPathAndName;
-        this.streamin = istream;
-        // read the specified INI file.
-        if (streamin != null)
-            readFile();
     }
 
-    /*------------------------------------------------------------------------------
-     * Getters
-    ------------------------------------------------------------------------------*/
-    /**
-     * Lemmi 20101224: neue Funktion: Check file loading success
-     * 
-     * @return TRUE if file was loaded successfully
-     */
-    public Boolean exIgnore() {
-        return this.mblnLoaded;
+    public INIFile(String contentAsSingleString, String absoluteFileNamePath) {
+        if (absoluteFileNamePath == null) {
+            throw new NullPointerException("Parameter [absoluteFileNamePath] must be NOT null!");
+        }
+        if (!new File(absoluteFileNamePath).exists()) {
+            LOG.debug("loading from Stream: {}", absoluteFileNamePath);
+        }
+        this.sectionMap = new LinkedHashMap<>();
+        this.absoluteFileNamePath = absoluteFileNamePath;
+
+        // read the specified INI file.
+        if (contentAsSingleString != null) {
+            String[] linesInFile = contentAsSingleString.split(System.lineSeparator());
+            loadFile(Arrays.asList(linesInFile));
+        }
     }
 
     /**
      * Returns the ini file name being used.
-     * 
+     *
      * @return the INI file name.
      */
     public String getFileName() {
-        return this.mstrFile;
-    }
-
-    public InputStream getInputStream() {
-        return this.streamin;
+        return this.absoluteFileNamePath;
     }
 
     /**
-     * Returns the specified string property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
+     * Returns the specified string property from the specified sectionKey.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
      * @return the string property value.
      */
-    public String getStringProperty(String pstrSection, String pstrProp) {
-        String strRet = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
-
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            if (objProp != null) {
-                strRet = objProp.getPropValue();
-            }
-        }
-        return strRet;
+    public String getStringProperty(String sectionKey, String propertyKey) {
+        return getProperty(sectionKey, propertyKey, Function.identity());
     }
 
     /**
-     * Returns the specified boolean property from the specified section. This
-     * method considers the following values as boolean values.
+     * Returns the specified boolean property from the specified sectionKey. This
+     * <p>
+     * method considers the following values as boolean values. A none existing ue
+     * is considered as false.
      * <ol>
      * <li>YES/yes/Yes - boolean true</li>
      * <li>NO/no/No - boolean false</li>
@@ -166,490 +157,485 @@ public final class INIFile {
      * <li>TRUE/True/true - boolean true</li>
      * <li>FALSE/False/false - boolean false</li>
      * </ol>
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
-     * @return the boolean value
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
+     * @return The boolean value of the property values, if parsing is possible, or
+     *         <code>false</code>, if there is no such value existing or the value
+     *         can't be interpreted as boolean.
      */
-    public Boolean getBooleanProperty(String pstrSection, String pstrProp) {
-        boolean blnRet = false;
-        String strVal = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            if (objProp != null) {
-                strVal = objProp.getPropValue()
-                                .toUpperCase();
-                if (strVal.equals("YES") || strVal.equals("TRUE") || strVal.equals("1")) {
-                    blnRet = true;
-                }
-
+    public boolean getBooleanProperty(String sectionKey, String propertyKey) {
+        Boolean result = getProperty(sectionKey, propertyKey, s -> {
+            if (s == null) {
+                return false;
+            } else if ("YES".equalsIgnoreCase(s) || "1".equalsIgnoreCase(s)) {
+                return true;
+            } else if ("NO".equalsIgnoreCase(s) || "0".equalsIgnoreCase(s)) {
+                return false;
+            } else {
+                return Boolean.parseBoolean(s);
             }
+        });
 
-        }
-        return Boolean.valueOf(blnRet);
+        return result != null ? result : false;
     }
 
     /**
-     * Returns the specified integer property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
+     * Returns the specified integer property from the specified sectionKey.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
      * @return the integer property value.
      */
-    public Integer getIntegerProperty(String pstrSection, String pstrProp) {
-        Integer intRet = null;
-        String strVal = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
+    public Integer getIntegerProperty(String sectionKey, String propertyKey) {
+        Integer result = null;
+        try {
+            result = getProperty(sectionKey, propertyKey, Integer::valueOf);
+        } catch (NumberFormatException ex) {
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            try {
-                if (objProp != null) {
-                    strVal = objProp.getPropValue();
-                    if (strVal != null)
-                        intRet = Integer.valueOf(strVal);
-                }
-            } catch (NumberFormatException exIgnore) {
-            } finally {
-                if (objProp != null)
-                    objProp = null;
-            }
-            objSec = null;
+            LOG.error(String.format(PARSE_EXCEPTION_BASE_MESSAGE, this.absoluteFileNamePath, sectionKey, propertyKey,
+                    "as Integer value!"), ex);
         }
-        return intRet;
+        return result;
     }
 
     /**
-     * Returns the specified long property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
+     * Returns the specified long property from the specified sectionKey.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
      * @return the long property value.
      */
-    public Long getLongProperty(String pstrSection, String pstrProp) {
-        Long lngRet = null;
-        String strVal = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
+    public Long getLongProperty(String sectionKey, String propertyKey) {
+        Long result = null;
+        try {
+            result = getProperty(sectionKey, propertyKey, Long::valueOf);
+        } catch (NumberFormatException ex) {
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            try {
-                if (objProp != null) {
-                    strVal = objProp.getPropValue();
-                    if (strVal != null)
-                        lngRet = new Long(strVal);
-                }
-            } catch (NumberFormatException exIgnore) {
-            } finally {
-                if (objProp != null)
-                    objProp = null;
-            }
-            objSec = null;
+            LOG.error(String.format(PARSE_EXCEPTION_BASE_MESSAGE, this.absoluteFileNamePath, sectionKey, propertyKey,
+                    "as Long value!"), ex);
         }
-        return lngRet;
+        return result;
     }
 
     /**
-     * Returns the specified double property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
+     * Returns the specified double property from the specified sectionKey.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
      * @return the double property value.
      */
-    public Double getDoubleProperty(String pstrSection, String pstrProp) {
-        Double dblRet = null;
-        String strVal = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            try {
-                if (objProp != null) {
-                    strVal = objProp.getPropValue();
-                    if (strVal != null)
-                        dblRet = new Double(strVal);
+    public Double getDoubleProperty(String sectionKey, String propertyKey) {
+        Double result = null;
+        try {
+            result = getProperty(sectionKey, propertyKey, s -> {
+                Double value = Double.valueOf(s);
+                if (Double.isInfinite(value)) {
+                    value = null;
                 }
-            } catch (NumberFormatException exIgnore) {
-            } finally {
-                if (objProp != null)
-                    objProp = null;
-            }
-            objSec = null;
+                return value;
+            });
+        } catch (NumberFormatException ex) {
+            LOG.error(String.format(PARSE_EXCEPTION_BASE_MESSAGE, this.absoluteFileNamePath, sectionKey, propertyKey,
+                    "as Double value!"), ex);
         }
-        return dblRet;
+        return result;
     }
 
     /**
-     * Returns the specified date property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
-     * @return the date property value.
+     * Returns the specified property from the specified sectionKey as
+     * {@link LocalDate}.
+     *
+     * @param sectionKey  The INI sectionKey name.
+     * @param propertyKey The property to be retrieved.
+     * @return The property value as {@link LocalDate} instance, or
+     *         <code>null</code>, if the property value can't be retrieved or
+     *         parsed.
      */
-    public Date getDateProperty(String pstrSection, String pstrProp) {
-        Date dtRet = null;
-        String strVal = null;
-        DateFormat dtFmt = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
-            try {
-                if (objProp != null)
-                    strVal = objProp.getPropValue();
-                if (strVal != null) {
-                    dtFmt = new SimpleDateFormat(this.mstrDateFmt);
-                    dtRet = dtFmt.parse(strVal);
-                }
-            } catch (ParseException exIgnore) {
-            } catch (IllegalArgumentException ex) {
-            } finally {
-                if (objProp != null)
-                    objProp = null;
-            }
-            objSec = null;
+    public LocalDate getDateProperty(String sectionKey, String propertyKey) {
+        LocalDate result = null;
+        try {
+            result = getProperty(sectionKey, propertyKey, s -> {
+                DateTimeFormatter dtFmt = DateTimeFormatter.ofPattern(this.dateFormatString);
+                return LocalDate.parse(s, dtFmt);
+
+            });
+        } catch (IllegalArgumentException | DateTimeParseException ex) {
+            LOG.error(String.format(PARSE_EXCEPTION_BASE_MESSAGE, this.absoluteFileNamePath, sectionKey, propertyKey,
+                    "as LocalDate with format string" + this.dateFormatString + "!"), ex);
         }
-        return dtRet;
+        return result;
     }
 
     /**
-     * Returns the specified date property from the specified section.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be retrieved.
+     * Returns the specified date property from the specified sectionKey.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be retrieved.
      * @return the date property value.
      */
-    public Date getTimestampProperty(String pstrSection, String pstrProp) {
-        Timestamp tsRet = null;
-        Date dtTmp = null;
-        String strVal = null;
-        DateFormat dtFmt = null;
-        INIProperty objProp = null;
-        INISection objSec = null;
-
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objProp = objSec.getProperty(pstrProp);
+    public Timestamp getTimestampProperty(String sectionKey, String propertyKey) {
+        return getProperty(sectionKey, propertyKey, s -> {
+            Timestamp result = null;
             try {
-                if (objProp != null)
-                    strVal = objProp.getPropValue();
-                if (strVal != null) {
-                    dtFmt = new SimpleDateFormat(this.mstrDateFmt);
-                    dtTmp = dtFmt.parse(strVal);
-                    tsRet = new Timestamp(dtTmp.getTime());
-                }
-            } catch (ParseException exIgnore) {
-            } catch (IllegalArgumentException ex) {
-            } finally {
-                if (objProp != null)
-                    objProp = null;
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern(this.timeStampFormatString);
+                LocalDateTime localDateTime = LocalDateTime.parse(s, formatter);
+                result = Timestamp.valueOf(localDateTime);
+            } catch (IllegalArgumentException | DateTimeParseException | NullPointerException ex) {
+                LOG.error(String.format(PARSE_EXCEPTION_BASE_MESSAGE, this.absoluteFileNamePath, sectionKey,
+                        propertyKey, "with timestamp format " + this.timeStampFormatString + "!"), ex);
             }
-            objSec = null;
+            return result;
+        });
+    }
+
+    protected <T> T getProperty(String sectionKey, String propertyKey, Function<String, T> converter) {
+        T result = null;
+        INISection section = this.sectionMap.get(sectionKey);
+        if (section != null) {
+            INIProperty objProp = section.getProperty(propertyKey);
+            if (objProp != null) {
+                String strVal = objProp.getPropValue();
+                if (strVal != null) {
+                    result = converter.apply(strVal);
+                } else {
+
+                    LOG.debug("No property value for property key {} available in sectionKey {}!", propertyKey,
+                            sectionKey);
+                }
+            } else {
+                LOG.debug("No property set  for sectionKey {}, property {}!", sectionKey, propertyKey);
+            }
+        } else {
+            LOG.debug("No sectionKey with name {} available!", sectionKey);
         }
-        return tsRet;
+        return result;
     }
 
     /*------------------------------------------------------------------------------
      * Setters
     ------------------------------------------------------------------------------*/
-    /**
-     * Sets the comments associated with a section.
-     * 
-     * @param pstrSection  the section name
-     * @param pstrComments the comments.
-     */
-    public void addSection(String pstrSection, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setSecComments(delRemChars(pstrComments));
+    /**
+     * Sets the comments associated with a sectionKey.
+     *
+     * @param sectionKey the sectionKey name
+     * @param comments   the comments.
+     * @return The new created section.
+     */
+
+    public INISection addSection(String sectionKey, String comments) {
+        return this.sectionMap.computeIfAbsent(sectionKey, key -> new INISection(key, comments));
     }
 
     /**
      * Sets the specified string property.
-     * 
-     * @param pstrSection    the INI section name.
-     * @param newpstrSection the new Section name to be set.
-     * @pstrVal the string value to be persisted
+     *
+     * @param sectionKey    the INI sectionKey name.
+     * @param newSectionKey the new Section name to be set.
      */
 
-    public void renameSection(String pstrSection, String newpstrSection, String pstrComments) {
-        INISection objSec = null;
+    public void renameSection(String sectionKey, String newSectionKey, String comments) {
+        INISection section = this.sectionMap.get(sectionKey);
+        if (section != null) {
+            this.sectionMap.put(newSectionKey, section);
+            this.sectionMap.remove(sectionKey);
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            this.mhmapSections.put(newpstrSection, objSec);
-            if (this.mhmapSections.containsKey(pstrSection)) {
-                this.mhmapSections.remove(pstrSection);
-            }
-            objSec.setSecComments(delRemChars(pstrComments));
+            section.setSecComments(comments);
         }
     }
 
     /**
      * Sets the specified string property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @pstrVal the string value to be persisted
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the string value to be persisted
+     * @param comments    A comment for the property.
      */
-    public void setStringProperty(String pstrSection, String pstrProp, String pstrVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, pstrVal, pstrComments);
+    public void setStringProperty(String sectionKey, String propertyKey, String value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey, value, comments);
+    }
+
+    /**
+     * Sets the specified string property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the string value to be persisted
+     */
+    public void setStringProperty(String sectionKey, String propertyKey, String value) {
+        setStringProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified boolean property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param pblnVal     the boolean value to be persisted
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the boolean value to be persisted
+     * @param comments    A comment for the property.
      */
-    public void setBooleanProperty(String pstrSection, String pstrProp, boolean pblnVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        if (pblnVal)
-            objSec.setProperty(pstrProp, "TRUE", pstrComments);
-        else
-            objSec.setProperty(pstrProp, "FALSE", pstrComments);
+    public void setBooleanProperty(String sectionKey, String propertyKey, boolean value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey,
+                value ? INI_FILE_BOOLEAN_VALUE_STRING_TRUE : INI_FILE_BOOLEAN_VALUE_STRING_FALSE, comments);
+    }
+
+    /**
+     * Sets the specified boolean property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the boolean value to be persisted
+     */
+    public void setBooleanProperty(String sectionKey, String propertyKey, boolean value) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey,
+                value ? INI_FILE_BOOLEAN_VALUE_STRING_TRUE : INI_FILE_BOOLEAN_VALUE_STRING_FALSE, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified integer property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param pintVal     the int property to be persisted.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the int property to be persisted.
+     * @param comments    A comment for the property.
      */
-    public void setIntegerProperty(String pstrSection, String pstrProp, int pintVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, Integer.toString(pintVal), pstrComments);
+    public void setIntegerProperty(String sectionKey, String propertyKey, int value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey, Integer.toString(value), comments);
+    }
+
+    /**
+     * Sets the specified integer property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the int property to be persisted.
+     */
+    public void setIntegerProperty(String sectionKey, String propertyKey, int value) {
+        setIntegerProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified long property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param plngVal     the long value to be persisted.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the long value to be persisted.
+     * @param comments    A comment for the property.
      */
-    public void setLongProperty(String pstrSection, String pstrProp, long plngVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, Long.toString(plngVal), pstrComments);
+    public void setLongProperty(String sectionKey, String propertyKey, long value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey, Long.toString(value), comments);
+    }
+
+    /**
+     * Sets the specified long property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the long value to be persisted.
+     */
+    public void setLongProperty(String sectionKey, String propertyKey, long value) {
+        setLongProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified double property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param pdblVal     the double value to be persisted.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the double value to be persisted.
+     * @param comments    A comment for the property.
      */
-    public void setDoubleProperty(String pstrSection, String pstrProp, double pdblVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, Double.toString(pdblVal), pstrComments);
+    public void setDoubleProperty(String sectionKey, String propertyKey, double value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey, Double.toString(value), comments);
+    }
+
+    /**
+     * Sets the specified double property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the double value to be persisted.
+     */
+    public void setDoubleProperty(String sectionKey, String propertyKey, double value) {
+        setDoubleProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified java.util.Date property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param pdtVal      the date value to be persisted.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the date value to be persisted.
+     * @param comments    A comment for the property.
      */
-    public void setDateProperty(String pstrSection, String pstrProp, Date pdtVal, String pstrComments) {
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, utilDateToStr(pdtVal, this.mstrDateFmt), pstrComments);
+    public void setDateProperty(String sectionKey, String propertyKey, LocalDate value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey,
+                utilDateToString(value.atStartOfDay(), this.dateFormatString), comments);
+    }
+
+    /**
+     * Sets the specified java.util.Date property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the date value to be persisted.
+     */
+    public void setDateProperty(String sectionKey, String propertyKey, LocalDate value) {
+        setDateProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
     }
 
     /**
      * Sets the specified java.sql.Timestamp property.
-     * 
-     * @param pstrSection the INI section name.
-     * @param pstrProp    the property to be set.
-     * @param ptsVal      the timestamp value to be persisted.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the timestamp value to be persisted.
+     * @param comments    A comment for the property.
      */
-    public void setTimestampProperty(String pstrSection, String pstrProp, Timestamp ptsVal, String pstrComments) {
-        INISection objSec = null;
+    public void setTimestampProperty(String sectionKey, String propertyKey, Timestamp value, String comments) {
+        setPropertyOfTypeWithComments(sectionKey, propertyKey, timeToString(value, this.timeStampFormatString),
+                comments);
+    }
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec == null) {
-            objSec = new INISection(pstrSection);
-            this.mhmapSections.put(pstrSection, objSec);
-        }
-        objSec.setProperty(pstrProp, timeToStr(ptsVal, this.mstrTimeStampFmt), pstrComments);
+    /**
+     * Sets the specified java.sql.Timestamp property.
+     *
+     * @param sectionKey  the INI sectionKey name.
+     * @param propertyKey the property to be set.
+     * @param value       the timestamp value to be persisted.
+     */
+    public void setTimestampProperty(String sectionKey, String propertyKey, Timestamp value) {
+        setTimestampProperty(sectionKey, propertyKey, value, EMPTY_COMMENTS);
+    }
+
+    /**
+     * Set a property value, represented as string, for a property key into an
+     * section with a (maybe empty) comment.
+     *
+     * @param sectionKey  The section key.
+     * @param propertyKey The property key.
+     * @param value       The value to set.
+     * @param comments    A (maybe) empty comment.
+     */
+    private void setPropertyOfTypeWithComments(String sectionKey, String propertyKey, String value, String comments) {
+        INISection section = this.sectionMap.computeIfAbsent(sectionKey, s -> new INISection(sectionKey));
+        section.setProperty(propertyKey, value, comments);
     }
 
     /**
      * Sets the format to be used to interpreat date values.
-     * 
-     * @param pstrDtFmt the format string
+     *
+     * @param dateFormatString the format string
      * @throws IllegalArgumentException if the if the given pattern is invalid
      */
-    public void setDateFormat(String pstrDtFmt) throws IllegalArgumentException {
-        if (!checkDateTimeFormat(pstrDtFmt))
-            throw new IllegalArgumentException("The specified date pattern is invalid!");
-        this.mstrDateFmt = pstrDtFmt;
+
+    public void setDateFormat(String dateFormatString) {
+        // check if the string is parsable. Go ahead when the format is ok, otherwise
+        // throw an runtime exception.
+        checkIfTemporalFormatStringIsParsable(dateFormatString);
+        this.dateFormatString = dateFormatString;
     }
 
     /**
-     * Sets the format to be used to interpreat timestamp values.
-     * 
-     * @param pstrTSFmt the format string
-     * @throws IllegalArgumentException if the if the given pattern is invalid
+     * Sets the format to be used to interpret timestamp values.
+     *
+     * @param timeStampFormatString the format string.
+     * @throws IllegalArgumentException if the if the given pattern is invalid.
      */
-    public void setTimeStampFormat(String pstrTSFmt) {
-        if (!checkDateTimeFormat(pstrTSFmt))
-            throw new IllegalArgumentException("The specified timestamp pattern is invalid!");
-        this.mstrTimeStampFmt = pstrTSFmt;
+
+    public void setTimeStampFormat(String timeStampFormatString) {
+        // check if the string is parsable. Go ahead when the format is ok, otherwise
+        // throw a RuntimeException.
+        checkIfTemporalFormatStringIsParsable(timeStampFormatString);
+        this.timeStampFormatString = timeStampFormatString;
     }
 
-    /*------------------------------------------------------------------------------
-     * Public methods
-    ------------------------------------------------------------------------------*/
+    /**
+     * Get the amount of sections.
+     *
+     * @return The amount of sections in the ini file.
+     */
     public int getTotalSections() {
-        return this.mhmapSections.size();
+        return this.sectionMap.size();
     }
 
     /**
      * Returns a string array containing names of all sections in INI file.
-     * 
-     * @return the string array of section names
+     *
+     * @return the string array of sectionKey names
      */
     public String[] getAllSectionNames() {
-        int iCntr = 0;
-        Iterator<String> iter = null;
-        String[] arrRet = null;
-
-        try {
-            if (this.mhmapSections.size() > 0) {
-                arrRet = new String[this.mhmapSections.size()];
-                for (iter = this.mhmapSections.keySet()
-                                              .iterator(); iter.hasNext();) {
-                    arrRet[iCntr] = iter.next();
-                    iCntr++;
-                }
-            }
-        } catch (NoSuchElementException exIgnore) {
-        } finally {
-            if (iter != null)
-                iter = null;
-        }
-        return arrRet;
+        List<String> sectionNamesList = new ArrayList<>(this.sectionMap.keySet());
+        return sectionNamesList.toArray(new String[0]);
     }
 
     /**
      * Returns a string array containing names of all the properties under specified
-     * section.
-     * 
-     * @param pstrSection the name of the section for which names of properties is
-     *                    to be retrieved.
+     * sectionKey.
+     *
+     * @param sectionKey the name of the sectionKey for which names of properties is
+     *                   to be retrieved.
      * @return the string array of property names.
      */
-    public String[] getPropertyNames(String pstrSection) {
-        String[] arrRet = null;
-        INISection objSec = null;
 
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            arrRet = objSec.getPropNames();
+    public String[] getPropertyNames(String sectionKey) {
+        String[] result = null;
+        INISection section = this.sectionMap.get(sectionKey);
+        if (section != null) {
+            result = section.getPropNames();
         }
-        return arrRet;
+        return result;
     }
 
     /**
-     * Returns a map containing all the properties under specified section.
-     * 
-     * @param pstrSection the name of the section for which properties are to be
-     *                    retrieved.
+     * Returns a map containing all the properties under specified sectionKey.
+     *
+     * @param sectionKey the name of the sectionKey for which properties are to be
+     *                   retrieved.
      * @return the map of properties.
      */
-    public Map<String, INIProperty> getProperties(String pstrSection) {
-        Map<String, INIProperty> hmRet = null;
-        INISection objSec = null;
-
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            hmRet = objSec.getProperties();
+    public Map<String, INIProperty> getProperties(String sectionKey) {
+        Map<String, INIProperty> result = null;
+        INISection section = this.sectionMap.get(sectionKey);
+        if (section != null) {
+            result = section.getProperties();
         }
-        return hmRet;
+        return result;
     }
 
     /**
-     * Removed specified property from the specified section. If the specified
-     * section or the property does not exist, does nothing.
-     * 
-     * @param pstrSection the section name.
-     * @param pstrProp    the name of the property to be removed.
+     * Removed specified property from the specified sectionKey. If the specified
+     * sectionKey or the property does not exist, does nothing.
+     *
+     * @param sectionKey  the sectionKey name.
+     * @param propertyKey the name of the property to be removed.
      */
-    public void removeProperty(String pstrSection, String pstrProp) {
-        INISection objSec = null;
-
-        objSec = this.mhmapSections.get(pstrSection);
-        if (objSec != null) {
-            objSec.removeProperty(pstrProp);
+    public void removeProperty(String sectionKey, String propertyKey) {
+        INISection section = this.sectionMap.get(sectionKey);
+        if (section != null) {
+            section.removeProperty(propertyKey);
         }
     }
 
     /**
-     * Removes the specified section if one exists, otherwise does nothing.
-     * 
-     * @param pstrSection the name of the section to be removed.
+     * Removes the specified sectionKey if one exists, otherwise does nothing.
+     *
+     * @param sectionKey the name of the sectionKey to be removed.
      */
-    public void removeSection(String pstrSection) {
-        if (this.mhmapSections.containsKey(pstrSection))
-            this.mhmapSections.remove(pstrSection);
+    public void removeSection(String sectionKey) {
+        this.sectionMap.remove(sectionKey);
     }
 
     /**
@@ -657,341 +643,216 @@ public final class INIFile {
      * creates the new one.
      */
     public synchronized boolean save() {
-        boolean blnRet = false;
-        File objFile = null;
-        String strName = null;
-        String strTemp = null;
-        Iterator<String> itrSec = null;
-        INISection objSec = null;
-        FileWriter objWriter = null;
 
-        try {
-            if (this.mhmapSections.size() == 0)
+        boolean result = false;
+
+        File file = new File(this.absoluteFileNamePath);
+        try (FileWriter writer = new FileWriter(file)) {
+            if (this.sectionMap.size() == 0) {
+                LOG.warn("Nothing to save into file {}. The job is done!", this.absoluteFileNamePath);
                 return false;
-            objFile = new File(this.mstrFile);
-            if (objFile.exists())
-                objFile.delete();
-            objWriter = new FileWriter(objFile);
-            itrSec = this.mhmapSections.keySet()
-                                       .iterator();
-            while (itrSec.hasNext()) {
-                strName = itrSec.next();
-                objSec = this.mhmapSections.get(strName);
-                strTemp = objSec.toString();
-                objWriter.write(strTemp);
-                objWriter.write("\r\n");
-                objSec = null;
             }
-            blnRet = true;
-        } catch (IOException exIgnore) {
-            exIgnore.printStackTrace();
-        } finally {
-            if (objWriter != null) {
-                closeWriter(objWriter);
-                objWriter = null;
+            if (file.exists()) {
+                LOG.warn("File {} is existing, will be deleted before saving the new content!",
+                        this.absoluteFileNamePath);
+                boolean deleted = file.delete();
+                if (deleted) {
+                    LOG.debug("File {} was deleted successfully. Starting the writing of the new content!",
+                            this.absoluteFileNamePath);
+                } else {
+                    LOG.warn("Unable to delete the file {} before saving the new content!", this.absoluteFileNamePath);
+                }
+            } else {
+                LOG.warn("File {} is not existing yet. Start saving the new content!", this.absoluteFileNamePath);
             }
-            if (objFile != null)
-                objFile = null;
-            if (itrSec != null)
-                itrSec = null;
+
+            LOG.trace("Following content will be written into the file named {}.", this.absoluteFileNamePath);
+            for (Map.Entry<String, INISection> entry : this.sectionMap.entrySet()) {
+                INISection section = entry.getValue();
+                String sectionAsString = section.toString();
+                LOG.trace(sectionAsString);
+                writer.write(sectionAsString);
+                writer.write(System.lineSeparator());
+            }
+            LOG.trace("Done! All content written into the file named {}.", this.absoluteFileNamePath);
+            result = true;
+        } catch (IOException ex) {
+            LOG.error("Error during saving INI Content into file " + this.absoluteFileNamePath + "!", ex);
         }
-        return blnRet;
+        return result;
     }
 
-    public synchronized StringBuffer saveToStringBuffer() {
-
-        String strName = null;
-        String strTemp = null;
-        Iterator<String> itrSec = null;
-        INISection objSec = null;
-        StringBuffer buf = null;
-        try {
-
-            buf = new StringBuffer();
-            itrSec = this.mhmapSections.keySet()
-                                       .iterator();
-            while (itrSec.hasNext()) {
-                strName = itrSec.next();
-                objSec = this.mhmapSections.get(strName);
-                strTemp = objSec.toString();
-                buf.append(strTemp);
-                buf.append("\r\n");
-            }
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
+    public synchronized String saveToString() {
+        StringBuilder builder = new StringBuilder();
+        for (Map.Entry<String, INISection> entry : this.sectionMap.entrySet()) {
+            INISection section = entry.getValue();
+            builder.append(section.toString())
+                   .append(System.lineSeparator());
         }
-
-        return buf;
+        return builder.toString();
     }
 
     /*------------------------------------------------------------------------------
      * Helper functions
      *----------------------------------------------------------------------------*/
+
     /**
-     * Procedure to read environment variables. Thanx to
-     * http://www.rgagnon.com/howto.html for this implementation.
+     * Helper function to check if the date time formats is parsable.
+     *
+     * @param dateFormatString the date time format string to checked.
+     * @throws IllegalArgumentException if the format string is not parsable by a
+     *                                  {@link DateTimeFormatter}.
      */
-    private Properties getEnvVars() {
-        Process p = null;
-        Properties envVars = new Properties();
-
-        try {
-            Runtime r = Runtime.getRuntime();
-            String os = System.getProperty("os.name")
-                              .toLowerCase();
-
-            if (os.indexOf("windows 9") > -1) {
-                p = r.exec("command.com /c set");
-            } else if ((os.indexOf("nt") > -1) || (os.indexOf("windows 2000") > -1)
-                    || (os.indexOf("windows xp") > -1)) {
-                p = r.exec("cmd.exe /c set");
-            } else {
-                // our last hope, we assume Unix (thanks to H. Ware for the fix)
-                p = r.exec("env");
-            }
-            BufferedReader br = new BufferedReader(new InputStreamReader(p.getInputStream()));
-            String line;
-            while ((line = br.readLine()) != null) {
-                int idx = line.indexOf('=');
-                String key = line.substring(0, idx);
-                String value = line.substring(idx + 1);
-                envVars.setProperty(key, value);
-            }
-        } catch (Exception exIgnore) {
-        }
-        return envVars;
+    private void checkIfTemporalFormatStringIsParsable(String dateFormatString) {
+        DateTimeFormatter.ofPattern(dateFormatString);
     }
 
     /**
-     * Helper function to check the date time formats.
-     * 
-     * @param pstrDtFmt the date time format string to be checked.
-     * @return true for valid date/time format, false otherwise.
-     */
-    private boolean checkDateTimeFormat(String pstrDtFmt) {
-        boolean blnRet = false;
-        DateFormat objFmt = null;
-
-        try {
-            objFmt = new SimpleDateFormat(pstrDtFmt);
-            blnRet = true;
-        } catch (NullPointerException exIgnore) {
-        } catch (IllegalArgumentException exIgnore) {
-        } finally {
-            if (objFmt != null)
-                objFmt = null;
-        }
-        return blnRet;
-    }
-
-    /**
-     * Reads the INI file and load its contentens into a section collection after
+     * Reads the INI file and load its contentens into a sectionKey collection after
      * parsing the file line by line.
      */
-    private void loadFile() {
-        int iPos = -1;
-        String strLine = null;
-        String strSection = null;
-        String strRemarks = null;
-        BufferedReader objBRdr = null;
-        FileReader objFRdr = null;
-        INISection objSec = null;
 
-        try {
-            objFRdr = new FileReader(this.mstrFile);
-            objBRdr = new BufferedReader(objFRdr);
-            while (objBRdr.ready()) {
-                iPos = -1;
-                strLine = objBRdr.readLine()
-                                 .trim();
-                if (strLine == null) {
-                } else if (strLine.length() == 0) {
-                } else if (strLine.substring(0, 1)
-                                  .equals(";")) {
-                    if (strRemarks == null)
-                        strRemarks = strLine.substring(1);
-                    else if (strRemarks.length() == 0)
-                        strRemarks = strLine.substring(1);
-                    else
-                        strRemarks = strRemarks + "\r\n" + strLine.substring(1);
-                } else if (strLine.startsWith("[") && strLine.endsWith("]")) {
-                    // Section start reached create new section
-                    if (objSec != null)
-                        this.mhmapSections.put(strSection.trim(), objSec);
-                    objSec = null;
-                    strSection = strLine.substring(1, strLine.length() - 1);
-                    objSec = new INISection(strSection.trim(), strRemarks);
-                    strRemarks = null;
-                } else if ((iPos = strLine.indexOf("=")) > 0 && objSec != null) {
-                    // read the key value pair 012345=789
-                    objSec.setProperty(strLine.substring(0, iPos)
-                                              .trim(),
-                            strLine.substring(iPos + 1)
-                                   .trim(),
-                            strRemarks);
-                    strRemarks = null;
-                }
+    private void loadFile(String absoluteFileNamePath) {
+        try (FileInputStream inputStream = new FileInputStream(absoluteFileNamePath);
+                InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+
+            List<String> fileContent = new ArrayList<>();
+            while (bufferedReader.ready()) {
+                String nextLineInFile = bufferedReader.readLine();
+                fileContent.add(nextLineInFile);
             }
-            if (objSec != null)
-                this.mhmapSections.put(strSection.trim(), objSec);
-            this.mblnLoaded = true;
-        } catch (FileNotFoundException exIgnore) {
-            this.mhmapSections.clear();
-        } catch (IOException exIgnore) {
-            this.mhmapSections.clear();
-        } catch (NullPointerException exIgnore) {
-            this.mhmapSections.clear();
-        } finally {
-            if (objBRdr != null) {
-                closeReader(objBRdr);
-                objBRdr = null;
-            }
-            if (objFRdr != null) {
-                closeReader(objFRdr);
-                objFRdr = null;
-            }
-            if (objSec != null)
-                objSec = null;
+            loadFile(fileContent);
+        } catch (IOException ex) {
+            LOG.error("Exception in loadFile!", ex);
+            this.sectionMap.clear();
         }
     }
 
-    private void readFile() {
-        int iPos = -1;
-        String strLine = null;
-        String strSection = null;
-        String strRemarks = null;
-        BufferedReader objBRdr = null;
-        InputStreamReader objFRdr = null;
-        INISection objSec = null;
-
-        try {
-            objFRdr = new InputStreamReader(streamin);
-            objBRdr = new BufferedReader(objFRdr);
-            while (objBRdr.ready()) {
-                iPos = -1;
-                // strLine = null;
-                strLine = objBRdr.readLine()
-                                 .trim();
-                if (strLine == null) {
-                } else if (strLine.length() == 0) {
-                } else if (strLine.substring(0, 1)
-                                  .equals(";")) {
-                    if (strRemarks == null)
-                        strRemarks = strLine.substring(1);
-                    else if (strRemarks.length() == 0)
-                        strRemarks = strLine.substring(1);
-                    else
-                        strRemarks = strRemarks + "\r\n" + strLine.substring(1);
-                } else if (strLine.startsWith("[") && strLine.endsWith("]")) {
-                    // Section start reached create new section
-                    if (objSec != null)
-                        this.mhmapSections.put(strSection.trim(), objSec);
-                    objSec = null;
-                    strSection = strLine.substring(1, strLine.length() - 1);
-                    objSec = new INISection(strSection.trim(), strRemarks);
-                    strRemarks = null;
-                } else if ((iPos = strLine.indexOf("=")) > 0 && objSec != null) {
-                    // read the key value pair 012345=789
-                    objSec.setProperty(strLine.substring(0, iPos)
-                                              .trim(),
-                            strLine.substring(iPos + 1)
-                                   .trim(),
-                            strRemarks);
-                    strRemarks = null;
-                }
+    private void loadFile(List<String> fileContent) {
+        StringBuilder commentsBuilder = new StringBuilder();
+        INISection currentSection = null;
+        for (String nextLineInFile : fileContent) {
+            // if the line is empty, we go ahead with the next line.
+            if (lineIsEmpty(nextLineInFile)) {
+                continue;
             }
-            if (objSec != null)
-                this.mhmapSections.put(strSection.trim(), objSec);
-            this.mblnLoaded = true;
-        } catch (FileNotFoundException e) {
-            this.mhmapSections.clear();
-        } catch (IOException e) {
-            this.mhmapSections.clear();
-        } catch (NullPointerException e) {
-            this.mhmapSections.clear();
-        } finally {
-            if (objBRdr != null) {
-                closeReader(objBRdr);
-                objBRdr = null;
-            }
-            if (objFRdr != null) {
-                closeReader(objFRdr);
-                objFRdr = null;
-            }
-            if (objSec != null)
-                objSec = null;
+            currentSection = readFile(nextLineInFile, commentsBuilder, currentSection);
         }
     }
 
-    /**
-     * Helper function to close a reader object.
-     * 
-     * @param pobjRdr the reader to be closed.
-     */
-    private void closeReader(Reader pobjRdr) {
-        if (pobjRdr == null)
-            return;
-        try {
-            pobjRdr.close();
-        } catch (IOException exIgnore) {
+    private INISection readFile(String nextLineInFile, StringBuilder commentsBuilder, INISection section) {
+        final Pattern sectionPattern = Pattern.compile("\\[(?<SECTION>.+)\\]");
+        final Pattern propertyPattern = Pattern.compile("(?<PROPERTYKEY>.+)\\s*=\\s*(?<PROPERTYVALUE>.*+)");
+        final Pattern commentPattern = Pattern.compile(";(?<COMMENT>.*)");
+
+        // check if it a comment
+        Matcher commentMatcher = commentPattern.matcher(nextLineInFile);
+        // check if it a section
+        Matcher sectionMatcher = sectionPattern.matcher(nextLineInFile);
+        // check if it a property (key/value pair)
+        Matcher propertyMatcher = propertyPattern.matcher(nextLineInFile);
+
+        if (commentMatcher.matches()) {
+            // if we have a comment line, we need to check if it is the first or next line.
+            if (commentsBuilder == null) {
+                // for a first line, the commentsBuilder is expected to be <code>null</code>
+                commentsBuilder = new StringBuilder();
+            }
+            // in any case, we add the comment to the commentsBuilder and also add a new
+            // line sign.
+            aggregateCommentsLineForNextElement(commentsBuilder, commentMatcher);
+            LOG.trace("Read the following comment line: {}", nextLineInFile);
+        } else if (sectionMatcher.matches()) {
+            // if we have a new section, we add the section, together with the previously
+            // processed comments, if any.
+            section = createNewSection(commentsBuilder, sectionMatcher);
+            // after that, we throw away the comments processed before the section.
+            commentsBuilder.setLength(0);
+            LOG.trace("Read the following section: {}", section);
+        } else if (propertyMatcher.matches()) {
+            // if we have a new property, we add the property below the section, together
+            // with the previously processed comments, if any.
+            // NOTE! We expect to have a valid section here! otherwise we can't add the
+            // property. If there is no section available, we throw an exception and stop
+            // processing!
+            INIProperty property = extractPropertyForSection(commentsBuilder, section, nextLineInFile, propertyMatcher);
+            // after that, we throw away the comments processed before the section.
+            commentsBuilder.setLength(0);
+            LOG.trace("Read the following property: {} below section {}", property, section);
+        } else {
+            LOG.trace(
+                    "Found something strange in the file {}. Following line isn't a comment (;COMMENT), section ([SECTION]) or property (key = value): {}. Is there a bug inside the code or the line?",
+                    this.absoluteFileNamePath, nextLineInFile);
         }
+        return section;
     }
 
-    /**
-     * Helper function to close a writer object.
-     * 
-     * @param pobjWriter the writer to be closed.
-     */
-    private void closeWriter(Writer pobjWriter) {
-        if (pobjWriter == null)
-            return;
+    private boolean lineIsEmpty(String nextLineInFile) {
+        return nextLineInFile.trim()
+                             .length() == 0;
+    }
 
-        try {
-            pobjWriter.close();
-        } catch (IOException exIgnore) {
+    private void aggregateCommentsLineForNextElement(StringBuilder remarksBuilder, Matcher commentMatcher) {
+        String comment = commentMatcher.group("COMMENT")
+                                       .trim();
+        remarksBuilder.append(comment)
+                      .append(System.lineSeparator());
+    }
+
+    private INISection createNewSection(StringBuilder remarksBuilder, Matcher sectionMatcher) {
+        String sectionKey = sectionMatcher.group("SECTION")
+                                          .trim();
+        String remarks = remarksBuilder != null ? remarksBuilder.toString() : EMPTY_COMMENTS;
+        return this.addSection(sectionKey, remarks);
+    }
+
+    private INIProperty extractPropertyForSection(StringBuilder remarksBuilder, INISection section, String strLine,
+            Matcher propertyMatcher) {
+        if (section == null) {
+            throw new IllegalStateException("The line " + strLine + " isn't written below a valid section!");
         }
+        String propertyKey = propertyMatcher.group("PROPERTYKEY")
+                                            .trim();
+        String propertyValue = propertyMatcher.group("PROPERTYVALUE")
+                                              .trim();
+        String remarks = remarksBuilder != null ? remarksBuilder.toString() : EMPTY_COMMENTS;
+        return section.setProperty(propertyKey, propertyValue, remarks);
     }
 
     /**
      * Helper method to check the existance of a file.
-     * 
-     * @param the full path and name of the file to be checked.
+     *
+     * @param pstrFile the full path and name of the file to be checked.
      * @return true if file exists, false otherwise.
      */
     private boolean checkFile(String pstrFile) {
-        boolean blnRet = false;
-        File objFile = null;
-
+        boolean blnRet;
         try {
-            objFile = new File(pstrFile);
+            File objFile = new File(pstrFile);
             blnRet = (objFile.exists() && objFile.isFile());
         } catch (Exception e) {
-        } finally {
-            if (objFile != null)
-                objFile = null;
+            blnRet = false;
         }
         return blnRet;
     }
 
     /**
      * Converts a java.util.date into String
-     * 
-     * @param pd      Date that need to be converted to String
-     * @param pstrFmt The date format pattern.
+     *
+     * @param localDateTime Date that need to be converted to String
+     * @param formatString  The date format pattern.
      * @return String
      */
-    private String utilDateToStr(Date pdt, String pstrFmt) {
-        String strRet = null;
-        SimpleDateFormat dtFmt = null;
 
+    private String utilDateToString(LocalDateTime localDateTime, String formatString) {
+        String strRet;
         try {
-            dtFmt = new SimpleDateFormat(pstrFmt);
-            strRet = dtFmt.format(pdt);
-        } catch (Exception e) {
-        } finally {
-            if (dtFmt != null)
-                dtFmt = null;
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(formatString);
+            strRet = localDateTime.format(formatter);
+        } catch (IllegalArgumentException | DateTimeException ex) {
+            LOG.error("Exception in utilDateToString!", ex);
+            strRet = null;
         }
         return strRet;
     }
@@ -1000,351 +861,252 @@ public final class INIFile {
      * Converts the given sql timestamp object to a string representation. The
      * format to be used is to be obtained from the configuration file.
      *
-     * @param pobjTS  the sql timestamp object to be converted.
-     * @param pblnGMT If true formats the string using GMT timezone otherwise using
-     *                local timezone.
+     * @param timestamp             the sql timestamp object to be converted.
+     * @param timeStampFormatString If true formats the string using GMT timezone
+     *                              otherwise using local timezone.
      * @return the formatted string representation of the timestamp.
      */
-    private String timeToStr(Timestamp pobjTS, String pstrFmt) {
-        String strRet = null;
-        SimpleDateFormat dtFmt = null;
+
+    private String timeToString(Timestamp timestamp, String timeStampFormatString) {
+        String result;
 
         try {
-            dtFmt = new SimpleDateFormat(pstrFmt);
-            strRet = dtFmt.format(pobjTS);
-        } catch (IllegalArgumentException iae) {
-            strRet = "";
-        } catch (NullPointerException npe) {
-            strRet = "";
-        } finally {
-            if (dtFmt != null)
-                dtFmt = null;
+            SimpleDateFormat dtFmt = new SimpleDateFormat(timeStampFormatString);
+            result = dtFmt.format(timestamp);
+        } catch (IllegalArgumentException | NullPointerException ex) {
+            LOG.error("Exception in utilDateToString!", ex);
+            result = "";
         }
-        return strRet;
-    }
-
-    /**
-     * This function deletes the remark characters ';' from source string
-     * 
-     * @param pstrSrc the source string
-     * @return the converted string
-     */
-    private String delRemChars(String pstrSrc) {
-        int intPos = 0;
-
-        if (pstrSrc == null)
-            return null;
-        while ((intPos = pstrSrc.indexOf(";")) >= 0) {
-            if (intPos == 0)
-                pstrSrc = pstrSrc.substring(intPos + 1);
-            else if (intPos > 0)
-                pstrSrc = pstrSrc.substring(0, intPos) + pstrSrc.substring(intPos + 1);
-        }
-        return pstrSrc;
-    }
-
-    /**
-     * This function adds a remark character ';' in source string.
-     * 
-     * @param pstrSrc source string
-     * @return converted string.
-     */
-    private String addRemChars(String pstrSrc) {
-        int intLen;
-        int intPos = 0;
-        int intPrev = 0;
-
-        String strLeft = null;
-        String strRight = null;
-
-        if (pstrSrc == null)
-            return null;
-        while (intPos >= 0) {
-            intLen = 2;
-            intPos = pstrSrc.indexOf("\r\n", intPrev);
-            if (intPos < 0) {
-                intLen = 1;
-                intPos = pstrSrc.indexOf("\n", intPrev);
-                if (intPos < 0)
-                    intPos = pstrSrc.indexOf("\r", intPrev);
-            }
-            if (intPos == 0) {
-                pstrSrc = ";\r\n" + pstrSrc.substring(intPos + intLen);
-                intPrev = intPos + intLen + 1;
-            } else if (intPos > 0) {
-                strLeft = pstrSrc.substring(0, intPos);
-                strRight = pstrSrc.substring(intPos + intLen);
-                if (strRight == null)
-                    pstrSrc = strLeft;
-                else if (strRight.length() == 0)
-                    pstrSrc = strLeft;
-                else
-                    pstrSrc = strLeft + "\r\n;" + strRight;
-                intPrev = intPos + intLen + 1;
-            }
-        }
-        if (!pstrSrc.substring(0, 1)
-                    .equals(";"))
-            pstrSrc = ";" + pstrSrc;
-        pstrSrc = pstrSrc + "\r\n";
-        return pstrSrc;
-    }
-
-    /*------------------------------------------------------------------------------
-     * Main entry point to test the functionality.
-     *----------------------------------------------------------------------------*/
-    /**
-     * The main entry point for testing.
-     * 
-     * @param pstrArgs the command line arguments array if any.
-     */
-    public static void main(String[] pstrArgs) {
-        INIFile objINI = null;
-        String strFile = null;
-
-        if (pstrArgs.length == 0)
-            return;
-
-        strFile = pstrArgs[0];
-        // Following call will load the strFile if one exists.
-        objINI = new INIFile(strFile);
-
-        objINI.setStringProperty("Folders", "folder1", "G:\\Temp", null);
-        objINI.setStringProperty("Folders", "folder2", "G:\\Temp\\Backup", null);
-
-        // Save changes back to strFile.
-        objINI.save();
+        return result;
     }
 
     /*------------------------------------------------------------------------------
      * Private class representing the INI Section.
      *----------------------------------------------------------------------------*/
+
     /**
-     * Class to represent the individual ini file section.
-     * 
-     * @author Prasad P. Khandekar
-     * @version 1.0
-     * @since 1.0
+     * Class to represent the individual ini file sectionKey.
      */
-    private class INISection {
-        /** Variable to hold any comments associated with this section */
-        private String mstrComment;
 
-        /** Variable to hold the section name. */
-        private String mstrName;
-
-        /** Variable to hold the properties falling under this section. */
-        private LinkedHashMap<String, INIProperty> mhmapProps;
+    class INISection {
 
         /**
-         * Construct a new section object identified by the name specified in parameter.
-         * 
-         * @param pstrSection The new sections name.
+         * Variable to hold any comments associated with this sectionKey
          */
-        public INISection(String pstrSection) {
-            this.mstrName = pstrSection;
-            this.mhmapProps = new LinkedHashMap<String, INIProperty>();
+        private String sectionComment;
+
+        /**
+         * Variable to hold the sectionKey name.
+         */
+        private String sectionName;
+
+        /**
+         * Variable to hold the properties falling under this sectionKey.
+         */
+        private Map<String, INIProperty> iniSectionProperties;
+
+        /**
+         * Construct a new sectionKey object identified by the name specified in
+         * parameter.
+         *
+         * @param sectionKey The new sections name.
+         */
+        INISection(String sectionKey) {
+            this.sectionName = sectionKey;
+
+            this.iniSectionProperties = new HashMap<>();
         }
 
         /**
-         * Construct a new section object identified by the name specified in parameter
-         * and associated comments.
-         * 
-         * @param pstrSection  The new sections name.
-         * @param pstrComments the comments associated with this section.
+         * Construct a new sectionKey object identified by the name specified in
+         * parameter and associated comments.
+         *
+         * @param sectionKey The new sections name.
+         * @param comments   the comments associated with this sectionKey.
          */
-        public INISection(String pstrSection, String pstrComments) {
-            this.mstrName = pstrSection;
-            this.mstrComment = delRemChars(pstrComments);
-            this.mhmapProps = new LinkedHashMap<String, INIProperty>();
+        INISection(String sectionKey, String comments) {
+            this.sectionName = sectionKey;
+            this.iniSectionProperties = new LinkedHashMap<>();
         }
 
         /**
-         * Sets the comments associated with this section.
-         * 
-         * @param pstrComments the comments
+         * Sets the comments associated with this sectionKey.
+         *
+         * @param comments the comments
          */
-        public void setSecComments(String pstrComments) {
-            this.mstrComment = delRemChars(pstrComments);
+        void setSecComments(String comments) {
+            this.sectionComment = comments;
         }
 
         /**
-         * Removes specified property value from this section.
-         * 
-         * @param pstrProp The name of the property to be removed.
+         * Removes specified property value from this sectionKey.
+         *
+         * @param propertyKey The name of the property to be removed.
          */
-        public void removeProperty(String pstrProp) {
-            if (this.mhmapProps.containsKey(pstrProp))
-                this.mhmapProps.remove(pstrProp);
+        void removeProperty(String propertyKey) {
+            this.iniSectionProperties.remove(propertyKey);
         }
 
         /**
          * Creates or modifies the specified property value.
-         * 
-         * @param pstrProp     The name of the property to be created or modified.
-         * @param pstrValue    The new value for the property.
-         * @param pstrComments the associated comments
+         *
+         * @param propertyKey The name of the property to be created or modified.
+         * @param pstrValue   The new value for the property.
+         * @param comments    the associated comments
          */
-        public void setProperty(String pstrProp, String pstrValue, String pstrComments) {
-            this.mhmapProps.put(pstrProp, new INIProperty(pstrProp, pstrValue, pstrComments));
+
+        INIProperty setProperty(String propertyKey, String pstrValue, String comments) {
+            return this.iniSectionProperties.put(propertyKey, new INIProperty(propertyKey, pstrValue, comments));
         }
 
         /**
          * Returns a map of all properties.
-         * 
+         *
          * @return a map of all properties
          */
-        public Map<String, INIProperty> getProperties() {
-            return Collections.unmodifiableMap(this.mhmapProps);
+        Map<String, INIProperty> getProperties() {
+            return Collections.unmodifiableMap(this.iniSectionProperties);
         }
 
         /**
          * Returns a string array containing names of all the properties under this
-         * section.
-         * 
+         * sectionKey.
+         *
          * @return the string array of property names.
          */
-        public String[] getPropNames() {
-            int iCntr = 0;
-            String[] arrRet = null;
-            Iterator<String> iter = null;
-
-            try {
-                if (this.mhmapProps.size() > 0) {
-                    arrRet = new String[this.mhmapProps.size()];
-                    for (iter = this.mhmapProps.keySet()
-                                               .iterator(); iter.hasNext();) {
-                        arrRet[iCntr] = iter.next();
-                        iCntr++;
-                    }
-                }
-            } catch (NoSuchElementException exIgnore) {
-                arrRet = null;
-            }
-            return arrRet;
+        String[] getPropNames() {
+            return this.iniSectionProperties.keySet()
+                                            .toArray(new String[0]);
         }
 
         /**
          * Returns underlying value of the specified property.
-         * 
-         * @param pstrProp the property whose underlying value is to be etrieved.
-         * @return the property value.
+         *
+         * @param propertyKey the property whose underlying value is to be retrieved.
+         * @return the property value or <code>null</code>, if there is no property
+         *         available for the key.
          */
-        public INIProperty getProperty(String pstrProp) {
-            INIProperty objRet = null;
-
-            if (this.mhmapProps.containsKey(pstrProp))
-                objRet = this.mhmapProps.get(pstrProp);
-            return objRet;
+        INIProperty getProperty(String propertyKey) {
+            return this.iniSectionProperties.get(propertyKey);
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
         @Override
         public String toString() {
-            Set<String> colKeys = null;
-            String strRet = "";
-            Iterator<String> iter = null;
-            INIProperty objProp = null;
-            StringBuffer objBuf = new StringBuffer();
 
-            if (this.mstrComment != null)
-                objBuf.append(addRemChars(this.mstrComment));
-            objBuf.append("[" + this.mstrName + "]\r\n");
-            colKeys = this.mhmapProps.keySet();
-            if (colKeys != null) {
-                iter = colKeys.iterator();
-                if (iter != null) {
-                    while (iter.hasNext()) {
-                        objProp = this.mhmapProps.get(iter.next());
-                        objBuf.append(objProp.toString());
-                        objBuf.append("\r\n");
-                    }
-                }
+            StringBuilder stringBuilder = new StringBuilder();
+            if (this.sectionComment != null) {
+                stringBuilder.append(addRemarkCharacter(this.sectionComment));
             }
-            strRet = objBuf.toString();
-            return strRet;
+            stringBuilder.append("[")
+                         .append(this.sectionName)
+                         .append("]")
+                         .append(System.lineSeparator());
+            for (INIProperty entry : this.iniSectionProperties.values()) {
+                stringBuilder.append(entry);
+                stringBuilder.append(System.lineSeparator());
+            }
+            return stringBuilder.toString();
         }
     }
 
-    /*------------------------------------------------------------------------------
-     * Private class representing the INI Property.
-     *----------------------------------------------------------------------------*/
     /**
      * This class represents a key value pair called property in an INI file.
-     * 
-     * @author Prasad P. Khandekar
-     * @version 1.0
-     * @since 1.0
      */
-    private class INIProperty {
-        /** Variable to hold name of this property */
-        private String mstrName;
-        /** Variable to hold value of this property */
-        private String mstrValue;
-        /** Variable to hold comments associated with this property */
-        private String mstrComments;
+    class INIProperty {
+
+        /**
+         * Variable to hold name of this property
+         */
+        private String propertyKey;
+
+        /**
+         * Variable to hold value of this property
+         */
+        private String propertyValue;
+
+        /**
+         * Variable to hold comments associated with this property
+         */
+        private String comments;
 
         /**
          * Constructor
-         * 
-         * @param pstrName     the name of this property.
-         * @param pstrValue    the value of this property.
-         * @param pstrComments the comments associated with this property.
+         *
+         * @param propertyKey   the name of this property.
+         * @param propertyValue the value of this property.
+         * @param comments      the comments associated with this property.
          */
-        public INIProperty(String pstrName, String pstrValue, String pstrComments) {
-            this.mstrName = pstrName;
-            this.mstrValue = pstrValue;
-            this.mstrComments = delRemChars(pstrComments);
+        INIProperty(String propertyKey, String propertyValue, String comments) {
+            this.propertyKey = propertyKey;
+            this.propertyValue = propertyValue;
+            this.comments = comments;
         }
 
         /**
          * Returns value of this property. If value contains a reference to environment
-         * avriable then this reference is replaced by actual value before the value is
+         * variable then this reference is replaced by actual value before the value is
          * returned.
-         * 
+         *
          * @return the value of this property.
          */
-        public String getPropValue() {
-            int intStart = 0;
-            int intEnd = 0;
-            String strVal = null;
-            String strVar = null;
-            String strRet = null;
 
-            strRet = this.mstrValue;
-            intStart = strRet.indexOf("%");
-            try {
-                if (intStart >= 0) {
-                    intEnd = strRet.indexOf("%", intStart + 1);
-                    strVar = strRet.substring(intStart + 1, intEnd);
-                    strVal = mpropEnv.getProperty(strVar);
-                    if (strVal != null) {
-                        strRet = strRet.substring(0, intStart) + strVal + strRet.substring(intEnd + 1);
-                    }
+        String getPropValue() {
+            final Pattern environmentVariableRegEx = Pattern.compile("%(?<environmentVariableKey>.+)%");
+            String result;
+            Matcher matcher = environmentVariableRegEx.matcher(this.propertyValue);
+            if (matcher.matches()) {
+                LOG.debug("Property value {} could be an environment variable, we will try to resolve the value.",
+                        this.propertyValue);
+                String environmentVariableKey = matcher.group("environmentVariableKey");
+                result = System.getenv(environmentVariableKey);
+                if (result == null) {
+                    LOG.debug(
+                            "Property value {} could not be resolved into an environment variable. The property value itself is returned.",
+                            this.propertyValue);
+                    result = this.propertyValue;
+                } else {
+                    LOG.debug("Property value {} is environment variable with value {}.", this.propertyValue, result);
                 }
-            } catch (Exception ex) {
-                return strRet;
+            } else {
+                LOG.debug("Property value {} is no environment variable. The property value itself is returned.",
+                        this.propertyValue);
+                result = this.propertyValue;
             }
-            return strRet;
+            return result;
         }
 
-        /*
-         * (non-Javadoc)
-         * 
-         * @see java.lang.Object#toString()
-         */
+        String getComments() {
+            return this.comments;
+        }
+
         @Override
         public String toString() {
-            String strRet = "";
 
-            if (this.mstrComments != null)
-                strRet = addRemChars(mstrComments);
-            strRet = strRet + this.mstrName + " = " + this.mstrValue;
-            return strRet;
+            StringBuilder result = new StringBuilder();
+            if (this.comments != null && !this.comments.isEmpty()) {
+                result.append(addRemarkCharacter(comments));
+            }
+            return result.append(this.propertyKey)
+                         .append(" = ")
+                         .append(this.propertyValue)
+                         .toString();
         }
+    }
+
+    /**
+     * This function adds a remark character ';' in source string.
+     *
+     * @param comment source string
+     * @return converted string.
+     */
+    private String addRemarkCharacter(String comment) {
+        String[] commentSlittedByNewLine = comment.split(System.lineSeparator());
+        StringBuilder commentsBlockBuilder = new StringBuilder();
+        for (String commentLine : commentSlittedByNewLine) {
+            commentsBlockBuilder.append(";")
+                                .append(commentLine)
+                                .append(System.lineSeparator());
+        }
+        return commentsBlockBuilder.toString();
     }
 }

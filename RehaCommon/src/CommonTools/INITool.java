@@ -1,33 +1,47 @@
 package CommonTools;
 
-import java.io.InputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class INITool {
-    static String[] dbInis = new String[] { "nix" };
 
-    public static void setDBInis(String[] xdbini) {
-        dbInis = xdbini;
+    private static final Logger LOG = LoggerFactory.getLogger(INITool.class);
+
+    private static List<String> iniFilesInDatabase = null;
+
+    /**
+     * private CTor to avoid creating an instance of an tooling class without
+     * members and functionality.
+     */
+    private INITool() {
+        // nothing to do here ;)
     }
 
     public static String[] getDBInis() {
-        return dbInis;
+        if (iniFilesInDatabase == null) {
+            iniFilesInDatabase = new ArrayList<>();
+        }
+        return iniFilesInDatabase.toArray(new String[0]);
     }
 
-    public static void init(String pfad) {
-        INIFile file = new INIFile(pfad + "inicontrol.ini");
+    public static void init(String path) {
+        INIFile file = new INIFile(path + "inicontrol.ini");
         try {
-            int anzahl = file.getIntegerProperty("INIinDB", "INIAnzahl");
-            if (anzahl == 0) {
-                dbInis = new String[] { "nix" };
+            Integer amountOfIniFilesInDatabase = file.getIntegerProperty("INIinDB", "INIAnzahl");
+            if (amountOfIniFilesInDatabase == null || amountOfIniFilesInDatabase == 0) {
+                iniFilesInDatabase = new ArrayList<>();
             } else {
-                dbInis = new String[anzahl];
-                for (int i = 0; i < dbInis.length; i++) {
-                    dbInis[i] = String.valueOf(file.getStringProperty("INIinDB", "DBIni" + Integer.toString(i + 1)));
+                iniFilesInDatabase = new ArrayList<>(amountOfIniFilesInDatabase);
+                for (int index = 0; index < amountOfIniFilesInDatabase; index++) {
+                    iniFilesInDatabase.add(String.valueOf(file.getStringProperty("INIinDB", "DBIni" + (index + 1))));
                 }
             }
         } catch (Exception ex) {
-            dbInis = new String[] { "nix" };
+            LOG.error("Exception in init!", ex);
+            iniFilesInDatabase = new ArrayList<>();
         }
     }
 
@@ -42,15 +56,14 @@ public class INITool {
     public static INIFile openIni(String path, String iniToOpen) {
         INIFile inif = null;
         try {
-            if (Arrays.asList(dbInis)
-                      .contains(iniToOpen)) {
-                InputStream stream = SqlInfo.liesIniAusTabelle(iniToOpen);
-                inif = new INIFile(stream, iniToOpen);
+            if (iniFilesInDatabase.contains(iniToOpen)) {
+                String contentAsSingleString = SqlInfo.liesIniAusTabelle(iniToOpen);
+                inif = new INIFile(contentAsSingleString, iniToOpen);
             } else {
                 inif = new INIFile(path + iniToOpen);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception in openIni!", ex);
         }
         return inif;
     }
@@ -66,12 +79,11 @@ public class INITool {
     public static INIFile openIniFallback(String path, String iniToOpen) {
         INIFile inif = null;
         try {
-            if (Arrays.asList(dbInis)
-                      .contains(iniToOpen)) {
+            if (iniFilesInDatabase.contains(iniToOpen)) {
                 inif = new INIFile(path + iniToOpen);
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception in openIniFallback!", ex);
         }
         return inif;
     }
@@ -80,20 +92,15 @@ public class INITool {
     public static boolean saveIni(INIFile iniToSave) {
         boolean ret = false;
         try {
-            if (Arrays.asList(dbInis)
-                      .contains(iniToSave.getFileName())) {
-                SqlInfo.schreibeIniInTabelle(iniToSave.getFileName(), iniToSave.saveToStringBuffer()
-                                                                               .toString()
+            if (iniFilesInDatabase.contains(iniToSave.getFileName())) {
+                SqlInfo.schreibeIniInTabelle(iniToSave.getFileName(), iniToSave.saveToString()
                                                                                .getBytes());
-                iniToSave.getInputStream()
-                         .close();
-                iniToSave = null;
             } else {
                 iniToSave.save();
             }
             ret = true;
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOG.error("Exception in saveIni!", ex);
         }
         return ret;
     }

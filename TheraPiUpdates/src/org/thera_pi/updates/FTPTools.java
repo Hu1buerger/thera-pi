@@ -1,6 +1,14 @@
 package org.thera_pi.updates;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 
 import javax.swing.*;
 
@@ -11,15 +19,15 @@ import org.apache.commons.net.ftp.FTPReply;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+class FTPTools {
+    private static final Logger LOG = LoggerFactory.getLogger(FTPTools.class);
 
-public class FTPTools {
-    private static final Logger LOG = LoggerFactory.getLogger(SqlInfo.class);
     private FTPClient ftpClient = null;
     private static final int BUFFER_SIZE = 1024 * 8;
     private FTPFile[] files;
     private UpdateConfig updateConfig;
 
-    public FTPTools() {
+    FTPTools() {
         try {
             updateConfig = UpdateConfig.getInstance();
             ftpClient = new FTPClient();
@@ -28,7 +36,7 @@ public class FTPTools {
         }
     }
 
-    public FTPFile[] holeDatNamen() {
+    FTPFile[] holeDatNamen() {
         try {
             if (files != null) {
                 return files;
@@ -56,7 +64,7 @@ public class FTPTools {
         return files;
     }
 
-    public boolean holeDatei(String datfern, String vznah, boolean doprogress, final UpdatePanel eltern, long groesse) {
+    boolean holeDatei(String datfern, String vznah, boolean doprogress, final UpdatePanel eltern, long groesse) {
         try {
             if (ftpClient == null) {
                 return false;
@@ -76,7 +84,8 @@ public class FTPTools {
 
             ftpClient.setUseEPSVwithIPv4(true);
 
-            try {
+            try (InputStream uis = ftpClient.retrieveFileStream(datfern);
+                    FileOutputStream fos = new FileOutputStream(vznah + /* "test/"+ */datfern)) {
                 if (files == null) {
                     files = ftpClient.listFiles();
                 } else {
@@ -104,8 +113,6 @@ public class FTPTools {
                 }
 
                 ftpClient.setFileTransferMode(FTP.STREAM_TRANSFER_MODE);
-                InputStream uis = ftpClient.retrieveFileStream(datfern);
-                FileOutputStream fos = new FileOutputStream(vznah + /* "test/"+ */datfern);
 
                 int n;
                 byte[] buf = new byte[BUFFER_SIZE];
@@ -127,23 +134,19 @@ public class FTPTools {
                     SwingUtilities.invokeLater(eltern::setDoneIcon);
                 }
 
-                LOG.debug("Datei " + datfern + " wurde erfolgreich übertragen");
+                LOG.debug("Datei {} wurde erfolgreich übertragen", datfern);
                 fos.flush();
-                fos.close();
-                uis.close();
-
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(null,
-                        "Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch");
-
-                LOG.error("Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch", ex);
+                String message = "Bezug der Datei " + datfern
+                        + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch";
+                JOptionPane.showMessageDialog(null, message);
+                LOG.error(message, ex);
                 return false;
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
-                    "Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch");
-
-            LOG.error("Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch", ex);
+            String message = "Bezug der Datei " + datfern + " fehlgeschlagen!\nBitte starten Sie einen neuen Versuch";
+            JOptionPane.showMessageDialog(null, message);
+            LOG.error(message, ex);
             return false;
         }
 
@@ -151,7 +154,7 @@ public class FTPTools {
     }
 
     /*****************************************************/
-    public String holeLogDateiSilent(String datfern) {
+    String holeLogDateiSilent(String datfern) {
         try {
             if (ftpClient == null) {
                 return "Fehler beim Bezug der Log-Datei, ftpClient == null";
@@ -169,10 +172,8 @@ public class FTPTools {
             ftpClient.setUseEPSVwithIPv4(true);
             ftpClient.getReplyStrings();
 
-            try {
-                InputStream uis = ftpClient.retrieveFileStream(datfern);
+            try (InputStream uis = ftpClient.retrieveFileStream(datfern)) {
                 String ret = convertStreamToString(uis);
-                uis.close();
                 ftpClient.getReplyStrings();
                 ftpClient.logout();
                 ftpClient.disconnect();
@@ -188,15 +189,13 @@ public class FTPTools {
         return "Fehler beim Bezug der Log-Datei";
     }
 
-    public void ftpTransferString(String datfern, String string, JProgressBar jprog) {
+    void ftpTransferString(String datfern, String string, JProgressBar jprog) {
         if (ftpClient == null) {
             LOG.debug("ftpClient = null");
             return;
         }
-        if (!ftpClient.isConnected()) {
-            if (!nurConnect()) {
-                return;
-            }
+        if (!ftpClient.isConnected() && !nurConnect()) {
+            return;
         }
 
         try {
@@ -211,14 +210,9 @@ public class FTPTools {
             ftpClient.enterLocalPassiveMode();
         }
 
-        try {
+        try (InputStream ins = convertStringToStream(string); OutputStream fos = ftpClient.storeFileStream(datfern)) {
             ftpClient.deleteFile(datfern);
-            InputStream ins = null;
-            try {
-                ins = convertStringToStream(string);
-            } catch (Exception ex) {
-                LOG.error("Exception: ", ex);
-            }
+
             if (updateConfig.isUseActiveMode()) {
                 ftpClient.enterLocalActiveMode();
             } else {
@@ -226,8 +220,6 @@ public class FTPTools {
             }
 
             ftpClient.setSendBufferSize(1024 * 8);
-
-            OutputStream fos = ftpClient.storeFileStream(datfern);
 
             byte[] buf = new byte[1024 * 8];
 
@@ -265,18 +257,15 @@ public class FTPTools {
                 }
 
             }
-            LOG.debug("Datei " + datfern + " auf Server geschrieben mit " + gesamt + " Bytes");
+            LOG.debug("Datei {} auf Server geschrieben mit {} Bytes", datfern, gesamt);
 
             fos.flush();
-            fos.close();
-            ins.close();
             if (!ftpClient.completePendingCommand()) {
                 ftpClient.logout();
                 ftpClient.disconnect();
-                JOptionPane.showMessageDialog(null,
-                        "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
-                System.err.println(
-                        "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)");
+                String message = "Die Puffer des belämmerten FTP's konnten nicht vollständig geschrieben werden!!!!(Ich krieg die Krise)";
+                JOptionPane.showMessageDialog(null, message);
+                System.err.println(message);
             }
             if (progresszeigen) {
                 SwingUtilities.invokeLater(() -> {
@@ -291,7 +280,7 @@ public class FTPTools {
 
     /********************************************************/
 
-    public static String convertStreamToString(InputStream is)   {
+    private static String convertStreamToString(InputStream is) {
         StringBuilder sb = new StringBuilder();
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
             String line;
@@ -299,19 +288,19 @@ public class FTPTools {
                 sb.append(line)
                   .append("\n");
             }
-        }catch (Exception ex){
+        } catch (Exception ex) {
             LOG.error("Exception: ", ex);
         }
         return sb.toString();
     }
 
-    public static InputStream convertStringToStream(String string) {
+    private static InputStream convertStringToStream(String string) {
         return new ByteArrayInputStream(string.getBytes());
     }
 
     private boolean nurConnect() {
         try {
-            if (!ftpClient.isConnected() && ftpClient != null) {
+            if (ftpClient != null && !ftpClient.isConnected()) {
                 ftpClient.connect(updateConfig.getUpdateHost());
 
                 ftpClient.login(updateConfig.getUpdateUser(), updateConfig.getUpdatePasswd());
@@ -333,17 +322,13 @@ public class FTPTools {
         return true;
     }
 
-    /*****************************************************/
-    public void holeDateiSilent(String datfern, String vznah) {
+    void holeDateiSilent(String datfern, String vznah) {
         try {
             if (ftpClient == null) {
                 return;
             }
-            if (!ftpClient.isConnected()) {
-                if (!nurConnect()) {
-                    return;
-                }
-
+            if (!ftpClient.isConnected() && !nurConnect()) {
+                return;
             }
             if (updateConfig.isUseActiveMode()) {
                 ftpClient.enterLocalActiveMode();
@@ -382,7 +367,7 @@ public class FTPTools {
     }
 
     /********************************************************/
-    public void ftpTransferDatei(String datfern, String quelldat, long groesse, JProgressBar jprog) {
+    void ftpTransferDatei(String datfern, String quelldat, int groesse, JProgressBar jprog) {
 
         if (ftpClient == null) {
             LOG.debug("ftpClient = null");
@@ -410,13 +395,9 @@ public class FTPTools {
             ftpClient.enterLocalPassiveMode();
         }
 
-        try {
-
+        File src = new File(quelldat);
+        try (InputStream ins = new FileInputStream(src); OutputStream fos = ftpClient.storeFileStream(datfern);) {
             ftpClient.deleteFile(datfern);
-
-            File src = new File(quelldat);
-            InputStream ins = new FileInputStream(src);
-
             if (updateConfig.isUseActiveMode()) {
                 ftpClient.enterLocalActiveMode();
             } else {
@@ -425,10 +406,8 @@ public class FTPTools {
 
             ftpClient.setSendBufferSize(1024 * 8);
 
-            OutputStream fos = ftpClient.storeFileStream(datfern);
             if (!FTPReply.isPositiveIntermediate(ftpClient.getReplyCode())) {
-                LOG.debug("Datei = " + quelldat);
-
+                LOG.debug("Datei = {}", quelldat);
             }
 
             int n;
@@ -443,7 +422,7 @@ public class FTPTools {
                 SwingUtilities.invokeLater(() -> {
                     xprog.setStringPainted(true);
                     xprog.setMinimum(0);
-                    xprog.setMaximum(new Long(xgross).intValue());
+                    xprog.setMaximum((int) xgross);
                     xprog.repaint();
                 });
                 progresszeigen = true;
@@ -462,15 +441,13 @@ public class FTPTools {
                         });
                     }
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    LOG.error("Exception: " + ex.getMessage(), ex);
                 }
 
             }
-            LOG.debug("Datei " + datfern + " auf Server geschrieben mit " + gesamt + "Bytes");
+            LOG.debug("Datei {} auf Server geschrieben mit {} Bytes", datfern, gesamt);
 
             fos.flush();
-            fos.close();
-            ins.close();
             if (!ftpClient.completePendingCommand()) {
                 ftpClient.logout();
                 ftpClient.disconnect();
@@ -495,20 +472,17 @@ public class FTPTools {
 
     }
 
-    public void connectTest() {
-        if (ftpClient != null) {
-            if (ftpClient.isConnected()) {
-                try {
-                    ftpClient.logout();
-                } catch (Exception ex) {
-                    LOG.error("Exception: ", ex);
-                }
-                try {
-                    ftpClient.disconnect();
-                } catch (Exception ex) {
-                    LOG.error("Exception: ", ex);
-
-                }
+    void connectTest() {
+        if (ftpClient != null && ftpClient.isConnected()) {
+            try {
+                ftpClient.logout();
+            } catch (Exception ex) {
+                LOG.error("Exception: ", ex);
+            }
+            try {
+                ftpClient.disconnect();
+            } catch (Exception ex) {
+                LOG.error("Exception: ", ex);
 
             }
         }
