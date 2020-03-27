@@ -1781,10 +1781,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * initialisiert ein Rezept mit Daten, die immer gesetzt werden müssen
      */
     private void initRezeptAll(Rezept thisRezept) {
-        thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse; koennte sich seit Kopiervorlage geaendert
-                                                                      // haben
-        thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
-
         if (thisRezept.getKtraeger()
                     .equals("")) { // eher ein Fall für check/speichern!
             JOptionPane.showMessageDialog(null,
@@ -1813,6 +1809,10 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      */
     private void initRezeptNeu(Rezept thisRezept) {
         thisRezept.createEmptyVec();
+
+        thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
+        thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68)); // id des Kassen-record
+
         initRezeptAll(thisRezept);
 
         thisRezept.setArzt(Reha.instance.patpanel.patDaten.get(25)); // Hausarzt als default
@@ -1830,6 +1830,18 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *  - löscht Daten, die nur für die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
     private void initRezeptKopie(Rezept thisRezept) {
+        String kasseInVo = thisRezept.getKtrName();
+        String kasseInPatStamm = Reha.instance.patpanel.patDaten.get(13);
+        if (!kasseInVo.equals(kasseInPatStamm)) {
+            // Kasse im Rezept stimmt nicht mit Kasse im Patientenstamm überein:
+            // Pat. hat inzwischen Kasse gewechselt oder es ist ein BG- oder
+            // Privatrezept
+            if (askForKeepCurrent(kasseInVo, kasseInPatStamm) == JOptionPane.NO_OPTION) {
+                thisRezept.setKtrName(kasseInPatStamm);
+                thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
+            }
+        }
+        
         initRezeptAll(thisRezept);
 
         // war Lemmis 'Löschen der auf jeden Fall "falsch weil alt" Komponenten'
@@ -1838,6 +1850,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         thisRezept.setTermine("");
         thisRezept.setZzStat("");
         thisRezept.setLastDate("");
+    }
+
+    private int askForKeepCurrent(String kasseInVO, String kassePatStamm) {
+        String[] strOptions = { "Kasse der VO beibehalten", "Kasse aus Patientendaten verwenden" };
+        return JOptionPane.showOptionDialog(null,
+                "<html><b>Das Rezept enthält eine andere Kasse als die Stammdaten des Patienten: </b>\n"
+                        + "\n     Kasse im kopierten Rezept:      " + kasseInVO + "\n     Kasse in den Patientendaten:  "
+                        + kassePatStamm + "\n",
+                "unterschiedliche Kassen gefunden", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null,
+                strOptions, strOptions[0]);
     }
 
     /**
