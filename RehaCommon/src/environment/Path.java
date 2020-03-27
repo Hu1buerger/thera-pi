@@ -47,11 +47,10 @@ public enum Path {
             setProghome("/opt/RehaVerwaltung/");
             break;
         case MAC:
-            String homedir = java.lang.System.getProperty("user.home");
-            setProghome(homedir + "/RehaVerwaltung/");
+            setProghome("/opt/RehaVerwaltung/");
             /**
-             * welcher Rueckgaberwert im Fall von OSX erfolgt muß durch einen Mac-Anhaenger
-             * ermittelt werden
+             * Sollte erstmal tun, bis eine echte 'OS-X' app oder installer
+             * gebaut wird.
              **/
             break;
         case UNKNOWN:
