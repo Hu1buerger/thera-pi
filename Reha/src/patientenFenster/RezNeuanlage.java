@@ -97,8 +97,9 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     final int cARZT = 1;
     final int cREZDAT = 2;
     final int cBEGINDAT = 3;
-    final int cANZ1 = 4; // ACHTUNG die Positionen cANZ1 bis cANZ4 müssen immer nacheinander definiert
-                         // sein
+    final int cANZ1 = 4; // Lemmi 20101231: ACHTUNG
+                         // die Positionen cANZ1 bis cANZ4 müssen immer
+                         // nacheinander definiert sein
     final int cANZ2 = 5;
     final int cANZ3 = 6;
     final int cANZ4 = 7;
@@ -110,13 +111,15 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     final int cPREISGR = 13;
     final int cHEIMBEW = 14;
     final int cBEFREIT = 15;
-    final int cPOS1 = 16; // ACHTUNG die Positionen cPOS1 bis cPOS4 müssen immer nacheinander definiert
-                          // sein
+    final int cPOS1 = 16; // Lemmi 20101231: ACHTUNG
+                          // die Positionen cPOS1 bis cPOS4 müssen immer
+                          // nacheinander definiert sein
     final int cPOS2 = 17;
     final int cPOS3 = 18;
     final int cPOS4 = 19;
-    final int cPREIS1 = 20; // ACHTUNG die Positionen cPREIS1 bis cPREIS4 müssen immer nacheinander
-                            // definiert sein
+    final int cPREIS1 = 20; // Lemmi 20101231: ACHTUNG
+                            // die Positionen cPREIS1 bis cPREIS4 müssen immer
+                            // nacheinander definiert sein
     final int cPREIS2 = 21;
     final int cPREIS3 = 22;
     final int cPREIS4 = 23;
@@ -142,12 +145,12 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     final int cVOLLHB = 3;
 
     public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
-    // Lemmi 20101231: Harte Index-Zahlen für "jcmb" durch sprechende Konstanten
-    // ersetzt !
+
     final int cRKLASSE = 0;
     final int cVERORD = 1;
-    final int cLEIST1 = 2; // ACHTUNG die Positionen cLEIST1 bis cLEIST4 müssen immer nacheinander
-                           // definiert sein
+    final int cLEIST1 = 2; // Lemmi 20101231: ACHTUNG
+                           // die Positionen cLEIST1 bis cLEIST4 müssen immer
+                           // nacheinander definiert sein
     final int cLEIST2 = 3;
     final int cLEIST3 = 4;
     final int cLEIST4 = 5;
@@ -162,11 +165,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     public JButton hmrcheck = null;
 
     public boolean neu = false;
-    public String feldname = "";
-
-    // Lemmi 20110101: strKopiervorlage zugefügt. Kopieren des letzten Rezepts des
-    // selben Patienten bei Rezept-Neuanlage
-    public String strKopiervorlage = "";
 
     public Vector<String> vec = null; // Lemmi Doku: Das bekommt den 'vecaktrez' aus dem rufenden Programm
                                       // (AktuelleRezepte)
@@ -209,25 +207,18 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
-    public RezNeuanlage(Vector<String> vec, boolean neu, String sfeldname, Connection connection) { // McM: sfeldname
-                                                                                                    // scheint
-                                                                                                    // unbenutzt; statt
-                                                                                                    // vec evtl rezNr
-                                                                                                    // übergeben?
+    public RezNeuanlage(Vector<String> vec, boolean neu, Connection connection) { 
         super();
         try {
             this.neu = neu;
-            this.feldname = sfeldname;
             this.vec = vec; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
             myRezept = new Rezept();
             verordnenderArzt = new ArztVec();
-            //            myRezept.init("KG18330");    // Bsp.
             myRezept.setVec_rez(vec);
             diszis = new Disziplinen();
 
             if (vec.size() > 0 && this.neu) {
-                aktuelleDisziplin = RezTools.putRezNrGetDisziplin(vec.get(1)); // McM: putRezNrGetDisziplin nach
-                                                                               // Disziplinen versch.?
+                aktuelleDisziplin = RezTools.putRezNrGetDisziplin(vec.get(1)); 
             }
 
             setName("RezeptNeuanlage");
@@ -286,7 +277,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 if (farbnamen.get(i).startsWith("Col")) {
                 String bedeutung = SystemConfig.vSysColsBedeut.get(i);
                 farbcodes.add(bedeutung);
-
 
                 jcmb[cFARBCOD].addItem(bedeutung);
                 }
@@ -353,11 +343,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     int aid, kid;
                     kid = StringTools.ZahlTest(jtf[cKASID].getText());
                     aid = StringTools.ZahlTest(jtf[cARZTID].getText());
-                    // System.out.println("*****************Keine Preisgruppen
-                    // bezogen*******************");
-                    // preisgruppen
-                    // RezTools.holePreisVector(vec.get(1), Integer.parseInt(vec.get(41))-1);
-                    // ladePreise();
                     if (kid < 0) {
                         jtf[cKASID].setText(Integer.toString(Reha.instance.patpanel.kid));
                         jtf[cKTRAEG].setText(Reha.instance.patpanel.patDaten.get(13));
@@ -479,7 +464,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     public int askForCancelUsaved() {
         String[] strOptions = { "ja", "nein" }; // Defaultwert auf "nein" gesetzt !
         return JOptionPane.showOptionDialog(null,
-                "Es wurden Rezept-Anngaben geändert!\nWollen sie die Änderung(en) wirklich verwerfen?",
+                "Es wurden Rezept-Angaben geändert!\nWollen sie die Änderung(en) wirklich verwerfen?",
                 "Angaben wurden geändert", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, strOptions,
                 strOptions[1]);
     }
@@ -501,7 +486,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         jpan.getPanel()
             .setOpaque(false);
         JScrollPane jscr = null;
-        // String ywerte = "";
 
         try {
             // Lemmi 20101231: Harte Index-Zahlen für "jtf" durch sprechende Konstanten
@@ -519,8 +503,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jtf[cANGEL] = new JRtaTextField("GROSS", true); // angelegt von
             jtf[cKASID] = new JRtaTextField("GROSS", false); // kassenid
             jtf[cARZTID] = new JRtaTextField("GROSS", false); // arztid
-            // ************ manches / nicht alles nachfolgende muss noch eingebaut
-            // werden.....
             jtf[cPREISGR] = new JRtaTextField("GROSS", false); // preisgruppe
             jtf[cHEIMBEW] = new JRtaTextField("GROSS", false); // heimbewohner
             jtf[cBEFREIT] = new JRtaTextField("GROSS", false); // befreit
@@ -1169,7 +1151,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             @Override
             protected Void doInBackground() throws Exception {
                 try {
-                    // System.out.println("kassenID = "+kassenid);
                     String test = SqlInfo.holeEinzelFeld(
                             "select id from adrgenehmigung where ik = (select ik_kostent from kass_adr where id = '"
                                     + kassenid + "') LIMIT 1");
@@ -1178,7 +1159,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                 + "<b>Genehmigung für Verordnungen außerhalb des Regelfalles</b><br><br></html>";
                         JOptionPane.showMessageDialog(null, meldung);
                     }
-                    // System.out.println("Rückgabe von test = "+test);
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null,
                             "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpaßt.\nFehlt zufällig die Tabelle adrgenehmigung?");
@@ -1190,8 +1170,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     }
 
-    // Lemmi 20101231: Harte Index-Zahlen für "jcmb" und "jtf" durch sprechende
-    // Konstanten ersetzt !
     // Lemmi Doku: prüft ob die Heilmittel überhaupt und in der korrekten
     // Reihenfolge eingetragen worden sind
     private boolean anzahlTest() {
@@ -1271,8 +1249,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         Vector<Integer> anzahlen = new Vector<Integer>();
         Vector<String> hmpositionen = new Vector<String>();
 
-        // Lemmi 20101231: Harte Index-Zahlen für "jcmb" und "jtf" durch sprechende
-        // Konstanten ersetzt !
         for (int i = 0; i < 4; i++) { // Lemmi Doku: Nacheinander alle 4 Leistungen abfragen und Anzahlen addieren
             itest = jcmb[cLEIST1 + i].getSelectedIndex();
             if (itest > 0) {
@@ -1606,8 +1582,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             String componentName = ((JComponent) arg0.getSource()).getName();
             boolean jumpForward = arg0.toString()
                                       .contains("cause=TRAVERSAL_FORWARD");
-            // String evt = arg0.toString();
-            // System.out.println("Focus lost: "+ componentName + " (" + evt + ")");
             if (componentName.equals("RezeptClass") || componentName.equals("ktraeger")) {
                 if (ctrlIsPressed && jumpForward) {
                     eingabeRezDate.requestFocusInWindow();
@@ -1752,7 +1726,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 vec = SqlInfo.holeFelder(
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + id + "' LIMIT 1");
             }
-            // System.out.println(vec);
             if (vec.size() > 0) {
                 for (int i = 1; i < vec.get(0)
                                        .size(); i++) {
@@ -1844,7 +1817,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         
         initRezeptAll(thisRezept);
 
-        // war Lemmis 'Löschen der auf jeden Fall "falsch weil alt" Komponenten'
         thisRezept.setRezNb("");
         thisRezept.setRezeptDatum("");
         thisRezept.setTermine("");
@@ -2161,7 +2133,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     } else {
                         szzstatus = "0";
                     }
-                    // szzstatus = "0";
                     unter18 = "T";
                     break;
                 }

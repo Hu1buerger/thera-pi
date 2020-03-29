@@ -18,7 +18,6 @@ public class Rezept {
 
     public boolean init(String rezNr) {
         String cmd = "select * from verordn where rez_nr='" + rezNr.trim() + "' LIMIT 1";
-        // System.out.println("Kommando = "+cmd);
         this.vecvec_rezepte = SqlInfo.holeFelder(cmd);
         if (this.vecvec_rezepte.size() <= 0) {
             System.out.println("RezeptVektor ist leer");
@@ -49,7 +48,6 @@ public class Rezept {
 
     private void setTo1stVec_rez(Vector<Vector<String>> vecvec_rez) {
         this.vec_rezept = this.vecvec_rezepte.get(0);
-        // System.out.println("RezeptVektor = "+this.vec_rezept);
     }
 
     private boolean getBoolAt(int index) {
@@ -71,7 +69,6 @@ public class Rezept {
     }
 
     private int getIntAt(int index) {
-//		return Integer.parseInt(this.vec_rezept.get(index));
         return StringTools.ZahlTest(this.vec_rezept.get(index));
     }
 
@@ -682,7 +679,6 @@ public class Rezept {
         cmd.append("anzahlhb='" + getAnzHB() + "', ");
         cmd.append("icd10='" + getICD10() + "', ");
         cmd.append("icd10_2='" + getICD10_2() + "' ");
-        cmd.append(", rsplit='rez2db' "); // -> debug-Hilfe
 
         cmd.append(" where id='" + getId() + "' LIMIT 1");
         SqlInfo.sqlAusfuehren(cmd.toString());
