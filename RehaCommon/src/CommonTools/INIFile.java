@@ -100,18 +100,19 @@ public final class INIFile {
 
     /**
      * Create a iniFile object from the file named in the parameter.
+     * If iniFile does not exist (i.e. to be created) - log warning
+     * If iniFile exists, load/parse its contents into sectionMap. 
      *
      * @param absoluteFileNamePath The full path and name of the ini file to be
      *                             used.
      */
-
     public INIFile(String absoluteFileNamePath) {
         if (absoluteFileNamePath == null) {
             throw new NullPointerException("Parameter [absoluteFileNamePath] must not be null!");
         }
 
         if (!new File(absoluteFileNamePath).exists()) {
-            LOG.error("Inifile does not exist: {}", absoluteFileNamePath);
+            LOG.warn("Inifile does not exist: {}", absoluteFileNamePath);
         }
 
         this.sectionMap = new LinkedHashMap<>();
@@ -655,31 +656,33 @@ public final class INIFile {
     }
 
     /**
-     * Flush changes back to the disk file. If the disk file does not exists then
-     * creates the new one.
+     * Flush changes back to the disk file. If the disk file does not exist,
+     * create a new one, otherwise delete existing file prior to write.
      */
     public synchronized boolean save() {
 
         boolean result = false;
 
         File file = new File(this.absoluteFileNamePath);
+        
+        if (file.exists()) {
+            LOG.warn("File {} exists and will be deleted before saving the new content!",
+                    this.absoluteFileNamePath);
+            boolean deleted = file.delete();
+            if (deleted) {
+                LOG.debug("File {} was deleted successfully. Starting to write the new content!",
+                        this.absoluteFileNamePath);
+            } else {
+                LOG.warn("Unable to delete the file {} before saving the new content!", this.absoluteFileNamePath);
+            }
+        } else {
+            LOG.warn("File {} does not exist yet. Start saving the new content!", this.absoluteFileNamePath);
+        }
+      
         try (FileWriter writer = new FileWriter(file)) {
             if (this.sectionMap.size() == 0) {
                 LOG.warn("Nothing to save into file {}. The job is done!", this.absoluteFileNamePath);
                 return false;
-            }
-            if (file.exists()) {
-                LOG.warn("File {} is existing, will be deleted before saving the new content!",
-                        this.absoluteFileNamePath);
-                boolean deleted = file.delete();
-                if (deleted) {
-                    LOG.debug("File {} was deleted successfully. Starting the writing of the new content!",
-                            this.absoluteFileNamePath);
-                } else {
-                    LOG.warn("Unable to delete the file {} before saving the new content!", this.absoluteFileNamePath);
-                }
-            } else {
-                LOG.warn("File {} is not existing yet. Start saving the new content!", this.absoluteFileNamePath);
             }
 
             LOG.trace("Following content will be written into the file named {}.", this.absoluteFileNamePath);
@@ -713,10 +716,10 @@ public final class INIFile {
      *----------------------------------------------------------------------------*/
 
     /**
-     * Helper function to check if the date time formats is parsable.
+     * Helper function to check if the date time formats can be parsed.
      *
      * @param dateFormatString the date time format string to checked.
-     * @throws IllegalArgumentException if the format string is not parsable by a
+     * @throws IllegalArgumentException if the format string can't be parsed by a
      *                                  {@link DateTimeFormatter}.
      */
     private void checkIfTemporalFormatStringIsParsable(String dateFormatString) {
@@ -724,7 +727,7 @@ public final class INIFile {
     }
 
     /**
-     * Reads the INI file and load its contentens into a sectionKey collection after
+     * Reads the INI file and load its contents into a sectionKey collection after
      * parsing the file line by line.
      */
 
@@ -807,15 +810,13 @@ public final class INIFile {
     }
 
     private void aggregateCommentsLineForNextElement(StringBuilder remarksBuilder, Matcher commentMatcher) {
-        String comment = commentMatcher.group("COMMENT")
-                                       .trim();
+        String comment = commentMatcher.group("COMMENT").trim();
         remarksBuilder.append(comment)
                       .append(System.lineSeparator());
     }
 
     private INISection createNewSection(StringBuilder remarksBuilder, Matcher sectionMatcher) {
-        String sectionKey = sectionMatcher.group("SECTION")
-                                          .trim();
+        String sectionKey = sectionMatcher.group("SECTION").trim();
         String remarks = remarksBuilder != null ? remarksBuilder.toString() : EMPTY_COMMENTS;
         return this.addSection(sectionKey, remarks);
     }
@@ -834,7 +835,7 @@ public final class INIFile {
     }
 
     /**
-     * Helper method to check the existance of a file.
+     * Helper method to check if a file exists.
      *
      * @param pstrFile the full path and name of the file to be checked.
      * @return true if file exists, false otherwise.

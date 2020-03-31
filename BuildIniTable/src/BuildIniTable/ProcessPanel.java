@@ -1,7 +1,6 @@
 package BuildIniTable;
 
 import CommonTools.ButtonTools;
-import CommonTools.FileTools;
 import CommonTools.INIFile;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
@@ -55,6 +54,13 @@ public class ProcessPanel extends JXPanel {
   
   ActionListener al = null;
   
+  /**
+   * This constructor was created to have an empty, clean constructor
+   *   for (unit-)testing. Should you need it otherwise, replace this
+   *   comment and remove the restriction.
+   *   
+   * @param testString *Should* be UnitTest
+   */
   // @VisibleForTesting
   ProcessPanel(String testString) {
       if ( !testString.contentEquals("UnitTest")) {
@@ -75,6 +81,12 @@ public class ProcessPanel extends JXPanel {
     System.out.println(BuildIniTable.thisClass.mandantNamevec);
   }
   
+  /**
+   * This method creates the main GUI panel, creating checkboxes for Mandanten
+   *   found in mandanten.ini.
+   *   
+   * @return a JXPanel
+   */
   private JXPanel mainpanel() {
     JXPanel pan = new JXPanel();
     pan.setBackground(Color.WHITE);
@@ -174,13 +186,23 @@ public class ProcessPanel extends JXPanel {
     } 
   }
   
+  /**
+   * This method does the bulk of work in this class.
+   *  - Check/create/overwrite inicontrol.ini
+   *  - Create DB connection
+   *  - Check/drop/create/update inidatei table
+   *  - Call schreibeIniInTabelle
+   *  
+   *  Where appropriate those actions are performed for each mandant from mandanten.ini
+   *  
+   */
   private void startAction() {
     Connection testconn = null;
     setTextArea("Starte Logbuch!");
     INIFile dummyini = null;
+    INIFile inicontrol = null;
     String kopf = "INIinDB";
     String sanzahl = "INIAnzahl";
-    INIFile inicontrol = null;
     int anzahl = 0;
     boolean overwrite = true;
     boolean tableDrop = false;
@@ -208,7 +230,7 @@ public class ProcessPanel extends JXPanel {
           }
           if (overwrite) {
             inicontrol = new INIFile(String.valueOf(BuildIniTable.thisClass.pfadzurini)
-                            + "/" + mandIk + "/inicontrol.ini");
+                            + mandIk + "/inicontrol.ini");
             inicontrol.addSection(kopf, null);
             inicontrol.setStringProperty(kopf, sanzahl, "0", null);
           } 
@@ -271,7 +293,7 @@ public class ProcessPanel extends JXPanel {
                                     BuildIniTable.thisClass.pfadzurini) + "/"
                                   + (String)BuildIniTable.thisClass.mandantIkvec.get(i)
                                   + "/" + iniName);
-                  schreibeIniInTabelle(iniName, dummyini.saveToStringBuffer().toString().getBytes());
+                  schreibeIniInTabelle(iniName, dummyini.saveToString().getBytes());
                   setTextArea("Datensatz für " + iniName + " erfolgreich erzeugt");
                   anzahl++;
                   if (overwrite)
@@ -299,11 +321,20 @@ public class ProcessPanel extends JXPanel {
     } 
   }
   
+  /**
+   * Method to display strings in a textbox, e.g. to let the user know about progress or
+   *   problems. It will append CR and update the 'cursor' position within the textbox.
+   *   
+   * @param text String		The text to put into the textbox.
+   */
   private void setTextArea(String text) {
     this.area.setText(String.valueOf(this.area.getText()) + text + "\n");
     this.area.setCaretPosition(this.area.getText().length());
   }
   
+  /**
+   * Calls 'startAction' in a background thread
+   */
   private void activateListener() {
     this.al = new ActionListener() {
         public void actionPerformed(ActionEvent e) {
@@ -325,6 +356,13 @@ public class ProcessPanel extends JXPanel {
       };
   }
   
+  /**
+   * Helper that returns the table-create string needed to create the 'inidatei'
+   *   table containing the appropriate fields and charset + engine settings.
+   *   
+   * @return String		Holds the statement needed to create the table in an SQL
+   * 					database.
+   */
   public static String createIniTableStmt() {
     StringBuffer buf = new StringBuffer();
     buf.append("CREATE TABLE IF NOT EXISTS inidatei (");
@@ -336,6 +374,15 @@ public class ProcessPanel extends JXPanel {
     return buf.toString();
   }
 
+  /**
+   * Will write an ini-file into the table 'inidatei' of the database.
+   *   If an entry in the table already exists, it will be updated,
+   *   otherwise inserted.
+   *   
+   * @param inifile	String of ini-file name - used to fill field 'dateiname'
+   * @param buf		The content to be written into the field  'inhalt' 
+   * @return bool	*Should* return false on failure or true upon success
+   */
   public static boolean schreibeIniInTabelle(String inifile, byte[] buf) {
     boolean ret = false;
     try {
@@ -382,6 +429,10 @@ public class ProcessPanel extends JXPanel {
     return ret;
   }
   
+  /**
+   * Helper class for working with Swing-Tables
+   * 
+   */
   class MyIniTableModel extends DefaultTableModel {
     private static final long serialVersionUID = 1L;
     
