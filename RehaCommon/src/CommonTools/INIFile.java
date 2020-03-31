@@ -39,6 +39,22 @@ public final class INIFile {
     private static final Logger LOG = LoggerFactory.getLogger(INIFile.class);
 
     /**
+     * Constant regex pattern that will match a COMMENT part of an INI file.
+     */
+    private static final Pattern commentPattern = Pattern.compile(";(?<COMMENT>.*)");
+    
+    /**
+     * Constant regex pattern that will match a SECTION part of an INI file.
+     */
+    private static final Pattern sectionPattern = Pattern.compile("\\[(?<SECTION>.+)\\]");
+
+    /**
+     * Constant regex pattern that will match a key=value part of an INI file.
+     * The key must be without an = sign!
+     */
+    private static final Pattern propertyPattern = Pattern.compile("(?<PROPERTYKEY>[^=]+)\\s*=\\s*(?<PROPERTYVALUE>.*+)");
+    
+    /**
      * Constant string part, used in error logging output about a parsing error of
      * an string value into the target type.
      */
@@ -742,9 +758,6 @@ public final class INIFile {
     }
 
     private INISection readFile(String nextLineInFile, StringBuilder commentsBuilder, INISection section) {
-        final Pattern sectionPattern = Pattern.compile("\\[(?<SECTION>.+)\\]");
-        final Pattern propertyPattern = Pattern.compile("(?<PROPERTYKEY>.+)\\s*=\\s*(?<PROPERTYVALUE>.*+)");
-        final Pattern commentPattern = Pattern.compile(";(?<COMMENT>.*)");
 
         // check if it a comment
         Matcher commentMatcher = commentPattern.matcher(nextLineInFile);

@@ -28,6 +28,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import CommonTools.INIFile.INIProperty;
+
 public class INIFileTest {
 
     private static final int CURRENT_SECTION_COUNT = 7;
@@ -1469,6 +1471,27 @@ public class INIFileTest {
         myIniFile.setTimeStampFormat("AbCdEf");
 
         // Assert
+    }
+    
+    @Test
+    public void checkThatAlsoBase64EncodingsAreDetectedAsValue() {
+        // Arrange
+        URL base64TestFixture = this.getClass()
+                                        .getResource("/CommonTools/INIFileWithBase64Encodings.ini");
+        String path = base64TestFixture.getPath();
+        INIFile myIniFile = new INIFile(path);
+
+        // Act
+        Map<String, INIProperty> actual = myIniFile.getProperties("TheraPiUpdates");
+
+        // Assert
+        assertThat(actual.get("UpdateFTP").getPropValue(), is("Gj3STm7R9Ks3qHLtXmFrZFxri79dUczQM/Evc1qS6upPZ3KgvBuLUA=="));
+        assertThat(actual.get("UpdateVerzeichnis").getPropValue(), is("iqVqwCnLGSk="));
+        assertThat(actual.get("UpdateUser").getPropValue(), is("oL5FtuHgYytvnfb0Fp1sDj+FxXrZmsPNsUc0gpUjj9wFE02sP0V4TA=="));
+        assertThat(actual.get("UpdatePasswd").getPropValue(), is("PIWlJzWmjEqkz9GTgF0E5GsA/6yg+uG+sOPkuYy2I5ois0fbxkoVXw=="));
+        assertThat(actual.get("UpdateEntwickler").getPropValue(), is("1"));
+        assertThat(actual.get("UpdateChecken").getPropValue(), is("1"));
+        assertThat(actual.get("DummyPw").getPropValue(), is("GDreeSTHhAR+O8iyrBQy9Z60ARpJHL8WlBEL8GSa4U63/hrzTjoWy8PXLiuiZ3n6"));
     }
 
     /*
