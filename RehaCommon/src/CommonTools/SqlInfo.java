@@ -707,8 +707,8 @@ public class SqlInfo {
         String insertOrUpdateStatementString = determineIfInsertOrUpdateMustPerformed(inifilename);
         try (PreparedStatement ps = conn.prepareStatement(insertOrUpdateStatementString,
                 ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE)) {
-            ps.setString(1, inifilename);
-            ps.setBytes(2, buf);
+            ps.setString(2, inifilename);
+            ps.setBytes(1, buf);
             ps.execute();
             result = true;
         } catch (SQLException ex) {

@@ -54,10 +54,6 @@ public class RehaIniedit implements WindowListener {
         if (args.length > 0) {
             if (!testcase) {
                 System.out.println("hole daten aus INI-Datei " + args[0]);
-
-
-
-
                 progHome = Path.Instance.getProghome();
                 aktIK = args[1];
             }
