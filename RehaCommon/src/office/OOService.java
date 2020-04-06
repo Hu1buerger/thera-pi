@@ -60,12 +60,14 @@ public class OOService {
             throws OfficeApplicationException, FileNotFoundException {
         File file = new File(ooPath);
         if (!file.exists()) {
-            throw new FileNotFoundException(file.getAbsolutePath());
+            throw new FileNotFoundException("OpenOffice path \""
+                                  + file.getAbsolutePath() + "\" does not exist");
         }
         ILazyApplicationInfo info = OfficeApplicationRuntime.getApplicationAssistant(libPath)
                                                             .findLocalApplicationInfo(ooPath);
-        String[] names = info.getProperties()
-                             .getPropertyNames();
+        if ( info == null ) throw new FileNotFoundException(
+                                                    "Couldn't find OO-App-Info in " + ooPath);
+        String[] names = info.getProperties().getPropertyNames();
         boolean isLibreOffice = false;
         for (int i = 0; i < names.length; i++) {
             System.out.println(names[i] + " = " + info.getProperties()

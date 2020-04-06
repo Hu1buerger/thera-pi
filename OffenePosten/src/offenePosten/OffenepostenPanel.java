@@ -406,8 +406,10 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     private void ermittleGesamtOffen() {
         Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(r_offen) from rliste where r_offen > '0.00'");
-        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
-                                                                 .get(0)));
+        String s_GAnz = offen.get(0).get(0);
+        
+        if ( s_GAnz.isEmpty() ) s_GAnz = "0";
+        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(s_GAnz));
         schreibeGesamtOffen();
     }
 

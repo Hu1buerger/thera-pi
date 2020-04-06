@@ -73,21 +73,22 @@ public class OffenePosten implements WindowListener {
 
     public static void main(String[] args) {
         new Logging("offeneposten");
-       OffenePosten instance = new OffenePosten();
+        OffenePosten instance = new OffenePosten();
         instance.sqlInfo = new SqlInfo();
         System.out.println("OP main: " + instance);
 
         if (args.length > 0 || testcase) {
             if (!testcase) {
-                System.out.println("hole daten aus INI-Datei " + args[0]);
-                INIFile inif = new INIFile(args[0] + "ini/" + args[1] + "/rehajava.ini");
+                String iniFilename4OfficeSettings = args[0] + "ini/"  + args[1] + "/rehajava.ini";
+                System.out.println("Hole Daten aus INI-Datei " + iniFilename4OfficeSettings);
+                INIFile inif = new INIFile(iniFilename4OfficeSettings);
 
-                 String officeProgrammPfad = inif.getStringProperty("OpenOffice.org", "OfficePfad") ;
+                String officeProgrammPfad = inif.getStringProperty("OpenOffice.org", "OfficePfad") ;
                 String officeNativePfad = inif.getStringProperty("OpenOffice.org", "OfficeNativePfad") ;
                 try {
 					new OOService().start(officeNativePfad, officeProgrammPfad);
 				} catch (FileNotFoundException | OfficeApplicationException e) {
-					e.printStackTrace();
+				    e.printStackTrace();
 				}
                 
                 progHome = args[0];
@@ -259,8 +260,6 @@ public class OffenePosten implements WindowListener {
     }
 
     private void StarteDB() {
-
-
             try {
 
                 conn = new DatenquellenFactory(aktIK).createConnection();
