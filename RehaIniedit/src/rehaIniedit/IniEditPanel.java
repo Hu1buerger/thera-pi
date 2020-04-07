@@ -151,18 +151,18 @@ public class IniEditPanel extends JXPanel {
         ico = new ImageIcon(RehaIniedit.progHome + "icons/accessories-text-editor.png").getImage()
                                                                                        .getScaledInstance(26, 26,
                                                                                                Image.SCALE_SMOOTH);
-        buts[1] = ButtonTools.macheButton("Ändern", "edit", al);
+        buts[1] = ButtonTools.macheButton("\u00c4ndern", "edit", al);
         buts[1].setIcon(new ImageIcon(ico));
         buts[1].setHorizontalAlignment(SwingConstants.LEFT);
-        buts[1].setToolTipText("ausgewählte INI-Datei bearbeiten");
+        buts[1].setToolTipText("ausgew\u00e4hlte INI-Datei bearbeiten");
 
         ico = new ImageIcon(RehaIniedit.progHome + "icons/package-remove-red.png").getImage()
                                                                                   .getScaledInstance(26, 26,
                                                                                           Image.SCALE_SMOOTH);
-        buts[2] = ButtonTools.macheButton("löschen", "delete", al);
+        buts[2] = ButtonTools.macheButton("l\u00f6schen", "delete", al);
         buts[2].setIcon(new ImageIcon(ico));
         buts[2].setHorizontalAlignment(SwingConstants.LEFT);
-        buts[2].setToolTipText("ausgewählte INI-Datei löschen!!!!");
+        buts[2].setToolTipText("ausgew\u00e4hlte INI-Datei l\u00f6schen!!!!");
 
         ico = new ImageIcon(RehaIniedit.progHome + "icons/document-save-as.png").getImage()
                                                                                 .getScaledInstance(26, 26,
@@ -331,7 +331,7 @@ public class IniEditPanel extends JXPanel {
         if (!obj.toString()
                 .trim()
                 .endsWith(".ini")) {
-            JOptionPane.showMessageDialog(null, "der Dateiname muß mit '.ini' enden");
+            JOptionPane.showMessageDialog(null, "der Dateiname mu\u00df mit '.ini' enden");
             return;
         }
         textArea.setForeground(Color.BLACK);
@@ -356,8 +356,8 @@ public class IniEditPanel extends JXPanel {
         int frage = JOptionPane.showConfirmDialog(null,
                 "Achtung wollen Sie wirklich die INI-Datei --> " + alleini.getValueAt(alleini.getSelectedRow(), 0)
                                                                           .toString()
-                        + " <-- löschen?",
-                "Gefahr für den weiteren Betrieb von Thera-Pi !", JOptionPane.YES_NO_OPTION);
+                        + " <-- l\u00f6schen?",
+                "Gefahr f\u00fcr den weiteren Betrieb von Thera-Pi !", JOptionPane.YES_NO_OPTION);
         if (frage == JOptionPane.YES_OPTION) {
             int row = alleini.getSelectedRow();
             SqlInfo.sqlAusfuehren(
