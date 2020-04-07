@@ -19,5 +19,5 @@ ci_test:
   stage: test
   script:
     - cd Build
-    - ant clean build TestHelloWorld
+    - ant clean dist
 
