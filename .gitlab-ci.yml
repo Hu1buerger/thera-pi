@@ -1,4 +1,4 @@
-image: openjdk:8
+image: oracle-java8
 
 before_script:
   - apt-get update
