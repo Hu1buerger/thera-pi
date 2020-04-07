@@ -13,7 +13,7 @@ ci_build:
   script:
     - cd Build
     - ant clean
-    - ant build
+    - ant
 
 ci_test:
   stage: test
