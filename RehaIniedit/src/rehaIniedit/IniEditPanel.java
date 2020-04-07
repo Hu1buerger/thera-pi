@@ -331,7 +331,7 @@ public class IniEditPanel extends JXPanel {
         if (!obj.toString()
                 .trim()
                 .endsWith(".ini")) {
-            JOptionPane.showMessageDialog(null, "der Dateiname mu\u00df mit '.ini' enden");
+            JOptionPane.showMessageDialog(null, "der Dateiname muss mit '.ini' enden");
             return;
         }
         textArea.setForeground(Color.BLACK);
