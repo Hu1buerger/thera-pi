@@ -1,8 +1,16 @@
 image: openjdk:8
 
+services:
+  - mysql:latest
+  - ant:latest
+
 before_script:
   - apt-get update
+  - update-alternatives --query java
+  - ls -al /etc/alternatives/java
   - apt-get -y install ant
+  - ls -al /etc/alternatives/java
+  - update-alternatives --query java
 
 stages:
   - build
