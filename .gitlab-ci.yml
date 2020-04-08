@@ -1,11 +1,13 @@
 image: openjdk:8
 
+variables:
+  - MYSQL_ROOT_PASSWORD: root
+  - MYSQL_DATABASE: therapi
+  - MYSQL_USER: therapi
+  - MYSQL_PASSWORD: therapie
+
 services:
-    db:
-        image: mariadb
-        restart: always
-        environment:
-            MYSQL_ROOT_PASSWORD: root
+  - image: mariadb
 
 before_script:
   - apt-get update
