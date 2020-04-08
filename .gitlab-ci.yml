@@ -2,7 +2,6 @@ image: openjdk:8
 
 services:
   - mysql:latest
-  - ant:latest
 
 before_script:
   - apt-get update
