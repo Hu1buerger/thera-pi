@@ -7,7 +7,7 @@ variables:
   - MYSQL_PASSWORD: therapie
 
 services:
-  - image: mariadb
+  - mariadb
 
 before_script:
   - apt-get update
