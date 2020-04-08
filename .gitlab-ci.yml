@@ -1,15 +1,19 @@
 image: openjdk:8
 
 services:
-  - mysql:latest
+    db:
+        image: mariadb
+        restart: always
+        environment:
+            MYSQL_ROOT_PASSWORD: root
 
 before_script:
   - apt-get update
-  - update-alternatives --query java
+  - update-alternatives --query java || true
   - ls -al /etc/alternatives/java
   - apt-get -y install ant
   - ls -al /etc/alternatives/java
-  - update-alternatives --query java
+  - update-alternatives --query java || true
 
 stages:
   - build
