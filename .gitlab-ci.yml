@@ -1,10 +1,10 @@
 image: openjdk:8
 
 variables:
-  - MYSQL_ROOT_PASSWORD: root
-  - MYSQL_DATABASE: therapi
-  - MYSQL_USER: therapi
-  - MYSQL_PASSWORD: therapie
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: therapi
+  MYSQL_USER: therapi
+  MYSQL_PASSWORD: therapie
 
 services:
   - mariadb
