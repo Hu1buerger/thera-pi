@@ -11,6 +11,8 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
+    <import file="build-tests.xml"/>
+    <import file="build-user.xml"/>
     <path id="RehaCommon.classpath">
         <pathelement location="${RehaCommon.location}/bin"/>
         <pathelement location="${Libraries.location}/lib/swingx/grad.jar"/>
@@ -54,10 +56,13 @@
         <pathelement location="${Libraries.location}/lib/jgoodies/jgoodies-common-0.9.9.jar"/>
         <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
         <pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar"/>
-        <pathelement location="${Libraries.location}/lib/jna_junit/junit-4.12.jar"/>
         <pathelement location="bin"/>
         <path refid="RehaCommon.classpath"/>
         <path refid="datenbank.classpath"/>
+    </path>
+    <path id="tests.classpath">
+        <pathelement location="bin-tests"/>
+        <pathelement location="${Libraries.location}/lib/jna_junit/junit-4.12.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
@@ -66,11 +71,13 @@
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
-        <copy includeemptydirs="false" todir="bin">
+	<mkdir dir="bin-tests"/>
+        <copy includeemptydirs="false" todir="bin-tests">
             <fileset dir="tests">
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
+	<mkdir dir="../dist-tests"/>
     </target>
     <target name="clean">
         <delete dir="bin"/>
@@ -88,7 +95,6 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <src path="tests"/>
             <classpath refid="BuildIniTable.classpath"/>
         </javac>
     </target>
