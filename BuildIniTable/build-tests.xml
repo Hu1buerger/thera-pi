@@ -13,13 +13,13 @@
 	    <echo message="Building tests"/>
 	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
 		    <src path="tests"/>
-		    <classpath refid="BuildIniTable.classpath"/>
+		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
 	    </javac>
 	</target>
 	<target depends="build-tests" name="JUnits">
 		<junit fork="true" maxmemory="128m" includeAntRuntime="true">
-		    <classpath refid="BuildIniTable.classpath"/>
+		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
 		    <formatter type="plain"/>
 		    <formatter type="xml"/>
