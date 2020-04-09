@@ -54,6 +54,7 @@ build.xml
 
 #510841109
 dist
+dist-tests
 stash
 
 
