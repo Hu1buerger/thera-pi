@@ -1,8 +1,23 @@
 image: openjdk:8
 
+variables:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: therapi
+  MYSQL_USER: therapi
+  MYSQL_PASSWORD: therapie
+
+services:
+  - mariadb
+
 before_script:
   - apt-get update
+  - update-alternatives --query java || true
+  - ls -al /usr/bin/java || true
+  - which java || true
+  - ls -al /etc/alternatives/java || true
   - apt-get -y install ant
+  - ls -al /etc/alternatives/java ||true
+  - update-alternatives --query java || true
 
 stages:
   - build
