@@ -10,25 +10,34 @@
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
     <property name="source" value="1.8"/>
+    <import file="build-tests.xml"/>
     <import file="build-user.xml"/>
     <path id="smartcard.classpath">
         <pathelement location="bin"/>
-        <pathelement location="${Libraries.location}/lib/jna_junit/hamcrest-all-1.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/jna_junit/junit-4.12.jar"/>
+        <pathelement location="bin-tests"/>
         <pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar"/>
         <pathelement location="${Libraries.location}/lib/logging/logback-classic-1.2.3.jar"/>
         <pathelement location="${Libraries.location}/lib/logging/logback-core-1.2.3.jar"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>
+        <mkdir dir="bin-tests"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="bin-tests">
+            <fileset dir="tests">
+                <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <delete dir="bin-tests"/>
     </target>
     <target depends="clean" name="cleanall"/>
     <target depends="build-subprojects,build-project" name="build"/>
