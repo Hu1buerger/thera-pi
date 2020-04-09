@@ -29,6 +29,7 @@
     <property name="TextB.location" value="../TextB"/>
     <property name="TheraPiDBAdmin.location" value="../TheraPiDBAdmin"/>
     <property name="TheraPiUpdates.location" value="../TheraPiUpdates"/>
+    <property name="junit.output.dir" value="../dist-tests"/>
     <property name="RehaCommon.location" value="../RehaCommon"/>
     <property name="debuglevel" value="source,lines,vars"/>
     <property name="target" value="1.8"/>
@@ -37,6 +38,7 @@
     <import file="build-user.xml"/>
     <path id="RehaCommon.classpath">
         <pathelement location="${RehaCommon.location}/bin"/>
+        <pathelement location="${RehaCommon.location}/bin-tests"/>
         <pathelement location="${Libraries.location}/lib/swingx/grad.jar"/>
         <pathelement location="${Libraries.location}/lib/openofficeorg/ag.ion.noa_2.2.3.jar"/>
         <pathelement location="${Libraries.location}/lib/openofficeorg/bootstrapconnector.jar"/>
@@ -62,6 +64,7 @@
     </path>
     <path id="datenbank.classpath">
         <pathelement location="bin"/>
+        <pathelement location="bin-tests"/>
         <path refid="RehaCommon.classpath"/>
         <pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar"/>
         <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
@@ -71,11 +74,13 @@
         <mkdir dir="bin-tests"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
+                <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
         <copy includeemptydirs="false" todir="bin-tests">
             <fileset dir="tests">
+                <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
         </copy>
@@ -145,5 +150,22 @@
         <ant antfile="build.xml" dir="${TheraPiDBAdmin.location}" inheritAll="false" target="build"/>
         <ant antfile="build.xml" dir="${TheraPiUpdates.location}" inheritAll="false" target="clean"/>
         <ant antfile="build.xml" dir="${TheraPiUpdates.location}" inheritAll="false" target="build"/>
+    </target>
+    <target name="VerschluesselnTest">
+        <mkdir dir="${junit.output.dir}"/>
+        <junit fork="yes" printsummary="withOutAndErr">
+            <formatter type="xml"/>
+            <test name="crypt.VerschluesselnTest" todir="${junit.output.dir}"/>
+            <jvmarg line="-ea"/>
+            <classpath refid="datenbank.classpath"/>
+        </junit>
+    </target>
+    <target name="junitreport">
+        <junitreport todir="${junit.output.dir}">
+            <fileset dir="${junit.output.dir}">
+                <include name="TEST-*.xml"/>
+            </fileset>
+            <report format="frames" todir="${junit.output.dir}"/>
+        </junitreport>
     </target>
 </project>
