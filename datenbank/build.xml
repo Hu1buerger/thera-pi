@@ -62,7 +62,6 @@
     </path>
     <path id="datenbank.classpath">
         <pathelement location="bin"/>
-        <pathelement location="bin-tests"/>
         <path refid="RehaCommon.classpath"/>
         <pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar"/>
         <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
@@ -96,10 +95,6 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
-            <classpath refid="datenbank.classpath"/>
-        </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
-            <src path="tests"/>
             <classpath refid="datenbank.classpath"/>
         </javac>
     </target>
