@@ -253,8 +253,10 @@
         <pathelement location="${Libraries.location}/lib/mmscomputing/uk.co.mmscomputing.device.twain.jar"/>
         <pathelement location="${Libraries.location}/lib/mmscomputing/uk.co.mmscomputing.device.sane.jar"/>
         <pathelement location="${Libraries.location}/lib/jgoodies/looks-2.3.1.jar"/>
+        <pathelement location="${Libraries.location}/lib/jna_junit/jna_WindowUtils.jar"/>
         <pathelement location="${Libraries.location}/lib/net/smtp.jar"/>
         <pathelement location="${Libraries.location}/lib/net/mail.jar"/>
+        <pathelement location="${Libraries.location}/lib/jna_junit/jna-3.2.4.jar"/>
         <pathelement location="${Libraries.location}/lib/sql/jpmdbc.jar"/>
         <pathelement location="${Libraries.location}/lib/jmf/jmf.jar"/>
         <pathelement location="${Libraries.location}/lib/serial/comm.jar"/>
@@ -333,6 +335,10 @@
         <echo message="${ant.project.name}: ${ant.file}"/>
         <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
             <src path="src"/>
+            <classpath refid="Reha.classpath"/>
+        </javac>
+        <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
+            <src path="tests"/>
             <classpath refid="Reha.classpath"/>
         </javac>
     </target>
