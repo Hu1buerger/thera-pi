@@ -337,10 +337,6 @@
             <src path="src"/>
             <classpath refid="Reha.classpath"/>
         </javac>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
-            <src path="tests"/>
-            <classpath refid="Reha.classpath"/>
-        </javac>
     </target>
     <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
         <ant antfile="build.xml" dir="${TheraPi.location}" inheritAll="false" target="clean"/>
