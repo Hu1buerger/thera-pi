@@ -24,9 +24,10 @@ stages:
 
 ci_buildNtest:
   artifacts:
+    expire_in: 2 weeks
     reports:
       junit: dist-tests/Test-*.xml
-    expire_in: 2 weeks
+      
   stage: buildNtest
   script:
     - cd Build
