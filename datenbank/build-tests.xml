@@ -3,7 +3,7 @@
 	<property file="../Build/build-common.properties"/>
 	<property name="junit.batchtest.todir" value="../dist-tests"/>
 
-	<!-- Includes JUnit.jar and the main.classpath jars too -->
+	<!-- Includes JUnit.jar and the main.classpath jars too 
 	<path id="tests.classpath">
 	     <pathelement location="bin-tests"/>
 	     <pathelement location="bin"/>
@@ -12,13 +12,12 @@
 	     </fileset>
 	     <fileset dir="${dir.binary.lib}"/>
 	</path>
-	<!--
+	-->
     <path id="tests.classpath">
         <pathelement location="bin-tests"/>
         <pathelement location="${dir.tests.binary.lib}/jna_junit/junit-4.12.jar"/>
         <pathelement location="${dir.tests.binary.lib}/jna_junit/hamcrest-all-1.3.jar"/>
     </path>
-	-->
 	<!-- Compile tests -->
 	<target depends="init, build-project" name="build-tests">
 	    <echo message="Building tests"/>
