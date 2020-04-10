@@ -35,7 +35,7 @@ public class TheraPiUpdates extends WindowAdapter {
 
     private static final Logger LOG = LoggerFactory.getLogger(TheraPiUpdates.class);
     private static final String PROGHOME = Path.Instance.getProghome();
-    private static final String LIB_SIG_JAR = "Libraries/lib/ocf/sig.jar";
+    private static final String LIB_SIG_JAR = "Libraries/lib/ocf/sig.jazz";
     private static boolean showpwdlg = true;
     private static boolean macNotMatch = true;
     private static boolean dbok = false;
