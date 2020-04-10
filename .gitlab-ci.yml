@@ -20,10 +20,10 @@ before_script:
   - update-alternatives --query java || true
 
 stages:
-  - buildNtest
+  - build
 
-ci_buildNtest:
-  stage: buildNtest
+ci_build:
+  stage: build
   script:
     - cd Build
     - ant clean
