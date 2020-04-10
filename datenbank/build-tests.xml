@@ -7,7 +7,9 @@
 	<path id="tests.classpath">
 	     <pathelement location="bin-tests"/>
 	     <pathelement location="bin"/>
-	     <fileset dir="${dir.tests.binary.lib}"/>
+	     <fileset dir="${dir.tests.binary.lib}">
+		<filename name="**/*.jar"/>
+	     </fileset>
 	     <fileset dir="${dir.binary.lib}"/>
 	</path>
 	<!--
