@@ -2,7 +2,7 @@
 <project>
 	<property name="junit.batchtest.todir" value="../dist-tests"/>
 
-	<!-- Includes JUnit.jar and the main.classpath jars too --
+	<!-- Includes JUnit.jar and the main.classpath jars too - -
 	<path id="tests.classpath">
 	     <fileset dir="${dir.tests.binary.lib}"/>
 	     <fileset dir="${dir.binary.lib}">
