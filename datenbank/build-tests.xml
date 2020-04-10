@@ -19,7 +19,7 @@
         <pathelement location="${dir.tests.binary.lib}/jna_junit/hamcrest-all-1.3.jar"/>
     </path>
 	<!-- Compile tests -->
-	<target depends="init, build-project" name="build-tests">
+	<target depends="init, build" name="build-tests">
 	    <echo message="Building tests"/>
 	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
 		    <src path="tests"/>
