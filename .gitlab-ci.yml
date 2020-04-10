@@ -32,7 +32,7 @@ ci_buildNtest:
   artifacts:
     reports:
       junit: dist-tests/Test-*.xml
-    expire in: 2 weeks
+    expire_in: 2 weeks
 
 ci_test:
   stage: test
