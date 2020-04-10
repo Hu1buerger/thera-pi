@@ -60,10 +60,6 @@
         <path refid="RehaCommon.classpath"/>
         <path refid="datenbank.classpath"/>
     </path>
-    <path id="tests.classpath">
-        <pathelement location="bin-tests"/>
-        <pathelement location="${Libraries.location}/lib/jna_junit/junit-4.12.jar"/>
-    </path>
     <target name="init">
         <mkdir dir="bin"/>
         <copy includeemptydirs="false" todir="bin">
