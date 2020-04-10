@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" output="bin-tests" path="tests">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/Libraries/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/swingx/swingx-1.6.jar"/>

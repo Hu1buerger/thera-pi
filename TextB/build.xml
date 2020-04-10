@@ -49,6 +49,7 @@
     </path>
     <path id="TextB.classpath">
         <pathelement location="bin"/>
+        <pathelement location="bin-tests"/>
         <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
         <pathelement location="${Libraries.location}/lib/swingx/swingx-1.6.jar"/>
         <pathelement location="${Libraries.location}/lib/jgoodies/looks-2.3.1.jar"/>
@@ -59,8 +60,15 @@
     </path>
     <target name="init">
         <mkdir dir="bin"/>
+        <mkdir dir="bin-tests"/>
         <copy includeemptydirs="false" todir="bin">
             <fileset dir="src">
+                <exclude name="**/*.launch"/>
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+        <copy includeemptydirs="false" todir="bin-tests">
+            <fileset dir="tests">
                 <exclude name="**/*.launch"/>
                 <exclude name="**/*.java"/>
             </fileset>
@@ -68,6 +76,7 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <delete dir="bin-tests"/>
     </target>
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="clean"/>
