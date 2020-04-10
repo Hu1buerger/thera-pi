@@ -164,4 +164,8 @@
 	<target name="jar">
 		<echo>nothing to do for target jar</echo>
 	</target>
+
+	<target name="JUnits">
+		<echo message="Nothing to be done for JUnits"/>
+	</target>
 </project>
