@@ -7,7 +7,7 @@ import BuildIniTable.ProcessPanel;
 import java.util.Vector;
 // For test-ini driven tests:
 import CommonTools.INIFile;
-
+import java.io.File;
 
 public class testBuildIniTable {
 
@@ -16,6 +16,14 @@ public class testBuildIniTable {
     
     @Test
     public void testSetGetPfadzurmandini() {
+	String dirName=".";
+        File fileName = new File(dirName);
+        File[] fileList = fileName.listFiles();
+        
+        for (File file: fileList) {
+            
+            System.out.println(file);
+        }
         buildIniTable.setPfadzurmandini("test");
         assertEquals("test", buildIniTable.getPfadzurmandini());
     }

@@ -18,6 +18,7 @@
 	    </javac>
 	</target>
 	<target depends="build-tests" name="JUnits">
+		<echo message="Current working directory in parent: ${basedir}"/>
 		<junit fork="true" maxmemory="128m" includeAntRuntime="true">
 		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
