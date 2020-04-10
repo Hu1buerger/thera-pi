@@ -36,7 +36,7 @@ ci_build:
 ci_test:
   stage: test
   dependencies:
-    - build
+    - ci_build
   script:
     - cd Build
     - ant JUnits
