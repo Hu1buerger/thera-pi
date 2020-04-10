@@ -29,6 +29,14 @@ ci_build:
     - cd Build
     - ant clean
     - ant
+  artifacts:
+    untracked: true
+    expire_in: 2 weeks
+
+ci_test:
+  stage: test
+  script:
+    - cd Build
     - ant JUnits
   artifacts:
     when: always
@@ -38,10 +46,3 @@ ci_build:
       - dist-tests/TEST-*.txt
     reports:
       junit: dist-tests/TEST-*.xml
-
-ci_test:
-  stage: test
-  script:
-    - cd Build
-    - ant JUnits
-
