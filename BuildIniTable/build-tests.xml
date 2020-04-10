@@ -9,7 +9,7 @@
 	</path>
 
 	<!-- Compile tests -->
-	<target depends="build-project, init" name="build-tests">
+	<target depends="build, init" name="build-tests">
 	    <echo message="Building tests"/>
 	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
 		    <src path="tests"/>
