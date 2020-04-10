@@ -29,6 +29,14 @@ ci_build:
     - cd Build
     - ant clean
     - ant
+    - ant JUnits
+  artifacts:
+    expire_in: 2 weeks
+    paths:
+      - dist-tests/TEST-*.xml
+      - dist-tests/TEST-*.txt
+    reports:
+      junit: dist-tests/TEST-*.xml
 
 ci_test:
   stage: test
