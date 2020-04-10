@@ -5,7 +5,10 @@
 	<!-- Includes JUnit.jar and the main.classpath jars too -->
 	<path id="tests.classpath">
 	     <fileset dir="${dir.tests.binary.lib}"/>
-	     <fileset dir="${dir.binary.lib}"/>
+	     <fileset dir="${dir.binary.lib}">
+		<include name="**/*.jar"/>
+                <exclude name="sig.jar"/>
+             </fileset>
 	</path>
 
 	<!-- Compile tests -->
