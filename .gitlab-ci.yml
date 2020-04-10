@@ -20,15 +20,19 @@ before_script:
   - update-alternatives --query java || true
 
 stages:
-  - build
-  - test
+  - buildNtest
 
-ci_build:
-  stage: build
+ci_buildNtest:
+  stage: buildNtest
   script:
     - cd Build
     - ant clean
     - ant
+    - ant JUnits
+  artifacts:
+    reports:
+      junit: dist-tests/Test-*.xml
+    expire in: 2 weeks
 
 ci_test:
   stage: test
@@ -36,3 +40,11 @@ ci_test:
     - cd Build
     - ant JUnits
 
+
+java:
+  stage: test
+  script:
+    - gradle test
+  artifacts:
+    reports:
+      junit: build/test-results/test/**/TEST-*.xml
