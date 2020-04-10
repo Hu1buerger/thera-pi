@@ -40,11 +40,3 @@ ci_test:
     - cd Build
     - ant JUnits
 
-
-java:
-  stage: test
-  script:
-    - gradle test
-  artifacts:
-    reports:
-      junit: build/test-results/test/**/TEST-*.xml
