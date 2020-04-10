@@ -11,15 +11,14 @@
 	<!-- Compile tests -->
 	<target depends="build, init" name="build-tests">
 	    <echo message="Building tests"/>
-	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
+	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="true" source="${source}" target="${target}">
 		    <src path="tests"/>
 		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
 	    </javac>
 	</target>
 	<target depends="build-tests" name="JUnits">
-		<echo message="Current working directory in parent: ${basedir}"/>
-		<junit fork="true" maxmemory="128m" includeAntRuntime="true">
+		<junit dir="${basedir}" fork="true" maxmemory="128m" includeAntRuntime="true">
 		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
 		    <formatter type="plain"/>
