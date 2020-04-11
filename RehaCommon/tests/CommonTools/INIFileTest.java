@@ -6,16 +6,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
-import java.util.Date;
 
 import org.junit.Ignore;
 import org.junit.Test;
-
-import CommonTools.INIFile;
 
 public class INIFileTest {
 
@@ -24,7 +18,6 @@ public class INIFileTest {
     private static final String BOOL_SECTION = "Bools";
     private static final String LONG_SECTION = "Longs";
     private static final String DOUBLE_SECTION = "Doubles";
-    private static final String DATE_SECTION = "Dates";
     private static final String TEST_RESOURCES_DIR = "tests/resources/";
     private static final String TEST_RESOURCES_INIFILE_INI = TEST_RESOURCES_DIR + "IniFile.ini";
 
@@ -89,38 +82,7 @@ public class INIFileTest {
         myIniFile.setIntegerProperty(INTEGER_SECTION, "vierganze", 4, null);
     }
 
-    @Test
-    public void testLongProperty() {
 
-        INIFile myIniFile = new INIFile(TEST_RESOURCES_INIFILE_INI);
-        assertEquals(Long.valueOf(1), myIniFile.getLongProperty(LONG_SECTION, "one"));
-        assertEquals(Long.valueOf(2), myIniFile.getLongProperty(LONG_SECTION, "two"));
-        assertEquals(Long.valueOf(-2134), myIniFile.getLongProperty(LONG_SECTION, "negativ"));
-
-        assertEquals(null, myIniFile.getLongProperty(LONG_SECTION, "toobig"));
-        assertEquals(null, myIniFile.getLongProperty(LONG_SECTION, "invalid"));
-
-        myIniFile.setLongProperty(LONG_SECTION, "15lange", 15L, null);
-        assertEquals(Long.valueOf(15L), myIniFile.getLongProperty(LONG_SECTION, "15lange"));
-    }
-
-    @Test
-    public void testDoubleProperty() {
-        INIFile myIniFile = new INIFile(TEST_RESOURCES_INIFILE_INI);
-
-        assertEquals(Double.valueOf(1), myIniFile.getDoubleProperty(DOUBLE_SECTION, "one"));
-        assertEquals(Double.valueOf(2), myIniFile.getDoubleProperty(DOUBLE_SECTION, "two"));
-        assertEquals(Double.valueOf(-6.3), myIniFile.getDoubleProperty(DOUBLE_SECTION, "negativ"));
-        assertEquals(Double.valueOf(0.5), myIniFile.getDoubleProperty(DOUBLE_SECTION, "osomething"));
-        assertEquals(Double.valueOf(0.8), myIniFile.getDoubleProperty(DOUBLE_SECTION, "decimalonly"));
-        assertEquals(Double.valueOf(-0.7), myIniFile.getDoubleProperty(DOUBLE_SECTION, "negativDecimalonly"));
-
-        assertEquals(null, myIniFile.getDoubleProperty(DOUBLE_SECTION, "invalid"));
-
-        myIniFile.setDoubleProperty(DOUBLE_SECTION, "13einhalb", 13.5, null);
-        assertEquals(Double.valueOf(13.5), myIniFile.getDoubleProperty(DOUBLE_SECTION, "13einhalb"));
-
-    }
 
     @Test
     @Ignore("the method is not used in project")
@@ -141,23 +103,7 @@ public class INIFileTest {
 
     }
 
-    @Test
-    public void testSetDateProperty() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        LocalDate ldateIn = LocalDate.parse("2013.12.31", formatter);
-        LocalDate ldateOut = LocalDate.parse("2013.01.31", formatter);
 
-        Date dateIn = Date.from(ldateIn.atStartOfDay(ZoneId.systemDefault())
-                                       .toInstant());
-        Date dateOut = Date.from(ldateOut.atStartOfDay(ZoneId.systemDefault())
-                                         .toInstant());
-
-        INIFile inifile = new INIFile(null);
-        inifile.setDateProperty(DOUBLE_SECTION, DATE_SECTION, dateIn, null);
-
-        // FIXME it should be expected to get the same date back
-        assertEquals(dateOut, inifile.getDateProperty(DOUBLE_SECTION, DATE_SECTION));
-    }
 
     @Test
     @Ignore("the method is not used in project")
@@ -184,14 +130,7 @@ public class INIFileTest {
         assertArrayEquals(names, myIniFile.getAllSectionNames());
     }
 
-    @Test
-    public void testGetPropertyNames() {
-        INIFile myIniFile = new INIFile(TEST_RESOURCES_INIFILE_INI);
-        String[] names = { "Strings", "Bools", "Integer" };
-        String[] propertyNames = { "simpleString", "escapedString", "spacyString" };
 
-        assertArrayEquals(propertyNames, myIniFile.getPropertyNames(names[0]));
-    }
 
     @Test
     public void testGetProperties() {
@@ -212,19 +151,7 @@ public class INIFileTest {
         // overwrite equals
     }
 
-    @Test
-    public void testRemoveProperty() {
-        INIFile iniFile = new INIFile("");
-        iniFile.setStringProperty(LONG_SECTION, "eins", "1", null);
-        iniFile.setStringProperty(LONG_SECTION, "zwei", "2", null);
-        assertEquals("2", iniFile.getStringProperty(LONG_SECTION, "zwei"));
 
-        iniFile.removeProperty(LONG_SECTION, "zwei");
-
-        assertEquals(null, iniFile.getStringProperty(LONG_SECTION, "zwei"));
-        assertEquals("1", iniFile.getStringProperty(LONG_SECTION, "eins"));
-
-    }
 
     @Test
     public void testRemoveSection() {
@@ -237,7 +164,7 @@ public class INIFileTest {
         iniFile.removeSection(LONG_SECTION);
 
         assertFalse(Arrays.asList(iniFile.getAllSectionNames())
-                          .contains(LONG_SECTION));
+                          .contains(LONG_SECTION)); 
         assertTrue(Arrays.asList(iniFile.getAllSectionNames())
                          .contains(BOOL_SECTION));
 

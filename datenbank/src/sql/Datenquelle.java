@@ -30,25 +30,28 @@ public class Datenquelle {
         return this.s_pfadZurRehaIni;
     }
     
-    /**Datenquelle liest fuer den angegebenen Mandant die Datenverbindung die in rehajava.ini unter DB1 angegeben ist.
-    * 
-    * @param digitString = die 9 Ziffern der IK des Mandanten
-    */
+    /**
+     * Datenquelle liest fuer den angegebenen Mandant die Datenverbindung, die in
+     * rehajava.ini unter DB1 angegeben ist.
+     *
+     * @param digitString = die 9 Ziffern des IK des Mandanten
+     */
     Datenquelle(String digitString) {
         this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + "ini/" + digitString + "/rehajava.ini";
         initialize();
     }
 
     private void initialize() {
-        File f = new File(this.s_pfadZurRehaIni);
+        File datei = new File(this.s_pfadZurRehaIni);
         Ini ini;
         try {
-            ini = new Ini(f);
+            ini = new Ini(datei);
             ini.load();
         } catch (IOException e) {
-            throw new IllegalArgumentException(f.getPath());
+            throw new IllegalArgumentException(datei.getPath());
         }
         dataSource = new MysqlConnectionPoolDataSource();
+        // If enabled, serverside sql_mode='' is ignored clientside.
         dataSource.setJdbcCompliantTruncation(false);
         dataSource.setUrl(ini.get(DATEN_BANK, "DBKontakt1"));
         dataSource.setUser(ini.get(DATEN_BANK, "DBBenutzer1"));

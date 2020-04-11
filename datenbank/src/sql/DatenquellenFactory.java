@@ -9,17 +9,17 @@ public class DatenquellenFactory {
     private static final ConcurrentMap<String, Datenquelle> grube = new ConcurrentHashMap<>();
     private String ik;
 
+    /**
+     * @param ik = die 9 Ziffern des IK des Mandanten
+     */
     public DatenquellenFactory(String ik) {
         this.ik = ik;
     }
 
-
-
     public Connection createConnection() throws SQLException {
-         grube.computeIfAbsent(ik,k -> new Datenquelle(ik));
-            return grube.get(ik).connection();
-     }
+        grube.computeIfAbsent(ik, k -> new Datenquelle(ik));
+        return grube.get(ik)
+                    .connection();
+    }
 
 }
-
-

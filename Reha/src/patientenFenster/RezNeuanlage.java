@@ -48,7 +48,7 @@ import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import environment.LadeProg;
 import environment.Path;
 import events.RehaTPEvent;
@@ -202,8 +202,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private Component eingabeDiag = null;
     private Connection connection;
 
-    private Rezept myRezept = null;
-    private Rezept tmpRezept = null;
+    private Rezeptvector myRezept = null;
+    private Rezeptvector tmpRezept = null;
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
@@ -212,7 +212,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         try {
             this.neu = neu;
             this.vec = vec; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
-            myRezept = new Rezept();
+            myRezept = new Rezeptvector();
             verordnenderArzt = new ArztVec();
             myRezept.setVec_rez(vec);
             diszis = new Disziplinen();
@@ -528,7 +528,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             JRtaTextField TF_icd10_2 = jtf[cICD10];
             TF_icd10_2.addMouseListener(icd10Text );
             jcmb[cRKLASSE] = new JRtaComboBox();
-            int lang = SystemConfig.rezeptKlassenAktiv.size();
             strRezepklassenAktiv = diszis.getActiveRK();
             jcmb[cRKLASSE] = diszis.getComboBoxActiveRK();
 
@@ -544,16 +543,17 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             allowShortCut(jcmb[cRKLASSE], "RezeptClass");
             /********************/
 
-            if (this.neu) {
-                jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);
+            if (myRezept.isEmpty()) {
+                jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);                    
             } else {
-                for (int i = 0; i < lang; i++) {
-                    if (myRezept.getRezClass()
-                                .equals(SystemConfig.rezeptKlassenAktiv.get(i)
-                                                                       .get(1))) {
+                String rezClassInVO = myRezept.getRezClass();
+                for (int i = 0; i < strRezepklassenAktiv.length; i++) {
+                    if (strRezepklassenAktiv[i].equals(rezClassInVO)) {
                         jcmb[cRKLASSE].setSelectedIndex(i);
                     }
                 }
+            }
+            if (!this.neu) {
                 jcmb[cRKLASSE].setEnabled(false);
             }
 
@@ -748,7 +748,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.add(jcmb[cINDI], cc.xy(3, 31));
 
             klassenReady = true;
-            fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
+            this.fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
 
             jpan.addLabel("Barcode-Format", cc.xy(5, 31));
             jcmb[cBARCOD] = new JRtaComboBox(SystemConfig.rezBarCodName);
@@ -804,9 +804,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                       .trim(),
                             preisgruppen[getPgIndex()]); // fuellt jcmb[cLEIST1..4] u.
                                                                               // jcmb[cBARCOD]
-                    this.fuelleIndis(jcmb[cRKLASSE].getSelectedItem()
-                                                   .toString()
-                                                   .trim());
                 } else { // myRezept enthaelt Daten
                     try {
                         String[] xartdbeh = new String[] { myRezept.getHMkurz(1), myRezept.getHMkurz(2),
@@ -817,9 +814,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                           .toString()
                                                           .trim(),
                                 preisgruppen[getPgIndex()]);
-                        this.fuelleIndis(jcmb[cRKLASSE].getSelectedItem()
-                                                       .toString()
-                                                       .trim());
                         for (int i = 0; i < 4; i++) {
                             if (xartdbeh[i].equals("")) {
                                 jcmb[cLEIST1 + i].setSelectedIndex(0);
@@ -1320,7 +1314,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                             mitsamstag);
                 }
             }
-            tmpRezept = new Rezept();
+            tmpRezept = new Rezeptvector();
             if (getInstance().neu) {
                 initRezeptNeu(tmpRezept);
             } else {
@@ -1418,7 +1412,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         return true;
     }
 
-    private void ladePreisliste(String item, int preisgruppe) {
+    private void ladePreisliste(String typeOfVO, int preisgruppe) {
         try {
             String[] artdbeh = null;
             if (!this.neu && jcmb[cLEIST1].getItemCount() > 0) {
@@ -1431,8 +1425,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcmb[cLEIST3].removeAllItems();
             jcmb[cLEIST4].removeAllItems();
 
-            aktuelleDisziplin = diszis.getDiszi(item);
-            rezKlasse = diszis.getRezClass(item); // ist jetzt Uppercase!
+            aktuelleDisziplin = diszis.getDisziKurzFromTypeOfVO(typeOfVO);
+            rezKlasse = diszis.getRezClass(typeOfVO);
 
             preisvec = SystemPreislisten.hmPreise.get(aktuelleDisziplin)
                                                  .get(preisgruppe);
@@ -1469,12 +1463,12 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     }
 
     /** Holt die passenden Inikationsschlüssel gemäß aktiver Disziplin**/
-    private void fuelleIndis(String item) {
+    private void fuelleIndis(String typeOfVO) {
         try {
             if (jcmb[cINDI].getItemCount() > 0) {
                 jcmb[cINDI].removeAllItems();
             }
-            String tmpItem = item.toLowerCase();
+            String tmpItem = typeOfVO.toLowerCase();
             if (tmpItem.contains("reha") && (!tmpItem.startsWith("rehasport"))) {
                 return;
             }
@@ -1715,16 +1709,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         kwahl = null;
     }
 
-    private void holePreisGruppe(String id) {
+    private void holePreisGruppe(String idKtraeger) {
         try {
             Vector<Vector<String>> vec = null;
             if (SystemConfig.mitRs) {
                 vec = SqlInfo.holeFelder(
-                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='" + id
+                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='" + idKtraeger
                                 + "' LIMIT 1");
             } else {
                 vec = SqlInfo.holeFelder(
-                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + id + "' LIMIT 1");
+                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + idKtraeger + "' LIMIT 1");
             }
             if (vec.size() > 0) {
                 for (int i = 1; i < vec.get(0)
@@ -1753,7 +1747,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein Rezept mit Daten, die immer gesetzt werden müssen
      */
-    private void initRezeptAll(Rezept thisRezept) {
+    private void initRezeptAll(Rezeptvector thisRezept) {
         if (thisRezept.getKtraeger()
                     .equals("")) { // eher ein Fall für check/speichern!
             JOptionPane.showMessageDialog(null,
@@ -1780,7 +1774,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
      */
-    private void initRezeptNeu(Rezept thisRezept) {
+    private void initRezeptNeu(Rezeptvector thisRezept) {
         thisRezept.createEmptyVec();
 
         thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
@@ -1802,7 +1796,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *  - aktualisiert Daten aus dem aktuellen Patienten,
      *  - löscht Daten, die nur für die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
-    private void initRezeptKopie(Rezept thisRezept) {
+    private void initRezeptKopie(Rezeptvector thisRezept) {
         String kasseInVo = thisRezept.getKtrName();
         String kasseInPatStamm = Reha.instance.patpanel.patDaten.get(13);
         if (!kasseInVo.equals(kasseInPatStamm)) {
@@ -1933,7 +1927,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec1stTime(Rezept thisRezept) {
+    private void copyFormToVec1stTime(Rezeptvector thisRezept) {
         thisRezept.setAnzHB(jtf[cANZ1].getText());
         copyFormToVec(thisRezept);
     }
@@ -1943,7 +1937,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * lädt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec(Rezept thisRezept) {
+    private void copyFormToVec(Rezeptvector thisRezept) {
         try {
             if (!komplettTest()) {
                 return;

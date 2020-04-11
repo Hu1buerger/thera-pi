@@ -1294,14 +1294,17 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                         BufferedImage img = holePatBild(Reha.instance.patpanel.aktPatID);
                         if (img == null) {
                             lblbild.setText("Kein Bild des Patienten vorhanden");
+                            picVerwerfenButton.setEnabled(false);
                         } else {
                             lblbild.setText("");
                             lblbild.setIcon(new ImageIcon(img));
                             startMitBild = true;
+                            picVerwerfenButton.setEnabled(true);
                         }
                     } else {
                         lblbild.setText("Kein Bild des Patienten vorhanden");
                         lblbild.setIcon(null);
+                        picVerwerfenButton.setEnabled(false);
                     }
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -1627,6 +1630,7 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
             }
             break;
         case "delpic":
+            System.out.println("In delPic");
             if (lblbild.getIcon() != null && !inNeu) {
                 int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie das Patientenfoto wirklich löschen?",
                         "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
@@ -1634,6 +1638,7 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                     SqlInfo.sqlAusfuehren(
                             "delete from patbild where pat_intern = '" + Reha.instance.patpanel.aktPatID + "' LIMIT 1");
                 } else {
+                    System.out.println("Took wrong turn");
                     return;
                 }
             }

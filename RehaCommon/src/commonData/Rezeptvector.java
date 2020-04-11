@@ -7,11 +7,11 @@ import javax.swing.JOptionPane;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 
-public class Rezept {
+public class Rezeptvector {
     private Vector<Vector<String>> vecvec_rezepte;
     private Vector<String> vec_rezept;
 
-    public Rezept() {
+    public Rezeptvector() {
         vecvec_rezepte = new Vector<Vector<String>>();
         vec_rezept = new Vector<String>();
     }
@@ -42,7 +42,7 @@ public class Rezept {
         }
     }
 
-    public Rezept getInstance() {
+    public Rezeptvector getInstance() {
         return this;
     }
 

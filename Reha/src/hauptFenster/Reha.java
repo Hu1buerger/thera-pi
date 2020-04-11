@@ -314,7 +314,7 @@ public class Reha implements RehaEventListener {
     public String lastSelectedValue = "";
     public int lastSelectedFloskel = -1;
 
-  
+
     public SqlInfo sqlInfo = null;
     public static int nachladenDB = 0;
     public static int dbLoadError = 1;
@@ -399,28 +399,28 @@ public class Reha implements RehaEventListener {
 
 
         INITool.init(iniPath);
-        logger.info("Insgesamt sind " + Integer.toString(INITool.getDBInis().length)
+        logger.info("Insgesamt sind " + INITool.anzahlInisInDB()
                 + " INI-Dateien in der Tabelle inidatei abgelegt");
 
         Titel2 = "  -->  [Mandant: " + getAktMandant() + "]";
-       
+
         Thread rehasockeThread = new Thread(new RehaSockServer(), "RehaSocketServer");
         rehasockeThread.start();
-        
- 
+
+
                 try {
                     logger.info("Starte RehaxSwing.jar");
                     ProcessBuilder processBuilder = new ProcessBuilder("java", "-Djava.net.preferIPv4Stack=true", "-jar",
                             Path.Instance.getProghome() + "RehaxSwing.jar");
-                   
+
                     processBuilder.inheritIO().start();
                     logger.info("RehaxSwing beendet");
                 } catch (IOException e) {
                     e.printStackTrace();
-                } 
-           
-      
-       
+                }
+
+
+
         try {
             rehasockeThread.join(10000);
         } catch (InterruptedException e2) {
@@ -1899,7 +1899,7 @@ public class Reha implements RehaEventListener {
     public static void starteOfficeApplication() {
         try {
         	new OOService().start(SystemConfig.OpenOfficeNativePfad,SystemConfig.OpenOfficePfad );
-        	
+
             officeapplication = new OOService().getOfficeapplication();
             Reha.instance.Rehaprogress.setIndeterminate(false);
         } catch (OfficeApplicationException | FileNotFoundException e) {

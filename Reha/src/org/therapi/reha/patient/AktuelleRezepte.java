@@ -79,6 +79,7 @@ import abrechnung.AbrechnungPrivat;
 import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
+import commonData.Rezeptvector;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -113,9 +114,7 @@ import systemTools.ListenerTools;
 
 public class AktuelleRezepte extends JXPanel implements ListSelectionListener, TableModelListener,
         TableColumnModelExtListener, PropertyChangeListener, ActionListener {
-    /**
-     *
-     */
+
     private static final long serialVersionUID = 5440388431022834348L;
     JXPanel leerPanel = null;
     JXPanel vollPanel = null;
@@ -330,7 +329,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         PanelBuilder builder = new PanelBuilder(datenlay);
         builder.getPanel()
                .setOpaque(false);
-        // CellConstraints cc = new CellConstraints();
         JXPanel dumm = new JXPanel(new BorderLayout());
         dumm.setOpaque(false);
         dumm.setBorder(null);
@@ -521,7 +519,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     if (reznummer.equals("")) {
                         return;
                     }
-//                    infoDlg = new InfoDialog(reznummer, "terminInfo", null);
                     infoDlg = new InfoDialogTerminInfo(reznummer, null);
                     infoDlg.pack();
                     infoDlg.setLocationRelativeTo(null);
@@ -557,7 +554,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     // Zuzahlungsstatus
     private JPopupMenu getTerminPopupMenu() {
         JPopupMenu jPopupMenu = new JPopupMenu();
-        // Lemmi 20101231: Icon zugefügt
         JMenuItem item = new JMenuItem("Zuzahlungsstatus auf befreit setzen",
                 new ImageIcon(Path.Instance.getProghome() + "icons/frei.png"));
         item.setActionCommand("statusfrei");
@@ -565,13 +561,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         jPopupMenu.add(item); // McM 2016-01 keine Auswirkung auf Abrechnung; RTA intern benutzt für
                               // verschieben in die Historie ohne Abrechnung (Rezept-split)
                               // ?? sollte Abrechnung den gesetzten Status verwenden?
-        // Lemmi 20101231: Icon zugefügt
         item = new JMenuItem("... auf bereits bezahlt setzen",
                 new ImageIcon(Path.Instance.getProghome() + "icons/Haken_klein.gif"));
         item.setActionCommand("statusbezahlt");
         item.addActionListener(this);
         jPopupMenu.add(item); // McM 2016-01 keine Auswirkung auf Abrechnung; RTA intern benutzt
-        // Lemmi 20101231: Icon zugefügt
         item = new JMenuItem("... auf nicht bezahlt setzen",
                 new ImageIcon(Path.Instance.getProghome() + "icons/Kreuz.png"));
         item.setActionCommand("statusnichtbezahlt");
@@ -630,7 +624,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             item.setEnabled(false);
         item.addActionListener(this);
         jPopupMenu.add(item);
-        // ^^^ Lemmi 20110105: aktuellen Behandler auf alle leeren Behandler kopieren
 
         return jPopupMenu;
     }
@@ -857,7 +850,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     + "DATE_FORMAT(lastdate,'%d.%m.%Y') AS datum,abschluss,pat_intern,indikatschl,id,termine",
                             "pat_intern='" + xpatint + "' ORDER BY rez_datum", Arrays.asList(new String[] {}));
                     int anz = vec.size();
-                    // System.out.println("Anzahl Rezepte: "+anz);
                     for (int i = 0; i < anz; i++) {
                         if (i == 0) {
                             dtblm.setRowCount(0);
@@ -866,7 +858,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                               .get(termineInTable)));
                         int iZuZahlStat = 3, rezstatus = 0;
                         ZZStat iconKey;
-                        if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heißt 'befreit'?? 
+                        if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heißt 'befreit'??
                             iZuZahlStat = 0; // ?? nicht besser 'not set' ??
                         } else if (!((Vector) vec.get(i)).get(1)
                                                          .equals("")) {
@@ -915,7 +907,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     int row = 0;
                     if (anz > 0) {
                         setzeRezeptPanelAufNull(false);
-                        // int anzeigen = -1;
                         if (xrez_nr.length() > 0) {
                             row = 0;
                             rezneugefunden = true;
@@ -1169,7 +1160,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     private void holeEinzelTermineAktuell(int row, Vector<String> vvec, String aufruf) {
-        // System.out.println("Aufruf aus --> "+aufruf);
         inEinzelTermine = true;
         Vector<String> xvec = null;
         if (vvec == null) {
@@ -1856,12 +1846,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             }
 
-            // Lemmi 201110106: Knopf zum Kopieren des aktiven Rezeptes zugefügt
             if (cmd.equals("KopiereAngewaehltes")) {
                 neuanlageRezept(true, "", "KopiereAngewaehltes");
             }
 
-            // Lemmi 201110113: Knopf zum Kopieren des jüngsten Rezeptes zugefügt
             if (cmd.equals("KopiereLetztes")) {
                 neuanlageRezept(true, "", "KopiereLetztes");
             }
@@ -1882,7 +1870,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 doAngleichenBehandlungen();
             }
 
-            // Lemmi 20110105: aktuellen Behandler auf alle leeren Behandler kopieren
             if (cmd.equals("behandlerkopieren")) {
                 doBehandlerKopieren();
             }
@@ -1911,8 +1898,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
     }
 
-    // Lemmi 20110105: aktuellen Behandler auf alle leeren Behandler kopieren
-    // Neue Routine
     // nimmt den Behandler aus der aktuell markierten Zeile und kopiert ihn auf alle
     // leeren Behandlerfelder
     private void doBehandlerKopieren() {
@@ -2416,7 +2401,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                                  .get(5)).get(preisgruppe);
         for (int i = 0; i < tageanzahl; i++) {
             if (i > 0) {
-                // hier die neue Prüfung einbauen Unterbrechungstest
                 vglalt = (String) dtermm.getValueAt(i - 1, 0);
                 vglneu = (String) dtermm.getValueAt(i, 0);
                 if (vglalt.equals(vglneu)) {
@@ -2461,17 +2445,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         }
                     }
                 }
-            } else {
-                /*
-                 * //TODO: hier die neue Prüfung einbauen Frist bis erste Behandlung
-                 * if(ktagebeginn){ //Frist bis Rezeptbeginn in Kalendertagen
-                 * if(DatFunk.TageDifferenz(latestdat, starttag) < 0){
-                 * System.out.println("Letzter Behandlungsbeginn wurde überschritten"); }
-                 * }else{//Frist bis Rezeptbeginn in Werktagen
-                 * 
-                 * }
-                 */
-
             }
         }
         return true;
@@ -2688,8 +2661,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             bereitsbezahlt = true;
         }
-        // Lemmi Doku: Hier werden die Variablen für die Vorlage initialisiert bzw.
-        // zurückgesetzt
+        resetHmAdrRData();
+        RezTools.testeRezGebArt(false, false, Reha.instance.patpanel.vecaktrez.get(1),
+                Reha.instance.patpanel.vecaktrez.get(34));
+        new RezeptGebuehren(this, bereitsbezahlt, false, pt);
+    }
+
+    private void resetHmAdrRData() {
         SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
         SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
@@ -2700,9 +2678,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
-        RezTools.testeRezGebArt(false, false, Reha.instance.patpanel.vecaktrez.get(1),
-                Reha.instance.patpanel.vecaktrez.get(34));
-        new RezeptGebuehren(this, bereitsbezahlt, false, pt);
     }
 
     public static void setZuzahlImageActRow(ZZStat key, String reznr) {
@@ -2734,16 +2709,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     private void doBarcode() {
-        SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbgesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rwegpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
+        resetHmAdrRData();
         RezTools.testeRezGebArt(true, false, Reha.instance.patpanel.vecaktrez.get(1),
                 Reha.instance.patpanel.vecaktrez.get(34));
         SystemConfig.hmAdrRDaten.put("<Bcik>", Reha.getAktIK());
@@ -2841,7 +2807,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 neuRez.setSize(500, 800);
                 neuRez.setPreferredSize(new Dimension(490 + Reha.zugabex, 690 + Reha.zugabey));
                 neuRez.getSmartTitledPanel()
-                      .setPreferredSize(new Dimension(490, 800)); // Original 630
+                      .setPreferredSize(new Dimension(490, 800));
                 neuRez.setPinPanel(pinPanel);
                 if (lneu) {
                     // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
@@ -3075,8 +3041,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private void doRezeptgebuehrRechnung(Point location) {
         boolean buchen = true;
         DecimalFormat dfx = new DecimalFormat("0.00");
-
-        String sRezNr = Reha.instance.patpanel.vecaktrez.get(1);
+        Rezeptvector currVO = new Rezeptvector();
+        currVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
+        String sRezNr = currVO.getRezNb();
         if (ZuzahlTools.existsRGR(sRezNr)) {
             int anfrage = JOptionPane.showConfirmDialog(null,
                     "<html>" + ZuzahlTools.rgrOK(sRezNr) + "<br><br>" + "Wollen Sie eine Kopie erstellen?</html>",
@@ -3084,12 +3051,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             if (anfrage != JOptionPane.YES_OPTION) {
                 return;
             }
-            buchen = false; // hier in RGR-Kopie verzweigen! (Wozu RGR erstellen u. evtl. die Preise ändern?
-                            // - Ist keine Kopie!)
+            RgrKopie kopie = new RgrKopie(sRezNr);
+            return;
         } else {
             // vvv Prüfungen aus der Bar-Quittung auch hier !
-            if (Reha.instance.patpanel.vecaktrez.get(39)
-                                                .equals("0")) {
+            if (currVO.getZzStat().equals(ZZStat.ZUZAHLFREI)) {
                 JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
                 return;
             }
@@ -3105,7 +3071,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         "Rezeptgebühren-Rechnung nicht mehr möglich", JOptionPane.WARNING_MESSAGE, null);
                 return;
             }
-            // ^^^ Prüfungen aus der Bar-Quittung auch hier !
 
         }
 
@@ -3115,53 +3080,22 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         String behandl = "";
         String strZuzahlung = "0.00";
 
-        // Lemmi: Nutzung der Routine aus der RG-Barzahlung, um "geprüft" einige
-        // Varibalen vorzubelegen
-        // Lemmi Doku: Hier werden die Variablen für die Vorlage initialisiert bzw.
-        // zurückgesetzt
-        SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbgesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rwegpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
-        RezTools.testeRezGebArt(false, false, sRezNr, Reha.instance.patpanel.vecaktrez.get(34));
+        resetHmAdrRData();
+        String termine = currVO.getTermine();
+        RezTools.testeRezGebArt(false, false, sRezNr, termine);
 
         // String mit den Anzahlen und HM-Kürzeln erzeugen
-        for (i = 0; i < 4; i++) {
-            if ((Reha.instance.patpanel.vecaktrez.get(65 + i) != null) && Reha.instance.patpanel.vecaktrez.get(65 + i)
-                                                                                                          .length() > 0) {
-                behandl += ((behandl.length() > 0) ? ", " : "") + Reha.instance.patpanel.vecaktrez.get(3 + i) + " * "
-                        + Reha.instance.patpanel.vecaktrez.get(65 + i);
+        for (i = 1; i < 5; i++) {
+            String hmKurz = currVO.getHMkurz(i);
+            String aktAnzBehandlg = currVO.getAnzBehS(i);
+            if ((hmKurz != null) && hmKurz.length() > 0) {
+                behandl += ((behandl.length() > 0) ? ", " : "") + aktAnzBehandlg + " * " + hmKurz;
             }
         }
 
-        // Zuzahlung zusammenziehen
-        Double dZuzahl = 0.0;
-        for (i = 0; i < 4; i++) {
-            if (Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rproz" + (i + 1) + ">")
-                                                           .replaceAll(",", ".")) > 0.00) {
-                dZuzahl += Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rgesamt" + (i + 1) + ">")
-                                                                      .replaceAll(",", "."));
-
-            }
-        }
-        dZuzahl += Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rpauschale>")
-                                                              .replaceAll(",", ".")); // 10 Euro dazu
-
-        strZuzahlung = Reha.instance.patpanel.vecaktrez.get(13);
-        strZuzahlung = dfx.format(dZuzahl);
         strZuzahlung = SystemConfig.hmAdrRDaten.get("<Rendbetrag>");
 
-        // anr=17,titel=18,nname=0,vname=1,strasse=3,plz=4,ort=5,abwadress=19
-        // "anrede,titel,nachname,vorname,strasse,plz,ort"
-
-        String cmd = "select abwadress,id from pat5 where pat_intern='" + Reha.instance.patpanel.vecaktrez.get(0)
-                + "' LIMIT 1";
+        String cmd = "select abwadress,id from pat5 where pat_intern='" + currVO.getPatIntern() + "' LIMIT 1";
         Vector<Vector<String>> adrvec = SqlInfo.holeFelder(cmd);
         String[] adressParams = null;
 
@@ -3179,7 +3113,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         hmRezgeb.put("<rgbehandlung>", behandl);
 
-        hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)));
+        hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(currVO.getRezeptDatum()));
 
         hmRezgeb.put("<rgbetrag>", strZuzahlung);
         hmRezgeb.put("<rgpauschale>", SystemConfig.hmAbrechnung.get("rgrpauschale"));
@@ -3190,7 +3124,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         hmRezgeb.put("<rgort>", adressParams[3]);
         hmRezgeb.put("<rgbanrede>", adressParams[4]);
 
-        hmRezgeb.put("<rgpatintern>", Reha.instance.patpanel.vecaktrez.get(0));
+        hmRezgeb.put("<rgpatintern>", currVO.getPatIntern());
 
         hmRezgeb.put("<rgpatnname>", SystemConfig.hmAdrPDaten.get("<Pnname>"));
         hmRezgeb.put("<rgpatvname>", SystemConfig.hmAdrPDaten.get("<Pvname>"));

@@ -32,7 +32,7 @@ import CommonTools.JRtaLabel;
 import CommonTools.JRtaTextField;
 import CommonTools.StringTools;
 import commonData.ArztVec;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import environment.Path;
 import hauptFenster.Reha;
 import rechteTools.Rechte;
@@ -102,7 +102,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
         RezeptDaten.feddisch = false;
         boolean reha = false;
         ArztVec verordnenderArzt = new ArztVec();
-        Rezept dieseVO = new Rezept();
+        Rezeptvector dieseVO = new Rezeptvector();
         final String xreznummer = reznummer;
         try {
             dieseVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
@@ -314,7 +314,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
      * @param idxHM - Index des HM im Rezept
      * @return String 'anz * kuerzel (HM-Position)' oder Platzhalter '----'
      */
-    private String showHM(Rezept dieseVO, Vector<Vector<String>> preisvec, int idxHM) {
+    private String showHM(Rezeptvector dieseVO, Vector<Vector<String>> preisvec, int idxHM) {
         String retVal = "----";
         // indices for preisvec/priceListEntry access
         final int KUERZEL = 1;

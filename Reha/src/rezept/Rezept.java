@@ -1,0 +1,81 @@
+package rezept;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+public class Rezept {
+    int PAT_INTERN;
+    String REZ_NR;
+    LocalDate REZ_DATUM;
+    int ANZAHL1;
+    int ANZAHL2;
+    int ANZAHL3;
+    int ANZAHL4;
+    BigDecimal ANZAHLKM;
+    int ART_DBEH1;
+    int ART_DBEH2;
+    int ART_DBEH3;
+    int ART_DBEH4;
+    boolean BEFR;
+    Money REZ_GEB ;
+    boolean REZ_BEZ;
+    String ARZT;
+    int ARZTID;
+    String AERZTE;
+    Money PREISE1;
+    Money PREISE2;
+    Money PREISE3;
+    Money PREISE4;
+    LocalDate DATUM;
+    String DIAGNOSE;
+    boolean HEIMBEWOHN;
+    LocalDate VERAENDERD;
+    int VERAENDERA;
+    String REZEPTART; // erstverordn, VO oder Adr
+    boolean LOGFREI1;
+    boolean LOGFREI2;
+    int NUMFREI1;
+    int NUMFREI2;
+    String CHARFREI1;
+    String CHARFREI2;
+    String TERMINE;
+    int ID;
+    String KTRAEGER;
+    int KID;
+    int PATID;
+    int ZZSTATUS;
+    LocalDate LASTDATE;
+    int PREISGRUPPE;
+    boolean BEGRUENDADR;
+    boolean HAUSBES;
+    String INDIKATSCHL;
+    String ANGELEGTVON;
+    int BARCODEFORM;
+    String DAUER;
+    String POS1;
+    String POS2;
+    String POS3;
+    String POS4;
+    String FREQUENZ;
+    String LASTEDIT;
+    int BERID;
+    boolean ARZTBERICHT;
+    LocalDate LASTEDDATE;
+    String FARBCODE;
+    String RSPLIT;
+    String JAHRFREI; //vielleicht auch localdate
+    boolean UNTER18;
+    boolean HBVOLL;
+    boolean ABSCHLUSS;
+    int ZZREGEL=-1;
+    int ANZAHLHB;
+    String KUERZEL1;
+    String KUERZEL2;
+    String KUERZEL3;
+    String KUERZEL4;
+    String KUERZEL5;
+    String KUERZEL6;
+    String ICD10;
+    String ICD10_2;
+
+}

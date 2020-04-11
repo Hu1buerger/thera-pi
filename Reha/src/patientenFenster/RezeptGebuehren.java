@@ -58,7 +58,7 @@ import systemEinstellungen.SystemConfig;
 
 public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
     /**
-     *
+     * Rezeptgebühren bar kassieren
      */
     private static final long serialVersionUID = 1L;
     boolean nurkopie;
@@ -69,7 +69,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
     public JCheckBox direktdruck;
     private RehaTPEventClass rtp = null;
     private RgebHintergrund rgb;
-    // CompoundPainter cp = null;
     MattePainter mp = null;
     LinearGradientPaint p = null;
     private AktuelleRezepte aktuelleRezepte;
@@ -152,7 +151,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
     private JPanel getGebuehren() {
         FormLayout lay = new FormLayout("10dlu,fill:0:grow(0.50),right:max(40dlu;p),5dlu,40dlu,fill:0:grow(0.50),10dlu",
                 // 1 2 3 4 5 6 7 8 9 10 11 12
-                "15dlu,p,10dlu,p,10dlu,p,4dlu,p,4dlu,p,  20dlu,p,15dlu");
+                "15dlu,p,10dlu,p,10dlu,p,4dlu,p,4dlu,p,20dlu,p,15dlu");
         PanelBuilder pb = new PanelBuilder(lay);
         CellConstraints cc = new CellConstraints();
 
@@ -209,8 +208,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         rueckgeld.setForeground(Color.BLUE);
                     }
                     rueckgeld.setText(df.format(rgtest));
-                    //// System.out.println("Text = "+gegeben.getText()+ " inhalt von Test =
-                    //// "+test.toString());
                 }
             }
         });
@@ -253,12 +250,12 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
             String url = "";
             if (Reha.instance.patpanel.vecaktrez.get(43)
                                                 .equals("T")) {
+                // Wenn Hausbesuch andere Vorlage.....
                 url = SystemConfig.rezGebVorlageHB;
             } else {
                 url = SystemConfig.rezGebVorlageNeu;
             }
 
-            // Wenn Hausbesuch andere Vorlage.....
             IDocumentService documentService = null;
 
             try {
@@ -269,7 +266,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                 ex.printStackTrace();
             }
             IDocumentDescriptor docdescript = new DocumentDescriptor();
-            // docdescript.setHidden(true);
             if (!direktdruck.isSelected()) {
                 docdescript.setHidden(false);
             } else {
@@ -337,15 +333,12 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        // Reha.officeapplication.getDocumentService().
                         xtextDocument.getFrame()
                                      .getXFrame()
                                      .activate();
                     }
                 });
             }
-            // System.out.println(SystemConfig.hmAdrRDaten);
-            // document.getFrame().getXFrame().getContainerWindow().setVisible(true);
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -362,12 +355,9 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                     rtp = null;
                     super.dispose();
                     this.dispose();
-                    // System.out.println("****************Rezeptgebühren -> Listener
-                    // entfernt**************");
                 }
             }
         } catch (NullPointerException ne) {
-            // System.out.println("In PatNeuanlage" +evt);
         }
     }
 
@@ -380,10 +370,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
             rtp = null;
             super.dispose();
             dispose();
-            // System.out.println("****************Rezeptgebühren -> Listener entfernt
-            // (Closed)**********");
         }
-
     }
 
     @Override
@@ -410,16 +397,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                     return null;
                 }
             }.execute();
-
-            /*
-             * new SwingWorker<Void,Void>(){
-             * 
-             * @Override protected Void doInBackground() throws Exception { try{
-             * if(!nurkopie){ doBuchen(); } rezGebDrucken(); doSchliessen();
-             * }catch(Exception ex){ ex.printStackTrace(); } return null; }
-             * 
-             * }.execute();
-             */
         }
     }
 
@@ -430,7 +407,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
 
     @Override
     public void keyPressed(KeyEvent event) {
-        if (event.getKeyCode() == 10) {
+        if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             event.consume();
             new SwingWorker<Void, Void>() {
                 @Override
@@ -447,7 +424,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                     return null;
                 }
             }.execute();
-            // System.out.println("Return Gedrückt");
         }
     }
 
@@ -468,8 +444,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                             + "\nSql-Befehl = " + cmd + "\n\n"
                             + "Bitte notieren Sie diese Fehlermeldung und informieren Sie den Administrator umgehend.");
                     srgeb = "0.00";
-                    // ErrorMail(String text,String comp,String user,String senderadress,String
-                    // xtitel)
                     new ErrorMail(
                             "Fehler bei Rezeptgebührenkassieren - Fehler-Nr. 1 - Reznr."
                                     + SystemConfig.hmAdrRDaten.get("<Rnummer>"),
@@ -534,7 +508,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
 
             }
-            /**/
 
             try {
                 cmd = "insert into kasse set einnahme='" + SystemConfig.hmAdrRDaten.get("<Rendbetrag>")
@@ -545,7 +518,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         + SystemConfig.hmAdrRDaten.get("<Rnummer>") + "' ," + "user='" + Reha.aktUser + "'," + "ik='"
                         + Reha.getAktIK() + "'";
                 SqlInfo.sqlAusfuehren(cmd);
-                //// System.out.println("Kassenbuch -> "+cmd);
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null,
                         "Die bezahlten Rezeptgebühren konnten nicht verbucht werden.\n+"
@@ -558,7 +530,6 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
 
             }
-            /**/
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
                     "Der Zuzahlungsstatus im Rezeptstamm konnte nicht korrekt gesetzt werden.\n+"

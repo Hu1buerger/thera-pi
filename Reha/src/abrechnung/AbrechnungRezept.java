@@ -105,7 +105,7 @@ import CommonTools.StringTools;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import environment.Path;
 import hauptFenster.Reha;
 import hauptFenster.UIFSplitPane;
@@ -153,7 +153,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     Vector<Object> vecdummy = new Vector<Object>();
 
     Vector<Vector<String>> vectage = null;
-    Rezept aktRezept = new Rezept();
+    Rezeptvector aktRezept = new Rezeptvector();
     Vector<Vector<String>> vec_pat = null;
     Vector<Vector<String>> vec_term = null;
     Vector<Vector<String>> vec_hb = null;

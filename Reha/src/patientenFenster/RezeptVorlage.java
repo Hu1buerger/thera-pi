@@ -39,23 +39,16 @@ import hauptFenster.Reha;
 import systemEinstellungen.SystemConfig;
 
 public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
-    /**
-     *
-     */
     private static final long serialVersionUID = 1L;
-    // ActionListener al = null;
 
     JRtaRadioButton[] rbDiszi = { null, null, null, null };
     ButtonGroup bgroup = new ButtonGroup();
-
-//	public JRtaCheckBox[] leistung = {null,null,null,null,null};
 
     private RehaTPEventClass rtp = null;
     private RezeptVorlageHintergrund rgb;
 
     public JButton uebernahme;
     public JButton abbrechen;
-//	public String afrNummer;
 
     public String strSelectedDiszi = "";
     Vector<String> vecDiszi = new Vector<String>();
@@ -107,7 +100,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                              .setName("RezeptVorlage");
         setName("RezeptVorlage");
         setModal(true);
-        // Point lpt = new Point(pt.x-125,pt.y+30);
         Point lpt = new Point(pt.x - 150, pt.y + 30);
         setLocation(lpt);
 
@@ -118,7 +110,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
         // prüfe die Anzahl der gefundenen Ergebnisse und treffe voreilige
         // Entscheidungen !
-        // int iTest = vecDiszi.size();
         if (vecDiszi.size() < 2) {
             if (vecDiszi.size() == 1)
                 strSelectedDiszi = vecDiszi.get(0);
@@ -277,12 +268,10 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                     rtp = null;
                     this.dispose();
                     super.dispose();
-                    // System.out.println("****************Ausfallrechnung -> Listener
-                    // entfernt**************");
                 }
             }
         } catch (NullPointerException ne) {
-            // System.out.println("In PatNeuanlage" +evt);
+            ne.printStackTrace();
         }
     }
 
@@ -296,8 +285,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
             pinPanel = null;
             dispose();
             super.dispose();
-            // System.out.println("****************Ausfallrechnung -> Listener entfernt
-            // (Closed)**********");
         }
     }
 
@@ -308,8 +295,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                 .equals("kopieren")) {
             // hier wird vecResult gefüllt
             starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
-//			Vector<String> vecTest = new Vector<String>();
-//			vecTest = vecResult;
             this.dispose();
         }
         if (vecDiszi.contains(arg0.getActionCommand())) { // Wenn eine der gefundenen Disziplinen angewählt worden ist
@@ -327,106 +312,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
     }
 
-    /*
-     * private void doBuchen(){
-     * 
-     * StringBuffer buf = new StringBuffer();
-     * buf.append("insert into rgaffaktura set ");
-     * buf.append("rnr='"+afrNummer+"', ");
-     * buf.append("reznr='"+(String)Reha.instance.patpanel.vecaktrez.get(1)+"', ");
-     * buf.append("pat_intern='"+(String)Reha.instance.patpanel.vecaktrez.get(0)
-     * +"', ");
-     * buf.append("rgesamt='"+(String)SystemConfig.hmAdrAFRDaten.get("<AFRgesamt>").
-     * replace(",",".")+"', ");
-     * buf.append("roffen='"+(String)SystemConfig.hmAdrAFRDaten.get("<AFRgesamt>").
-     * replace(",",".")+"', ");
-     * buf.append("rdatum='"+DatFunk.sDatInSQL(DatFunk.sHeute())+"'");
-     * ////System.out.println(buf.toString());
-     * sqlTools.SqlInfo.sqlAusfuehren(buf.toString());
-     * 
-     * // vvv Lemmi 20101220: Eintrag der AFR auch in Tabelle "rliste" (Offene
-     * Posten & Mahnungen) if (
-     * SystemConfig.hmZusatzInOffenPostenIni.get("AFRinOPverwaltung") == 1) { String
-     * strHelp = ""; StringBuffer buf2 = new StringBuffer();
-     * buf2.append("insert into rliste set "); buf2.append("r_nummer='0', ");
-     * buf2.append("x_nummer='" + afrNummer + "', "); buf2.append("r_datum='" +
-     * DatFunk.sDatInSQL(DatFunk.sHeute())+"', ");
-     * 
-     * // Patienten-Name holen und eintragen String cmd =
-     * "select n_name, v_name from pat5 where id='" +
-     * (String)Reha.instance.patpanel.vecaktrez.get(0) + "'";
-     * //System.out.println(cmd); Vector<Vector<String>> vec =
-     * SqlInfo.holeFelder(cmd); if(vec.size() <= 0) strHelp = "Patient, unbekannt";
-     * else strHelp = vec.get(0).get(0) + ", " + vec.get(0).get(1); // N_name,
-     * V_name buf2.append("r_kasse='" + strHelp + "', ");
-     * 
-     * // Hole die ersten beiden Buchstaben aus der Rezeptnummer als "Klasse"
-     * strHelp = (String)Reha.instance.patpanel.vecaktrez.get(1);
-     * buf2.append("r_klasse='" + strHelp.substring(0, 2) + "', ");
-     * 
-     * buf2.append("r_betrag='" +
-     * (String)SystemConfig.hmAdrAFRDaten.get("<AFRgesamt>").replace(",",".")+"', "
-     * ); buf2.append("r_offen='" +
-     * (String)SystemConfig.hmAdrAFRDaten.get("<AFRgesamt>").replace(",",".")+"', "
-     * ); buf2.append("r_zuzahl='0.00', "); buf2.append("pat_intern='" +
-     * (String)Reha.instance.patpanel.vecaktrez.get(0) + "', ");
-     * buf2.append("ikktraeger='" + (String)Reha.instance.patpanel.vecaktrez.get(1)
-     * + "'"); // Rezept-Nummer, z.B. ER23
-     * sqlTools.SqlInfo.sqlAusfuehren(buf2.toString()); // ^^^ Lemmi 20101220:
-     * Eintrag der RGR auch in Tabelle "rliste" (Offene Posten & Mahnungen) }
-     * 
-     * } private void macheMemoEintrag(){ StringBuffer sb = new StringBuffer();
-     * sb.append(DatFunk.sHeute()
-     * +" - unentschuldigt oder zu spät abgesagt - Rechnung!!\n");
-     * sb.append(Reha.instance.patpanel.pmemo[1].getText());
-     * Reha.instance.patpanel.pmemo[1].setText(sb.toString()); String cmd =
-     * "update pat5 set pat_text='"+sb.toString()+"' where pat_intern = '"+Reha.
-     * instance.patpanel.aktPatID+"'"; new ExUndHop().setzeStatement(cmd); } private
-     * void macheAFRHmap(){ String mappos = ""; String mappreis = ""; String mapkurz
-     * = ""; String maplang = ""; String[] inpos = {null,null}; String spos = "";
-     * String sart = ""; Double gesamt = new Double(0.00); int preisgruppe = 0;
-     * 
-     * // List<String> lAdrAFRDaten = Arrays.asList(new
-     * String[]{"<AFRposition1>","<AFRposition2>","<AFRposition3>" //
-     * ,"<AFRposition4>","<AFRpreis1>","<AFRpreis2>","<AFRpreis3>","<AFRpreis4>",
-     * "<AFRgesamt>","<AFRnummer>"});
-     * 
-     * DecimalFormat df = new DecimalFormat( "0.00" );
-     * 
-     * for(int i = 0 ; i < 4; i++){ mappos = "<AFRposition"+(i+1)+">"; mappreis =
-     * "<AFRpreis"+(i+1)+">"; mapkurz = "<AFRkurz"+(i+1)+">"; maplang =
-     * "<AFRlang"+(i+1)+">"; if(leistung[i].isSelected()){ Double preis = new
-     * Double( (String)Reha.instance.patpanel.vecaktrez.get(18+i)); String s =
-     * df.format( preis);
-     * SystemConfig.hmAdrAFRDaten.put(mappos,leistung[i].getText());
-     * SystemConfig.hmAdrAFRDaten.put(mappreis,s); gesamt = gesamt+preis;
-     * 
-     * spos = (String)Reha.instance.patpanel.vecaktrez.get(8+i); sart =
-     * (String)Reha.instance.patpanel.vecaktrez.get(1); sart = sart.substring(0,2);
-     * preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41))-1;
-     * inpos = LeistungTools.getLeistung(sart, spos,preisgruppe);
-     * SystemConfig.hmAdrAFRDaten.put(maplang,inpos[0]);
-     * SystemConfig.hmAdrAFRDaten.put(mapkurz,inpos[1]);
-     * ////System.out.println(inpos[0]); ////System.out.println(inpos[1]);
-     * 
-     * }else{ spos = (String)Reha.instance.patpanel.vecaktrez.get(8+i); sart =
-     * (String)Reha.instance.patpanel.vecaktrez.get(1); sart = sart.substring(0,2);
-     * preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41))-1;
-     * inpos = LeistungTools.getLeistung(sart, spos,preisgruppe);
-     * 
-     * SystemConfig.hmAdrAFRDaten.put(mappos,leistung[i].getText());
-     * SystemConfig.hmAdrAFRDaten.put(mappreis,"0,00");
-     * SystemConfig.hmAdrAFRDaten.put(maplang,(!inpos[0].equals("") ? inpos[0] :
-     * "----") ); SystemConfig.hmAdrAFRDaten.put(mapkurz,(!inpos[1].equals("") ?
-     * inpos[1] : "----") );
-     * 
-     * }
-     * 
-     * } SystemConfig.hmAdrAFRDaten.put("<AFRgesamt>",df.format( gesamt)); /// Hier
-     * muß noch die Rechnungsnummer bezogen und eingetragen werden afrNummer =
-     * "AFR-"+Integer.toString(sqlTools.SqlInfo.erzeugeNummer("afrnr"));
-     * SystemConfig.hmAdrAFRDaten.put("<AFRnummer>",afrNummer); }
-     */
     @Override
     public void keyPressed(KeyEvent event) {
         if (event.getKeyCode() == 10) {
@@ -449,46 +334,6 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
         }
     }
 
-    /*
-     * 
-     * public static void starteAusfallRechnung(String url){ IDocumentService
-     * documentService = null;; //System.out.println("Starte Datei -> "+url);
-     * if(!Reha.officeapplication.isActive()){ Reha.starteOfficeApplication(); } try
-     * { documentService = Reha.officeapplication.getDocumentService(); } catch
-     * (OfficeApplicationException e) { e.printStackTrace();
-     * JOptionPane.showMessageDialog(null,
-     * "Fehler im OpenOffice-System - Ausfallrechnung kann nicht erstellt werden");
-     * return; } IDocumentDescriptor docdescript = new DocumentDescriptor();
-     * docdescript.setHidden(false); docdescript.setAsTemplate(true); IDocument
-     * document = null; //ITextTable[] tbl = null; try { document =
-     * documentService.loadDocument(url,docdescript); } catch (NOAException e) {
-     * 
-     * e.printStackTrace(); } ITextDocument textDocument = (ITextDocument)document;
-     * ITextFieldService textFieldService = textDocument.getTextFieldService();
-     * ITextField[] placeholders = null; try { placeholders =
-     * textFieldService.getPlaceholderFields(); } catch (TextException e) {
-     * 
-     * e.printStackTrace(); } for (int i = 0; i < placeholders.length; i++) {
-     * //boolean loeschen = false; boolean schonersetzt = false; String
-     * placeholderDisplayText = placeholders[i].getDisplayText().toLowerCase();
-     * ////System.out.println(placeholderDisplayText);
-     * ////////////////////////////// Set<?> entries =
-     * SystemConfig.hmAdrPDaten.entrySet(); Iterator<?> it = entries.iterator();
-     * while (it.hasNext()) { Map.Entry<String,String> entry =
-     * ((Map.Entry<String,String>) it.next());
-     * if(((String)entry.getKey()).toLowerCase().equals(placeholderDisplayText)){
-     * placeholders[i].getTextRange().setText(((String)entry.getValue()));
-     * schonersetzt = true; break; } } /////////////////////////////// entries =
-     * SystemConfig.hmAdrAFRDaten.entrySet(); it = entries.iterator(); while
-     * (it.hasNext() && (!schonersetzt)) { Map.Entry entry = (Map.Entry) it.next();
-     * if(((String)entry.getKey()).toLowerCase().equals(placeholderDisplayText)){
-     * placeholders[i].getTextRange().setText(((String)entry.getValue()));
-     * schonersetzt = true; break; } } if(!schonersetzt){
-     * OOTools.loescheLeerenPlatzhalter(textDocument, placeholders[i]); }
-     * //////////////////////// }
-     * 
-     * }
-     */
 
 }
 

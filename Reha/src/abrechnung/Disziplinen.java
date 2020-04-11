@@ -154,16 +154,6 @@ public class Disziplinen {
     }
 
     public String getCurrDisziFromActRK() {
-//        String selectedRK = cmbDisziActive.getSelectedItem()
-//                                          .toString();
-//        for (int i = 0; i < listTypeOfVO.size(); i++) {
-//            if (selectedRK.equals(listTypeOfVO.get(i))) {
-//                return diszis.get(i);
-//            }
-//        }
-//        System.out.println("getCurrDisziFromActRK err: not found: " + selectedRK);
-//        return diszis.get(0); // use default ("Physio")
-//        return listTypeOfVO.get(0); // use default ("Physio-Rezept")
         return cmbDisziActive.getSelectedItem()
                              .toString();
     }
@@ -196,9 +186,22 @@ public class Disziplinen {
     /**
      * liefert Kurzbezeichnung (z.B. "Physio") zur uebergebenen Rezeptklasse (z.B. "KG")
      */
-    public String getDisziKurz(String rk) {
+    public String getDisziKurzFromRK(String rk) {
         ArrayList<String> rKl = new ArrayList<String>(Arrays.asList(rezeptKlassen));
         return getDisziKurz(rKl.indexOf(rk));
+    }
+
+    /**
+     * liefert Kurzbezeichnung (z.B. "Physio") zum uebergebenen VO-Typ (z.B. "Physio-Rezept")
+     */
+    public String getDisziKurzFromTypeOfVO(String typeOfVO) {
+        for (int i = 0; i < listTypeOfVO.size(); i++) {
+            if (typeOfVO.equalsIgnoreCase(listTypeOfVO.get(i))) {
+                return diszis.get(i);
+            }
+        }
+        System.out.println("getDiszi err: not found: " + typeOfVO + " set " + diszis.get(0) + " as default");
+        return diszis.get(0); // use default ("Physio")
     }
 
     public String getRezClass(String typeOfVO) {
@@ -209,16 +212,6 @@ public class Disziplinen {
         }
         System.out.println("getRezClass err: not found: " + typeOfVO + " set " + rezeptKlassen[0] + " as default");
         return rezeptKlassen[0]; // use default ("KG")
-    }
-
-    public String getDiszi(String typeOfVO) {
-        for (int i = 0; i < listTypeOfVO.size(); i++) {
-            if (typeOfVO.equalsIgnoreCase(listTypeOfVO.get(i))) {
-                return diszis.get(i);
-            }
-        }
-        System.out.println("getDiszi err: not found: " + typeOfVO + " set " + diszis.get(0) + " as default");
-        return diszis.get(0); // use default ("Physio")
     }
 
 }
