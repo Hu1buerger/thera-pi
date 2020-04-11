@@ -26,7 +26,6 @@ _$*
 *.Z
 *.elc
 *.ln
-core
 # CVS default ignores end
 
 # ignores from old projectdir begin
