@@ -73,6 +73,7 @@
     </target>
     <target name="clean">
         <delete dir="bin"/>
+        <delete dir="bin-tests"/>
     </target>
     <target depends="clean" name="cleanall">
         <ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="clean"/>
