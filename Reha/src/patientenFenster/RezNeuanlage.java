@@ -804,9 +804,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                       .trim(),
                             preisgruppen[getPgIndex()]); // fuellt jcmb[cLEIST1..4] u.
                                                                               // jcmb[cBARCOD]
-                    this.fuelleIndis(jcmb[cRKLASSE].getSelectedItem()
-                                                   .toString()
-                                                   .trim());
                 } else { // myRezept enthaelt Daten
                     try {
                         String[] xartdbeh = new String[] { myRezept.getHMkurz(1), myRezept.getHMkurz(2),
@@ -817,9 +814,6 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                           .toString()
                                                           .trim(),
                                 preisgruppen[getPgIndex()]);
-                        this.fuelleIndis(jcmb[cRKLASSE].getSelectedItem()
-                                                       .toString()
-                                                       .trim());
                         for (int i = 0; i < 4; i++) {
                             if (xartdbeh[i].equals("")) {
                                 jcmb[cLEIST1 + i].setSelectedIndex(0);
@@ -1418,7 +1412,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         return true;
     }
 
-    private void ladePreisliste(String item, int preisgruppe) {
+    private void ladePreisliste(String typeOfVO, int preisgruppe) {
         try {
             String[] artdbeh = null;
             if (!this.neu && jcmb[cLEIST1].getItemCount() > 0) {
@@ -1431,8 +1425,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcmb[cLEIST3].removeAllItems();
             jcmb[cLEIST4].removeAllItems();
 
-            aktuelleDisziplin = diszis.getDiszi(item);
-            rezKlasse = diszis.getRezClass(item); // ist jetzt Uppercase!
+            aktuelleDisziplin = diszis.getDisziKurzFromTypeOfVO(typeOfVO);
+            rezKlasse = diszis.getRezClass(typeOfVO);
 
             preisvec = SystemPreislisten.hmPreise.get(aktuelleDisziplin)
                                                  .get(preisgruppe);

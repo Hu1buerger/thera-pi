@@ -257,7 +257,7 @@ public class RezTools {
                 + kuerzel + "' and disziplin ='" + rezClass + "' LIMIT 1").get(0);
         if (vec.size() <= 0) {
             String msg = "Achtung!\n\n" + "Ihre Kürzelzuordnung in den Preislisten ist nicht korrekt!!!!!\n"
-                    + "Kürzel: " + kuerzel + "\n" + "Disziplin: " + diszis.getDisziKurz(rezClass) + "\n\n"
+                    + "Kürzel: " + kuerzel + "\n" + "Disziplin: " + diszis.getDisziKurzFromRK(rezClass) + "\n\n"
                     + "Für die ausgewählte Diziplin ist das angegebene Kürzel nicht in der Kürzeltabelle vermerkt!";
             JOptionPane.showMessageDialog(null, msg);
             return null;
