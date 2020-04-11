@@ -11,20 +11,32 @@ import com.mysql.jdbc.jdbc2.optional.MysqlConnectionPoolDataSource;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 
 import crypt.Verschluesseln;
+import environment.Path;
 
 public class Datenquelle {
 
+    private String s_pfadZurRehaIni = "";
     private static final Verschluesseln DECODER = Verschluesseln.getInstance();
     private static final String DATEN_BANK = "DatenBank";
     MysqlDataSource dataSource;
 
+    // @Visible for testing
+    void setRehaIni(String pfadZurRehaIni) {
+        this.s_pfadZurRehaIni = pfadZurRehaIni;
+    }
+    
+    // @Visible for testing
+    String getRehaIni() {
+        return this.s_pfadZurRehaIni;
+    }
+    
     Datenquelle(String digitString) {
-        initialize(digitString);
-
+        this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + "ini/" + digitString + "/rehajava.ini";
+        initialize();
     }
 
-    private void initialize(String digitString) {
-        File f = new File(environment.Path.Instance.getProghome() + "ini/" + digitString + "/rehajava.ini");
+    private void initialize() {
+        File f = new File(this.s_pfadZurRehaIni);
         Ini ini;
         try {
             ini = new Ini(f);
