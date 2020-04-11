@@ -23,8 +23,11 @@ public enum Disziplin {
     }
 
     public static Disziplin ofMedium(String medium) {
+        if(medium == null) {
+            return INV;
+        }
         for (Disziplin d : Disziplin.values()) {
-            if (d.medium.equals(medium)) {
+            if (d.medium.toLowerCase().equals(medium.toLowerCase())) {
                 return d;
             }
         }
