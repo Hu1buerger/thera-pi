@@ -79,7 +79,7 @@ import abrechnung.AbrechnungPrivat;
 import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -858,7 +858,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                               .get(termineInTable)));
                         int iZuZahlStat = 3, rezstatus = 0;
                         ZZStat iconKey;
-                        if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heißt 'befreit'?? 
+                        if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heißt 'befreit'??
                             iZuZahlStat = 0; // ?? nicht besser 'not set' ??
                         } else if (!((Vector) vec.get(i)).get(1)
                                                          .equals("")) {
@@ -3041,7 +3041,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private void doRezeptgebuehrRechnung(Point location) {
         boolean buchen = true;
         DecimalFormat dfx = new DecimalFormat("0.00");
-        Rezept currVO = new Rezept();
+        Rezeptvector currVO = new Rezeptvector();
         currVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
         String sRezNr = currVO.getRezNb();
         if (ZuzahlTools.existsRGR(sRezNr)) {
