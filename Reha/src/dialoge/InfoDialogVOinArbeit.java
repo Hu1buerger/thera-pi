@@ -20,7 +20,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.JCompTools;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import patientenFenster.PatUndVOsuchen;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -128,7 +128,7 @@ public class InfoDialogVOinArbeit extends InfoDialog implements HyperlinkListene
     }
 
     private void showTableVO(Vector<Vector<String>> data) {
-        Rezept myRezept = new Rezept();
+        Rezeptvector myRezept = new Rezeptvector();
         StringBuffer tdata = new StringBuffer();
         hmVO.clear();
         String complete = ladehead();

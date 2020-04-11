@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import hauptFenster.Reha;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -75,7 +75,7 @@ public class HMRCheck {
         fehlertext = new FehlerTxt();
     }
 
-    public HMRCheck(Rezept rezept, String currTypeOfVO, Vector<Vector<String>> xpreisvec) {
+    public HMRCheck(Rezeptvector rezept, String currTypeOfVO, Vector<Vector<String>> xpreisvec) {
         diszis = new Disziplinen();
         diszis.setCurrTypeOfVO(currTypeOfVO);
         anzahl = new Vector<Integer>();

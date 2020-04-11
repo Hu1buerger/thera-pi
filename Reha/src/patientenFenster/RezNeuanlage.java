@@ -48,7 +48,7 @@ import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
-import commonData.Rezept;
+import commonData.Rezeptvector;
 import environment.LadeProg;
 import environment.Path;
 import events.RehaTPEvent;
@@ -202,8 +202,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private Component eingabeDiag = null;
     private Connection connection;
 
-    private Rezept myRezept = null;
-    private Rezept tmpRezept = null;
+    private Rezeptvector myRezept = null;
+    private Rezeptvector tmpRezept = null;
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
@@ -212,7 +212,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         try {
             this.neu = neu;
             this.vec = vec; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
-            myRezept = new Rezept();
+            myRezept = new Rezeptvector();
             verordnenderArzt = new ArztVec();
             myRezept.setVec_rez(vec);
             diszis = new Disziplinen();
@@ -1314,7 +1314,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                             mitsamstag);
                 }
             }
-            tmpRezept = new Rezept();
+            tmpRezept = new Rezeptvector();
             if (getInstance().neu) {
                 initRezeptNeu(tmpRezept);
             } else {
@@ -1747,7 +1747,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein Rezept mit Daten, die immer gesetzt werden müssen
      */
-    private void initRezeptAll(Rezept thisRezept) {
+    private void initRezeptAll(Rezeptvector thisRezept) {
         if (thisRezept.getKtraeger()
                     .equals("")) { // eher ein Fall für check/speichern!
             JOptionPane.showMessageDialog(null,
@@ -1774,7 +1774,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
      */
-    private void initRezeptNeu(Rezept thisRezept) {
+    private void initRezeptNeu(Rezeptvector thisRezept) {
         thisRezept.createEmptyVec();
 
         thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
@@ -1796,7 +1796,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *  - aktualisiert Daten aus dem aktuellen Patienten,
      *  - löscht Daten, die nur für die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
-    private void initRezeptKopie(Rezept thisRezept) {
+    private void initRezeptKopie(Rezeptvector thisRezept) {
         String kasseInVo = thisRezept.getKtrName();
         String kasseInPatStamm = Reha.instance.patpanel.patDaten.get(13);
         if (!kasseInVo.equals(kasseInPatStamm)) {
@@ -1927,7 +1927,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec1stTime(Rezept thisRezept) {
+    private void copyFormToVec1stTime(Rezeptvector thisRezept) {
         thisRezept.setAnzHB(jtf[cANZ1].getText());
         copyFormToVec(thisRezept);
     }
@@ -1937,7 +1937,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * lädt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec(Rezept thisRezept) {
+    private void copyFormToVec(Rezeptvector thisRezept) {
         try {
             if (!komplettTest()) {
                 return;
