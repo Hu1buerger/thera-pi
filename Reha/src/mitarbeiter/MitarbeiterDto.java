@@ -240,12 +240,12 @@ public class MitarbeiterDto {
     }
 
     public static void main(String[] args) {
-        List<Mitarbeiter> result = new MitarbeiterDto(new IK("987654321")).all();
+        List<Mitarbeiter> result = new MitarbeiterDto(new IK("123456789")).all();
         Mitarbeiter e = new Mitarbeiter();
         e.nachname = "insertme";
         result.add(e);
         result.add(e);
-        new MitarbeiterDto(new IK("987654321")).save(result);
+        new MitarbeiterDto(new IK("123456789")).save(result);
     }
 
 }
