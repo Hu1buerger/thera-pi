@@ -1,73 +1,17 @@
-# CVS default ignores begin
-*.iml
-/out
-tags
-TAGS
-.make.state
-.nse_depinfo
-*~
-#*
-.#*
-,*
-_$*
-*$
-*.old
-*.bak
-*.BAK
-*.orig
-*.rej
-.del-*
-*.a
-*.olb
-*.o
-*.obj
-*.so
-*.exe
-*.Z
-*.elc
-*.ln
-# CVS default ignores end
-
-# ignores from old projectdir begin
-# erzeugte  binaries nicht versionieren ...
+#
 bin
 bin-tests
-*.jar
-#eclipse export build.xml nicht synchronisieren
-build.xml
-
-# ... aber die benutzten Libs, wenn sich da was ändert
-!/Libraries/
-!/Libraries/lib/
-!/Libraries/lib/**
-
-*.old
-*.log
-*.org
-
-#*.ico
-#*.jpg
-#*.jpeg
-#*.png
-#*.gif
-
-#510841109
 dist
 dist-tests
-stash
+target
 
+build.xml
+!Build/build.xml
 
-# ignores from old projectdir end
-/.metadata/
-
-.byke
-.recommenders
-.pmd
-.eclipse-pmd
-org.moreunit.prefs
-*report.txt
-*.mgp
-*.mgi
+sig.jar
 
 *sonarlint*prefs
-*.patch
+*.pmd
+*.orig
+*.log
+
