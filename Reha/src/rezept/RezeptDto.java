@@ -18,17 +18,22 @@ import sql.DatenquellenFactory;
 public class RezeptDto {
     private IK ik;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDto.class);
-    private static final String SelectAllSql = "SELECT * FROM verordn;";
+    private static final String SelectAllSql = "select * from verordn union select * from lza order by rez_nr;";
     public RezeptDto(IK ik) {
         this.ik = ik;
     }
 
     List<Rezept> all() {
+        String sql = SelectAllSql;
+        return retrieveList(sql);
+    }
+
+    private List<Rezept> retrieveList(String sql) {
         List<Rezept> rezeptLste = new LinkedList<>();
         try (Connection con = new DatenquellenFactory(ik.digitString())
                                                        .createConnection()) {
             ResultSet rs = con.createStatement()
-                              .executeQuery(SelectAllSql);
+                              .executeQuery(sql);
             while (rs.next()) {
                 rezeptLste.add(ofResultset(rs));
             }
@@ -41,7 +46,14 @@ public class RezeptDto {
     }
 
     public Optional<Rezept> byRezeptNr(String rezeptNummer) {
-        String sql = "SELECT * FROM verordn WHERE REZ_NR LIKE '" + rezeptNummer + "';";
+        String sql = "SELECT * FROM verordn WHERE REZ_NR LIKE '" + rezeptNummer + "'"
+                + "UNION SELECT * FROM lza WHERE REZ_NR LIKE '" + rezeptNummer + "';";
+        Rezept rezept = retrieveFirst(sql);
+
+        return Optional.ofNullable(rezept);
+    }
+
+    private Rezept retrieveFirst(String sql) {
         Rezept rezept = null;
         try (Connection con = new DatenquellenFactory(ik.digitString())
                                                        .createConnection();
@@ -54,8 +66,7 @@ public class RezeptDto {
         } catch (SQLException e) {
             logger.error("could not retrieve Rezept from Database", e);
         }
-
-        return Optional.ofNullable(rezept);
+        return rezept;
     }
 
     private Rezept ofResultset(ResultSet rs) throws SQLException {
