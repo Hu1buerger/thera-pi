@@ -1,19 +1,23 @@
 package CommonTools;
 
-import static org.junit.Assert.*;
-
-import java.nio.file.Paths;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
 public class INIToolTest {
 
-
     @Test
-    public void pathSplitsIntoDirAndFile() throws Exception {
-        String pfad = "C:\\RehaVerwaltung\\ini\\987654321\\whatever.ini";
-        assertEquals("whatever.ini", Paths.get(pfad).getFileName().toString());
-        assertEquals("C:\\RehaVerwaltung\\ini\\987654321", Paths.get(pfad).getParent().toString());
+    public void filesInIncontroleIniAreMeantForDatabase() throws Exception {
+
+        String pfad = "./tests/resources/";
+        INITool.init(pfad);
+
+        assertEquals(2, INITool.anzahlInisInDB());
+        assertTrue(INITool.inisInDb.contains("color.ini"));
+        assertTrue(INITool.inisInDb.contains("james.ini"));
+        assertFalse(INITool.inisInDb.contains("michnicht.ini"));
 
     }
 

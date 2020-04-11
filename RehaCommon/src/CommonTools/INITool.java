@@ -2,13 +2,13 @@ package CommonTools;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.ini4j.Ini;
 
 public class INITool {
-    static Set<String> inisInDb = new HashSet<>();
+    static List<String> inisInDb = new LinkedList<>();
 
     public static int anzahlInisInDB() {
         return inisInDb.size();
@@ -24,6 +24,7 @@ public class INITool {
             inisInDb.addAll(inicontrol.get("INIinDB")
                                       .values());
             inisInDb.remove(String.valueOf(anzahl));
+             inisInDb.subList(anzahl, inisInDb.size()).clear();;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
