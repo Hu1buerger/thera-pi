@@ -8,7 +8,7 @@ import java.text.NumberFormat;
 
 public class Money implements Comparable<Money>{
    private BigDecimal value = new BigDecimal(".00");
-    private static final NumberFormat df= twoDigitsRoundingDown();
+    private static final NumberFormat df= twoDecimalsRoundingDown();
 
     public Money() {
     }
@@ -21,12 +21,12 @@ public class Money implements Comparable<Money>{
         this.value= new BigDecimal(df.format(value));
     }
 
-    private static NumberFormat twoDigitsRoundingDown() {
+    private static NumberFormat twoDecimalsRoundingDown() {
 
         DecimalFormatSymbols dezimalPunkt = DecimalFormatSymbols.getInstance();
         dezimalPunkt.setDecimalSeparator('.');
 
-        NumberFormat df = new DecimalFormat("###0.###",dezimalPunkt);
+        NumberFormat df = new DecimalFormat("###0.##",dezimalPunkt);
         df.setMinimumFractionDigits(2);
         df.setMaximumFractionDigits(2);
 
