@@ -79,6 +79,7 @@ import abrechnung.AbrechnungPrivat;
 import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
+import commonData.Rezept;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -2660,8 +2661,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             bereitsbezahlt = true;
         }
-        // Lemmi Doku: Hier werden die Variablen für die Vorlage initialisiert bzw.
-        // zurückgesetzt
+        resetHmAdrRData();
+        RezTools.testeRezGebArt(false, false, Reha.instance.patpanel.vecaktrez.get(1),
+                Reha.instance.patpanel.vecaktrez.get(34));
+        new RezeptGebuehren(this, bereitsbezahlt, false, pt);
+    }
+
+    private void resetHmAdrRData() {
         SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
         SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
@@ -2672,9 +2678,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
         SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
-        RezTools.testeRezGebArt(false, false, Reha.instance.patpanel.vecaktrez.get(1),
-                Reha.instance.patpanel.vecaktrez.get(34));
-        new RezeptGebuehren(this, bereitsbezahlt, false, pt);
     }
 
     public static void setZuzahlImageActRow(ZZStat key, String reznr) {
@@ -2706,16 +2709,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     private void doBarcode() {
-        SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbgesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rwegpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
+        resetHmAdrRData();
         RezTools.testeRezGebArt(true, false, Reha.instance.patpanel.vecaktrez.get(1),
                 Reha.instance.patpanel.vecaktrez.get(34));
         SystemConfig.hmAdrRDaten.put("<Bcik>", Reha.getAktIK());
@@ -3047,8 +3041,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private void doRezeptgebuehrRechnung(Point location) {
         boolean buchen = true;
         DecimalFormat dfx = new DecimalFormat("0.00");
-
-        String sRezNr = Reha.instance.patpanel.vecaktrez.get(1);
+        Rezept currVO = new Rezept();
+        currVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
+        String sRezNr = currVO.getRezNb();
         if (ZuzahlTools.existsRGR(sRezNr)) {
             int anfrage = JOptionPane.showConfirmDialog(null,
                     "<html>" + ZuzahlTools.rgrOK(sRezNr) + "<br><br>" + "Wollen Sie eine Kopie erstellen?</html>",
@@ -3060,8 +3055,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             // - Ist keine Kopie!)
         } else {
             // vvv Prüfungen aus der Bar-Quittung auch hier !
-            if (Reha.instance.patpanel.vecaktrez.get(39)
-                                                .equals("0")) {
+            if (currVO.getZzStat().equals(ZZStat.ZUZAHLFREI)) {
                 JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
                 return;
             }
@@ -3086,53 +3080,22 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         String behandl = "";
         String strZuzahlung = "0.00";
 
-        // Lemmi: Nutzung der Routine aus der RG-Barzahlung, um "geprüft" einige
-        // Varibalen vorzubelegen
-        // Lemmi Doku: Hier werden die Variablen für die Vorlage initialisiert bzw.
-        // zurückgesetzt
-        SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rhbgesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegpos>", "----");
-        SystemConfig.hmAdrRDaten.put("<Rwegpreis>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwegproz>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rweggesamt>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rendbetrag>", "0,00");
-        SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
-        RezTools.testeRezGebArt(false, false, sRezNr, Reha.instance.patpanel.vecaktrez.get(34));
+        resetHmAdrRData();
+        String termine = currVO.getTermine();
+        RezTools.testeRezGebArt(false, false, sRezNr, termine);
 
         // String mit den Anzahlen und HM-Kürzeln erzeugen
-        for (i = 0; i < 4; i++) {
-            if ((Reha.instance.patpanel.vecaktrez.get(65 + i) != null) && Reha.instance.patpanel.vecaktrez.get(65 + i)
-                                                                                                          .length() > 0) {
-                behandl += ((behandl.length() > 0) ? ", " : "") + Reha.instance.patpanel.vecaktrez.get(3 + i) + " * "
-                        + Reha.instance.patpanel.vecaktrez.get(65 + i);
+        for (i = 1; i < 5; i++) {
+            String hmKurz = currVO.getHMkurz(i);
+            String aktAnzBehandlg = currVO.getAnzBehS(i);
+            if ((hmKurz != null) && hmKurz.length() > 0) {
+                behandl += ((behandl.length() > 0) ? ", " : "") + aktAnzBehandlg + " * " + hmKurz;
             }
         }
 
-        // Zuzahlung zusammenziehen
-        Double dZuzahl = 0.0;
-        for (i = 0; i < 4; i++) {
-            if (Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rproz" + (i + 1) + ">")
-                                                           .replaceAll(",", ".")) > 0.00) {
-                dZuzahl += Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rgesamt" + (i + 1) + ">")
-                                                                      .replaceAll(",", "."));
-
-            }
-        }
-        dZuzahl += Double.parseDouble(SystemConfig.hmAdrRDaten.get("<Rpauschale>")
-                                                              .replaceAll(",", ".")); // 10 Euro dazu
-
-        strZuzahlung = Reha.instance.patpanel.vecaktrez.get(13);
-        strZuzahlung = dfx.format(dZuzahl);
         strZuzahlung = SystemConfig.hmAdrRDaten.get("<Rendbetrag>");
 
-        // anr=17,titel=18,nname=0,vname=1,strasse=3,plz=4,ort=5,abwadress=19
-        // "anrede,titel,nachname,vorname,strasse,plz,ort"
-
-        String cmd = "select abwadress,id from pat5 where pat_intern='" + Reha.instance.patpanel.vecaktrez.get(0)
-                + "' LIMIT 1";
+        String cmd = "select abwadress,id from pat5 where pat_intern='" + currVO.getPatIntern() + "' LIMIT 1";
         Vector<Vector<String>> adrvec = SqlInfo.holeFelder(cmd);
         String[] adressParams = null;
 
@@ -3150,7 +3113,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         hmRezgeb.put("<rgbehandlung>", behandl);
 
-        hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)));
+        hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(currVO.getRezeptDatum()));
 
         hmRezgeb.put("<rgbetrag>", strZuzahlung);
         hmRezgeb.put("<rgpauschale>", SystemConfig.hmAbrechnung.get("rgrpauschale"));
@@ -3161,7 +3124,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         hmRezgeb.put("<rgort>", adressParams[3]);
         hmRezgeb.put("<rgbanrede>", adressParams[4]);
 
-        hmRezgeb.put("<rgpatintern>", Reha.instance.patpanel.vecaktrez.get(0));
+        hmRezgeb.put("<rgpatintern>", currVO.getPatIntern());
 
         hmRezgeb.put("<rgpatnname>", SystemConfig.hmAdrPDaten.get("<Pnname>"));
         hmRezgeb.put("<rgpatvname>", SystemConfig.hmAdrPDaten.get("<Pvname>"));
