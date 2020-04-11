@@ -28,13 +28,15 @@ ci_build:
   script:
     - cd Build
     - ant clean
-    - ant
+    - ant build-all
   artifacts:
     untracked: true
-    expire_in: 2 weeks
+    expire_in: 1 week
 
 ci_test:
   stage: test
+  dependencies:
+    - ci_build
   script:
     - cd Build
     - ant JUnits
