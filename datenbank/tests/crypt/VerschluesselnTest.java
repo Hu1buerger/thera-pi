@@ -19,6 +19,10 @@ public class VerschluesselnTest {
         assertEquals("OK1VGAz2LN15juNtHxkcbg==", ver.encrypt("Bastie"));
         assertEquals("OK1VGAz2LN0M6y0ozt7lVkY4qMZrBXX/gztR+1m/CtP4NW8aP2AMjHIwEaci2J3AuHqzdnsrKwq9" + "g2j9dbigyQ==",
                 ver.encrypt("Bastie_hateinengroßenH\u00fctehund"));
+        assertEquals("E2fyCxAPQkqXjpVUetngA3H8rkblqjY8", ver.encrypt("therapi"));
+        assertEquals("E2fyCxAPQkqXjpVUetngA6TjLd3z7xZq", ver.encrypt("therapie"));
+
+
 
     }
 
