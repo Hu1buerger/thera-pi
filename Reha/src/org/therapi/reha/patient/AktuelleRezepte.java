@@ -3051,8 +3051,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             if (anfrage != JOptionPane.YES_OPTION) {
                 return;
             }
-            buchen = false; // hier in RGR-Kopie verzweigen! (Wozu RGR erstellen u. evtl. die Preise ändern?
-                            // - Ist keine Kopie!)
+            RgrKopie kopie = new RgrKopie(sRezNr);
+            return;
         } else {
             // vvv Prüfungen aus der Bar-Quittung auch hier !
             if (currVO.getZzStat().equals(ZZStat.ZUZAHLFREI)) {
