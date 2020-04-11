@@ -44,7 +44,7 @@ public class MitarbeiterDto {
             return mitarbeiterListe;
         } catch (SQLException e) {
             logger.error("could not retrieve Mitarbeiter from Database", e);
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
 
     }
@@ -77,8 +77,7 @@ public class MitarbeiterDto {
         ma.telefon1 = rs.getString("TELEFON1");
         ma.telfon2 = rs.getString("TELFON2");
         ma.geboren = rs.getDate("GEBOREN") == null ? null
-                : rs.getDate("GEBOREN")
-                    .toLocalDate();
+                   : rs.getDate("GEBOREN") .toLocalDate();
         ma.matchcode = rs.getString("matchcode");
         ma.ztext = rs.getString("ZTEXT");
         ma.kal_teil = rs.getInt("KAL_TEIL");
