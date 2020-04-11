@@ -2,38 +2,41 @@ package rezept;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
 public class Behandlung implements Comparable<Behandlung> {
-
     LocalDate datum;
     String kollege;
-    String keineahnung;
-    String heilmittel;
-    private DateTimeFormatter format =DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    String unterbrechungsbegründung;
+    /** Mehrere mit kommata getrennt. */
+    List<String> heilmittel;
+    private DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    Behandlung(String fromDB){
+    Behandlung(String fromDB) {
         String[] parts = fromDB.split("@");
-        datum = LocalDate.parse(parts[0],format);
-        kollege= parts[1];
-        keineahnung = parts[2];
-        heilmittel = parts[3];
+        datum = LocalDate.parse(parts[0], format);
+        kollege = parts[1];
+        unterbrechungsbegründung = parts[2];
+        heilmittel = Arrays.asList(parts[3].replace(" ", "")
+                                           .split(","));
     }
 
     public Behandlung(LocalDate of, String kollege, String string2, String heilmittel) {
-        if(of == null ) {
+        if (of == null) {
             throw new IllegalArgumentException("Date musst not be null");
         }
         datum = of;
         this.kollege = kollege;
-        keineahnung = string2;
-        this.heilmittel = heilmittel;
-
+        unterbrechungsbegründung = string2;
+        this.heilmittel = Arrays.asList(heilmittel.replace(" ", "")
+                                                  .split(","));
     }
 
     @Override
     public String toString() {
-        return "Termin [datum=" + datum + ", kollege=" + kollege + ", keineahnung=" + keineahnung + ", heilmittel="
-                + heilmittel + "]";
+        return "Termin [datum=" + datum + ", kollege=" + kollege + ", unterbrechungsbegründung="
+                + unterbrechungsbegründung + ", heilmittel=" + heilmittel + "]";
     }
 
     @Override
@@ -42,45 +45,56 @@ public class Behandlung implements Comparable<Behandlung> {
         int result = 1;
         result = prime * result + ((datum == null) ? 0 : datum.hashCode());
         result = prime * result + ((heilmittel == null) ? 0 : heilmittel.hashCode());
-        result = prime * result + ((keineahnung == null) ? 0 : keineahnung.hashCode());
-        result = prime * result + ((kollege == null) ? 0 : kollege.hashCode());
-        return result;
+        result = prime * result + ((unterbrechungsbegründung == null) ? 0 : unterbrechungsbegründung.hashCode());
+        return prime * result + ((kollege == null) ? 0 : kollege.hashCode());
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
-        if (getClass() != obj.getClass())
-            return false;
+        }
         Behandlung other = (Behandlung) obj;
         if (datum == null) {
-            if (other.datum != null)
+            if (other.datum != null) {
                 return false;
-        } else if (!datum.equals(other.datum))
+            }
+        } else if (!datum.equals(other.datum)) {
             return false;
+        }
         if (heilmittel == null) {
-            if (other.heilmittel != null)
+            if (other.heilmittel != null) {
                 return false;
-        } else if (!heilmittel.equals(other.heilmittel))
+            }
+        } else if (!heilmittel.equals(other.heilmittel)) {
             return false;
-        if (keineahnung == null) {
-            if (other.keineahnung != null)
+        }
+        if (unterbrechungsbegründung == null) {
+            if (other.unterbrechungsbegründung != null) {
                 return false;
-        } else if (!keineahnung.equals(other.keineahnung))
+            }
+        } else if (!unterbrechungsbegründung.equals(other.unterbrechungsbegründung)) {
             return false;
+        }
         if (kollege == null) {
-            if (other.kollege != null)
+            if (other.kollege != null) {
                 return false;
-        } else if (!kollege.equals(other.kollege))
+            }
+        } else if (!kollege.equals(other.kollege)) {
             return false;
+        }
         return true;
     }
 
     @Override
     public int compareTo(Behandlung o) {
-       return datum.compareTo(o.datum);
+        return datum.compareTo(o.datum);
+    }
+
+    public List<String> erbrachteHeilmittel() {
+        return heilmittel;
     }
 }
