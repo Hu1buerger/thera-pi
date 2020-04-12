@@ -5,6 +5,7 @@ variables:
   MYSQL_DATABASE: therapi
   MYSQL_USER: therapi
   MYSQL_PASSWORD: therapie
+  THERAPIHOME: ./bin-test/resources
 
 services:
   - mariadb
@@ -30,7 +31,8 @@ ci_build:
     - ant clean
     - ant build-all
   artifacts:
-    untracked: true
+    paths:
+      - ./*/bin
     expire_in: 1 week
 
 ci_test:
