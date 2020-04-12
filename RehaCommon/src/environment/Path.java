@@ -36,6 +36,7 @@ public enum Path {
 
     Path() {
         currentOS = determineOS();
+        System.out.println("Detected OS: " + currentOS);
 
         switch (currentOS) {
         case WIN:
@@ -71,7 +72,7 @@ public enum Path {
             // developer.
             // we assume standardpath until this mess is fixed
             setProghome(C_REHA_VERWALTUNG);
-
+            System.out.println("Couldn't find \"" + path + "\" using " +  C_REHA_VERWALTUNG);
         }
         System.out.println("Programmverzeichnis = " + getProghome());
     }
