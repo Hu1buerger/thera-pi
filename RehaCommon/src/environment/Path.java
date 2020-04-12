@@ -43,6 +43,7 @@ public enum Path {
         if (envPfadZurRehaJava != null) {
             System.out.println("Got envar as \"" + envPfadZurRehaJava + "\"");
             setProghome(envPfadZurRehaJava);
+            return;
         }
         
         currentOS = determineOS();
