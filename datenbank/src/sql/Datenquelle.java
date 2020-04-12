@@ -38,6 +38,7 @@ public class Datenquelle {
      */
     Datenquelle(String digitString) {
         this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + "ini/" + digitString + "/rehajava.ini";
+        System.out.println("Arbeite mit folgender Rehajava.ini: " + this.s_pfadZurRehaIni );
         initialize();
     }
 
