@@ -20,24 +20,16 @@ public class Datenquelle {
     private static final String DATEN_BANK = "DatenBank";
     MysqlDataSource dataSource;
 
-    // @Visible for testing
-    void setRehaIni(String pfadZurRehaIni) {
-        this.s_pfadZurRehaIni = pfadZurRehaIni;
-    }
-    
-    // @Visible for testing
-    String getRehaIni() {
-        return this.s_pfadZurRehaIni;
-    }
-    
-    /**
+   /**
      * Datenquelle liest fuer den angegebenen Mandant die Datenverbindung, die in
      * rehajava.ini unter DB1 angegeben ist.
      *
      * @param digitString = die 9 Ziffern des IK des Mandanten
      */
     Datenquelle(String digitString) {
-        this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + "ini/" + digitString + "/rehajava.ini";
+        this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + File.pathSeparator 
+                + "ini" + File.pathSeparator + digitString + File.pathSeparator
+                + "rehajava.ini";
         initialize();
     }
 
