@@ -35,7 +35,19 @@ public enum Path {
     }
 
     Path() {
+        String envPfadZurRehaJava;
+
+        envPfadZurRehaJava = System.getenv("THERAPIHOME");
+
+
+        if (envPfadZurRehaJava != null) {
+            System.out.println("Got envar as \"" + envPfadZurRehaJava + "\"");
+            setProghome(envPfadZurRehaJava);
+        }
+        
         currentOS = determineOS();
+        
+        
 
         switch (currentOS) {
         case WIN:
