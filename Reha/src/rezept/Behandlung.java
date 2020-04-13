@@ -8,7 +8,7 @@ import java.util.List;
 public class Behandlung implements Comparable<Behandlung> {
     LocalDate datum;
     String kollege;
-    String unterbrechungsbegründung;
+    String unterbrechungsbegruendung;
     /** Mehrere mit kommata getrennt. */
     List<String> heilmittel;
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -17,7 +17,7 @@ public class Behandlung implements Comparable<Behandlung> {
         String[] parts = fromDB.split("@");
         datum = LocalDate.parse(parts[0], format);
         kollege = parts[1];
-        unterbrechungsbegründung = parts[2];
+        unterbrechungsbegruendung = parts[2];
         heilmittel = Arrays.asList(parts[3].replace(" ", "")
                                            .split(","));
     }
@@ -28,7 +28,7 @@ public class Behandlung implements Comparable<Behandlung> {
         }
         datum = of;
         this.kollege = kollege;
-        unterbrechungsbegründung = string2;
+        unterbrechungsbegruendung = string2;
         this.heilmittel = Arrays.asList(heilmittel.replace(" ", "")
                                                   .split(","));
     }
@@ -36,7 +36,7 @@ public class Behandlung implements Comparable<Behandlung> {
     @Override
     public String toString() {
         return "Termin [datum=" + datum + ", kollege=" + kollege + ", unterbrechungsbegründung="
-                + unterbrechungsbegründung + ", heilmittel=" + heilmittel + "]";
+                + unterbrechungsbegruendung + ", heilmittel=" + heilmittel + "]";
     }
 
     @Override
@@ -45,7 +45,7 @@ public class Behandlung implements Comparable<Behandlung> {
         int result = 1;
         result = prime * result + ((datum == null) ? 0 : datum.hashCode());
         result = prime * result + ((heilmittel == null) ? 0 : heilmittel.hashCode());
-        result = prime * result + ((unterbrechungsbegründung == null) ? 0 : unterbrechungsbegründung.hashCode());
+        result = prime * result + ((unterbrechungsbegruendung == null) ? 0 : unterbrechungsbegruendung.hashCode());
         return prime * result + ((kollege == null) ? 0 : kollege.hashCode());
     }
 
@@ -72,11 +72,11 @@ public class Behandlung implements Comparable<Behandlung> {
         } else if (!heilmittel.equals(other.heilmittel)) {
             return false;
         }
-        if (unterbrechungsbegründung == null) {
-            if (other.unterbrechungsbegründung != null) {
+        if (unterbrechungsbegruendung == null) {
+            if (other.unterbrechungsbegruendung != null) {
                 return false;
             }
-        } else if (!unterbrechungsbegründung.equals(other.unterbrechungsbegründung)) {
+        } else if (!unterbrechungsbegruendung.equals(other.unterbrechungsbegruendung)) {
             return false;
         }
         if (kollege == null) {

@@ -2,18 +2,27 @@ package environment;
 
 import java.io.File;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * Tries to guess the programs execution home based on the OS it is running on
- * and defaults to c:/RehaVerwaltung/
  *
- * This guessing is at the moment (sep.2018) scattered through the code. This
- * class is probably temporary until the program does finding its files how it
- * should
+ * Tries to guess the programs execution home
+ * <li>First checks for environment variable THERAPIHOME
+ * <li>second uses user dir if File("ini").exists
+ * <li>third based on the OS it is running on<p> defaults to c:/RehaVerwaltung/
+ * <p>
+ * This class is probably temporary until the program does finding its files as
+ * it should
  *
  */
 public enum Path {
     Instance;
 
+    private final Logger logger = LoggerFactory.getLogger(Path.class);
+    static final String THERAPIHOME = "THERAPIHOME";
     private static final String C_REHA_VERWALTUNG = "C:/RehaVerwaltung/";
     String proghome = "";
     OS currentOS = OS.WIN;
@@ -35,8 +44,31 @@ public enum Path {
     }
 
     Path() {
+
         currentOS = determineOS();
 
+        Optional<String> therapihome = Optional.ofNullable(System.getenv(THERAPIHOME));
+        if (therapihome.isPresent()) {
+            setProghome(therapihome.get());
+
+        } else if (iniExistsInUserDir()) {
+            setProghome(System.getProperty("user.dir"));
+
+        } else {
+            theoldway();
+        }
+        logger.info("Programmverzeichnis = " + getProghome());
+    }
+
+    private boolean iniExistsInUserDir() {
+        String userdir = System.getProperty("user.dir");
+        // if userenvironment has correct structure take that
+        File istDieInida = new File(userdir + File.separator + "ini"); // or user dir?
+        boolean exists = istDieInida.exists();
+        return exists;
+    }
+
+    private void theoldway() {
         switch (currentOS) {
         case WIN:
             String prog = java.lang.System.getProperty("user.dir");
@@ -49,8 +81,7 @@ public enum Path {
         case MAC:
             setProghome("/opt/RehaVerwaltung/");
             /**
-             * Sollte erstmal tun, bis eine echte 'OS-X' app oder installer
-             * gebaut wird.
+             * Sollte erstmal tun, bis eine echte 'OS-X' app oder installer gebaut wird.
              **/
             break;
         case UNKNOWN:
@@ -63,17 +94,16 @@ public enum Path {
         }
         if (!new File(getProghome()).exists()) {
             String prog = java.lang.System.getProperty("user.dir");
-            String path = prog.replace("Reha", "dist") +"\\";
+            String path = prog.replace("Reha", "dist") + "\\";
             if (new File(path).exists()) {
                 setProghome(path);
             } else
-            // program wasn't started from within its installation directory, probably
-            // developer.
-            // we assume standardpath until this mess is fixed
-            setProghome(C_REHA_VERWALTUNG);
+                // program wasn't started from within its installation directory, probably
+                // developer.
+                // we assume standardpath until this mess is fixed
+                setProghome(C_REHA_VERWALTUNG);
 
         }
-        System.out.println("Programmverzeichnis = " + getProghome());
     }
 
     private OS determineOS() {
