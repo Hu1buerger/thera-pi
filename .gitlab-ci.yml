@@ -55,4 +55,4 @@ ci_test:
       - dist-tests/TEST-*.txt
       - dist-tests/*/TEST-*.txt
     reports:
-      junit: dist-tests/TEST-*.xml
+      junit: dist-tests/**TEST-*.xml
