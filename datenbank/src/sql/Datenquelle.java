@@ -27,9 +27,10 @@ public class Datenquelle {
      * @param digitString = die 9 Ziffern des IK des Mandanten
      */
     Datenquelle(String digitString) {
-        this.s_pfadZurRehaIni = environment.Path.Instance.getProghome() + File.pathSeparator 
-                + "ini" + File.pathSeparator + digitString + File.pathSeparator
-                + "rehajava.ini";
+        this.s_pfadZurRehaIni = Path.Instance.getProghome() + File.separator 
+                                                    + "ini" + File.separator 
+                                                    + digitString + File.separator
+                                                    + "rehajava.ini";
         initialize();
     }
 
