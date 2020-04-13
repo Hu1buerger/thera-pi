@@ -8,10 +8,10 @@ import org.junit.Test;
 
 import mandant.IK;
 
-public class DatenquelleTest {
+public class testDatenbankSql {
 
     @Test
-    public void constructor() throws SQLException {
+    public void testDatenQuelleConstructor() throws SQLException {
 
         IK ik = new IK("123456789");
         Datenquelle dq = new Datenquelle(ik.digitString());

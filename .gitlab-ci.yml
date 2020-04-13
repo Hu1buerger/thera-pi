@@ -5,9 +5,9 @@ variables:
   MYSQL_DATABASE: therapi
   MYSQL_USER: therapi
   MYSQL_PASSWORD: therapie
+  THERAPIHOME: ./bin-tests/resources
 
-services:
-  - mariadb
+
 
 before_script:
   - apt-get update
@@ -18,6 +18,7 @@ before_script:
   - apt-get -y install ant
   - ls -al /etc/alternatives/java ||true
   - update-alternatives --query java || true
+  
 
 stages:
   - build
@@ -30,14 +31,19 @@ ci_build:
     - ant clean
     - ant build-all
   artifacts:
-    untracked: true
+    paths:
+      - ./*/bin
     expire_in: 1 week
 
 ci_test:
   stage: test
   dependencies:
     - ci_build
+  services:
+    - mariadb
   script:
+    - apt-get -y install mariadb-client
+    - cat Files/sql/AlleTabellen.sql | mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi
     - cd Build
     - ant JUnits
   artifacts:
