@@ -42,7 +42,7 @@ public enum Path {
 
         if (envPfadZurRehaJava != null) {
             System.out.println("Got envar as \"" + envPfadZurRehaJava + "\"");
-            setProghome(envPfadZurRehaJava);
+            setProghome(envPfadZurRehaJava + File.pathSeparator);
             return;
         }
         
