@@ -24,6 +24,7 @@
 	    </javac>
 	</target>
 	<target depends="build-tests" name="JUnits">
+		<mkdir dir="${junit.batchtest.todir}"/>
 		<junit fork="true" maxmemory="128m" includeAntRuntime="true">
 		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
