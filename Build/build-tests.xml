@@ -25,7 +25,7 @@
 	</target>
 	<target depends="build-tests" name="JUnits">
 		<mkdir dir="${junit.batchtest.todir}"/>
-		<junit dir="${projektname}/bin-tests" fork="true" maxmemory="128m" includeAntRuntime="true">
+		<junit dir="${basedir}" fork="true" maxmemory="128m" includeAntRuntime="true">
 		    <classpath refid="${projektname}.classpath"/>
 		    <classpath refid="tests.classpath"/>
 		    <formatter type="plain"/>
