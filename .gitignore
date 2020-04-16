@@ -16,3 +16,5 @@ sig.jar
 *.log
 *.rej
 *.orig
+
+.gitlab-ci.yml

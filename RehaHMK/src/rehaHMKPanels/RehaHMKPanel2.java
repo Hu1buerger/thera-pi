@@ -7,7 +7,7 @@ import java.awt.Font;
 import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.ByteArrayOutputStream;
+//import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -38,10 +38,18 @@ import org.jdesktop.swingx.painter.Painter;
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
-import com.sun.image.codec.jpeg.ImageFormatException;
-import com.sun.image.codec.jpeg.JPEGCodec;
-import com.sun.image.codec.jpeg.JPEGEncodeParam;
-import com.sun.image.codec.jpeg.JPEGImageEncoder;
+//import com.sun.image.codec.jpeg.ImageFormatException;
+//import com.sun.image.codec.jpeg.JPEGCodec;
+//import com.sun.image.codec.jpeg.JPEGEncodeParam;
+//import com.sun.image.codec.jpeg.JPEGImageEncoder;
+//import java.awt.image.*;
+//import java.io.*;
+import javax.imageio.*;
+import javax.imageio.metadata.IIOMetadata;
+import javax.imageio.plugins.jpeg.JPEGImageWriteParam;
+import javax.imageio.stream.ImageOutputStream;
+
+import com.sun.imageio.plugins.jpeg.JPEGImageWriter;
 import com.sun.star.beans.XPropertySet;
 import com.sun.star.container.XNameContainer;
 import com.sun.star.lang.XMultiServiceFactory;
@@ -979,24 +987,13 @@ public class RehaHMKPanel2 extends JXPanel implements ScannerListener {
                 }).execute();
             } else if (ScannerIOMetadata.ACQUIRED.equals(type)) {
                 this.scanner.removeListener(this);
-                File file = new File(String.valueOf(progHome) + "temp/" + RehaHMK.aktIK + "/rezkorrekt.jpg");
+                // File file = new File(String.valueOf(progHome) + "temp/" + RehaHMK.aktIK + "/rezkorrekt.jpg");
                 try {
-                    FileOutputStream fout = new FileOutputStream(file);
-                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
-                    JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(metadata.getImage());
-                    param.setQuality(1.0F, false);
-                    encoder.setJPEGEncodeParam(param);
-                    encoder.encode(metadata.getImage());
-                    os.close();
-                    fout.write(os.toByteArray());
-                    fout.flush();
-                    fout.close();
-                    Thread.sleep(150L);
+                    saveScanToTempJpegFile(metadata);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
-                } catch (ImageFormatException e) {
-                    e.printStackTrace();
+//                } catch (ImageFormatException e) {
+//                    e.printStackTrace();
                 } catch (IOException e) {
                     e.printStackTrace();
                 } catch (InterruptedException e) {
@@ -1028,6 +1025,44 @@ public class RehaHMKPanel2 extends JXPanel implements ScannerListener {
                 this.htmlpane.setText("");
                 RehaHMK.hmAdrADaten = new HashMap<String, String>();
             }
+    }
+
+    /**
+     * @param metadata
+     * @param file
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws InterruptedException
+     */
+    private void saveScanToTempJpegFile(ScannerIOMetadata metadata)
+            throws FileNotFoundException, IOException, InterruptedException {
+        FileOutputStream fout = new FileOutputStream(new File(String.valueOf(progHome) 
+                                        + "temp/" + RehaHMK.aktIK + "/rezkorrekt.jpg"));
+        //ByteArrayOutputStream os = new ByteArrayOutputStream();
+        ImageOutputStream os =  ImageIO.createImageOutputStream(fout);
+        
+        // JPEGImageEncoder encoder = JPEGCodec.createJPEGEncoder(os);
+        JPEGImageWriter imageWriter = (JPEGImageWriter) ImageIO.getImageWritersBySuffix("jpeg").next();
+        imageWriter.setOutput(os);
+        
+        // JPEGEncodeParam param = encoder.getDefaultJPEGEncodeParam(metadata.getImage());
+        JPEGImageWriteParam param = (JPEGImageWriteParam) imageWriter.getDefaultWriteParam();
+        
+        // param.setQuality(1.0F, false);
+        // encoder.setJPEGEncodeParam(param);
+        param.setCompressionMode(JPEGImageWriteParam.MODE_EXPLICIT);
+        param.setCompressionQuality(1.0F);
+        
+        // encoder.encode(metadata.getImage());
+        IIOMetadata imageMetaData = imageWriter.getDefaultImageMetadata(new ImageTypeSpecifier(metadata.getImage()), null);
+        imageWriter.write(imageMetaData, new IIOImage(metadata.getImage(), null, null), null);
+        
+        os.close();
+        // fout.write(os.toByteArray());
+        fout.flush();
+        fout.close();
+        imageWriter.dispose();
+        Thread.sleep(150L);
     }
 
     private void embedGraphic(GraphicInfo grProps, XMultiServiceFactory xMSF, XTextCursor xCursor) {

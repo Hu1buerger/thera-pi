@@ -1,0 +1,58 @@
+image: openjdk:8
+
+variables:
+  MYSQL_ROOT_PASSWORD: root
+  MYSQL_DATABASE: therapi
+  MYSQL_USER: therapi
+  MYSQL_PASSWORD: therapie
+  THERAPIHOME: ../Files/tests/resources
+
+
+
+before_script:
+  - apt-get update
+  - update-alternatives --query java || true
+  - ls -al /usr/bin/java || true
+  - which java || true
+  - ls -al /etc/alternatives/java || true
+  - apt-get -y install ant
+  - ls -al /etc/alternatives/java ||true
+  - update-alternatives --query java || true
+  
+
+stages:
+  - build
+  - test
+
+ci_build:
+  stage: build
+  script:
+    - cd Build
+    - ant clean
+    - ant build-all
+  artifacts:
+    paths:
+      - ./*/bin
+    expire_in: 1 week
+
+ci_test:
+  stage: test
+  dependencies:
+    - ci_build
+  services:
+    - mariadb
+  script:
+    - apt-get -y install mariadb-client
+    - cat Files/sql/AlleTabellen.sql | mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi
+    - cd Build
+    - ant JUnits
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    paths:
+      - dist-tests/TEST-*.xml
+      - dist-tests/*/TEST-*.xml
+      - dist-tests/TEST-*.txt
+      - dist-tests/*/TEST-*.txt
+    reports:
+      junit: dist-tests/*/TEST-*.xml

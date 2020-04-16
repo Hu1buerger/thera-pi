@@ -1,22 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-		<classpathentry kind="src" output="bin-tests" path="tests">
-		<attributes>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-all-1.3.jar">
-		<attributes>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-junit-2.0.0.0.jar">
-		<attributes>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/junit-4.12.jar">
+	<classpathentry kind="src" output="bin-tests" path="tests">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
@@ -45,5 +30,15 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/RehaCommon"/>
 	<classpathentry kind="src" path="/datenbank"/>
 	<classpathentry kind="lib" path="/Libraries/lib/logging/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/junit-4.12.jar">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/hamcrest-all-1.3.jar">
+		<attributes>
+			<attribute name="test" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

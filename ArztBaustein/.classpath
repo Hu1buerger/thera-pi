@@ -28,17 +28,12 @@
 	<classpathentry kind="lib" path="/Libraries/lib/logging/logback-core-1.2.3.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/logging/sysout-over-slf4j-1.0.2.jar"/>
 	<classpathentry kind="src" path="/datenbank"/>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-all-1.3.jar">
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/junit-4.12.jar">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-junit-2.0.0.0.jar">
-		<attributes>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/junit-4.12.jar">
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/hamcrest-all-1.3.jar">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>

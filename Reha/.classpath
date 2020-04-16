@@ -49,8 +49,18 @@
 	<classpathentry kind="src" path="/ArztBaustein"/>
 	<classpathentry kind="lib" path="/Libraries/lib/ini/ini4j-0.5.4.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/ocf/apduio.jar"/>
+        <classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-junit-2.0.0.0.jar">
+                <attributes>
+                        <attribute name="test" value="true"/>
+                </attributes>
+        </classpathentry>
+        <classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-all-1.3.jar">
+                <attributes>
+                        <attribute name="test" value="true"/>
+                </attributes>
+        </classpathentry>
 	<classpathentry kind="src" path="/ICDSuche"/>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/junit-4.12.jar">
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/junit-4.12.jar">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>
@@ -61,12 +71,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/datenbank"/>
 	<classpathentry kind="src" path="/RehaWissen"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/CalcKilometer"/>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-all-1.3.jar">
-		<attributes>
-			<attribute name="test" value="true"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/hamcrest-junit-2.0.0.0.jar">
+	<classpathentry kind="lib" path="/Libraries/tests/lib/jna_junit/hamcrest-all-1.3.jar">
 		<attributes>
 			<attribute name="test" value="true"/>
 		</attributes>

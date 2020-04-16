@@ -14,6 +14,7 @@ Patientenfenster:
 - Buildini Quellen zum Projekt hinzugefügt #341
 ###changed
 - office öffnet nur noch eine Verbindung
+- RehaHMK/src/rehaHMKPanels/RehaHMKPanel2.java no longer uses depr. sun.image.jpeg lib - this seems to have been when saving a temp. Rezept image (acqu. via scan?)
 ###fixes
 - Eclipse project calckilometer naming #337
 - logback-test.xml beim build nicht mehr in reha.jar #338

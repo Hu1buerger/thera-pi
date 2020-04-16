@@ -1,0 +1,38 @@
+<?eclipse.ant.import?>
+<project>
+	<property file="../Build/build-common.properties"/>
+	<property name="junit.batchtest.todir" value="../dist-tests/${projektname}"/>
+
+	<!-- Includes JUnit.jar and the main.classpath jars too 
+	<path id="tests.classpath">
+	     <fileset dir="${dir.tests.binary.lib}"/>
+	     <fileset dir="${dir.binary.lib}"/>
+	</path>
+	-->
+    <path id="tests.classpath">
+        <pathelement location="bin-tests"/>
+        <pathelement location="${dir.tests.binary.lib}/jna_junit/junit-4.12.jar"/>
+        <pathelement location="${dir.tests.binary.lib}/jna_junit/hamcrest-all-1.3.jar"/>
+    </path>
+	<!-- Compile tests -->
+	<target depends="build, init" name="build-tests">
+	    <echo message="Building tests"/>
+	    <javac debug="true" debuglevel="${debuglevel}" destdir="bin-tests" includeantruntime="false" source="${source}" target="${target}">
+		    <src path="tests"/>
+		    <classpath refid="${projektname}.classpath"/>
+		    <classpath refid="tests.classpath"/>
+	    </javac>
+	</target>
+	<target depends="build-tests" name="JUnits">
+		<mkdir dir="${junit.batchtest.todir}"/>
+		<junit dir="${basedir}" fork="true" maxmemory="128m" includeAntRuntime="true">
+		    <classpath refid="${projektname}.classpath"/>
+		    <classpath refid="tests.classpath"/>
+		    <formatter type="plain"/>
+		    <formatter type="xml"/>
+		    <batchtest todir="${junit.batchtest.todir}">
+			<fileset dir="${tests-classdir}"/>
+		    </batchtest>
+		</junit>
+	</target>
+</project>
