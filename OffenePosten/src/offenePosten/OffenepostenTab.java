@@ -39,6 +39,14 @@ public class OffenepostenTab extends JXPanel implements ChangeListener {
     OffenepostenEinstellungen oeinstellungpanel = null;
     RehaBillPanel rehaBillPanel = null;
 
+    // @VisibleForTesting
+    OffenepostenTab(String testIdent) {
+        if ( !testIdent.contentEquals("JUnit")) {
+            System.out.println("Attention! This method was created for Unit-testing and nothing else!");
+            return;
+        }
+        System.out.println("OPTab-init, setting nothing");
+    }
 
     public OffenepostenTab(OffenePosten offenePosten) {
         super();
