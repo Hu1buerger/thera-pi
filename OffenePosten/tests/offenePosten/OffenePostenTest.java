@@ -3,7 +3,9 @@
  */
 package offenePosten;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -35,6 +37,7 @@ public class OffenePostenTest {
         }
         sqlInfo = new SqlInfo();
         op.setProghome("./");
+        sqlInfo.setConnection(conn);
         op.sqlInfo = sqlInfo;
         opPan.eltern = opTab;
         opPan.offenePosten = op;
@@ -44,6 +47,15 @@ public class OffenePostenTest {
             e.printStackTrace();
             fail("Böser Code: ");
         }
-        
+        String sqlStatement = "drop table rliste;insert into rliste set r_offen='0.99' r_nummer='1';"
+                                                + "insert into rliste set r_offen='0.01' r_nummer=2;";
+        try {
+            ResultSet rs = conn.createStatement()
+                        .executeQuery(sqlStatement);
+        } catch (SQLException e) {
+            fail("Need running DB connection for this test");
+        }
+        opPan.ermittleGesamtOffen();
+        assertEquals("1.00", OffenepostenPanel.gesamtOffen);
     }
 }

@@ -82,7 +82,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
      * JLabel summeOffen; JLabel summeRechnung; JLabel summeGesamtOffen; JLabel
      * anzahlSaetze;
      */
-    BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
+    static BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
     DecimalFormat dcf = new DecimalFormat("###0.00");
@@ -106,7 +106,6 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
             System.out.println("Attention! This method was created for Unit-testing and nothing else!");
             return;
         }
-        System.out.println("OPPan-init, setting nothing");
     }
     
     public OffenepostenPanel(OffenepostenTab xeltern, OffenePosten offenePosten) {
@@ -421,17 +420,11 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         String sTabelle = "rliste";
         String sBedingung = "r_offen > '0.00'";
         
-        System.out.println("In OPP ermGesOffen");
         if (SqlInfo.zaehleSaetze(sTabelle, sBedingung) > 0) {
             sGesOffen = SqlInfo.holeFelder("select sum(r_offen) from " + sTabelle + "where " + sBedingung)
                                                                                            .get(0).get(0);
-            System.out.println("Have sGesOffen: " + sGesOffen);
-            // gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
-            //                                                     .get(0)));
         }
-        System.out.println("Have sGesOffen: " + sGesOffen);
         gesamtOffen = BigDecimal.valueOf(Double.parseDouble(sGesOffen));
-        System.out.println("Computed gesamtOffen: " + gesamtOffen);
         // schreibeGesamtOffen();
     }
 

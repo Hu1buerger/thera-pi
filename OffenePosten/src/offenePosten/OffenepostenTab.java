@@ -45,7 +45,6 @@ public class OffenepostenTab extends JXPanel implements ChangeListener {
             System.out.println("Attention! This method was created for Unit-testing and nothing else!");
             return;
         }
-        System.out.println("OPTab-init, setting nothing");
     }
 
     public OffenepostenTab(OffenePosten offenePosten) {

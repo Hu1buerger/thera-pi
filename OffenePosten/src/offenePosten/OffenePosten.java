@@ -78,7 +78,7 @@ public class OffenePosten implements WindowListener {
             return;
         }
         setAktIK("123456789");
-        System.out.println("OP-init, setting default mand to 123456789");
+        System.out.println("OP-init, setting test mand to 123456789");
     }
     
     private OffenePosten() {
