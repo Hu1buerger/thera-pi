@@ -97,8 +97,18 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     private JRtaCheckBox bar = null;
 
-    private OffenePosten offenePosten;
+    // @VisibleForTesting
+    OffenePosten offenePosten;
 
+    // @VisibleForTesting
+    OffenepostenPanel(String testIdent) {
+        if ( !testIdent.contentEquals("JUnit")) {
+            System.out.println("Attention! This method was created for Unit-testing and nothing else!");
+            return;
+        }
+        System.out.println("OPPan-init, setting nothing");
+    }
+    
     public OffenepostenPanel(OffenepostenTab xeltern, OffenePosten offenePosten) {
         super();
         this.eltern = xeltern;
@@ -404,10 +414,22 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         tfs[0].setText("0,00");
     }
 
-    private void ermittleGesamtOffen() {
-        Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(r_offen) from rliste where r_offen > '0.00'");
-        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
-                                                                 .get(0)));
+    // @VisisbleForTesting
+    void ermittleGesamtOffen() {
+        String sGesOffen = "0";
+        String sTabelle = "rliste";
+        String sBedingung = "r_offen > '0.00'";
+        
+        System.out.println("In OPP ermGesOffen");
+        if (SqlInfo.zaehleSaetze(sTabelle, sBedingung) > 0) {
+            sGesOffen = SqlInfo.holeFelder("select sum(r_offen) from " + sTabelle + "where " + sBedingung)
+                                                                                           .get(0).get(0);
+            System.out.println("Have sGesOffen: " + sGesOffen);
+            // gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
+            //                                                     .get(0)));
+        }
+        System.out.println("Have sGesOffen: " + sGesOffen);
+        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(sGesOffen));
         schreibeGesamtOffen();
     }
 
