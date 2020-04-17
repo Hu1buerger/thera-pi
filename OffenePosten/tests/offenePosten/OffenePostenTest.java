@@ -3,40 +3,34 @@
  */
 package offenePosten;
 
-import java.math.BigDecimal;
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Vector;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
-import com.mysql.jdbc.PreparedStatement;
-
-import sql.DatenquellenFactory;
 import CommonTools.SqlInfo;
+import sql.DatenquellenFactory;
 
 /**
  *
  */
 public class OffenePostenTest {
     
-    OffenePosten op = new OffenePosten("JUnit");
-    OffenepostenTab opTab = new OffenepostenTab("JUnit");
-    OffenepostenPanel  opPan = new OffenepostenPanel("JUnit");
-    String aktIK = "123456789";
-    public Connection conn;
-    public SqlInfo sqlInfo;
+    static OffenePosten op = new OffenePosten("JUnit");
+    static OffenepostenTab opTab = new OffenepostenTab("JUnit");
+    static OffenepostenPanel  opPan = new OffenepostenPanel("JUnit");
+    static Connection conn;
+    static SqlInfo sqlInfo;
 
-    @Test
-    public void testOPPanelermittleGesamtOffen() {
+    @BeforeClass
+    public static void initForAllTests() {
         try {
-            conn = new DatenquellenFactory(aktIK).createConnection();
+            conn = new DatenquellenFactory("123456789").createConnection();
         } catch (SQLException e) {
             fail("Need running DB connection for this test");
         }
@@ -46,6 +40,11 @@ public class OffenePostenTest {
         op.sqlInfo = sqlInfo;
         opPan.eltern = opTab;
         opPan.offenePosten = op;
+    }
+    
+    @Test
+    public void testOPPanelermittleGesamtOffen() {
+        
         try {
             opPan.ermittleGesamtOffen();
         } catch (NullPointerException e) {
@@ -53,13 +52,12 @@ public class OffenePostenTest {
             fail("Böser Code: ");
         }
         
-        
         try {
             Statement batchStmt = conn.createStatement();
             conn.setAutoCommit(false);
             batchStmt.addBatch("delete from rliste");
             batchStmt.addBatch("insert into rliste (r_nummer, r_offen) values(1, 0.99)");
-            batchStmt.addBatch("insert into rliste (r_nummer, r_offen) values(2, 0.01)");
+            batchStmt.addBatch("insert into rliste (r_nummer, r_offen) values(2, 0.02)");
             int[] rc = batchStmt.executeBatch();
             conn.commit();
             conn.setAutoCommit(true);
@@ -69,10 +67,7 @@ public class OffenePostenTest {
             e.printStackTrace();
             fail("Need running DB connection for this test");
         }
-        Vector<Vector<String>> Ergebnis = SqlInfo.holeFelder("select * from rliste");
-        System.out.println("Got Outer0: " + Ergebnis.get(0));
-        System.out.println("Got Inner0: " + Ergebnis.get(0).get(0));
         opPan.ermittleGesamtOffen();
-        assertEquals("1.00", opPan.gesamtOffen);
+        assertEquals("1.01", opPan.gesamtOffen);
     }
 }
