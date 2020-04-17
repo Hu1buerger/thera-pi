@@ -255,6 +255,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         builder.add(sumPan.getPanel(), cc.xyw(colCnt, rowCnt, 2, CellConstraints.LEFT, CellConstraints.TOP)); // 2,2
 
         ermittleGesamtOffen();
+        schreibeGesamtOffen();
 
         return builder.getPanel();
     }
@@ -430,7 +431,8 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         }
         System.out.println("Have sGesOffen: " + sGesOffen);
         gesamtOffen = BigDecimal.valueOf(Double.parseDouble(sGesOffen));
-        schreibeGesamtOffen();
+        System.out.println("Computed gesamtOffen: " + gesamtOffen);
+        // schreibeGesamtOffen();
     }
 
     private void schreibeAbfrage() {
