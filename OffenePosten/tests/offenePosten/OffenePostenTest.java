@@ -6,6 +6,7 @@ package offenePosten;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -68,6 +69,6 @@ public class OffenePostenTest {
             fail("Need running DB connection for this test");
         }
         opPan.ermittleGesamtOffen();
-        assertEquals("1.01", opPan.gesamtOffen);
+        assertEquals(BigDecimal.valueOf(Double.parseDouble("1.01")), opPan.gesamtOffen);
     }
 }
