@@ -47,8 +47,8 @@ public class OffenePostenTest {
             e.printStackTrace();
             fail("Böser Code: ");
         }
-        String sqlStatement = "drop table rliste;insert into rliste set r_offen='0.99' r_nummer='1';"
-                                                + "insert into rliste set r_offen='0.01' r_nummer=2;";
+        String sqlStatement = "delete from rliste;insert into rliste set r_offen='0.99', r_nummer='1';"
+                                                + "insert into rliste set r_offen='0.01', r_nummer='2';";
         try {
             if (! conn.createStatement().execute(sqlStatement)) {
                 fail("Cannot insert data for test testOPPanelermittleGesamtOffen");
