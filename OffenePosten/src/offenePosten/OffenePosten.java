@@ -71,6 +71,20 @@ public class OffenePosten implements WindowListener {
     private static boolean erlaubeBarInKasse = false;
     private static boolean iniValuesValid = false;
 
+    // @VisibleForTesting
+    OffenePosten(String testIdent) {
+        if ( !testIdent.contentEquals("JUnit")) {
+            System.out.println("Attention! This method was created for Unit-testing and nothing else!");
+            return;
+        }
+        setAktIK("123456789");
+        System.out.println("OP-init, setting test mand to 123456789");
+    }
+    
+    private OffenePosten() {
+        
+    }
+    
     public static void main(String[] args) {
         new Logging("offeneposten");
        OffenePosten instance = new OffenePosten();
@@ -165,6 +179,26 @@ public class OffenePosten implements WindowListener {
 
     }
 
+    // @VisibleForTesting
+    String getAktIK() {
+        return aktIK;
+    }
+    
+    // @VisibleForTesting
+    void setAktIK(String ik2set ) {
+        aktIK = ik2set;
+    }
+    
+    // @VisibleForTesting
+    String getProghome() {
+        return progHome;
+    }
+    
+    // @VisibleForTesting
+    void setProghome(String ph2set) {
+        progHome = ph2set;
+    }
+    
     /********************/
 
     public JFrame getJFrame() {
