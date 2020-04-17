@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Vector;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -53,8 +54,6 @@ public class OffenePostenTest {
         }
         
         
-        String sqlStatement = ";, r_nummer='1';"
-                                                + ";";
         try {
             Statement batchStmt = conn.createStatement();
             conn.setAutoCommit(false);
@@ -70,7 +69,9 @@ public class OffenePostenTest {
             e.printStackTrace();
             fail("Need running DB connection for this test");
         }
-        
+        Vector<Vector<String>> Ergebnis = SqlInfo.holeFelder("select * from rliste");
+        System.out.println("Got Outer0: " + Ergebnis.get(0));
+        System.out.println("Got Inner0: " + Ergebnis.get(0).get(0));
         opPan.ermittleGesamtOffen();
         assertEquals("1.00", opPan.gesamtOffen);
     }
