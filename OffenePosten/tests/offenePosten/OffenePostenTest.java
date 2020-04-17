@@ -53,6 +53,9 @@ public class OffenePostenTest {
             ResultSet rs = conn.createStatement()
                         .executeQuery(sqlStatement);
         } catch (SQLException e) {
+            System.out.println("SQL-Error: " + e.getCause() + "with " + e.getLocalizedMessage());
+            System.out.println(e.toString());
+            e.printStackTrace();
             fail("Need running DB connection for this test");
         }
         opPan.ermittleGesamtOffen();
