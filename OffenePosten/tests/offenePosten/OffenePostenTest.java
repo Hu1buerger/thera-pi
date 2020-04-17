@@ -37,6 +37,7 @@ public class OffenePostenTest {
         }
         sqlInfo = new SqlInfo();
         op.setProghome("./");
+        op.setAktIK("123456789");
         sqlInfo.setConnection(conn);
         op.sqlInfo = sqlInfo;
         opPan.eltern = opTab;
