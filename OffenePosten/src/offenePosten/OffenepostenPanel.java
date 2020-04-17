@@ -97,8 +97,17 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
 
     private JRtaCheckBox bar = null;
 
-    private OffenePosten offenePosten;
+    // @VisibleForTesting
+    OffenePosten offenePosten;
 
+    // @VisibleForTesting
+    OffenepostenPanel(String testIdent) {
+        if ( !testIdent.contentEquals("JUnit")) {
+            System.out.println("Attention! This method was created for Unit-testing and nothing else!");
+            return;
+        }
+    }
+    
     public OffenepostenPanel(OffenepostenTab xeltern, OffenePosten offenePosten) {
         super();
         this.eltern = xeltern;
@@ -245,6 +254,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         builder.add(sumPan.getPanel(), cc.xyw(colCnt, rowCnt, 2, CellConstraints.LEFT, CellConstraints.TOP)); // 2,2
 
         ermittleGesamtOffen();
+        schreibeGesamtOffen();
 
         return builder.getPanel();
     }
@@ -404,11 +414,20 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
         tfs[0].setText("0,00");
     }
 
-    private void ermittleGesamtOffen() {
-        Vector<Vector<String>> offen = SqlInfo.holeFelder("select sum(r_offen) from rliste where r_offen > '0.00'");
-        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(offen.get(0)
-                                                                 .get(0)));
-        schreibeGesamtOffen();
+    // @VisisbleForTesting
+    void ermittleGesamtOffen() {
+        String sGesOffen = "0";
+        String sTabelle = "rliste";
+        String sBedingung = "r_offen > '0.00'";
+        
+        if (SqlInfo.zaehleSaetze(sTabelle, sBedingung) > 0) {
+            Vector<Vector<String>> Ergebnis = SqlInfo.holeFelder("select sum(r_offen) from "
+                                                                    + sTabelle + " where " + sBedingung);
+            System.out.println("Got inner: " + Ergebnis.get(0));
+            sGesOffen = Ergebnis.get(0).get(0);
+        }
+        gesamtOffen = BigDecimal.valueOf(Double.parseDouble(sGesOffen));
+        // schreibeGesamtOffen();
     }
 
     private void schreibeAbfrage() {
