@@ -50,9 +50,9 @@ public class OffenePostenTest {
         String sqlStatement = "delete from rliste;insert into rliste set r_offen='0.99', r_nummer='1';"
                                                 + "insert into rliste set r_offen='0.01', r_nummer='2';";
         try {
-            if (! conn.createStatement().execute(sqlStatement)) {
-                fail("Cannot insert data for test testOPPanelermittleGesamtOffen");
-            };
+            Connection batch = conn;
+            batch.createStatement().addBatch(sqlStatement);
+            int[] rc = batch.createStatement().executeBatch();
         } catch (SQLException e) {
             System.out.println("SQL-Error: " + e.getCause() + "with " + e.getLocalizedMessage());
             System.out.println(e.toString());
