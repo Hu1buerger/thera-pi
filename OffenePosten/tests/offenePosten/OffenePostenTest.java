@@ -7,11 +7,15 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import org.junit.Test;
+
+import com.mysql.jdbc.PreparedStatement;
 
 import sql.DatenquellenFactory;
 import CommonTools.SqlInfo;
@@ -47,18 +51,26 @@ public class OffenePostenTest {
             e.printStackTrace();
             fail("Böser Code: ");
         }
-        String sqlStatement = "delete from rliste;insert into rliste set r_offen='0.99', r_nummer='1';"
-                                                + "insert into rliste set r_offen='0.01', r_nummer='2';";
+        
+        
+        String sqlStatement = ";, r_nummer='1';"
+                                                + ";";
         try {
-            Connection batch = conn;
-            batch.createStatement().addBatch(sqlStatement);
-            int[] rc = batch.createStatement().executeBatch();
+            Statement batchStmt = conn.createStatement();
+            conn.setAutoCommit(false);
+            batchStmt.addBatch("delete from rliste");
+            batchStmt.addBatch("insert into rliste (r_nummer, r_offen) values(1, 0.99)");
+            batchStmt.addBatch("insert into rliste (r_nummer, r_offen) values(2, 0.01)");
+            int[] rc = batchStmt.executeBatch();
+            conn.commit();
+            conn.setAutoCommit(true);
         } catch (SQLException e) {
             System.out.println("SQL-Error: " + e.getCause() + "with " + e.getLocalizedMessage());
             System.out.println(e.toString());
             e.printStackTrace();
             fail("Need running DB connection for this test");
         }
+        
         opPan.ermittleGesamtOffen();
         assertEquals("1.00", opPan.gesamtOffen);
     }
