@@ -82,7 +82,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
      * JLabel summeOffen; JLabel summeRechnung; JLabel summeGesamtOffen; JLabel
      * anzahlSaetze;
      */
-    static BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
+    BigDecimal gesamtOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchOffen = BigDecimal.valueOf(Double.parseDouble("0.00"));
     BigDecimal suchGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
     DecimalFormat dcf = new DecimalFormat("###0.00");

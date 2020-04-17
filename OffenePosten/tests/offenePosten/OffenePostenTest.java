@@ -50,8 +50,9 @@ public class OffenePostenTest {
         String sqlStatement = "drop table rliste;insert into rliste set r_offen='0.99' r_nummer='1';"
                                                 + "insert into rliste set r_offen='0.01' r_nummer=2;";
         try {
-            ResultSet rs = conn.createStatement()
-                        .executeQuery(sqlStatement);
+            if (! conn.createStatement().execute(sqlStatement)) {
+                fail("Cannot insert data for test testOPPanelermittleGesamtOffen");
+            };
         } catch (SQLException e) {
             System.out.println("SQL-Error: " + e.getCause() + "with " + e.getLocalizedMessage());
             System.out.println(e.toString());
@@ -59,6 +60,6 @@ public class OffenePostenTest {
             fail("Need running DB connection for this test");
         }
         opPan.ermittleGesamtOffen();
-        assertEquals("1.00", OffenepostenPanel.gesamtOffen);
+        assertEquals("1.00", opPan.gesamtOffen);
     }
 }
