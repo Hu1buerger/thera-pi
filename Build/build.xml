@@ -8,7 +8,9 @@
         <property name="build.target" value="clean"/>
         <ant target="subprojects"/>
         <delete dir="${dir.dist}"/>
+	<delete dir="../dist-tests"/>
     </target>
+
     <target name="dist" depends="jars,copyfiles"/>
 
     <target name="copyfiles">
@@ -21,6 +23,17 @@
         <ant target="subprojects"/>
     </target>
 
+    <target description="Builds all subprojects" name="build-all">
+	<property name="build.target" value="build"/>
+	<ant target="subprojects"/>
+    </target>
+
+    <target description="Run all JUnit tests in all subprojects" name="JUnits">
+	<mkdir dir="../dist-tests"/>
+	<property name="build.target" value="JUnits"/>
+	<ant target="subprojects"/>
+    </target>
+
     <target description="Build the same target for all subprojects." name="subprojects">
         <ant dir="${dir.datenbank}" target="${build.target}"/>
         <ant dir="${dir.therapi.common}" target="${build.target}"/>
@@ -28,6 +41,7 @@
         <ant dir="${dir.reha.common}" target="${build.target}"/>
         <ant dir="${dir.therapi.database}" target="${build.target}"/>
         <ant dir="${dir.nebraska}" target="${build.target}"/>
+	<ant dir="${dir.buildIniTable}" target="${build.target}"/>
         <ant dir="${dir.calcKilometer}" target="${build.target}"/>
         <ant dir="${dir.fahrdienst.exporter}" target="${build.target}"/>
         <ant dir="${dir.gbriefe}" target="${build.target}"/>

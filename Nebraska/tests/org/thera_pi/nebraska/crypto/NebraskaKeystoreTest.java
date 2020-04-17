@@ -23,7 +23,7 @@ public class NebraskaKeystoreTest {
     private NebraskaKeystore nebraskaKeystore;
 
     @Before
-    protected void setUp() throws Exception {
+    public void setUp() throws Exception {
         File keystoreFile = new File(keystoreFilename);
         if (keystoreFile.exists()) {
             keystoreFile.delete();

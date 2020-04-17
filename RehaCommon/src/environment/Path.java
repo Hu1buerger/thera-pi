@@ -52,7 +52,7 @@ public enum Path {
             setProghome(therapihome.get());
 
         } else if (iniExistsInUserDir()) {
-            setProghome(System.getProperty("user.dir"));
+            setProghome(System.getProperty("user.dir")+ File.separator);
 
         } else {
             theoldway();

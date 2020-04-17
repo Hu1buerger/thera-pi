@@ -16,4 +16,6 @@
 
 	<!-- common targets for all projects -->
 	<import file="../Build/build-common.xml"/>
+	<!-- test targets for all projects -->
+	<import file="../Build/build-tests.xml"/>
 </project>

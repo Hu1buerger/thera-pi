@@ -6,6 +6,19 @@ die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
 Datumsformat ist jjjj-mm-tt, also Jahr-Monat-Tag
 
 ## unveröffentlicht
+### added
+- der Ausführungspfad (proghome) kann über die Umgebungsvariable THERAPIHOME gesetzt werden.
+- Die Quelle wird jetzt automatisch auf gitlab compiliert und getestet.
+- Konvention Testdatenbank IK = 123456789
+- Feature Toggle ermöglicht das Schalten von neuen Features im Hauptbaum
+
+###changed
+- RehaHMK/src/rehaHMKPanels/RehaHMKPanel2.java no longer uses depr. sun.image.jpeg lib und compiliert jetzt auch mit openjdk
+
+###fixed
+Heilmittel Sparte wird korrekt in Rezeptkopie übernommen
+
+
 
 ## [1.1.5] - 2020-04-03
 ### added
@@ -14,7 +27,8 @@ Patientenfenster:
 - Buildini Quellen zum Projekt hinzugefügt #341
 ###changed
 - office öffnet nur noch eine Verbindung
-###fixes
+
+###fixed
 - Eclipse project calckilometer naming #337
 - logback-test.xml beim build nicht mehr in reha.jar #338
 - Nebraska hängt nach klick auf Zertifikat #339

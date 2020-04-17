@@ -17,6 +17,7 @@ import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
+import core.Disziplin;
 import environment.Path;
 import hauptFenster.Reha;
 import systemEinstellungen.SystemConfig;
@@ -67,7 +68,6 @@ public class RezTools {
                     anzahl.add(Integer.parseInt(rezvec.get(i + 4)));
                     doppeltest.add(rezvec.get(i));
                 } else if (i >= 1) {
-                    doppeltest.add(rezvec.get(i));
 
                     if (rezvec.indexOf(rezvec.get(i)) != i) { // Doppelbehandlung, wenn die HMPos vor i schon mal
                                                               // aufgeführt ist. Hintergrund: Doppelbehandlungen müssen
@@ -75,6 +75,7 @@ public class RezTools {
                         anzahl.set(0, Integer.parseInt(rezvec.get(i + 4))
                                 + Integer.parseInt(rezvec.get(rezvec.indexOf(rezvec.get(i)) + 4)));
                     } else {
+                        doppeltest.add(rezvec.get(i));
                         positionen.add(holePosAusIdUndRezNr(rezvec.get(i), xreznr));
                         anzahl.add(Integer.parseInt(rezvec.get(i + 4)));
                     }
@@ -480,7 +481,11 @@ public class RezTools {
         String diszi = RezTools.putRezNrGetDisziplin(reznr);
         String preisgruppe = SqlInfo.holeEinzelFeld(
                 "select preisgruppe from verordn where rez_nr='" + reznr + "' LIMIT 1");
-        Vector<Vector<String>> preisvec = SystemPreislisten.hmPreise.get(diszi)
+        Vector<Vector<Vector<String>>> vector = SystemPreislisten.hmPreise.get(diszi);
+        if (vector == null) {
+            System.out.println("baeh");
+        }
+        Vector<Vector<String>> preisvec = vector
                                                                     .get(Integer.parseInt(preisgruppe) - 1);
         String pos = RezTools.getPosFromID(id, preisgruppe, preisvec);
         return (pos == null ? "" : pos);
@@ -1745,30 +1750,11 @@ public class RezTools {
     }
 
     public static String putRezNrGetDisziplin(String reznr) {
-        if (reznr.startsWith("KG")) {
-            return "Physio";
-        } else if (reznr.startsWith("MA")) {
-            return "Massage";
-        } else if (reznr.startsWith("ER")) {
-            return "Ergo";
-        } else if (reznr.startsWith("LO")) {
-            return "Logo";
-        } else if (reznr.startsWith("RH")) {
-            return "Reha";
-        } else if (reznr.startsWith("PO")) {
-            return "Podo";
-        } else if (reznr.startsWith("RS")) {
-            return "Rsport";
-        } else if (reznr.startsWith("FT")) {
-            return "Ftrain";
-        }
-        return "Physio";
+        String diszi = reznr.substring(0,2);
+        return Disziplin.valueOf(diszi).medium;
+
     }
 
-    public static Object[] ermittleRezeptwert(Vector<String> vec) {
-        Object[] retobj = { null, null, null };
-        return retobj;
-    }
 
     public static Object[] ermittleHBwert(Vector<String> vec) {
         Object[] retobj = { null, null, null };

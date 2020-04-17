@@ -10,18 +10,19 @@ import java.util.Vector;
 import CommonTools.INIFile;
 import CommonTools.INITool;
 import CommonTools.SqlInfo;
+import core.Disziplin;
 import environment.Path;
 import hauptFenster.Reha;
 
 public class SystemPreislisten {
-    public static Vector<Vector<Vector<String>>> vKGPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vMAPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vERPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vLOPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vRHPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vPOPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vRSPreise = new Vector<Vector<Vector<String>>>();
-    public static Vector<Vector<Vector<String>>> vFTPreise = new Vector<Vector<Vector<String>>>();
+
+
+
+
+
+
+
+
 
     public static HashMap<String, Vector<Vector<Vector<String>>>> hmPreise = new HashMap<String, Vector<Vector<Vector<String>>>>();
 
@@ -48,457 +49,215 @@ public class SystemPreislisten {
     private static Vector<Integer> intdummy = new Vector<Integer>();
     private static Vector<Vector<String>> hbdummy = new Vector<Vector<String>>();
     private static Vector<String> hbdummy_1 = new Vector<String>();
-    private static Vector<Vector<String>> preisliste = new Vector<Vector<String>>();
+
     private static Vector<Integer> modusdummy = new Vector<Integer>();
     public static HashMap<String, Vector<Object>> hmFristen = new HashMap<String, Vector<Object>>();
     private static Vector<Object> odummy = new Vector<Object>();
 
-    static INIFile fristenini = null;
-    static INIFile inif = null;
-
     public static void ladePreise(String disziplin) {
-        String[] diszis = { "Physio", "Massage", "Ergo", "Logo", "Reha", "Common", "Podo", "Rsport", "Ftrain" };
+        String aktIK = Reha.getAktIK();
+        ladepreise(disziplin, aktIK);
 
-        List<String> list = Arrays.asList(diszis);
-        int treffer = list.indexOf(disziplin);
+    }
 
-        if (treffer < 0) {
+    static INIFile fristenini = null;
+
+    public static void ladepreise(String disziplin, String aktIK) {
+
+        INIFile fristeninilocal = null;
+
+        INIFile inif = null;
+        if (Disziplin.ofMedium(disziplin) == Disziplin.INV) {
             return;
         }
         int tarife = -1;
         try {
-            inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "preisgruppen.ini");
-            tarife = inif.getIntegerProperty("PreisGruppen_" + diszis[treffer], "AnzahlPreisGruppen");
-            fristenini = INITool.openIni(Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/", "fristen.ini");
+            inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + aktIK + "/", "preisgruppen.ini");
+            tarife = inif.getIntegerProperty("PreisGruppen_" + disziplin, "AnzahlPreisGruppen");
+            fristeninilocal = INITool.openIni(Path.Instance.getProghome() + "ini/" + aktIK + "/", "fristen.ini");
+            fristenini = fristeninilocal;
         } catch (Exception ex) {
             ex.printStackTrace();
         }
 
-        Comparator<Vector> comparator = new Comparator<Vector>() {
-            @Override
-            public int compare(Vector o1, Vector o2) {
-
-                String s1 = o1.get(0)
-                              .toString();
-                String s2 = o2.get(0)
-                              .toString();
-                return s1.compareTo(s2);
-            }
-        };
-
-        if (treffer == 0) {
-            vKGPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from kgtarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vKGPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Physio", vKGPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Physio", tarife);
-            hmPreisGruppen.put("Physio", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Physio", tarife);
-            hmPreisBereich.put("Physio", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Physio", tarife);
-            hmPreisBesonderheit.put("Physio", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getNeuePreiseAb(inif, "Physio", tarife);
-            hmNeuePreiseAb.put("Physio", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Physio", tarife);
-            hmNeuePreiseRegel.put("Physio", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Physio", tarife);
-            hmZuzahlRegeln.put("Physio", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Physio", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Physio", tarife);
-            hmHMRAbrechnung.put("Physio", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Physio", tarife);
-            hmHBRegeln.put("Physio", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Physio", tarife);
-            hmBerichtRegeln.put("Physio", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Physio", tarife);
-            return;
-        }
-
-        /***************************************************/
-        if (treffer == 1) {
-            vMAPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from matarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vMAPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Massage", vMAPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Massage", tarife);
-            hmPreisGruppen.put("Massage", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Massage", tarife);
-            hmPreisBereich.put("Massage", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Massage", tarife);
-            hmPreisBesonderheit.put("Massage", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Massage", tarife);
-            hmNeuePreiseRegel.put("Massage", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getNeuePreiseAb(inif, "Massage", tarife);
-            hmNeuePreiseAb.put("Massage", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Massage", tarife);
-            hmZuzahlRegeln.put("Massage", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Massage", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Massage", tarife);
-            hmHMRAbrechnung.put("Massage", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Massage", tarife);
-            hmHBRegeln.put("Massage", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Massage", tarife);
-            hmBerichtRegeln.put("Massage", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Massage", tarife);
-            return;
-        }
-        /***************************************************/
-        if (treffer == 2) {
-            vERPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from ertarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vERPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Ergo", vERPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Ergo", tarife);
-            hmPreisGruppen.put("Ergo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Ergo", tarife);
-            hmPreisBereich.put("Ergo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Ergo", tarife);
-            hmPreisBesonderheit.put("Ergo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Ergo", tarife);
-            hmNeuePreiseRegel.put("Ergo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getNeuePreiseAb(inif, "Ergo", tarife);
-            hmNeuePreiseAb.put("Ergo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Ergo", tarife);
-            hmZuzahlRegeln.put("Ergo", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Ergo", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Ergo", tarife);
-            hmHMRAbrechnung.put("Ergo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Ergo", tarife);
-            hmHBRegeln.put("Ergo", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Ergo", tarife);
-            hmBerichtRegeln.put("Ergo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Ergo", tarife);
-            return;
-        }
-        /***************************************************/
-        if (treffer == 3) {
-            vLOPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from lotarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vLOPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Logo", vLOPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Logo", tarife);
-            hmPreisGruppen.put("Logo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Logo", tarife);
-            hmPreisBereich.put("Logo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Logo", tarife);
-            hmPreisBesonderheit.put("Logo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Logo", tarife);
-            hmNeuePreiseRegel.put("Logo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getNeuePreiseAb(inif, "Logo", tarife);
-            hmNeuePreiseAb.put("Logo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Logo", tarife);
-            hmZuzahlRegeln.put("Logo", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Logo", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Logo", tarife);
-            hmHMRAbrechnung.put("Logo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Logo", tarife);
-            hmHBRegeln.put("Logo", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Logo", tarife);
-            hmBerichtRegeln.put("Logo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Logo", tarife);
-            return;
-        }
-        /***************************************************/
-        if (treffer == 4) {
-            vRHPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from rhtarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vRHPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Reha", vRHPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Reha", tarife);
-            hmPreisGruppen.put("Reha", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Reha", tarife);
-            hmPreisBereich.put("Reha", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Reha", tarife);
-            hmPreisBesonderheit.put("Reha", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Reha", tarife);
-            hmNeuePreiseRegel.put("Reha", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getNeuePreiseAb(inif, "Reha", tarife);
-            hmNeuePreiseAb.put("Reha", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Reha", tarife);
-            hmZuzahlRegeln.put("Reha", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Reha", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Reha", tarife);
-            hmHMRAbrechnung.put("Reha", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Reha", tarife);
-            hmHBRegeln.put("Reha", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Reha", tarife);
-            hmBerichtRegeln.put("Reha", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Reha", tarife);
-            return;
-        }
-
-        if (treffer == 6) {
-            vPOPreise.clear();
-            for (int i = 0; i < tarife; i++) {
-                preisliste.clear();
-                preisliste = SqlInfo.holeFelder("select * from potarif" + Integer.toString(i + 1));
-                Collections.sort((Vector) preisliste, comparator);
-                vPOPreise.add((Vector<Vector<String>>) preisliste.clone());
-            }
-            preisliste.clear();
-            hmPreise.put("Podo", vPOPreise);
-            dummy.clear();
-            getPreisGruppen(inif, "Podo", tarife);
-            hmPreisGruppen.put("Podo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBereich(inif, "Podo", tarife);
-            hmPreisBereich.put("Podo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            getPreisBesonderheit(inif, "Podo", tarife);
-            hmPreisBesonderheit.put("Podo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getNeuePreiseRegeln(inif, "Podo", tarife);
-            hmNeuePreiseRegel.put("Podo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            getNeuePreiseAb(inif, "Podo", tarife);
-            hmNeuePreiseAb.put("Podo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            intdummy.clear();
-            getZuzahlRegeln(inif, "Podo", tarife);
-            hmZuzahlRegeln.put("Podo", (Vector<Integer>) intdummy.clone());
-            hmZuzahlModus.put("Podo", (Vector<Integer>) modusdummy.clone());
-            intdummy.clear();
-            modusdummy.clear();
-            getHMRAbrechnung(inif, "Podo", tarife);
-            hmHMRAbrechnung.put("Podo", (Vector<Integer>) intdummy.clone());
-            intdummy.clear();
-            hbdummy.clear();
-            getHBRegeln(inif, "Podo", tarife);
-            hmHBRegeln.put("Podo", (Vector<Vector<String>>) hbdummy.clone());
-            hbdummy.clear();
-            dummy.clear();
-            getBerichtRegeln(inif, "Podo", tarife);
-            hmBerichtRegeln.put("Podo", (Vector<String>) dummy.clone());
-            dummy.clear();
-            doFristen("Podo", tarife);
-            return;
-        }
-        /**************************************************************************/
-        // Rehasport
-        if (treffer == 7) {
-            try {
-                vRSPreise.clear();
-                for (int i = 0; i < tarife; i++) {
-                    preisliste.clear();
-                    preisliste = SqlInfo.holeFelder("select * from rstarif" + Integer.toString(i + 1));
-                    Collections.sort((Vector) preisliste, comparator);
-                    vRSPreise.add((Vector<Vector<String>>) preisliste.clone());
-                }
-                preisliste.clear();
-                hmPreise.put("Rsport", vRSPreise);
-                dummy.clear();
-                getPreisGruppen(inif, "Rsport", tarife);
-                hmPreisGruppen.put("Rsport", (Vector<String>) dummy.clone());
-                dummy.clear();
-                getPreisBereich(inif, "Rsport", tarife);
-                hmPreisBereich.put("Rsport", (Vector<String>) dummy.clone());
-                dummy.clear();
-                getPreisBesonderheit(inif, "Rsport", tarife);
-                hmPreisBesonderheit.put("Rsport", (Vector<String>) dummy.clone());
-                dummy.clear();
-                intdummy.clear();
-                getNeuePreiseRegeln(inif, "Rsport", tarife);
-                hmNeuePreiseRegel.put("Rsport", (Vector<Integer>) intdummy.clone());
-                intdummy.clear();
-                getNeuePreiseAb(inif, "Rsport", tarife);
-                hmNeuePreiseAb.put("Rsport", (Vector<String>) dummy.clone());
-                dummy.clear();
-                intdummy.clear();
-                getZuzahlRegeln(inif, "Rsport", tarife);
-                hmZuzahlRegeln.put("Rsport", (Vector<Integer>) intdummy.clone());
-                hmZuzahlModus.put("Rsport", (Vector<Integer>) modusdummy.clone());
-                intdummy.clear();
-                modusdummy.clear();
-                getHMRAbrechnung(inif, "Rsport", tarife);
-                hmHMRAbrechnung.put("Rsport", (Vector<Integer>) intdummy.clone());
-                intdummy.clear();
-                hbdummy.clear();
-                getHBRegeln(inif, "Rsport", tarife);
-                hmHBRegeln.put("Rsport", (Vector<Vector<String>>) hbdummy.clone());
-                hbdummy.clear();
-                dummy.clear();
-                getBerichtRegeln(inif, "Rsport", tarife);
-                hmBerichtRegeln.put("Rsport", (Vector<String>) dummy.clone());
-                dummy.clear();
-                doFristen("Rsport", tarife);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            // System.out.println("Preise Rehasport");
-            // System.out.println(hmPreise.get("Rsport"));
-
-            return;
-        }
-
-        if (treffer == 8) {
-            try {
-                vFTPreise.clear();
-                for (int i = 0; i < tarife; i++) {
-                    preisliste.clear();
-                    preisliste = SqlInfo.holeFelder("select * from fttarif" + Integer.toString(i + 1));
-                    Collections.sort((Vector) preisliste, comparator);
-                    vFTPreise.add((Vector<Vector<String>>) preisliste.clone());
-                }
-                preisliste.clear();
-                hmPreise.put("Ftrain", vFTPreise);
-                dummy.clear();
-                getPreisGruppen(inif, "Ftrain", tarife);
-                hmPreisGruppen.put("Ftrain", (Vector<String>) dummy.clone());
-                dummy.clear();
-                getPreisBereich(inif, "Ftrain", tarife);
-                hmPreisBereich.put("Ftrain", (Vector<String>) dummy.clone());
-                dummy.clear();
-                getPreisBesonderheit(inif, "Ftrain", tarife);
-                hmPreisBesonderheit.put("Ftrain", (Vector<String>) dummy.clone());
-                dummy.clear();
-                intdummy.clear();
-                getNeuePreiseRegeln(inif, "Ftrain", tarife);
-                hmNeuePreiseRegel.put("Ftrain", (Vector<Integer>) intdummy.clone());
-                intdummy.clear();
-                getNeuePreiseAb(inif, "Ftrain", tarife);
-                hmNeuePreiseAb.put("Ftrain", (Vector<String>) dummy.clone());
-                dummy.clear();
-                intdummy.clear();
-                getZuzahlRegeln(inif, "Ftrain", tarife);
-                hmZuzahlRegeln.put("Ftrain", (Vector<Integer>) intdummy.clone());
-                hmZuzahlModus.put("Ftrain", (Vector<Integer>) modusdummy.clone());
-                intdummy.clear();
-                modusdummy.clear();
-                getHMRAbrechnung(inif, "Ftrain", tarife);
-                hmHMRAbrechnung.put("Ftrain", (Vector<Integer>) intdummy.clone());
-                intdummy.clear();
-                hbdummy.clear();
-                getHBRegeln(inif, "Ftrain", tarife);
-                hmHBRegeln.put("Ftrain", (Vector<Vector<String>>) hbdummy.clone());
-                hbdummy.clear();
-                dummy.clear();
-                getBerichtRegeln(inif, "Ftrain", tarife);
-                hmBerichtRegeln.put("Ftrain", (Vector<String>) dummy.clone());
-                dummy.clear();
-                doFristen("Ftrain", tarife);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-            // System.out.println("Preise Funktonstraining");
-            // System.out.println(hmPreise.get("Ftrain"));
-            return;
-        }
-
-        /**************************************************************************/
-        if (treffer == 5) {
-            dummy.clear();
-            getPreisGruppen(inif, "Common", tarife);
-            hmPreisGruppen.put("Common", (Vector<String>) dummy.clone());
-            dummy.clear();
-        }
-        inif = null;
-        fristenini = null;
+        ladepreise(disziplin, fristeninilocal, inif, tarife);
 
     }
 
+    private static void ladepreise(String disziplin, INIFile fristeninilocal, INIFile inif, int tarife) {
+
+
+
+
+        Disziplin diszi = Disziplin.ofMedium(disziplin);
+
+        switch (diszi) {
+        case KG:
+        {
+
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from kgtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            break;
+        case MA:
+        {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from matarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            break;
+        case ER:
+        {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from ertarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            break;
+        case LO:
+        {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from lotarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+        break;
+        case RH:
+        {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                 Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from rhtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            break;
+        case PO:
+        {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste= SqlInfo.holeFelder("select * from potarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
+
+
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            break;
+        case RS:
+        {
+            try {
+                Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+
+                for (int i = 0; i < tarife; i++) {
+                    Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from rstarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                    preise.add((Vector<Vector<String>>) preisliste);
+                }
+
+
+                hmPreise.put(diszi.medium, preise);
+                ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }}
+            break;
+        case FT:
+        {
+            try {
+                Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+
+                for (int i = 0; i < tarife; i++) {
+                    Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from fttarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                    preise.add((Vector<Vector<String>>) preisliste);
+                }
+
+
+                hmPreise.put(diszi.medium, preise);
+                ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }}
+            break;
+        case COMMON:
+        {
+            dummy.clear();
+            getPreisGruppen(inif, "Common", tarife);
+            hmPreisGruppen.put("Common", (Vector<String>) dummy.clone());
+            dummy.clear();}
+            break;
+        }
+    }
+
+    private static void ladepreise(INIFile fristeninilocal, INIFile inif, int tarife, String key) {
+        dummy.clear();
+        getPreisGruppen(inif, key, tarife);
+        hmPreisGruppen.put(key, (Vector<String>) dummy.clone());
+        dummy.clear();
+        getPreisBereich(inif, key, tarife);
+        hmPreisBereich.put(key, (Vector<String>) dummy.clone());
+        dummy.clear();
+        getPreisBesonderheit(inif, key, tarife);
+        hmPreisBesonderheit.put(key, (Vector<String>) dummy.clone());
+        dummy.clear();
+        intdummy.clear();
+        getNeuePreiseRegeln(inif, key, tarife);
+        hmNeuePreiseRegel.put(key, (Vector<Integer>) intdummy.clone());
+        intdummy.clear();
+        getNeuePreiseAb(inif, key, tarife);
+        hmNeuePreiseAb.put(key, (Vector<String>) dummy.clone());
+        dummy.clear();
+        intdummy.clear();
+        getZuzahlRegeln(inif, key, tarife);
+        hmZuzahlRegeln.put(key, (Vector<Integer>) intdummy.clone());
+        hmZuzahlModus.put(key, (Vector<Integer>) modusdummy.clone());
+        intdummy.clear();
+        modusdummy.clear();
+        getHMRAbrechnung(inif, key, tarife);
+        hmHMRAbrechnung.put(key, (Vector<Integer>) intdummy.clone());
+        intdummy.clear();
+        hbdummy.clear();
+        getHBRegeln(inif, key, tarife);
+        hmHBRegeln.put(key, (Vector<Vector<String>>) hbdummy.clone());
+        hbdummy.clear();
+        dummy.clear();
+        getBerichtRegeln(inif, key, tarife);
+        hmBerichtRegeln.put(key, (Vector<String>) dummy.clone());
+        dummy.clear();
+        doFristen(key, tarife, fristeninilocal);
+    }
+
     /**********
-     * 
-     * 
+     *
+     *
      * @param f
      * @param disziplin
      * @param tarife
@@ -605,7 +364,6 @@ public class SystemPreislisten {
         intdummy.clear();
         hbdummy.clear();
         hbdummy_1.clear();
-        preisliste.clear();
         hmFristen.clear();
         odummy.clear();
 
@@ -622,7 +380,6 @@ public class SystemPreislisten {
         intdummy.trimToSize();
         hbdummy.trimToSize();
         hbdummy_1.trimToSize();
-        preisliste.trimToSize();
 
     }
 
@@ -651,12 +408,15 @@ public class SystemPreislisten {
         }
     }
 
-    /*********************************/
-    private static void doFristen(String disziplin, int anzahl) {
+    /**
+     * @param fristenini TODO
+     *******************************/
+    private static void doFristen(String disziplin, int anzahl, INIFile fristenini) {
         odummy.clear();
         Vector<Object> xdummy = new Vector<Object>();
         for (int i = 0; i < anzahl; i++) {
-            xdummy.add(fristenTesten("Fristen_" + disziplin, "FristBeginn" + Integer.toString(i + 1), true));
+            xdummy.add(
+                    fristenTesten("Fristen_" + disziplin, "FristBeginn" + Integer.toString(i + 1), true, fristenini));
             // xdummy.add(fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "FristBeginn"+Integer.toString(i+1)));
         }
@@ -665,12 +425,14 @@ public class SystemPreislisten {
         for (int i = 0; i < anzahl; i++) {
             // xdummy.add( (fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "BeginnKalendertage"+Integer.toString(i+1))==1 ? true : false));
-            xdummy.add(fristenTesten("Fristen_" + disziplin, "BeginnKalendertage" + Integer.toString(i + 1), false));
+            xdummy.add(fristenTesten("Fristen_" + disziplin, "BeginnKalendertage" + Integer.toString(i + 1), false,
+                    fristenini));
         }
         odummy.add(xdummy.clone());
         xdummy.clear();
         for (int i = 0; i < anzahl; i++) {
-            xdummy.add(fristenTesten("Fristen_" + disziplin, "FristUnterbrechung" + Integer.toString(i + 1), true));
+            xdummy.add(fristenTesten("Fristen_" + disziplin, "FristUnterbrechung" + Integer.toString(i + 1), true,
+                    fristenini));
             // xdummy.add(fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "FristUnterbrechung"+Integer.toString(i+1)));
         }
@@ -678,22 +440,23 @@ public class SystemPreislisten {
         xdummy.clear();
         for (int i = 0; i < anzahl; i++) {
             xdummy.add(fristenTesten("Fristen_" + disziplin, "UnterbrechungKalendertage" + Integer.toString(i + 1),
-                    false));
+                    false, fristenini));
             // xdummy.add( (fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "UnterbrechungKalendertage"+Integer.toString(i+1))==1 ? true : false));
         }
         odummy.add(xdummy.clone());
         xdummy.clear();
         for (int i = 0; i < anzahl; i++) {
-            xdummy.add(fristenTesten("Fristen_" + disziplin, "BeginnMitSamstag" + Integer.toString(i + 1), false));
+            xdummy.add(fristenTesten("Fristen_" + disziplin, "BeginnMitSamstag" + Integer.toString(i + 1), false,
+                    fristenini));
             // xdummy.add( (fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "UnterbrechungKalendertage"+Integer.toString(i+1))==1 ? true : false));
         }
         odummy.add(xdummy.clone());
         xdummy.clear();
         for (int i = 0; i < anzahl; i++) {
-            xdummy.add(
-                    fristenTesten("Fristen_" + disziplin, "UnterbrechungMitSamstag" + Integer.toString(i + 1), false));
+            xdummy.add(fristenTesten("Fristen_" + disziplin, "UnterbrechungMitSamstag" + Integer.toString(i + 1), false,
+                    fristenini));
             // xdummy.add( (fristenini.getIntegerProperty("Fristen_"+disziplin,
             // "UnterbrechungKalendertage"+Integer.toString(i+1))==1 ? true : false));
         }
@@ -706,28 +469,30 @@ public class SystemPreislisten {
     }
 
     /***
-     * 
-     * 
+     *
+     *
      * @param kategorie
      * @param item
      * @param retint
+     * @param fristenini TODO
      * @return
      */
-    private static Object fristenTesten(String kategorie, String item, boolean retint) {
-        if (fristenini.getIntegerProperty(kategorie, item) == null) {
+    private static Object fristenTesten(String kategorie, String item, boolean retint, INIFile fristenini) {
+        INIFile fristenini2 = fristenini;
+        if (fristenini2.getIntegerProperty(kategorie, item) == null) {
             System.out.println(
                     "SytemPreislisten: erstelle Parameter für Kategorie=" + kategorie + " Preisgruppe=" + item);
             if (retint) {
-                fristenini.setIntegerProperty(kategorie, item, 14, null);
+                fristenini2.setIntegerProperty(kategorie, item, 14, null);
             } else {
-                fristenini.setIntegerProperty(kategorie, item, 1, null);
+                fristenini2.setIntegerProperty(kategorie, item, 1, null);
             }
-            INITool.saveIni(fristenini);
+            INITool.saveIni(fristenini2);
         }
         if (retint) {
-            return fristenini.getIntegerProperty(kategorie, item);
+            return fristenini2.getIntegerProperty(kategorie, item);
         } else {
-            return (fristenini.getIntegerProperty(kategorie, item) == 1 ? true : false);
+            return (fristenini2.getIntegerProperty(kategorie, item) == 1 ? true : false);
         }
     }
 

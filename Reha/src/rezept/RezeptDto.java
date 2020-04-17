@@ -19,6 +19,7 @@ public class RezeptDto {
     private IK ik;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDto.class);
     private static final String SelectAllSql = "select * from verordn union select * from lza order by rez_nr;";
+
     public RezeptDto(IK ik) {
         this.ik = ik;
     }
@@ -26,6 +27,12 @@ public class RezeptDto {
     List<Rezept> all() {
         String sql = SelectAllSql;
         return retrieveList(sql);
+    }
+
+    List<Rezept> allfromVerordn(){
+    final String sql =      "select * from verordn  order by rez_nr";
+    return retrieveList(sql);
+
     }
 
     private List<Rezept> retrieveList(String sql) {
