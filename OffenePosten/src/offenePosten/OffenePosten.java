@@ -77,8 +77,7 @@ public class OffenePosten implements WindowListener {
             System.out.println("Attention! This method was created for Unit-testing and nothing else!");
             return;
         }
-        setAktIK("123456789");
-        System.out.println("OP-init, setting test mand to 123456789");
+        
     }
     
     private OffenePosten() {
