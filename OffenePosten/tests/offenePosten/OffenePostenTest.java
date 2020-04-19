@@ -21,10 +21,10 @@ import sql.DatenquellenFactory;
  *
  */
 public class OffenePostenTest {
-    
+
     static OffenePosten op = new OffenePosten("JUnit");
     static OffenepostenTab opTab = new OffenepostenTab("JUnit");
-    static OffenepostenPanel  opPan = new OffenepostenPanel("JUnit");
+    static OffenepostenPanel opPan = new OffenepostenPanel("JUnit");
     static Connection conn;
     static SqlInfo sqlInfo;
 
@@ -37,22 +37,23 @@ public class OffenePostenTest {
         }
         sqlInfo = new SqlInfo();
         op.setProghome("./");
+        op.setAktIK("123456789");
         sqlInfo.setConnection(conn);
         op.sqlInfo = sqlInfo;
         opPan.eltern = opTab;
         opPan.offenePosten = op;
     }
-    
+
     @Test
     public void testOPPanelermittleGesamtOffen() {
-        
+
         try {
             opPan.ermittleGesamtOffen();
         } catch (NullPointerException e) {
             e.printStackTrace();
             fail("Böser Code: ");
         }
-        
+
         try {
             Statement batchStmt = conn.createStatement();
             conn.setAutoCommit(false);

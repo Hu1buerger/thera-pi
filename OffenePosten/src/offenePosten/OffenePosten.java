@@ -41,8 +41,6 @@ public class OffenePosten implements WindowListener {
     public static JFrame thisFrame = null;
     public Connection conn;
 
-
-
     public static String progHome = "C:/RehaVerwaltung/";
     public static String aktIK = "510841109";
 
@@ -52,16 +50,13 @@ public class OffenePosten implements WindowListener {
     public static HashMap<String, String> hmFirmenDaten = null;
     public static HashMap<String, String> hmAdrPDaten = new HashMap<String, String>();
 
-
     public static boolean testcase = false;
     public SqlInfo sqlInfo;
 
     OffenepostenTab otab = null;
 
-
     public RehaReverseServer rehaReverseServer = null;
     public static int rehaReversePort = -1;
-
 
     private static String path2IniFile;
     private static String path2TemplateFiles;
@@ -73,21 +68,19 @@ public class OffenePosten implements WindowListener {
 
     // @VisibleForTesting
     OffenePosten(String testIdent) {
-        if ( !testIdent.contentEquals("JUnit")) {
+        if (!testIdent.contentEquals("JUnit")) {
             System.out.println("Attention! This method was created for Unit-testing and nothing else!");
             return;
         }
-        setAktIK("123456789");
-        System.out.println("OP-init, setting test mand to 123456789");
     }
-    
+
     private OffenePosten() {
-        
+
     }
-    
+
     public static void main(String[] args) {
         new Logging("offeneposten");
-       OffenePosten instance = new OffenePosten();
+        OffenePosten instance = new OffenePosten();
         instance.sqlInfo = new SqlInfo();
         System.out.println("OP main: " + instance);
 
@@ -96,14 +89,14 @@ public class OffenePosten implements WindowListener {
                 System.out.println("hole daten aus INI-Datei " + args[0]);
                 INIFile inif = new INIFile(args[0] + "ini/" + args[1] + "/rehajava.ini");
 
-                 String officeProgrammPfad = inif.getStringProperty("OpenOffice.org", "OfficePfad") ;
-                String officeNativePfad = inif.getStringProperty("OpenOffice.org", "OfficeNativePfad") ;
+                String officeProgrammPfad = inif.getStringProperty("OpenOffice.org", "OfficePfad");
+                String officeNativePfad = inif.getStringProperty("OpenOffice.org", "OfficeNativePfad");
                 try {
-					new OOService().start(officeNativePfad, officeProgrammPfad);
-				} catch (FileNotFoundException | OfficeApplicationException e) {
-					e.printStackTrace();
-				}
-                
+                    new OOService().start(officeNativePfad, officeProgrammPfad);
+                } catch (FileNotFoundException | OfficeApplicationException e) {
+                    e.printStackTrace();
+                }
+
                 progHome = args[0];
                 aktIK = args[1];
                 path2IniFile = progHome + "ini/" + aktIK + "/";
@@ -111,7 +104,7 @@ public class OffenePosten implements WindowListener {
                 INITool.init(path2IniFile);
                 /*******************************************************/
 
-                     instance.StarteDB();
+                instance.StarteDB();
 
                 new SwingWorker<Void, Void>() {
                     @Override
@@ -130,7 +123,6 @@ public class OffenePosten implements WindowListener {
                         }
 
                         mahnParameter.put("diralterechnungen", oinif.getStringProperty("General", "DirAlteRechnungen"));
-
 
                         readLastSelection(oinif);
                         readBarAnKasse(oinif);
@@ -183,32 +175,32 @@ public class OffenePosten implements WindowListener {
     String getAktIK() {
         return aktIK;
     }
-    
+
     // @VisibleForTesting
-    void setAktIK(String ik2set ) {
+    void setAktIK(String ik2set) {
         aktIK = ik2set;
     }
-    
+
     // @VisibleForTesting
     String getProghome() {
         return progHome;
     }
-    
+
     // @VisibleForTesting
     void setProghome(String ph2set) {
         progHome = ph2set;
     }
-    
+
     /********************/
 
     public JFrame getJFrame() {
         try {
             UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
+                | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
         }
         jFrame = new JFrame() {
-
 
             private static final long serialVersionUID = 1L;
 
@@ -219,7 +211,6 @@ public class OffenePosten implements WindowListener {
                     setState(JFrame.NORMAL);
                 }
 
-                
                 if (!shallBeVisible || !isVisible()) {
                     super.setVisible(shallBeVisible);
                 }
@@ -256,9 +247,8 @@ public class OffenePosten implements WindowListener {
         sqlInfo.setFrame(jFrame);
         jFrame.addWindowListener(this);
         jFrame.setSize(1000, 750);
-        String string =  "dbIpAndName"; // XXX:fixme name
-        jFrame.setTitle(
-                "Thera-Pi  Offene-Posten / Mahnwesen  [IK: " + aktIK + "] " + "[Server-IP: " + string + "]");
+        String string = "dbIpAndName"; // XXX:fixme name
+        jFrame.setTitle("Thera-Pi  Offene-Posten / Mahnwesen  [IK: " + aktIK + "] " + "[Server-IP: " + string + "]");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setLocationRelativeTo(null);
         otab = new OffenepostenTab(this);
@@ -294,27 +284,20 @@ public class OffenePosten implements WindowListener {
 
     private void StarteDB() {
 
+        try {
 
-            try {
+            conn = new DatenquellenFactory(aktIK).createConnection();
+            sqlInfo.setConnection(conn);
+            OffenePosten.DbOk = true;
+            System.out.println("Datenbankkontakt hergestellt");
+        } catch (final SQLException ex) {
+            System.out.println("SQLException: " + ex.getMessage());
+            System.out.println("SQLState: " + ex.getSQLState());
+            System.out.println("VendorError: " + ex.getErrorCode());
+            OffenePosten.DbOk = false;
 
-                conn = new DatenquellenFactory(aktIK).createConnection();
-                sqlInfo.setConnection(conn);
-                OffenePosten.DbOk = true;
-                System.out.println("Datenbankkontakt hergestellt");
-            } catch (final SQLException ex) {
-                System.out.println("SQLException: " + ex.getMessage());
-                System.out.println("SQLState: " + ex.getSQLState());
-                System.out.println("VendorError: " + ex.getErrorCode());
-                OffenePosten.DbOk = false;
-
-            }
         }
-
-
-
-
-
-
+    }
 
     /*****************************************************************
      *
@@ -435,8 +418,6 @@ public class OffenePosten implements WindowListener {
     }
 
     /***************************/
-
-  
 
     public static void setVorauswahl(int value) {
         vorauswahlSuchkriterium = value;

@@ -3,120 +3,121 @@
               Any modifications will be overwritten.
               To include a user specific buildfile here, simply create one in the same
               directory with the processing instruction <?eclipse.ant.import?>
-              as the first entry and export the buildfile again. --><project basedir="." default="build" name="OffenePosten">
-    <property environment="env"/>
-    <property name="Libraries.location" value="../Libraries"/>
-    <property name="Reha.location" value="../Reha"/>
-    <property name="RehaCommon.location" value="../RehaCommon"/>
-    <property name="datenbank.location" value="../datenbank"/>
-    <property name="filesystem.location" value="../filesystem"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.8"/>
-    <property name="source" value="1.8"/>
+              as the first entry and export the buildfile again. -->
+<project basedir="." default="build" name="OffenePosten">
+	<property environment="env" />
+	<property name="Libraries.location" value="../Libraries" />
+	<property name="Reha.location" value="../Reha" />
+	<property name="RehaCommon.location" value="../RehaCommon" />
+	<property name="datenbank.location" value="../datenbank" />
+	<property name="filesystem.location" value="../filesystem" />
+	<property name="debuglevel" value="source,lines,vars" />
+	<property name="target" value="1.8" />
+	<property name="source" value="1.8" />
 
-    <import file="build-user.xml"/>
-    <path id="RehaCommon.classpath">
-        <pathelement location="${RehaCommon.location}/bin"/>
-        <pathelement location="${Libraries.location}/lib/swingx/grad.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/ag.ion.noa_2.2.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/bootstrapconnector.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/java_uno_accessbridge.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/java_uno.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/juh.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/jurt.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/jut.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/officebean.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/registry-3.1.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/ridl.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/sandbox.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/unoil.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/unoloader.jar"/>
-        <pathelement location="${Libraries.location}/lib/swingx/swing-worker.jar"/>
-        <pathelement location="${Libraries.location}/lib/swingx/swingx-1.6.jar"/>
-        <pathelement location="${Libraries.location}/lib/logging/logback-classic-1.2.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/logging/logback-core-1.2.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar"/>
-        <pathelement location="${Libraries.location}/lib/logging/sysout-over-slf4j-1.0.2.jar"/>
-        <pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar"/>
-        <pathelement location="${Libraries.location}/lib/jgoodies/forms-1.3.0.jar"/>
-    </path>
-    <path id="datenbank.classpath">
-        <pathelement location="${datenbank.location}/bin"/>
-        <pathelement location="${datenbank.location}/bin-tests"/>
-        <path refid="RehaCommon.classpath"/>
-        <pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar"/>
-        <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
-    </path>
-    <path id="filesystem.classpath">
-        <pathelement location="${filesystem.location}/bin"/>
-    </path>
-    <path id="OffenePosten.classpath">
-        <pathelement location="bin"/>
-        <pathelement location="bin-tests"/>
-        <pathelement location="${Libraries.location}/lib/swingx/swingx-1.6.jar"/>
-        <pathelement location="${Libraries.location}/lib/swingx/swing-worker.jar"/>
-        <pathelement location="${Libraries.location}/lib/jgoodies/looks-2.3.1.jar"/>
-        <pathelement location="${Libraries.location}/lib/jgoodies/forms-1.3.0.jar"/>
-        <pathelement location="${Libraries.location}/lib/jgoodies/jgoodies-common-0.9.9.jar"/>
-        <pathelement location="${Libraries.location}/lib/dbf/jdbf.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/ag.ion.noa_2.2.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/unoil.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/unoloader.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/bootstrapconnector.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/java_uno_accessbridge.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/java_uno.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/juh.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/jurt.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/jut.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/officebean.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/registry-3.1.3.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/ridl.jar"/>
-        <pathelement location="${Libraries.location}/lib/openofficeorg/sandbox.jar"/>
-        <path refid="RehaCommon.classpath"/>
-        <path refid="datenbank.classpath"/>
-        <path refid="filesystem.classpath"/>
-    </path>
-    <target name="init">
-        <mkdir dir="bin"/>
-        <mkdir dir="bin-tests"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-        <copy includeemptydirs="false" todir="bin-tests">
-            <fileset dir="tests">
-                <exclude name="**/*.launch"/>
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="clean">
-        <delete dir="bin"/>
-        <delete dir="bin-tests"/>
-    </target>
-    <target depends="clean" name="cleanall">
-        <ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${datenbank.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${filesystem.location}" inheritAll="false" target="clean"/>
-    </target>
-    <target depends="build-subprojects,build-project" name="build"/>
-    <target name="build-subprojects">
-        <ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="build-project"/>
-        <ant antfile="build.xml" dir="${datenbank.location}" inheritAll="false" target="build-project"/>
-        <ant antfile="build.xml" dir="${filesystem.location}" inheritAll="false" target="build-project"/>
-    </target>
-    <target depends="init" name="build-project">
-        <echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
-            <src path="src"/>
-            <classpath refid="OffenePosten.classpath"/>
-        </javac>
-    </target>
-    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
-        <ant antfile="build.xml" dir="${Reha.location}" inheritAll="false" target="clean"/>
-        <ant antfile="build.xml" dir="${Reha.location}" inheritAll="false" target="build"/>
-    </target>
+	<import file="build-user.xml" />
+	<path id="RehaCommon.classpath">
+		<pathelement location="${RehaCommon.location}/bin" />
+		<pathelement location="${Libraries.location}/lib/swingx/grad.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/ag.ion.noa_2.2.3.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/bootstrapconnector.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/java_uno_accessbridge.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/java_uno.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/juh.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/jurt.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/jut.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/officebean.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/registry-3.1.3.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/ridl.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/sandbox.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/unoil.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/unoloader.jar" />
+		<pathelement location="${Libraries.location}/lib/swingx/swing-worker.jar" />
+		<pathelement location="${Libraries.location}/lib/swingx/swingx-1.6.jar" />
+		<pathelement location="${Libraries.location}/lib/logging/logback-classic-1.2.3.jar" />
+		<pathelement location="${Libraries.location}/lib/logging/logback-core-1.2.3.jar" />
+		<pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar" />
+		<pathelement location="${Libraries.location}/lib/logging/sysout-over-slf4j-1.0.2.jar" />
+		<pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar" />
+		<pathelement location="${Libraries.location}/lib/jgoodies/forms-1.3.0.jar" />
+	</path>
+	<path id="datenbank.classpath">
+		<pathelement location="${datenbank.location}/bin" />
+		<pathelement location="${datenbank.location}/bin-tests" />
+		<path refid="RehaCommon.classpath" />
+		<pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar" />
+		<pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
+	</path>
+	<path id="filesystem.classpath">
+		<pathelement location="${filesystem.location}/bin" />
+	</path>
+	<path id="OffenePosten.classpath">
+		<pathelement location="bin" />
+		<pathelement location="bin-tests" />
+		<pathelement location="${Libraries.location}/lib/swingx/swingx-1.6.jar" />
+		<pathelement location="${Libraries.location}/lib/swingx/swing-worker.jar" />
+		<pathelement location="${Libraries.location}/lib/jgoodies/looks-2.3.1.jar" />
+		<pathelement location="${Libraries.location}/lib/jgoodies/forms-1.3.0.jar" />
+		<pathelement location="${Libraries.location}/lib/jgoodies/jgoodies-common-0.9.9.jar" />
+		<pathelement location="${Libraries.location}/lib/dbf/jdbf.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/ag.ion.noa_2.2.3.jar" />
+		<pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/unoil.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/unoloader.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/bootstrapconnector.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/java_uno_accessbridge.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/java_uno.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/juh.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/jurt.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/jut.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/officebean.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/registry-3.1.3.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/ridl.jar" />
+		<pathelement location="${Libraries.location}/lib/openofficeorg/sandbox.jar" />
+		<path refid="RehaCommon.classpath" />
+		<path refid="datenbank.classpath" />
+		<path refid="filesystem.classpath" />
+	</path>
+	<target name="init">
+		<mkdir dir="bin" />
+		<mkdir dir="bin-tests" />
+		<copy includeemptydirs="false" todir="bin">
+			<fileset dir="src">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+		<copy includeemptydirs="false" todir="bin-tests">
+			<fileset dir="tests">
+				<exclude name="**/*.launch" />
+				<exclude name="**/*.java" />
+			</fileset>
+		</copy>
+	</target>
+	<target name="clean">
+		<delete dir="bin" />
+		<delete dir="bin-tests" />
+	</target>
+	<target depends="clean" name="cleanall">
+		<ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="clean" />
+		<ant antfile="build.xml" dir="${datenbank.location}" inheritAll="false" target="clean" />
+		<ant antfile="build.xml" dir="${filesystem.location}" inheritAll="false" target="clean" />
+	</target>
+	<target depends="build-subprojects,build-project" name="build" />
+	<target name="build-subprojects">
+		<ant antfile="build.xml" dir="${RehaCommon.location}" inheritAll="false" target="build-project" />
+		<ant antfile="build.xml" dir="${datenbank.location}" inheritAll="false" target="build-project" />
+		<ant antfile="build.xml" dir="${filesystem.location}" inheritAll="false" target="build-project" />
+	</target>
+	<target depends="init" name="build-project">
+		<echo message="${ant.project.name}: ${ant.file}" />
+		<javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+			<src path="src" />
+			<classpath refid="OffenePosten.classpath" />
+		</javac>
+	</target>
+	<target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects">
+		<ant antfile="build.xml" dir="${Reha.location}" inheritAll="false" target="clean" />
+		<ant antfile="build.xml" dir="${Reha.location}" inheritAll="false" target="build" />
+	</target>
 </project>
