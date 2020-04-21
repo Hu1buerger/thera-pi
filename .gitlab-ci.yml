@@ -71,7 +71,7 @@ pages:
     - cd Build
     - ant CoCo-all
     - cd ..
-    - mv dist-test/reports/jacoco public/
+    - mv dist-tests/reports/jacoco public/
   artifacts:
     paths:
       - public
