@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
-public class testBuildIniTable {
+public class buildIniTableTest {
 
     public BuildIniTable buildIniTable = new BuildIniTable();
     public ProcessPanel procPanel;
