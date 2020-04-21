@@ -77,9 +77,9 @@ import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.ReaderStart;
 import CommonTools.SqlInfo;
-import rehaMail.Tools.OOTools;
-import rehaMail.Tools.ToolsDialog;
-import rehaMail.Tools.UIFSplitPane;
+import Tools.OOTools;
+import Tools.ToolsDialog;
+import Tools.UIFSplitPane;
 
 public class ToDoPanel extends JXPanel implements TableModelListener, KeyListener {
 
@@ -262,7 +262,7 @@ public class ToDoPanel extends JXPanel implements TableModelListener, KeyListene
     }
 
     /**************************************************/
-    private rehaMail.Tools.UIFSplitPane constructSplitPaneOU() {
+    private Tools.UIFSplitPane constructSplitPaneOU() {
         UIFSplitPane jSplitRechtsOU = UIFSplitPane.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, getToolsPanel(),
                 rtfEditor = new RTFEditorPanel(true, true, true)/* getOOorgPanel() */);
         jSplitRechtsOU.setOpaque(false);
@@ -1045,10 +1045,10 @@ public class ToDoPanel extends JXPanel implements TableModelListener, KeyListene
                                    .endsWith(".ODT")
                         || komplett.toUpperCase()
                                    .endsWith(".ODT")) {
-                    rehaMail.Tools.OOTools.starteWriterMitDatei(komplett.replace("//", "/"));
+                    Tools.OOTools.starteWriterMitDatei(komplett.replace("//", "/"));
                 } else if (komplett.toUpperCase()
                                    .endsWith(".ODS")) {
-                    rehaMail.Tools.OOTools.starteCalcMitDatei(komplett);
+                    Tools.OOTools.starteCalcMitDatei(komplett);
                 }
             } else {
                 String[] indatei = dateiDialog(attachmentFileName.get(RehaMail.toolsDlgRueckgabe));

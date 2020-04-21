@@ -1,4 +1,4 @@
-package rehaMail.Tools;
+package Tools;
 
 //import hauptFenster.SystemLookAndFeel;
 

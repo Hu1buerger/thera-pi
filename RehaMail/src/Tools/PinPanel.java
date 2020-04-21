@@ -1,4 +1,4 @@
-package rehaMail.Tools;
+package Tools;
 
 import java.awt.Component;
 import java.awt.Dimension;
