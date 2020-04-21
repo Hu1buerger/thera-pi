@@ -67,9 +67,9 @@ import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.ReaderStart;
 import CommonTools.SqlInfo;
-import Tools.Rechte;
-import Tools.ToolsDialog;
-import Tools.UIFSplitPane;
+import rehaMail.Tools.Rechte;
+import rehaMail.Tools.ToolsDialog;
+import rehaMail.Tools.UIFSplitPane;
 import ag.ion.bion.officelayer.NativeView;
 import ag.ion.bion.officelayer.desktop.IFrame;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
@@ -213,7 +213,7 @@ public class SendMailPanel extends JXPanel implements KeyListener {
     }
 
     /******************************************/
-    private Tools.UIFSplitPane constructSplitPaneOU() {
+    private rehaMail.Tools.UIFSplitPane constructSplitPaneOU() {
         try {
             UIFSplitPane jSplitRechtsOU = UIFSplitPane.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, getTabelle(),
                     rtfEditor = new RTFEditorPanel(false, false, false)/* getOOorgPanel() */);
@@ -353,7 +353,7 @@ public class SendMailPanel extends JXPanel implements KeyListener {
                             out.flush();
                             out.close();
                             ByteArrayInputStream ins = new ByteArrayInputStream(out.toByteArray());
-                            Tools.OOTools.starteWriterMitStream(ins, "mailprint");
+                            rehaMail.Tools.OOTools.starteWriterMitStream(ins, "mailprint");
                             ins.close();
                             return null;
                         }
@@ -952,10 +952,10 @@ public class SendMailPanel extends JXPanel implements KeyListener {
                                    .endsWith(".ODT")
                         || komplett.toUpperCase()
                                    .endsWith(".ODT")) {
-                    Tools.OOTools.starteWriterMitDatei(komplett.replace("//", "/"));
+                    rehaMail.Tools.OOTools.starteWriterMitDatei(komplett.replace("//", "/"));
                 } else if (komplett.toUpperCase()
                                    .endsWith(".ODS")) {
-                    Tools.OOTools.starteCalcMitDatei(komplett);
+                    rehaMail.Tools.OOTools.starteCalcMitDatei(komplett);
                 }
             } else {
                 String[] indatei = dateiDialog(attachmentFileName.get(RehaMail.toolsDlgRueckgabe));

@@ -18,7 +18,7 @@ import org.jdesktop.swingx.JXPanel;
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
 import CommonTools.DatFunk;
-import rehaBillEdit.RehaBillPanel;
+import offenePosten.rehaBillEdit.RehaBillPanel;
 
 public class OffenepostenTab extends JXPanel implements ChangeListener {
 

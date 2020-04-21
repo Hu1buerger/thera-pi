@@ -49,7 +49,7 @@ import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.OpShowGesamt;
 import CommonTools.SqlInfo;
-import RehaIO.SocketClient;
+import offenePosten.RehaIO.SocketClient;
 import io.RehaIOMessages;
 
 public class OffenepostenPanel extends JXPanel implements TableModelListener {

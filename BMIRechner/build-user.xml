@@ -8,14 +8,19 @@
  -->
 
 <project>
-	<!-- common settings for all projects -->	
-	<property file="../Build/build-common.properties"/>
+	<!-- common settings for all projects -->
+	<property file="../Build/build-common.properties" />
 
 	<!-- project specific settings -->
-	<property file="project.properties"/>
+	<property file="project.properties" />
 
 	<!-- common targets for all projects -->
-	<import file="../Build/build-common.xml"/>
+	<import file="../Build/build-common.xml" />
+
 	<!-- test targets for all projects -->
-	<import file="../Build/build-tests.xml"/>
+	<import file="../Build/build-tests.xml" />
+
+	<!-- coverage targets for all projects -->
+	<import file="../Build/build-jacoco.xml" />
+
 </project>

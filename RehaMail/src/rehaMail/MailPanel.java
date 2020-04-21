@@ -74,10 +74,10 @@ import CommonTools.JRtaTextField;
 import CommonTools.MitteRenderer;
 import CommonTools.ReaderStart;
 import CommonTools.SqlInfo;
-import Tools.OOTools;
-import Tools.Rechte;
-import Tools.ToolsDialog;
-import Tools.UIFSplitPane;
+import rehaMail.Tools.OOTools;
+import rehaMail.Tools.Rechte;
+import rehaMail.Tools.ToolsDialog;
+import rehaMail.Tools.UIFSplitPane;
 
 public class MailPanel extends JXPanel implements TableModelListener, KeyListener {
     /**
@@ -215,7 +215,7 @@ public class MailPanel extends JXPanel implements TableModelListener, KeyListene
         return pan;
     }
 
-    private Tools.UIFSplitPane constructSplitPaneOU() {
+    private rehaMail.Tools.UIFSplitPane constructSplitPaneOU() {
         UIFSplitPane jSplitRechtsOU = UIFSplitPane.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, getToolsPanel(),
                 rtfEditor = new RTFEditorPanel(false, false, false)/* getOOorgPanel() */);
         jSplitRechtsOU.setOpaque(false);

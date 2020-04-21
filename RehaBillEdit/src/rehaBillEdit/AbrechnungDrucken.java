@@ -217,7 +217,7 @@ public class AbrechnungDrucken {
         document = documentService.loadDocument(url, docdescript);
         /**********************/
         textDocument = (ITextDocument) document;
-        Tools.OOTools.druckerSetzen(textDocument, RehaBillEdit.hmAbrechnung.get("hmgkvrechnungdrucker"));
+        rehaBillEdit.Tools.OOTools.druckerSetzen(textDocument, RehaBillEdit.hmAbrechnung.get("hmgkvrechnungdrucker"));
         textTable = textDocument.getTextTableService()
                                 .getTextTable("Tabelle1");
         textEndbetrag = textDocument.getTextTableService()

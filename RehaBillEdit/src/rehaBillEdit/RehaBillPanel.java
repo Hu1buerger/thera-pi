@@ -39,13 +39,13 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.DatFunk;
 import CommonTools.JRtaTextField;
-import Tools.ButtonTools;
-import Tools.JCompTools;
-import Tools.JRtaCheckBox;
-import Tools.PatTools;
-import Tools.RezTools;
-import Tools.SqlInfo;
-import Tools.TableTool;
+import rehaBillEdit.Tools.ButtonTools;
+import rehaBillEdit.Tools.JCompTools;
+import rehaBillEdit.Tools.JRtaCheckBox;
+import rehaBillEdit.Tools.PatTools;
+import rehaBillEdit.Tools.RezTools;
+import rehaBillEdit.Tools.SqlInfo;
+import rehaBillEdit.Tools.TableTool;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
 import ag.ion.bion.officelayer.document.IDocument;
 import ag.ion.bion.officelayer.document.IDocumentDescriptor;
@@ -259,9 +259,9 @@ public class RehaBillPanel extends JXPanel implements ListSelectionListener, Act
                          .get(1)
                          .contains("decimal(")) {
                 tab.getColumn(i)
-                   .setCellRenderer(new Tools.DoubleTableCellRenderer());
+                   .setCellRenderer(new rehaBillEdit.Tools.DoubleTableCellRenderer());
                 tab.getColumn(i)
-                   .setCellEditor(new Tools.DblCellEditor());
+                   .setCellEditor(new rehaBillEdit.Tools.DblCellEditor());
             } else if (feldNamen.get(i)
                                 .get(1)
                                 .contains("date")) {
@@ -270,12 +270,12 @@ public class RehaBillPanel extends JXPanel implements ListSelectionListener, Act
             }
         }
         /*
-         * tab.getColumn(0).setCellRenderer(new Tools.MitteRenderer());
+         * tab.getColumn(0).setCellRenderer(new rehaBillEdit.Tools.MitteRenderer());
          * tab.getColumn(4).setCellRenderer(new Tools.MitteRenderer());
          * tab.getColumn(5).setCellRenderer(new Tools.DoubleTableCellRenderer());
          * tab.getColumn(6).setCellRenderer(new Tools.DoubleTableCellRenderer());
          * tab.getColumn(8).setCellRenderer(new Tools.DoubleTableCellRenderer());
-         * tab.getColumn(5).setCellEditor(new Tools.DblCellEditor());
+         * tab.getColumn(5).setCellEditor(new rehaBillEdit.Tools.DblCellEditor());
          * tab.getColumn(6).setCellEditor(new Tools.DblCellEditor());
          * tab.getColumn(8).setCellEditor(new Tools.DblCellEditor());
          */

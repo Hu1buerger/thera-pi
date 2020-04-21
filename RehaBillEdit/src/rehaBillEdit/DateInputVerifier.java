@@ -16,7 +16,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
-import Tools.IntegerTools;
+import rehaBillEdit.Tools.IntegerTools;
 
 public class DateInputVerifier extends InputVerifier {
     JFormattedTextField input;

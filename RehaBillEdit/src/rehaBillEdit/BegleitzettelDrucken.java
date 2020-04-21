@@ -64,7 +64,7 @@ public class BegleitzettelDrucken {
 
         /**********************/
         textDocument = (ITextDocument) document;
-        Tools.OOTools.druckerSetzen(textDocument, RehaBillEdit.hmAbrechnung.get("hmgkvrechnungdrucker"));
+        rehaBillEdit.Tools.OOTools.druckerSetzen(textDocument, RehaBillEdit.hmAbrechnung.get("hmgkvrechnungdrucker"));
     }
 
     private void ersetzePlatzhalter() {

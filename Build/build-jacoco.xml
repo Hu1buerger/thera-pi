@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:jacoco="antlib:org.jacoco.ant">
+
+	<description>
+	  Example Ant build file that demonstrates how a JaCoCo coverage report
+	  can be itegrated into an existing build in three simple steps.
+	</description>
+	<!-- This is only needed for SA xml files
+	<import file="./build.xml"/>
+	-->
+
+	<property name="src.dir" location="./src" />
+	<property name="srctests.dir" location="./tests" />
+	<property name="result.dir" location="../bin-tests" />
+	<property name="result.classes.dir" location="${result.dir}/${projektname}" />
+	<property name="result.report.dir" location="../dist-tests/reports/jacoco" />
+	<property name="result.exec.file" location="${result.dir}/${projektname}-jacoco.exec" />
+
+	<path id="jacoco.compile.classpath">
+		<path refid="${projektname}.classpath" />
+		<path refid="tests.classpath" />
+		<pathelement location="${result.dir}" />
+		<pathelement location="${dir.tests.binary.lib}/jacoco/jacocoant.jar" />
+	</path>
+	<path id="jacoco.test.classpath">
+		<path refid="jacoco.compile.classpath" />
+		<pathelement location="${result.classes.dir}" />
+	</path>
+
+	<!-- Step 1: Import JaCoCo Ant tasks -->
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		<classpath refid="jacoco.compile.classpath" />
+	</taskdef>
+
+	<target name="compile-cov">
+		<ant dir="../bin-tests" antfile="../${projektname}/build.xml" target="build-subprojects" />
+		<mkdir dir="${result.classes.dir}" />
+		<mkdir dir="${result.dir}" />
+		<javac srcdir="${src.dir}" destdir="${result.classes.dir}" debug="true" includeantruntime="false">
+			<classpath refid="jacoco.compile.classpath" />
+		</javac>
+	</target>
+
+	<target depends="compile-cov" name="compile-tests-cov">
+		<mkdir dir="${result.classes.dir}" />
+		<javac srcdir="${srctests.dir}" destdir="${result.classes.dir}" debug="true" includeantruntime="false">
+			<classpath refid="jacoco.compile.classpath" />
+		</javac>
+	</target>
+
+	<target name="test-cov" depends="compile-tests-cov">
+		<!-- Step 2: Wrap test execution with the JaCoCo coverage task -->
+		<jacoco:coverage destfile="${result.exec.file}">
+			<junit dir="${basedir}" fork="true" forkmode="once" maxmemory="128m" includeAntRuntime="true">
+				<classpath refid="jacoco.test.classpath" />
+				<formatter type="plain" />
+				<formatter type="xml" />
+				<batchtest todir="${result.dir}">
+					<fileset dir="${result.classes.dir}">
+						<filename name="**/*Test.class" />
+					</fileset>
+				</batchtest>
+			</junit>
+		</jacoco:coverage>
+	</target>
+
+	<target name="check-exec-exists">
+		<available file="${result.exec.file}" property="exec.found"/>
+	</target>
+
+	<target name="report-cov" depends="check-exec-exists, test-cov" if="exec.found">
+		<!-- Step 3: Create coverage report -->
+		<jacoco:report>
+			<!-- This task needs the collected execution data and ... -->
+			<executiondata>
+				<file file="${result.exec.file}" />
+			</executiondata>
+
+			<!-- the class files and optional source files ... -->
+			<structure name="${projektname}">
+				<classfiles>
+					<!-- <fileset dir="${result.classes.dir}"> -->
+					<fileset dir="${result.dir}/${projektname}">
+						<exclude name="**/*$*.class" />
+						<exclude name="**/*Test.class" />
+					</fileset>
+				</classfiles>
+				<sourcefiles encoding="UTF-8">
+					<fileset dir="${src.dir}" />
+				</sourcefiles>
+			</structure>
+
+			<!-- to produce reports in different formats. -->
+			<html destdir="${result.report.dir}" />
+			<csv destfile="${result.report.dir}/report.csv" />
+			<xml destfile="${result.report.dir}/report.xml" />
+		</jacoco:report>
+		<!-- Copy sources for merged report -->
+		<copy todir="${result.dir}">
+			<fileset dir="${src.dir}" />
+		</copy>
+	</target>
+
+	<target name="rebuild-cov" depends="init,compile-cov,test-cov,check-exec-exists,report-cov" if="exec.found" />
+
+	<target name="merge-cov">
+		<jacoco:merge destfile="${result.dir}/merged.exec">
+                        <fileset dir="${result.dir}" includes="*.exec" />
+                </jacoco:merge>
+                <echo message="Running accumulated report" />
+                <jacoco:report>
+                        <!-- This task needs the collected execution data and ... -->
+                        <executiondata>
+                                <file file="${result.dir}/merged.exec" />
+                        </executiondata>
+
+                        <!-- the class files and optional source files ... -->
+                        <structure name="Thera-Pi">
+                                <classfiles>
+                                        <!-- <fileset dir="${result.classes.dir}"> -->
+                                        <fileset dir="${result.dir}">
+                                                <exclude name="**/*$*.class" />
+                                                <exclude name="**/*Test.class" />
+                                        </fileset>
+                                </classfiles>
+                                <sourcefiles encoding="UTF-8">
+					<!--
+                                        <fileset dir="${src.dir}" />
+					-->
+					<fileset dir="${result.dir}">
+						<include name="**/*.java" />
+						<exclude name="**/*Test.java" />
+					</fileset>
+                                </sourcefiles>
+                        </structure>
+
+                        <!-- to produce reports in different formats. -->
+                        <html destdir="${result.report.dir}" />
+                        <csv destfile="${result.report.dir}/report.csv" />
+                        <xml destfile="${result.report.dir}/report.xml" />
+                </jacoco:report>
+
+	</target>
+
+</project>

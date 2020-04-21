@@ -58,7 +58,7 @@ import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
-import RehaIO.SocketClient;
+import rehaMail.RehaIO.SocketClient;
 import ag.ion.bion.officelayer.NativeView;
 import ag.ion.bion.officelayer.desktop.IFrame;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;

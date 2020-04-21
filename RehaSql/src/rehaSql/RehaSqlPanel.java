@@ -59,7 +59,7 @@ import CommonTools.OOTools;
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
 import CommonTools.ini.INITool;
-import RehaIO.SocketClient;
+import rehaSql.RehaIO.SocketClient;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
 import ag.ion.bion.officelayer.document.IDocument;

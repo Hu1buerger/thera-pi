@@ -5,7 +5,7 @@ variables:
   MYSQL_DATABASE: therapi
   MYSQL_USER: therapi
   MYSQL_PASSWORD: therapie
-  THERAPIHOME: ../Files/tests/resources
+  THERAPIHOME: ../Files/tests/resources/
 
 
 
@@ -23,6 +23,8 @@ before_script:
 stages:
   - build
   - test
+  - dist
+  - deploy
 
 ci_build:
   stage: build
@@ -33,6 +35,7 @@ ci_build:
   artifacts:
     paths:
       - ./*/bin
+      - ./*/bin-tests
     expire_in: 1 week
 
 ci_test:
@@ -54,5 +57,39 @@ ci_test:
       - dist-tests/*/TEST-*.xml
       - dist-tests/TEST-*.txt
       - dist-tests/*/TEST-*.txt
+      - dist-tests/reports
     reports:
-      junit: dist-tests/*/TEST-*.xml
+      junit: dist-tests/reports/TESTS-TestSuites.xml
+
+pages:
+  stage: deploy
+  dependencies:
+    - ci_test
+  script:
+    - mkdir -p public/
+    - mv dist-tests/reports/html public/junit
+    - cd Build
+    - ant CoCo-all
+    - cd ..
+    - mv dist-test/reports/jacoco public/
+  artifacts:
+    paths:
+      - public
+    expire_in: 30 days
+  only:
+    - master
+      
+ci_dist:
+  stage: dist
+  rules:
+    - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "entwicklung"'
+      when: always
+    - when: never
+  script:
+    - cd Build
+    - ant dist
+  artifacts:
+    expire_in: 2 weeks
+    when: on_success
+    paths:
+      - dist/*

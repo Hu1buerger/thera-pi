@@ -59,7 +59,7 @@ import CommonTools.RgAfVkSelect;
 import CommonTools.RgAfVk_IfCallBack;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
-import RehaIO.SocketClient;
+import opRgaf.RehaIO.SocketClient;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.document.DocumentDescriptor;
 import ag.ion.bion.officelayer.document.IDocument;

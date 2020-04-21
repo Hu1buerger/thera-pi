@@ -16,7 +16,7 @@ import org.jdesktop.swingworker.SwingWorker;
 
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
-import Tools.SystemPreislisten;
+import rehaStatistik.Tools.SystemPreislisten;
 import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import logging.Logging;

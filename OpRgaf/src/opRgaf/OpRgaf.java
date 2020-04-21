@@ -17,8 +17,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
-import RehaIO.RehaReverseServer;
-import RehaIO.SocketClient;
+import opRgaf.RehaIO.RehaReverseServer;
+import opRgaf.RehaIO.SocketClient;
 import ag.ion.bion.officelayer.application.IOfficeApplication;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import environment.Path;
