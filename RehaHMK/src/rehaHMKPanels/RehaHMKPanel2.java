@@ -94,7 +94,7 @@ import ag.ion.noa.graphic.GraphicInfo;
 import ag.ion.noa.search.ISearchDescriptor;
 import ag.ion.noa.search.ISearchResult;
 import ag.ion.noa.search.SearchDescriptor;
-import rehaHMK.dialoge.ArztAuswahl;
+import dialoge.ArztAuswahl;
 import environment.Path;
 import io.RehaIOMessages;
 import rehaHMK.RehaHMK;
