@@ -77,7 +77,7 @@ pages:
       - public
     expire_in: 30 days
   only:
-    - master
+    - entwicklung
       
 ci_dist:
   stage: dist
