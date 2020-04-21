@@ -1,4 +1,4 @@
-package rehaHMK.dialoge;
+package dialoge;
 
 import java.util.EventObject;
 

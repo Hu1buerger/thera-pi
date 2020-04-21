@@ -1,4 +1,4 @@
-package rehaHMK.Tools;
+package Tools;
 
 import org.jdesktop.swingx.treetable.DefaultMutableTreeTableNode;
 
