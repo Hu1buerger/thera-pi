@@ -5,7 +5,7 @@ variables:
   MYSQL_DATABASE: therapi
   MYSQL_USER: therapi
   MYSQL_PASSWORD: therapie
-  THERAPIHOME: ../Files/tests/resources/
+  THERAPIHOME: ../Files/tests/resources
 
 
 

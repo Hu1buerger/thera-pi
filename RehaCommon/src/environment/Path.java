@@ -48,10 +48,15 @@ public enum Path {
 
         Optional<String> therapihome = Optional.ofNullable(System.getenv(THERAPIHOME));
         if (therapihome.isPresent()) {
+            String envHome = therapihome.get();
+            
+            if (!envHome.endsWith(File.separator)) {
+                envHome += File.separator;
+            }
             setProghome(therapihome.get());
 
         } else if (iniExistsInUserDir()) {
-            setProghome(System.getProperty("user.dir")+ File.separator);
+            setProghome(System.getProperty("user.dir") + File.separator);
 
         } else {
             theoldway();
