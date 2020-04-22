@@ -18,7 +18,6 @@
 	<property name="Nebraska.location" value="../Nebraska" />
 	<property name="ICDSuche.location" value="../ICDSuche" />
 	<property name="ArztBaustein.location" value="../ArztBaustein" />
-	<property name="filesystem.location" value="../filesystem" />
 	<property name="OpRgaf.location" value="../OpRgaf" />
 	<property name="OffenePosten.location" value="../OffenePosten" />
 	<property name="smartcard.location" value="../smartcard" />
@@ -241,9 +240,6 @@
 		<pathelement
 			location="${Libraries.location}/lib/logging/logback-core-1.2.3.jar" />
 	</path>
-	<path id="filesystem.classpath">
-		<pathelement location="${filesystem.location}/bin" />
-	</path>
 	<path id="OpRgaf.classpath">
 		<pathelement location="${OpRgaf.location}/bin" />
 		<pathelement location="${OpRgaf.location}/bin-tests" />
@@ -267,7 +263,6 @@
 		<pathelement
 			location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
 		<path refid="datenbank.classpath" />
-		<path refid="filesystem.classpath" />
 		<pathelement
 			location="${Libraries.location}/lib/logging/logback-classic-1.2.3.jar" />
 		<pathelement
@@ -322,7 +317,6 @@
 			location="${Libraries.location}/lib/openofficeorg/sandbox.jar" />
 		<path refid="RehaCommon.classpath" />
 		<path refid="datenbank.classpath" />
-		<path refid="filesystem.classpath" />
 	</path>
 	<path id="RehaWissen.classpath">
 		<pathelement location="${RehaWissen.location}/bin" />
@@ -496,8 +490,6 @@
 			inheritAll="false" target="clean" />
 		<ant antfile="build.xml" dir="${ArztBaustein.location}"
 			inheritAll="false" target="clean" />
-		<ant antfile="build.xml" dir="${filesystem.location}"
-			inheritAll="false" target="clean" />
 		<ant antfile="build.xml" dir="${OpRgaf.location}"
 			inheritAll="false" target="clean" />
 		<ant antfile="build.xml" dir="${OffenePosten.location}"
@@ -524,8 +516,6 @@
 		<ant antfile="build.xml" dir="${ICDSuche.location}"
 			inheritAll="false" target="build-project" />
 		<ant antfile="build.xml" dir="${ArztBaustein.location}"
-			inheritAll="false" target="build-project" />
-		<ant antfile="build.xml" dir="${filesystem.location}"
 			inheritAll="false" target="build-project" />
 		<ant antfile="build.xml" dir="${OpRgaf.location}"
 			inheritAll="false" target="build-project" />

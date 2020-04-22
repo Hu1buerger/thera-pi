@@ -9,7 +9,6 @@
 	<property name="Reha.location" value="../Reha" />
 	<property name="RehaCommon.location" value="../RehaCommon" />
 	<property name="datenbank.location" value="../datenbank" />
-	<property name="filesystem.location" value="../filesystem" />
 	<property name="debuglevel" value="source,lines,vars" />
 	<property name="target" value="1.8" />
 	<property name="source" value="1.8" />
@@ -70,9 +69,6 @@
 		<pathelement
 			location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
 	</path>
-	<path id="filesystem.classpath">
-		<pathelement location="${filesystem.location}/bin" />
-	</path>
 	<path id="OffenePosten.classpath">
 		<pathelement location="bin" />
 		<pathelement location="bin-tests" />
@@ -118,7 +114,6 @@
 			location="${Libraries.location}/lib/openofficeorg/sandbox.jar" />
 		<path refid="RehaCommon.classpath" />
 		<path refid="datenbank.classpath" />
-		<path refid="filesystem.classpath" />
 	</path>
 	<import file="build-user.xml" />
 	<target name="init">
@@ -146,16 +141,12 @@
 			inheritAll="false" target="clean" />
 		<ant antfile="build.xml" dir="${datenbank.location}"
 			inheritAll="false" target="clean" />
-		<ant antfile="build.xml" dir="${filesystem.location}"
-			inheritAll="false" target="clean" />
 	</target>
 	<target depends="build-subprojects,build-project" name="build" />
 	<target name="build-subprojects">
 		<ant antfile="build.xml" dir="${RehaCommon.location}"
 			inheritAll="false" target="build-project" />
 		<ant antfile="build.xml" dir="${datenbank.location}"
-			inheritAll="false" target="build-project" />
-		<ant antfile="build.xml" dir="${filesystem.location}"
 			inheritAll="false" target="build-project" />
 	</target>
 	<target depends="init" name="build-project">
