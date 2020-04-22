@@ -65,7 +65,7 @@
 	</target>
 
 	<target name="check-exec-exists">
-		<available file="${result.exec.file}" property="exec.found"/>
+		<available file="${result.exec.file}" property="exec.found" />
 	</target>
 
 	<target name="report-cov" depends="check-exec-exists, test-cov" if="exec.found">
@@ -105,25 +105,25 @@
 
 	<target name="merge-cov">
 		<jacoco:merge destfile="${result.dir}/merged.exec">
-                        <fileset dir="${result.dir}" includes="*.exec" />
-                </jacoco:merge>
-                <echo message="Running accumulated report" />
-                <jacoco:report>
-                        <!-- This task needs the collected execution data and ... -->
-                        <executiondata>
-                                <file file="${result.dir}/merged.exec" />
-                        </executiondata>
+			<fileset dir="${result.dir}" includes="*.exec" />
+		</jacoco:merge>
+		<echo message="Running accumulated report" />
+		<jacoco:report>
+			<!-- This task needs the collected execution data and ... -->
+			<executiondata>
+				<file file="${result.dir}/merged.exec" />
+			</executiondata>
 
-                        <!-- the class files and optional source files ... -->
-                        <structure name="Thera-Pi">
-                                <classfiles>
-                                        <!-- <fileset dir="${result.classes.dir}"> -->
-                                        <fileset dir="${result.dir}">
-                                                <exclude name="**/*$*.class" />
-                                                <exclude name="**/*Test.class" />
-                                        </fileset>
-                                </classfiles>
-                                <sourcefiles encoding="UTF-8">
+			<!-- the class files and optional source files ... -->
+			<structure name="Thera-Pi">
+				<classfiles>
+					<!-- <fileset dir="${result.classes.dir}"> -->
+					<fileset dir="${result.dir}">
+						<exclude name="**/*$*.class" />
+						<exclude name="**/*Test.class" />
+					</fileset>
+				</classfiles>
+				<sourcefiles encoding="UTF-8">
 					<!--
                                         <fileset dir="${src.dir}" />
 					-->
@@ -131,15 +131,20 @@
 						<include name="**/*.java" />
 						<exclude name="**/*Test.java" />
 					</fileset>
-                                </sourcefiles>
-                        </structure>
+				</sourcefiles>
+			</structure>
 
-                        <!-- to produce reports in different formats. -->
-                        <html destdir="${result.report.dir}" />
-                        <csv destfile="${result.report.dir}/report.csv" />
-                        <xml destfile="${result.report.dir}/report.xml" />
-                </jacoco:report>
+			<!-- to produce reports in different formats. -->
+			<html destdir="${result.report.dir}" />
+			<csv destfile="${result.report.dir}/report.csv" />
+			<xml destfile="${result.report.dir}/report.xml" />
+		</jacoco:report>
 
+	</target>
+
+	<!-- Lets make Eclipse happy again -->
+	<target name="init">
+		<ant antfile="../${projektname}/build.xml" target="init" />
 	</target>
 
 </project>
