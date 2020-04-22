@@ -53,7 +53,7 @@ public enum Path {
             if (!envHome.endsWith(File.separator)) {
                 envHome += File.separator;
             }
-            setProghome(therapihome.get());
+            setProghome(envHome);
 
         } else if (iniExistsInUserDir()) {
             setProghome(System.getProperty("user.dir") + File.separator);
