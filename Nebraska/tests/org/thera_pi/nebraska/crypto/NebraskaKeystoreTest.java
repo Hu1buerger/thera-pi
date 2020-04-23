@@ -10,6 +10,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.junit.Before;
+import org.junit.Test;
 
 public class NebraskaKeystoreTest {
     private static final String personName = "Max Mustermann";
@@ -32,6 +33,7 @@ public class NebraskaKeystoreTest {
                 institutionName, personName);
     }
 
+    @Test
     public void testGenerateKeyPair()
             throws NebraskaCryptoException, NebraskaFileException, NebraskaNotInitializedException {
         assertFalse(nebraskaKeystore.hasPrivateKey());
@@ -39,6 +41,7 @@ public class NebraskaKeystoreTest {
         assertTrue(nebraskaKeystore.hasPrivateKey());
     }
 
+    @Test
     public void testCreateCertificateRequest()
             throws NebraskaCryptoException, NebraskaFileException, IOException, NebraskaNotInitializedException {
         StringBuffer md5Hash = new StringBuffer();
@@ -58,6 +61,7 @@ public class NebraskaKeystoreTest {
 //        assertEquals("", md5Hash.toString());
     }
 
+    @Test
     public void testGetPublicKeyMD5()
             throws NebraskaCryptoException, NebraskaFileException, NebraskaNotInitializedException {
         assertFalse(nebraskaKeystore.hasPrivateKey());

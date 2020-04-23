@@ -50,7 +50,9 @@
 			<formatter type="plain" />
 			<formatter type="xml" />
 			<batchtest todir="${junit.batchtest.todir}">
-				<fileset dir="${tests-classdir}" />
+				<fileset dir="${tests-classdir}">
+					<exclude name="**/*$*.class"/>
+				</fileset>
 			</batchtest>
 		</junit>
 	</target>
