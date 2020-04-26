@@ -3,7 +3,7 @@
 mkdir -p ../dist/latest
 cp ../public/latest.template ../dist/latest/latest.html
 cat >>../dist/latest/latest.html <<EOF
-<p><a href="https://kwinner2.gitlab.io/thera-pi/latest/latest-jars-nolibs.zip">Latest project jar files</a></p>
+<p><a href="https://thera-pi.gitlab.io/thera-pi/latest/latest-jars-nolibs.zip">Latest project jar files</a></p>
 
 <table>
 <tr><TD>Build-Date</TD><TD>$(date)</TD></tr>
