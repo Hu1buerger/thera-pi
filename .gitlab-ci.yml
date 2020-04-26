@@ -15,7 +15,7 @@ before_script:
   - ls -al /usr/bin/java || true
   - which java || true
   - ls -al /etc/alternatives/java || true
-  - apt-get -y install ant
+  - apt-get -y install ant zip
   - ls -al /etc/alternatives/java ||true
   - update-alternatives --query java || true
   
@@ -65,13 +65,20 @@ pages:
   stage: deploy
   dependencies:
     - ci_test
+    - ci_dist
   script:
-    - mkdir -p public/
+    - mkdir -p public/latest
     - mv dist-tests/reports/html public/junit
     - cd Build
     - ant CoCo-all
+    - ant jars
+    - ant copyfiles
+    - ./make-latest-html.sh
     - cd ..
     - mv dist-tests/reports/jacoco public/
+    - zip -9r latest-jars-nolibs.zip dist/*.jar dist/latest.html
+    - mv latest-jars-nolibs.zip public/latest
+    - cp dist/latest/latest.html public/latest/index.html
   artifacts:
     paths:
       - public

@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Latest build of Thera-&pi;</title>
+  <meta charset="UTF-8">
+  <style>
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 10px;
+}
+</style>
+</head>
+<body>
+
