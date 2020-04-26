@@ -76,7 +76,7 @@ pages:
     - ./make-latest-html.sh
     - cd ..
     - mv dist-tests/reports/jacoco public/
-    - zip -9r latest-jars-nolibs.zip dist/*.jar dist/latest.html
+    - zip -9r latest-jars-nolibs.zip dist/*.jar dist/latest/latest.html
     - mv latest-jars-nolibs.zip public/latest
     - cp dist/latest/latest.html public/latest/index.html
   artifacts:
