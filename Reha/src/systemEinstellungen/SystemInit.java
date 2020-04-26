@@ -732,7 +732,7 @@ public class SystemInit extends JXPanel implements TreeSelectionListener {
                 }
                 JOptionPane.showMessageDialog(null,
                         "<html><b>Achtung!!!!</b><br>Wenn Sie mit dem INI-Editor eine INI-Datei verändern oder neu erstellen,<br>wirkt sich die jeweilige Änderung erst dann aus wenn Sie<br><b>Thera-Pi neu starten!</b></html>");
-                new LadeProg(Path.Instance.getProghome() + "RehaIniedit.jar " + " " + Path.Instance.getProghome() + " "
+                new LadeProg(Path.Instance.getProghome() + "RehaIniedit.jar" + " " + Path.Instance.getProghome() + " "
                         + Reha.getAktIK());
                 cursorWait(false);
                 setHeader("dummy");

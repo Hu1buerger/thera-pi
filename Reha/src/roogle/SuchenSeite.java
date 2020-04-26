@@ -1644,7 +1644,7 @@ public class SuchenSeite extends JXPanel
             bw.close();
             out.close();
             outputFile.close();
-            new LadeProg(Path.Instance.getProghome() + "FahrdienstExporter.jar " + Path.Instance.getProghome() + "ini/"
+            new LadeProg(Path.Instance.getProghome() + "FahrdienstExporter.jar" + " " + Path.Instance.getProghome() + "ini/"
                     + Reha.getAktIK() + "/rehajava.ini");
         } catch (Exception ex) {
             ex.printStackTrace();

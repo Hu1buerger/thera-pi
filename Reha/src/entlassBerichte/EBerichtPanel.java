@@ -2358,7 +2358,7 @@ public class EBerichtPanel extends JXPanel implements ChangeListener, RehaEventL
                 SwingUtilities.invokeLater(new ICDrahmen(connection));
                 break;
             case 3:
-                new LadeProg(Path.Instance.getProghome() + "RehaOCR.jar " + " " + Path.Instance.getProghome() + " "
+                new LadeProg(Path.Instance.getProghome() + "RehaOCR.jar" + " " + Path.Instance.getProghome() + " "
                         + Reha.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport)));
                 break;
             case 4:

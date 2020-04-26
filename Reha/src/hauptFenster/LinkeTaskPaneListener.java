@@ -216,7 +216,7 @@ final class LinkeTaskPaneListener implements ActionListener {
                 @Override
                 public void run() {
 
-                    new LadeProg(Path.Instance.getProghome() + "piHelp.jar " + Path.Instance.getProghome() + " "
+                    new LadeProg(Path.Instance.getProghome() + "piHelp.jar" + " " + Path.Instance.getProghome() + " "
                             + Reha.getAktIK());
                 }
             }.start();

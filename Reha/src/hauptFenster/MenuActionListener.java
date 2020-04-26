@@ -205,7 +205,7 @@ final class MenuActionListener implements ActionListener {
                 });
                 return;
             }
-            new LadeProg(Path.Instance.getProghome() + "Reha301.jar " + " " + Path.Instance.getProghome() + " "
+            new LadeProg(Path.Instance.getProghome() + "Reha301.jar" + " " + Path.Instance.getProghome() + " "
                     + Reha.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport)));
             return;
         case "workflow":
@@ -222,7 +222,7 @@ final class MenuActionListener implements ActionListener {
                 });
                 return;
             }
-            new LadeProg(Path.Instance.getProghome() + "WorkFlow.jar " + " " + Path.Instance.getProghome() + " "
+            new LadeProg(Path.Instance.getProghome() + "WorkFlow.jar" + " " + Path.Instance.getProghome() + " "
                     + Reha.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport)));
             return;
         case "hmrsearch":
@@ -244,7 +244,7 @@ final class MenuActionListener implements ActionListener {
                 });
                 return;
             }
-            new LadeProg(Path.Instance.getProghome() + "RehaHMK.jar " + " " + Path.Instance.getProghome() + " "
+            new LadeProg(Path.Instance.getProghome() + "RehaHMK.jar" + " " + Path.Instance.getProghome() + " "
                     + Reha.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport))
                     + (reha.patpanel != null ? " " + reha.patpanel.vecaktrez.get(1) : ""));
             // System.out.println("Übergebe Rezeptnummer:
@@ -255,11 +255,11 @@ final class MenuActionListener implements ActionListener {
             if (!Rechte.hatRecht(Rechte.Sonstiges_sqlmodul, true)) {
                 return;
             }
-            new LadeProg(Path.Instance.getProghome() + "RehaIniedit.jar " + " " + Path.Instance.getProghome() + " "
+            new LadeProg(Path.Instance.getProghome() + "RehaIniedit.jar" + " " + Path.Instance.getProghome() + " "
                     + Reha.getAktIK());
             return;
         case "ocr":
-            new LadeProg(Path.Instance.getProghome() + "RehaOCR.jar " + " " + Path.Instance.getProghome() + " "
+            new LadeProg(Path.Instance.getProghome() + "RehaOCR.jar" + " " + Path.Instance.getProghome() + " "
                     + Reha.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport)));
             return;
         }
