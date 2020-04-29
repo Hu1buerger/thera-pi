@@ -20,6 +20,7 @@ import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
+import commonData.Rezeptvector;
 import core.Disziplin;
 import environment.Path;
 import hauptFenster.Reha;
@@ -998,6 +999,14 @@ public class RezTools {
         boolean u18Test = false;
         boolean bMitJahresWechsel = false;
         ZuzahlModell zm = new ZuzahlModell();
+        Rezeptvector myRezept = new Rezeptvector();
+        myRezept.setVec_rez(Reha.instance.patpanel.vecaktrez);
+        String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
+        boolean warImVorjahrBefreit = Reha.instance.patpanel.patDaten.get(69)
+                                                                     .trim()
+                                                                     .equals(SystemConfig.vorJahr);
+        boolean istBefreit = Reha.instance.patpanel.patDaten.get(30)
+                                                            .equals("T");
 
         // 1. Schritt haben wir bereits Termineintr�ge die man auswerten kann
         if ((vAktTermine = holeEinzelTermineAusRezept("", termine)).size() > 0) {
@@ -1008,8 +1017,7 @@ public class RezTools {
                            .equals(SystemConfig.vorJahr)) {
                 bMitJahresWechsel = true;
             }
-            if (DatFunk.Unter18(vAktTermine.get(0), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)))) {
-                // System.out.println(vAktTermine);
+            if (DatFunk.Unter18(vAktTermine.get(0), geburtstag)) {
                 u18Test = true;
             }
 
@@ -1017,13 +1025,13 @@ public class RezTools {
 
         for (int i = 0; i < 1; i++) {
 
-            if (Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(63))) <= 0) {
+            if (myRezept.getZzRegel() <= 0) {
                 // Kasse erfordert keine Zuzahlung
                 zm.allefrei = true;
                 iret = 0;
                 break;
             }
-            if (Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(39))) == 1) {
+            if (Integer.parseInt((myRezept.getZzStat())) == 1) {
                 // Hat bereits bezahlt normal behandeln (zzstatus == 1)
                 zm.allezuzahl = true;
                 iret = 2;
@@ -1032,14 +1040,11 @@ public class RezTools {
             /************************
              * Jetzt der Ober-Scheißdreck für den Achtzehner-Test
              ***********************/
-            if ((Reha.instance.patpanel.vecaktrez.get(60)
-                                                 .equals("T"))
-                    || (u18Test)) {
+            if (myRezept.getUnter18() || (u18Test)) {
                 // Es ist ein unter 18 Jahre Test notwendig
                 if (bTermine) {
 
-                    int[] test = ZuzahlTools.terminNachAchtzehn(vAktTermine,
-                            DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
+                    int[] test = ZuzahlTools.terminNachAchtzehn(vAktTermine, geburtstag);
                     if (test[0] > 0) {
                         // muß zuzahlen
 
@@ -1068,7 +1073,6 @@ public class RezTools {
                 } else {
                     // Es stehen keine Termine für Analyse zur Verfügung also muß das Fenster für
                     // manuelle Eingabe geöffnet werden!!
-                    String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
                     String stichtag = DatFunk.sHeute()
                                              .substring(0, 6)
                             + Integer.valueOf(Integer.valueOf(SystemConfig.aktJahr) - 18)
@@ -1091,31 +1095,21 @@ public class RezTools {
             /************************
              * Keine Befreiung Aktuell und keine Vorjahr (Normalfall)
              ************************/
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("F")
-                    && (Reha.instance.patpanel.patDaten.get(69)
-                                                       .trim()
-                                                       .equals(""))) {
+            if (!istBefreit && !warImVorjahrBefreit) {
                 iret = 2;
                 break;
             }
             /************************
              * Aktuell befreit und im Vorjahr auch befreit
              ************************/
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("T")
-                    && (!Reha.instance.patpanel.patDaten.get(69)
-                                                        .equals(""))) {
+            if (istBefreit && warImVorjahrBefreit) {
                 iret = 0;
                 break;
             }
             /************************
              * aktuell nicht frei, Vorjahr frei
              ************************/
-            if ((Reha.instance.patpanel.patDaten.get(30)
-                                                .equals("F"))
-                    && (!Reha.instance.patpanel.patDaten.get(69)
-                                                        .equals(""))) {
+            if (!istBefreit && warImVorjahrBefreit) {
                 if (!bMitJahresWechsel) {// Alle Termine aktuell
                     iret = 2;
                 } else {// es gibt Termine im Vorjahr
@@ -1174,11 +1168,7 @@ public class RezTools {
             /************************
              * Aktuelle Befreiung aber nicht im Vorjahr
              ************************/
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("T")
-                    && (Reha.instance.patpanel.vecaktrez.get(59)
-                                                        .trim()
-                                                        .equals(""))) {
+            if (istBefreit && !warImVorjahrBefreit) {
                 if (!bMitJahresWechsel) {// Alle Termine aktuell
                     iret = 0;
                 } else {// es gibt Termine im Vorjahr
