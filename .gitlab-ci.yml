@@ -1,4 +1,7 @@
-image: openjdk:8
+# The origibal image (installs openJDK-11 as dep of ant):
+# image: openjdk:8
+# Astrid found this image containing real Oracle-JDK-8:
+image: tomsontom/oracle-java8-mvn:latest
 
 variables:
   MYSQL_ROOT_PASSWORD: root

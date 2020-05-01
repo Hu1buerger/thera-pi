@@ -24,7 +24,7 @@ public class UpdateConfig {
 
     private static String proghome = Path.Instance.getProghome();
 
-    private UpdateConfig() {
+    public UpdateConfig() {
         readIniFile();
     }
 
@@ -71,19 +71,19 @@ public class UpdateConfig {
         }
     }
 
-    String getUpdateDir() {
+    public String getUpdateDir() {
         return updateDir;
     }
 
-    String getUpdateHost() {
+    public String getUpdateHost() {
         return updateHost;
     }
 
-    String getUpdateUser() {
+    public String getUpdateUser() {
         return updateUser;
     }
 
-    String getUpdatePasswd() {
+    public String getUpdatePasswd() {
         return updatePasswd;
     }
 
