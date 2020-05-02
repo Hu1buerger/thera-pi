@@ -390,7 +390,7 @@ public class AbrechnungGKV extends JXPanel {
             aktuellerPat = "";
         }
         if (neueReznr != null) { // Rezept zum Baum hinzufügen
-            if (!aktDisziplin.equals(RezTools.putRezNrGetDisziplin(neueReznr))) {
+            if (!aktDisziplin.equals(RezTools.getDisziplinFromRezNr(neueReznr))) {
                 doEinlesen(null, neueReznr); // andere Disziplin -> Kassenbaum neu aufbauen
             } else {
                 directCall = true; // in Baum der akt. Disziplin einsortieren

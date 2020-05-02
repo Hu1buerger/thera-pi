@@ -861,7 +861,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                          * diszis[Reha.instance.abrechnungpanel.cmbDiszi.getSelectedIndex()];
                          */
                         String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
-                        if (RezTools.putRezNrGetDisziplin(rez_nr)
+                        if (RezTools.getDisziplinFromRezNr(rez_nr)
                                     .equals(aktDisziplin)) {
                             Reha.instance.abrechnungpanel.einlesenErneuern(rez_nr);
                         }

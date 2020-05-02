@@ -398,7 +398,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         name = "";
         if (!this.reznr.equals("")) {
             name = this.reznr;
-            this.disziplin = RezTools.putRezNrGetDisziplin(name.substring(0, 2));
+            this.disziplin = RezTools.getDisziplinFromRezNr(name.substring(0, 2));
         } else {
             name = "ohne Rezeptbezug";
         }
@@ -1022,13 +1022,13 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
                  * SystemConfig.hmAdrBDaten.put("<Blang4>",SystemConfig.hmAdrRDaten.get(
                  * "<Rposition4>"));
                  */
-                String diszi = RezTools.putRezNrGetDisziplin(reznr);
+                String diszi = RezTools.getDisziplinFromRezNr(reznr);
                 regleBHashMap(diszi, Reha.instance.patpanel.vecaktrez.get(41), Reha.instance.patpanel.vecaktrez.get(8),
                         Reha.instance.patpanel.vecaktrez.get(9), Reha.instance.patpanel.vecaktrez.get(10),
                         Reha.instance.patpanel.vecaktrez.get(11));
             } else {
                 //
-                String diszi = RezTools.putRezNrGetDisziplin(reznr);
+                String diszi = RezTools.getDisziplinFromRezNr(reznr);
                 Vector<Vector<String>> veclza = SqlInfo.holeFelder("select termine,preisgruppe,anzahl1,anzahl2,"
                         + "anzahl3,anzahl4,art_dbeh1,art_dbeh2,art_dbeh3,art_dbeh4 from verordn where rez_nr='" + reznr
                         + "' LIMIT 1");

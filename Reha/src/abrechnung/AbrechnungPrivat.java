@@ -151,7 +151,7 @@ public class AbrechnungPrivat extends JXDialog
          * preisliste = SystemPreislisten.hmPreise.get(disziplin).get(ipg); preisok =
          * true; return null; } }.execute();
          */
-        disziplin = RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+        disziplin = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
         preisliste = SystemPreislisten.hmPreise.get(disziplin)
                                                .get(ipg);
         preisok = true;

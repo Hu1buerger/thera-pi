@@ -108,7 +108,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             dieseVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
             verordnenderArzt.init(dieseVO.getArztId());
             
-            String diszi = RezTools.putRezNrGetDisziplin(dieseVO.getRezClass());
+            String diszi = RezTools.getDisziplinFromRezNr(dieseVO.getRezClass());
             int prgruppe = 0;
             try {
                 prgruppe = Integer.parseInt(dieseVO.getPreisgruppe())-1;
