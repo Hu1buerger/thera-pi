@@ -1,11 +1,13 @@
 package systemEinstellungen;
 
-import java.util.Arrays;
+import java.io.File;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Vector;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
@@ -16,13 +18,7 @@ import hauptFenster.Reha;
 
 public class SystemPreislisten {
 
-
-
-
-
-
-
-
+    private static final Logger logger = LoggerFactory.getLogger(SystemPreislisten.class);
 
     public static HashMap<String, Vector<Vector<Vector<String>>>> hmPreise = new HashMap<String, Vector<Vector<Vector<String>>>>();
 
@@ -45,13 +41,14 @@ public class SystemPreislisten {
 
     public static HashMap<String, Vector<String>> hmBerichtRegeln = new HashMap<String, Vector<String>>();
 
+    public static HashMap<String, Vector<Object>> hmFristen = new HashMap<String, Vector<Object>>();
+
     private static Vector<String> dummy = new Vector<String>();
     private static Vector<Integer> intdummy = new Vector<Integer>();
     private static Vector<Vector<String>> hbdummy = new Vector<Vector<String>>();
     private static Vector<String> hbdummy_1 = new Vector<String>();
 
     private static Vector<Integer> modusdummy = new Vector<Integer>();
-    public static HashMap<String, Vector<Object>> hmFristen = new HashMap<String, Vector<Object>>();
     private static Vector<Object> odummy = new Vector<Object>();
 
     public static void ladePreise(String disziplin) {
@@ -72,12 +69,13 @@ public class SystemPreislisten {
         }
         int tarife = -1;
         try {
-            inif = INITool.openIni(Path.Instance.getProghome() + "ini/" + aktIK + "/", "preisgruppen.ini");
+            inif = INITool.openIni(Path.Instance.getProghome() + "ini" + File.separator + aktIK + File.separator, "preisgruppen.ini");
             tarife = inif.getIntegerProperty("PreisGruppen_" + disziplin, "AnzahlPreisGruppen");
-            fristeninilocal = INITool.openIni(Path.Instance.getProghome() + "ini/" + aktIK + "/", "fristen.ini");
+            fristeninilocal = INITool.openIni(Path.Instance.getProghome() + "ini" + File.separator + aktIK + File.separator, "fristen.ini");
             fristenini = fristeninilocal;
         } catch (Exception ex) {
             ex.printStackTrace();
+            logger.error("Problems retrieving Preisgruppen and/or Fristen");
         }
 
         ladepreise(disziplin, fristeninilocal, inif, tarife);
@@ -86,133 +84,130 @@ public class SystemPreislisten {
 
     private static void ladepreise(String disziplin, INIFile fristeninilocal, INIFile inif, int tarife) {
 
-
-
-
         Disziplin diszi = Disziplin.ofMedium(disziplin);
 
         switch (diszi) {
-        case KG:
-        {
+        case KG: {
 
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
-                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from kgtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from kgtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                 preise.add((Vector<Vector<String>>) preisliste);
             }
 
-
             hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
             break;
-        case MA:
-        {
+        case MA: {
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
-                Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from matarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from matarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                 preise.add((Vector<Vector<String>>) preisliste);
             }
 
-
             hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
             break;
-        case ER:
-        {
+        case ER: {
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
-                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from ertarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from ertarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                 preise.add((Vector<Vector<String>>) preisliste);
             }
 
-
             hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
             break;
-        case LO:
-        {
+        case LO: {
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
-                Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from lotarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from lotarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                 preise.add((Vector<Vector<String>>) preisliste);
             }
 
-
             hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
-        break;
-        case RH:
-        {
-            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
-            for (int i = 0; i < tarife; i++) {
-                 Vector<Vector<String>> preisliste = SqlInfo.holeFelder("select * from rhtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
-
-                preise.add((Vector<Vector<String>>) preisliste);
-            }
-
-
-            hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
             break;
-        case PO:
-        {
+        case RH: {
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
-                Vector<Vector<String>> preisliste= SqlInfo.holeFelder("select * from potarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from rhtarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                 preise.add((Vector<Vector<String>>) preisliste);
             }
 
+            hmPreise.put(diszi.medium, preise);
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
+            break;
+        case PO: {
+            Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+            for (int i = 0; i < tarife; i++) {
+                Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                        "select * from potarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+
+                preise.add((Vector<Vector<String>>) preisliste);
+            }
 
             hmPreise.put(diszi.medium, preise);
-            ladepreise(fristeninilocal, inif, tarife, diszi.medium);}
+            ladepreise(fristeninilocal, inif, tarife, diszi.medium);
+        }
             break;
-        case RS:
-        {
+        case RS: {
             try {
                 Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
 
                 for (int i = 0; i < tarife; i++) {
-                    Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from rstarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                    Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                            "select * from rstarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                     preise.add((Vector<Vector<String>>) preisliste);
                 }
-
 
                 hmPreise.put(diszi.medium, preise);
                 ladepreise(fristeninilocal, inif, tarife, diszi.medium);
             } catch (Exception ex) {
                 ex.printStackTrace();
-            }}
+            }
+        }
             break;
-        case FT:
-        {
+        case FT: {
             try {
                 Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
 
                 for (int i = 0; i < tarife; i++) {
-                    Vector<Vector<String>> preisliste  = SqlInfo.holeFelder("select * from fttarif" + Integer.toString(i + 1) + " order by LEISTUNG");
+                    Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
+                            "select * from fttarif" + Integer.toString(i + 1) + " order by LEISTUNG");
 
                     preise.add((Vector<Vector<String>>) preisliste);
                 }
-
 
                 hmPreise.put(diszi.medium, preise);
                 ladepreise(fristeninilocal, inif, tarife, diszi.medium);
             } catch (Exception ex) {
                 ex.printStackTrace();
-            }}
+            }
+        }
             break;
-        case COMMON:
-        {
+        case COMMON: {
             dummy.clear();
             getPreisGruppen(inif, "Common", tarife);
             hmPreisGruppen.put("Common", (Vector<String>) dummy.clone());
-            dummy.clear();}
+            dummy.clear();
+        }
             break;
         }
     }

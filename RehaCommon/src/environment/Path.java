@@ -63,7 +63,7 @@ public enum Path {
         }
         logger.info("Programmverzeichnis = " + getProghome());
     }
-
+  
     private boolean iniExistsInUserDir() {
         String userdir = System.getProperty("user.dir");
         // if userenvironment has correct structure take that
