@@ -11,14 +11,14 @@ public class RezToolsTest {
 
 
         String anytext="anytext";
-            assertEquals( "Physio", RezTools.putRezNrGetDisziplin("KG" + anytext));
-            assertEquals( "Massage", RezTools.putRezNrGetDisziplin("MA" + anytext));
-            assertEquals( "Ergo", RezTools.putRezNrGetDisziplin("ER" + anytext));
-            assertEquals( "Logo", RezTools.putRezNrGetDisziplin("LO" + anytext));
-            assertEquals( "Reha", RezTools.putRezNrGetDisziplin("RH" + anytext));
-            assertEquals( "Podo", RezTools.putRezNrGetDisziplin("PO" + anytext));
-            assertEquals( "Rsport", RezTools.putRezNrGetDisziplin("RS" + anytext));
-            assertEquals( "Ftrain", RezTools.putRezNrGetDisziplin("FT" + anytext));
+            assertEquals( "Physio", RezTools.getDisziplinFromRezNr("KG" + anytext));
+            assertEquals( "Massage", RezTools.getDisziplinFromRezNr("MA" + anytext));
+            assertEquals( "Ergo", RezTools.getDisziplinFromRezNr("ER" + anytext));
+            assertEquals( "Logo", RezTools.getDisziplinFromRezNr("LO" + anytext));
+            assertEquals( "Reha", RezTools.getDisziplinFromRezNr("RH" + anytext));
+            assertEquals( "Podo", RezTools.getDisziplinFromRezNr("PO" + anytext));
+            assertEquals( "Rsport", RezTools.getDisziplinFromRezNr("RS" + anytext));
+            assertEquals( "Ftrain", RezTools.getDisziplinFromRezNr("FT" + anytext));
 
     }
 

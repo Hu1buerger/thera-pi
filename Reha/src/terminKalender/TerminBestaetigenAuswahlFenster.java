@@ -81,7 +81,7 @@ public class TerminBestaetigenAuswahlFenster extends RehaSmartDialog implements 
 
                 HMPosNr[i].setText(
                         RezTools.getKurzformFromPos(hMPosLC.get(i).hMPosNr, Integer.toString(preisgruppe - 1),
-                                SystemPreislisten.hmPreise.get(RezTools.putRezNrGetDisziplin(reznum))
+                                SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(reznum))
                                                           .get(preisgruppe - 1)));
                 // HMPosNr[i].setText(hMPosLC.get(i).hMPosNr);
                 AnzTermine[i].setText(Integer.toString(hMPosLC.get(i).anzBBT));

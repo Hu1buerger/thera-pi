@@ -1359,10 +1359,10 @@ public class SystemConfig {
             Vector<String> vec = new Vector<String>();
             for (int i = 0; i < lang; i++) {
                 vec.clear();
-                String prop = "AnzahlThemen_" + RezTools.putRezNrGetDisziplin(rezeptKlassenAktiv.get(i)
+                String prop = "AnzahlThemen_" + RezTools.getDisziplinFromRezNr(rezeptKlassenAktiv.get(i)
                                                                                                 .get(1));
                 int lang2 = inif.getIntegerProperty("Textbausteine", prop);
-                String prop2 = RezTools.putRezNrGetDisziplin(rezeptKlassenAktiv.get(i)
+                String prop2 = RezTools.getDisziplinFromRezNr(rezeptKlassenAktiv.get(i)
                                                                                .get(1));
                 // System.out.println("****************************"+prop);
                 // System.out.println("****************************"+prop2);

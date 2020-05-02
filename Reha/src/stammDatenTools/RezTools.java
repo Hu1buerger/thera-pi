@@ -13,6 +13,9 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
@@ -28,6 +31,7 @@ import terminKalender.TermineErfassen;
 import wecker.AePlayWave;
 
 public class RezTools {
+    
     public static final int REZEPT_IST_JETZ_VOLL = 0;
     public static final int REZEPT_IST_BEREITS_VOLL = 1;
     public static final int REZEPT_HAT_LUFT = 2;
@@ -36,6 +40,8 @@ public class RezTools {
     public static final int DIALOG_ABBRUCH = -1;
     public static final int DIALOG_OK = 0;
     public static int DIALOG_WERT = 0;
+    
+    private static Logger logger = LoggerFactory.getLogger(RezTools.class);
 
     public static boolean mitJahresWechsel(String datum) {
         boolean ret = false;
@@ -187,7 +193,7 @@ public class RezTools {
                             }
                         } catch (Exception ex) {
                             try {
-                                String disziplin = RezTools.putRezNrGetDisziplin(xreznr);
+                                String disziplin = RezTools.getDisziplinFromRezNr(xreznr);
                                 String kuerzel = RezTools.getKurzformFromPos(einzelbehandlung[i2], rezvec.get(9),
                                         SystemPreislisten.hmPreise.get(disziplin)
                                                                   .get(Integer.parseInt(rezvec.get(9)) - 1));
@@ -478,15 +484,23 @@ public class RezTools {
     }
 
     public static String holePosAusIdUndRezNr(String id, String reznr) {
-        String diszi = RezTools.putRezNrGetDisziplin(reznr);
+        String diszi = RezTools.getDisziplinFromRezNr(reznr);
         String preisgruppe = SqlInfo.holeEinzelFeld(
                 "select preisgruppe from verordn where rez_nr='" + reznr + "' LIMIT 1");
-        Vector<Vector<Vector<String>>> vector = SystemPreislisten.hmPreise.get(diszi);
-        if (vector == null) {
-            System.out.println("baeh");
+                
+        Vector<Vector<Vector<String>>> vector = null;
+        try {
+            vector = SystemPreislisten.hmPreise.get(diszi);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // TODO Auto-generated catch block
+            logger.error("Keine SystemPreislisten eingelesen? Error: " + e.getLocalizedMessage());
+            // e.printStackTrace();
         }
-        Vector<Vector<String>> preisvec = vector
-                                                                    .get(Integer.parseInt(preisgruppe) - 1);
+        
+        if (vector == null) {
+            System.out.println("baeh");  // Boo! If inner Vector was NULL, it can still be wrapped & outer Vec != NULL
+        }
+        Vector<Vector<String>> preisvec = vector.get(Integer.parseInt(preisgruppe) - 1);
         String pos = RezTools.getPosFromID(id, preisgruppe, preisvec);
         return (pos == null ? "" : pos);
     }
@@ -1282,7 +1296,7 @@ public class RezTools {
         String stmt = null;
         String meldung = null;
         DecimalFormat dfx = new DecimalFormat("0.00");
-        String xdiszi = RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+        String xdiszi = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
         int xpreisgr = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
         String xrezdatum = DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2));
 
@@ -1416,7 +1430,7 @@ public class RezTools {
             protected Void doInBackground() throws Exception {
                 try {
                     DecimalFormat df = new DecimalFormat("0.00");
-                    String diszi = RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+                    String diszi = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
 
                     int pg = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
                     String id = "";
@@ -1543,7 +1557,7 @@ public class RezTools {
         BigDecimal[] preise = { null, null, null, null };
         BigDecimal xrezgeb = BigDecimal.valueOf(new Double(0.000));
 
-        String xdiszi = RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+        String xdiszi = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
         int xpreisgr = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
         String xrezdatum = DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2));
         boolean neuerpreis = neuePreisNachRezeptdatumOderStichtag(xdiszi, xpreisgr, xrezdatum, false,
@@ -1736,7 +1750,7 @@ public class RezTools {
         // PreisUeberPosition");
         String ret = null;
         Vector<?> preisvec = null;
-        preisvec = SystemPreislisten.hmPreise.get(putRezNrGetDisziplin(disziplin))
+        preisvec = SystemPreislisten.hmPreise.get(getDisziplinFromRezNr(disziplin))
                                              .get(preisgruppe - 1);
         for (int i = 0; i < preisvec.size(); i++) {
             if (((String) ((Vector<?>) preisvec.get(i)).get(2)).equals(position)) {
@@ -1749,7 +1763,7 @@ public class RezTools {
         return ret;
     }
 
-    public static String putRezNrGetDisziplin(String reznr) {
+    public static String getDisziplinFromRezNr(String reznr) {
         String diszi = reznr.substring(0,2);
         return Disziplin.valueOf(diszi).medium;
 
@@ -1758,7 +1772,7 @@ public class RezTools {
 
     public static Object[] ermittleHBwert(Vector<String> vec) {
         Object[] retobj = { null, null, null };
-        String disziplin = putRezNrGetDisziplin(vec.get(1));
+        String disziplin = getDisziplinFromRezNr(vec.get(1));
         String pos = "";
         Double preis = 0.00;
         Double wgkm = (vec.get(7)
@@ -1860,7 +1874,7 @@ public class RezTools {
             retvec.add("");
         }
 
-        String disziplin = putRezNrGetDisziplin(vec.get(0)
+        String disziplin = getDisziplinFromRezNr(vec.get(0)
                                                    .get(1));
         String pos = "";
         String preis = "";
@@ -2097,19 +2111,19 @@ public class RezTools {
              * SystemConfig.vHBRegeln.get(zm.preisgruppe-1).get(0); String hbmit =
              * SystemConfig.vHBRegeln.get(zm.preisgruppe-1).get(1);
              */
-            String zz = SystemPreislisten.hmHBRegeln.get(putRezNrGetDisziplin(rezid))
+            String zz = SystemPreislisten.hmHBRegeln.get(getDisziplinFromRezNr(rezid))
                                                     .get(zm.preisgruppe - 1)
                                                     .get(4);
-            String kmgeld = SystemPreislisten.hmHBRegeln.get(putRezNrGetDisziplin(rezid))
+            String kmgeld = SystemPreislisten.hmHBRegeln.get(getDisziplinFromRezNr(rezid))
                                                         .get(zm.preisgruppe - 1)
                                                         .get(2);
-            String kmpausch = SystemPreislisten.hmHBRegeln.get(putRezNrGetDisziplin(rezid))
+            String kmpausch = SystemPreislisten.hmHBRegeln.get(getDisziplinFromRezNr(rezid))
                                                           .get(zm.preisgruppe - 1)
                                                           .get(3);
-            String hbpos = SystemPreislisten.hmHBRegeln.get(putRezNrGetDisziplin(rezid))
+            String hbpos = SystemPreislisten.hmHBRegeln.get(getDisziplinFromRezNr(rezid))
                                                        .get(zm.preisgruppe - 1)
                                                        .get(0);
-            String hbmit = SystemPreislisten.hmHBRegeln.get(putRezNrGetDisziplin(rezid))
+            String hbmit = SystemPreislisten.hmHBRegeln.get(getDisziplinFromRezNr(rezid))
                                                        .get(zm.preisgruppe - 1)
                                                        .get(1);
 
@@ -2172,7 +2186,7 @@ public class RezTools {
                         // System.out.println("Es könnten Kilometer abgerechnet werden");
                         if (kmBesserAlsPauschale(kmpausch, kmgeld, Double.parseDouble(Integer.toString(zm.km)),
                                 zm.preisgruppe,
-                                RezTools.putRezNrGetDisziplin(SystemConfig.hmAdrRDaten.get("<Rnummer>")))) {
+                                RezTools.getDisziplinFromRezNr(SystemConfig.hmAdrRDaten.get("<Rnummer>")))) {
                             // Mit Kilometerabrechnung verdient man mehr
                             preis = PreisUeberPosition(kmgeld, zm.preisgruppe, SystemConfig.hmAdrRDaten.get("<Rnummer>")
                                                                                                        .substring(0, 2),
@@ -2191,7 +2205,7 @@ public class RezTools {
                                  *
                                  */
 
-                                if (SystemPreislisten.hmZuzahlModus.get(putRezNrGetDisziplin(rezid))
+                                if (SystemPreislisten.hmZuzahlModus.get(getDisziplinFromRezNr(rezid))
                                                                    .get(zm.preisgruppe - 1) == 1) {
                                     bdrezgeb = bdpreis.divide(BigDecimal.valueOf(new Double(10.000)));
                                     testpr = bdrezgeb.setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -2397,7 +2411,7 @@ public class RezTools {
                 if (!kmgeld.equals("")) {// Wenn Kilometer abgerechnet werden k�nnen
                     // System.out.println("Es könnten Kilometer abgerechnet werden");
                     if (kmBesserAlsPauschale(kmpausch, kmgeld, Double.parseDouble(Integer.toString(zm.km)),
-                            zm.preisgruppe, RezTools.putRezNrGetDisziplin(SystemConfig.hmAdrRDaten.get("<Rnummer>")))) {
+                            zm.preisgruppe, RezTools.getDisziplinFromRezNr(SystemConfig.hmAdrRDaten.get("<Rnummer>")))) {
                         // Kilometerabrechnung besser als Pauschale
                         preis = PreisUeberPosition(kmgeld, zm.preisgruppe, SystemConfig.hmAdrRDaten.get("<Rnummer>")
                                                                                                    .substring(0, 2),
@@ -2409,7 +2423,7 @@ public class RezTools {
                         bdposwert = bdpreis.multiply(BigDecimal.valueOf(new Double(realhbAnz)));
                         retobj[0] = ((BigDecimal) retobj[0]).add(BigDecimal.valueOf(bdposwert.doubleValue()));
                         SystemConfig.hmAdrRDaten.put("<Rwegpreis>", dfx.format(bdpreis.doubleValue()));
-                        if (SystemPreislisten.hmZuzahlModus.get(putRezNrGetDisziplin(rezid))
+                        if (SystemPreislisten.hmZuzahlModus.get(getDisziplinFromRezNr(rezid))
                                                            .get(zm.preisgruppe - 1) == 1) {
                             bdrezgeb = bdpreis.divide(BigDecimal.valueOf(new Double(10.000)));
                             testpr = bdrezgeb.setScale(2, BigDecimal.ROUND_HALF_UP);
@@ -2694,7 +2708,7 @@ public class RezTools {
                 vec = vecx;
             }
             preisgruppe = Integer.parseInt(vec.get(9));
-            disziplin = RezTools.putRezNrGetDisziplin(swreznum);
+            disziplin = RezTools.getDisziplinFromRezNr(swreznum);
             hmrtest = (SystemPreislisten.hmHMRAbrechnung.get(disziplin)
                                                         .get(preisgruppe - 1) == 1);
             if (vec.size() > 0) {

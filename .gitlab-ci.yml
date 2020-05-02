@@ -1,6 +1,7 @@
 # The origibal image (installs openJDK-11 as dep of ant):
 # image: openjdk:8
 # Astrid found this image containing real Oracle-JDK-8:
+
 image: tomsontom/oracle-java8-mvn:latest
 
 variables:
@@ -50,6 +51,7 @@ ci_test:
   script:
     - apt-get -y install mariadb-client
     - cat Files/sql/AlleTabellen.sql | mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi
+    - for sqlFile in Files/tests/resources/sql/*.sql;do cat "${sqlFile}" |mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi ;done
     - cd Build
     - ant JUnits
   artifacts:

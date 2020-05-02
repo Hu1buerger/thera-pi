@@ -96,7 +96,7 @@ public class HistorDaten extends JXPanel {
                     String stest = StringTools.NullTest(vecaktrez.get(43));
                     String einzeln = StringTools.NullTest(vecaktrez.get(61));
 
-                    String diszi = RezTools.putRezNrGetDisziplin(vecaktrez.get(1));
+                    String diszi = RezTools.getDisziplinFromRezNr(vecaktrez.get(1));
                     int prgruppe = 0;
                     try {
                         prgruppe = Integer.parseInt(vecaktrez.get(41)) - 1;

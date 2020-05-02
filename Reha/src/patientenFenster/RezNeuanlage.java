@@ -218,7 +218,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             diszis = new Disziplinen();
 
             if (vec.size() > 0 && this.neu) {
-                aktuelleDisziplin = RezTools.putRezNrGetDisziplin(vec.get(1)); 
+                aktuelleDisziplin = RezTools.getDisziplinFromRezNr(vec.get(1)); 
             }
 
             setName("RezeptNeuanlage");

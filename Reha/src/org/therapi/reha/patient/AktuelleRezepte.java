@@ -1993,7 +1993,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     Reha.instance.abrechnungpanel.einlesenErneuern(null);
                 } else {
                     String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
-                    if (RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1))
+                    if (RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1))
                                 .equals(aktDisziplin)) {
                         // Rezept gehört zu der Sparte, die gerade im Abrechnungspanel geöffnet ist
                         Reha.instance.abrechnungpanel.einlesenErneuern(Reha.instance.patpanel.vecaktrez.get(1));
@@ -2099,7 +2099,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
 
             /*********************/
-            String diszi = RezTools.putRezNrGetDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+            String diszi = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
             String preisgruppe = Reha.instance.patpanel.vecaktrez.get(41);
 
             if (!doTageTest(vgldat3, vgldat2, anzterm, diszi, Integer.parseInt(preisgruppe) - 1)) {
@@ -2961,7 +2961,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         RezTools.loescheRezAusVolleTabelle(xrez_nr);
                         if (Reha.instance.abrechnungpanel != null) {
                             String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
-                            if (RezTools.putRezNrGetDisziplin(xrez_nr)
+                            if (RezTools.getDisziplinFromRezNr(xrez_nr)
                                         .equals(aktDisziplin)) {
                                 Reha.instance.abrechnungpanel.einlesenErneuern(null);
                             }
