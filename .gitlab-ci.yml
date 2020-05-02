@@ -1,4 +1,8 @@
-image: openjdk:8
+# Original image used:
+# image: openjdk:8
+# pulls openJDK-11 upon ant install & has openjdk-8 installed in a poor way...
+
+image: tomsontom/oracle-java8-mvn:latest
 
 variables:
   MYSQL_ROOT_PASSWORD: root
@@ -47,6 +51,7 @@ ci_test:
   script:
     - apt-get -y install mariadb-client
     - cat Files/sql/AlleTabellen.sql | mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi
+    - for sqlFile in Files/tests/resources/sql/*.sql;do cat "${sqlFile}" |mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi ;done
     - cd Build
     - ant JUnits
   artifacts:

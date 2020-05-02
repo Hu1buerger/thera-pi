@@ -19,8 +19,8 @@ public class buildIniTableTest {
     @Test
     public void testMandantTesten() {
         // Simple test only, since non-existing mandanten.ini will invoke file-chooser
-        buildIniTable.setPfadzurmandini("./tests/resources/ini/mandanten.ini");
-        assertEquals("./tests/resources/ini/mandanten.ini", buildIniTable.mandantTesten());
+        buildIniTable.setPfadzurmandini("../Files/tests/resources/ini/mandanten.ini");
+        assertEquals("../Files/tests/resources/ini/mandanten.ini", buildIniTable.mandantTesten());
     }
 
     // ProgressPanel tests

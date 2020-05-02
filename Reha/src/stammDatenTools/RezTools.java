@@ -13,6 +13,9 @@ import java.util.Vector;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
@@ -28,6 +31,7 @@ import terminKalender.TermineErfassen;
 import wecker.AePlayWave;
 
 public class RezTools {
+    
     public static final int REZEPT_IST_JETZ_VOLL = 0;
     public static final int REZEPT_IST_BEREITS_VOLL = 1;
     public static final int REZEPT_HAT_LUFT = 2;
@@ -36,6 +40,8 @@ public class RezTools {
     public static final int DIALOG_ABBRUCH = -1;
     public static final int DIALOG_OK = 0;
     public static int DIALOG_WERT = 0;
+    
+    private static Logger logger = LoggerFactory.getLogger(RezTools.class);
 
     public static boolean mitJahresWechsel(String datum) {
         boolean ret = false;
@@ -481,12 +487,20 @@ public class RezTools {
         String diszi = RezTools.getDisziplinFromRezNr(reznr);
         String preisgruppe = SqlInfo.holeEinzelFeld(
                 "select preisgruppe from verordn where rez_nr='" + reznr + "' LIMIT 1");
-        Vector<Vector<Vector<String>>> vector = SystemPreislisten.hmPreise.get(diszi);
-        if (vector == null) {
-            System.out.println("baeh");
+                
+        Vector<Vector<Vector<String>>> vector = null;
+        try {
+            vector = SystemPreislisten.hmPreise.get(diszi);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // TODO Auto-generated catch block
+            logger.error("Keine SystemPreislisten eingelesen? Error: " + e.getLocalizedMessage());
+            // e.printStackTrace();
         }
-        Vector<Vector<String>> preisvec = vector
-                                                                    .get(Integer.parseInt(preisgruppe) - 1);
+        
+        if (vector == null) {
+            System.out.println("baeh");  // Boo! If inner Vector was NULL, it can still be wrapped & outer Vec != NULL
+        }
+        Vector<Vector<String>> preisvec = vector.get(Integer.parseInt(preisgruppe) - 1);
         String pos = RezTools.getPosFromID(id, preisgruppe, preisvec);
         return (pos == null ? "" : pos);
     }
