@@ -11,6 +11,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -44,6 +45,20 @@ public class OffenePostenTest {
         opPan.offenePosten = op;
     }
 
+    @AfterClass
+    public static void teardownForAllTests() {
+        // Wipe table that was filled with test-entries:
+        String stmt = "delete from rliste";
+        try {
+            conn.createStatement().execute(stmt);
+            conn.close();
+        } catch (SQLException e) {
+            System.out.println("SQL-Error: " + e.getCause() + " with " + e.getLocalizedMessage());
+            fail("Error in trying to tear-down the OP-Tests");
+        }
+        
+    }
+    
     @Test
     public void testOPPanelermittleGesamtOffen() {
 
@@ -64,7 +79,7 @@ public class OffenePostenTest {
             conn.commit();
             conn.setAutoCommit(true);
         } catch (SQLException e) {
-            System.out.println("SQL-Error: " + e.getCause() + "with " + e.getLocalizedMessage());
+            System.out.println("SQL-Error: " + e.getCause() + " with " + e.getLocalizedMessage());
             System.out.println(e.toString());
             e.printStackTrace();
             fail("Need running DB connection for this test");
