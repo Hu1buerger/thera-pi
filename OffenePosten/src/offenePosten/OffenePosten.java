@@ -17,6 +17,8 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 import org.jdesktop.swingworker.SwingWorker;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import CommonTools.OpCommon;
 import CommonTools.SqlInfo;
@@ -33,6 +35,7 @@ import sql.DatenquellenFactory;
 
 public class OffenePosten implements WindowListener {
 
+    private static Logger logger = LoggerFactory.getLogger(OffenePosten.class);
     /**
      * @param args
      */
@@ -58,7 +61,7 @@ public class OffenePosten implements WindowListener {
     public RehaReverseServer rehaReverseServer = null;
     public static int rehaReversePort = -1;
 
-    private static String path2IniFile;
+    private static String path2IniFiles;
     private static String path2TemplateFiles;
     private static int vorauswahlSuchkriterium = -1;
     private static boolean settingsLocked = false;
@@ -69,7 +72,7 @@ public class OffenePosten implements WindowListener {
     // @VisibleForTesting
     OffenePosten(String testIdent) {
         if (!testIdent.contentEquals("JUnit")) {
-            System.out.println("Attention! This method was created for Unit-testing and nothing else!");
+            logger.error("Attention! This method was created for Unit-testing and nothing else!");
             return;
         }
     }
@@ -82,26 +85,29 @@ public class OffenePosten implements WindowListener {
         new Logging("offeneposten");
         OffenePosten instance = new OffenePosten();
         instance.sqlInfo = new SqlInfo();
-        System.out.println("OP main: " + instance);
+        logger.info("OP main: " + instance);
 
         if (args.length > 0 || testcase) {
             if (!testcase) {
-                System.out.println("hole daten aus INI-Datei " + args[0]);
-                INIFile inif = new INIFile(args[0] + "ini/" + args[1] + "/rehajava.ini");
+                progHome = args[0];
+                aktIK = args[1];
+                path2IniFiles = progHome + "ini" + File.separator + aktIK + File.separator;
+                path2TemplateFiles = progHome + "vorlagen" + File.separator + aktIK;
+                
+                INITool.init(path2IniFiles);
+                logger.info("Hole Daten aus INI-Datei " + path2IniFiles + "rehajava.ini");
+                INIFile inif = new INIFile(path2IniFiles + "rehajava.ini");
 
                 String officeProgrammPfad = inif.getStringProperty("OpenOffice.org", "OfficePfad");
                 String officeNativePfad = inif.getStringProperty("OpenOffice.org", "OfficeNativePfad");
                 try {
                     new OOService().start(officeNativePfad, officeProgrammPfad);
                 } catch (FileNotFoundException | OfficeApplicationException e) {
+                    logger.error("Probleme beim Start von OpenOffice");
                     e.printStackTrace();
                 }
 
-                progHome = args[0];
-                aktIK = args[1];
-                path2IniFile = progHome + "ini/" + aktIK + "/";
-                path2TemplateFiles = progHome + "vorlagen/" + aktIK;
-                INITool.init(path2IniFile);
+                
                 /*******************************************************/
 
                 instance.StarteDB();
@@ -114,7 +120,7 @@ public class OffenePosten implements WindowListener {
                             Thread.sleep(30);
                         }
                         iniFile = "offeneposten.ini";
-                        INIFile oinif = INITool.openIni(path2IniFile, iniFile);
+                        INIFile oinif = INITool.openIni(path2IniFiles, iniFile);
                         OpCommon.readMahnParamCommon(oinif, mahnParameter);
 
                         for (int i = 1; i <= 4; i++) {
@@ -129,7 +135,7 @@ public class OffenePosten implements WindowListener {
                         iniValuesValid = true; // werte für Anzeige OP sind jetzt gültig
 
                         AbrechnungParameter(progHome);
-                        FirmenDaten(progHome);
+                        FirmenDaten();
 
                         return null;
                     }
@@ -153,14 +159,14 @@ public class OffenePosten implements WindowListener {
                 mahnParameter.put("formular4", "2009-01-01");
                 mahnParameter.put("diralterechnungen", "l:/projekte/rta/dbf/rechnung/");
                 AbrechnungParameter(progHome);
-                FirmenDaten(progHome);
+                FirmenDaten();
 
             }
             if (testcase) {
-                System.out.println(mahnParameter);
-                System.out.println("TestCase = " + testcase);
+                logger.debug(mahnParameter.toString());
+                logger.debug("TestCase = " + testcase);
                 AbrechnungParameter(progHome);
-                FirmenDaten(progHome);
+                FirmenDaten();
 
             }
             instance.getJFrame();
@@ -191,6 +197,26 @@ public class OffenePosten implements WindowListener {
         progHome = ph2set;
     }
 
+    // @VisibleForTesting
+    String getPath2IniFiles() {
+        return path2IniFiles;
+    }
+    
+    // @VisibleForTesting
+    void setPath2IniFiles(String p2set) {
+        path2IniFiles = p2set;
+    }
+    
+    // @VisibleForTesting
+    String getPath2TemplateFiles() {
+        return path2TemplateFiles;
+    }
+    
+    // @VisibleForTesting
+    void setPath2TemplateFiles(String p2set) {
+        path2TemplateFiles = p2set;
+    }
+    
     /********************/
 
     public JFrame getJFrame() {
@@ -198,6 +224,7 @@ public class OffenePosten implements WindowListener {
             UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException
                 | UnsupportedLookAndFeelException e) {
+            logger.error("Couldn't load looks from JGoodies");
             e.printStackTrace();
         }
         jFrame = new JFrame() {
@@ -242,6 +269,7 @@ public class OffenePosten implements WindowListener {
             rehaReverseServer = new RehaReverseServer(7000, jFrame);
         } catch (Exception ex) {
             rehaReverseServer = null;
+            logger.error("Couldn't create ReverseSocketServer");
             ex.printStackTrace();
         }
         sqlInfo.setFrame(jFrame);
@@ -289,13 +317,13 @@ public class OffenePosten implements WindowListener {
             conn = new DatenquellenFactory(aktIK).createConnection();
             sqlInfo.setConnection(conn);
             OffenePosten.DbOk = true;
-            System.out.println("Datenbankkontakt hergestellt");
+            logger.info("Datenbankkontakt hergestellt");
         } catch (final SQLException ex) {
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
+            logger.error("In StarteDB:");
+            logger.error("SQLException: " + ex.getMessage());
+            logger.error("SQLState: " + ex.getSQLState());
+            logger.error("VendorError: " + ex.getErrorCode());
             OffenePosten.DbOk = false;
-
         }
     }
 
@@ -312,9 +340,13 @@ public class OffenePosten implements WindowListener {
         if (conn != null) {
             try {
                 conn.close();
-                System.out.println("Datenbankverbindung wurde geschlossen");
-            } catch (SQLException e) {
-                e.printStackTrace();
+                logger.info("Datenbankverbindung wurde geschlossen");
+            } catch (SQLException ex) {
+                logger.error("Error in windowClosed - couldn't close DB-Connection");
+                logger.error("SQLException: " + ex.getMessage());
+                logger.error("SQLState: " + ex.getSQLState());
+                logger.error("VendorError: " + ex.getErrorCode());
+                ex.printStackTrace();
             }
         }
         if (rehaReverseServer != null) {
@@ -323,6 +355,8 @@ public class OffenePosten implements WindowListener {
             try {
                 rehaReverseServer.serv.close();
             } catch (IOException e) {
+                logger.error("Error in windowClosed - couldn't close RehaReverseServer");
+                logger.error(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -334,8 +368,10 @@ public class OffenePosten implements WindowListener {
         if (conn != null) {
             try {
                 conn.close();
-                System.out.println("OP: Datenbankverbindung wurde geschlossen");
+                logger.info("OP: Datenbankverbindung wurde geschlossen");
             } catch (SQLException e) {
+                logger.error("Error in windowClosing - couldn't close DB-Connection");
+                logger.error(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -345,6 +381,8 @@ public class OffenePosten implements WindowListener {
             try {
                 rehaReverseServer.serv.close();
             } catch (IOException e) {
+                logger.error("Error in windowCloseing - couldn't close RehaReverseServer");
+                logger.error(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -371,7 +409,7 @@ public class OffenePosten implements WindowListener {
         hmAbrechnung.clear();
         /******** Heilmittelabrechnung ********/
 
-        INIFile inif = INITool.openIni(proghome + "ini/" + aktIK + "/", "abrechnung.ini");
+        INIFile inif = INITool.openIni(path2IniFiles, "abrechnung.ini");
         hmAbrechnung.put("hmgkvformular", inif.getStringProperty("HMGKVRechnung", "Rformular"));
         hmAbrechnung.put("hmgkvrechnungdrucker", inif.getStringProperty("HMGKVRechnung", "Rdrucker"));
         hmAbrechnung.put("hmgkvtaxierdrucker", inif.getStringProperty("HMGKVRechnung", "Tdrucker"));
@@ -406,12 +444,12 @@ public class OffenePosten implements WindowListener {
     }
 
     /***************************/
-    public static void FirmenDaten(String proghome) {
+    public static void FirmenDaten() {
         String[] stitel = { "Ik", "Ikbezeichnung", "Firma1", "Firma2", "Anrede", "Nachname", "Vorname", "Strasse",
                 "Plz", "Ort", "Telefon", "Telefax", "Email", "Internet", "Bank", "Blz", "Kto", "Steuernummer", "Hrb",
                 "Logodatei", "Zusatz1", "Zusatz2", "Zusatz3", "Zusatz4", "Bundesland" };
         hmFirmenDaten = new HashMap<String, String>();
-        INIFile inif = INITool.openIni(proghome + "ini/" + OffenePosten.aktIK + "/", "firmen.ini");
+        INIFile inif = INITool.openIni(path2IniFiles, "firmen.ini");
         for (int i = 0; i < stitel.length; i++) {
             hmFirmenDaten.put(stitel[i], inif.getStringProperty("Firma", stitel[i]));
         }
@@ -430,6 +468,8 @@ public class OffenePosten implements WindowListener {
             try {
                 Thread.sleep(25);
             } catch (InterruptedException ex) {
+                logger.error("Error in getVorauswahl - couldn't sleep, too much coffee");
+                logger.error(ex.getLocalizedMessage());
                 ex.printStackTrace();
             }
         }
@@ -456,11 +496,13 @@ public class OffenePosten implements WindowListener {
             try {
                 Thread.sleep(25);
             } catch (InterruptedException ex) {
+                logger.error("Error in getBarAusbuchenErlaubt - couldn't sleep, too much coffee");
+                logger.error(ex.getLocalizedMessage());
                 ex.printStackTrace();
             }
         }
         if (waitTimes == 0) {
-            System.out.println("OP erlaubeBarInKasse: " + erlaubeBarInKasse + "(Abbruch ini-read)");
+            logger.debug("OP erlaubeBarInKasse: " + erlaubeBarInKasse + "(Abbruch ini-read)");
         }
         return erlaubeBarInKasse;
     }
@@ -481,7 +523,7 @@ public class OffenePosten implements WindowListener {
         } else {
             settingsLocked = true;
         }
-        System.out.println("OP readLastSel.: " + vorauswahlSuchkriterium);
+        logger.debug("OP readLastSel.: " + vorauswahlSuchkriterium);
     }
 
     /**
@@ -489,7 +531,7 @@ public class OffenePosten implements WindowListener {
      * ini-Datei
      */
     public void saveLastSelection() {
-        INIFile inif = INITool.openIni(path2IniFile, iniFile);
+        INIFile inif = INITool.openIni(path2IniFiles, iniFile);
         String section = "offenePosten", comment = null;
         boolean saveChanges = false;
         if (!settingsLocked) { // ini-Einträge dürfen aktualisiert werden

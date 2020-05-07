@@ -82,6 +82,9 @@
 			location="${Libraries.location}/lib/jgoodies/forms-1.3.0.jar" />
 		<pathelement
 			location="${Libraries.location}/lib/jgoodies/jgoodies-common-0.9.9.jar" />
+                <pathelement location="${Libraries.location}/lib/logging/logback-core-1.2.3.jar"/>
+                <pathelement location="${Libraries.location}/lib/logging/sysout-over-slf4j-1.0.2.jar"/>
+                <pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar"/>
 		<pathelement
 			location="${Libraries.location}/lib/dbf/jdbf.jar" />
 		<pathelement
