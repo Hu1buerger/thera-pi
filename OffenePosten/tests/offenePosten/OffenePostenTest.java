@@ -6,6 +6,7 @@ package offenePosten;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import CommonTools.SqlInfo;
+import mandant.IK;
 import sql.DatenquellenFactory;
 
 /**
@@ -23,6 +25,8 @@ import sql.DatenquellenFactory;
  */
 public class OffenePostenTest {
 
+    static IK ik = new IK("123456789");
+    static String progHome = "." + File.separator;
     static OffenePosten op = new OffenePosten("JUnit");
     static OffenepostenTab opTab = new OffenepostenTab("JUnit");
     static OffenepostenPanel opPan = new OffenepostenPanel("JUnit");
@@ -32,13 +36,14 @@ public class OffenePostenTest {
     @BeforeClass
     public static void initForAllTests() {
         try {
-            conn = new DatenquellenFactory("123456789").createConnection();
+            conn = new DatenquellenFactory(ik.digitString()).createConnection();
         } catch (SQLException e) {
             fail("Need running DB connection for this test");
         }
         sqlInfo = new SqlInfo();
-        op.setProghome("./");
-        op.setAktIK("123456789");
+        op.setProghome(progHome);
+        op.setAktIK(ik.digitString());
+        op.setPath2IniFiles(progHome + "ini" + File.separator + ik.digitString() + File.separator);
         sqlInfo.setConnection(conn);
         op.sqlInfo = sqlInfo;
         opPan.eltern = opTab;
