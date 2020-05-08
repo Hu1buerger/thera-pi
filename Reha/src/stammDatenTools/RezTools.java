@@ -20,6 +20,7 @@ import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
+import commonData.Rezeptvector;
 import core.Disziplin;
 import environment.Path;
 import hauptFenster.Reha;
@@ -995,67 +996,57 @@ public class RezTools {
         int iret = 0;
         Vector<String> vAktTermine = null;
         boolean bTermine = false;
-        // int iTermine = -1;
         boolean u18Test = false;
         boolean bMitJahresWechsel = false;
         ZuzahlModell zm = new ZuzahlModell();
-        // Vector<String> patvec = SqlInfo.holeSatz("pat5", "geboren,jahrfrei",
-        // "pat_intern='"+xvec.get(1)+"'", Arrays.asList(new String[] {}));
-        // String patGeboren = datFunk.sDatInDeutsch(patvec.get(0));
-        // String patJahrfrei = datFunk.sDatInDeutsch(patvec.get(0));
-        //
+        Rezeptvector myRezept = new Rezeptvector();
+        myRezept.setVec_rez(Reha.instance.patpanel.vecaktrez);
+        String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
+        boolean warImVorjahrBefreit = Reha.instance.patpanel.patDaten.get(69)
+                                                                     .trim()
+                                                                     .equals(SystemConfig.vorJahr);
+        boolean istBefreit = Reha.instance.patpanel.patDaten.get(30)
+                                                            .equals("T");
 
         // 1. Schritt haben wir bereits Termineintr�ge die man auswerten kann
         if ((vAktTermine = holeEinzelTermineAusRezept("", termine)).size() > 0) {
             // Es gibt Termine in der Tabelle
             bTermine = true;
-            // iTermine = vAktTermine.size();
             if (vAktTermine.get(0)
                            .substring(6)
                            .equals(SystemConfig.vorJahr)) {
                 bMitJahresWechsel = true;
             }
-            if (DatFunk.Unter18(vAktTermine.get(0), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)))) {
-                // System.out.println(vAktTermine);
+            if (DatFunk.Unter18(vAktTermine.get(0), geburtstag)) {
                 u18Test = true;
             }
 
         }
 
-        // System.out.println(vAktTermine);
         for (int i = 0; i < 1; i++) {
 
-            if (Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(63))) <= 0) {
+            if (myRezept.getZzRegel() <= 0) {
                 // Kasse erfordert keine Zuzahlung
-                // System.out.println("Kasse erfordert keine Zuzahlung");
                 zm.allefrei = true;
                 iret = 0;
                 break;
             }
-            if (Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(39))) == 1) {
+            if (Integer.parseInt((myRezept.getZzStat())) == 1) {
                 // Hat bereits bezahlt normal behandeln (zzstatus == 1)
-                // System.out.println("Hat bereits bezahlt normal behandeln (zzstatus == 1)");
                 zm.allezuzahl = true;
                 iret = 2;
-                // break;
             }
 
             /************************
              * Jetzt der Ober-Scheißdreck für den Achtzehner-Test
              ***********************/
-            if ((Reha.instance.patpanel.vecaktrez.get(60)
-                                                 .equals("T"))
-                    || (u18Test)) {
+            if (myRezept.getUnter18() || (u18Test)) {
                 // Es ist ein unter 18 Jahre Test notwendig
-                // System.out.println("Es ist ein unter 18 Jahre Test notwendig");
                 if (bTermine) {
 
-                    int[] test = ZuzahlTools.terminNachAchtzehn(vAktTermine,
-                            DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
+                    int[] test = ZuzahlTools.terminNachAchtzehn(vAktTermine, geburtstag);
                     if (test[0] > 0) {
                         // muß zuzahlen
-                        // System.out.println("Parameter 1 = "+test[0]);
-                        // System.out.println("Parameter 2 = "+test[1]);
 
                         zm.allefrei = false;
                         if (test[1] > 0) {
@@ -1076,14 +1067,12 @@ public class RezTools {
                         }
                     } else {
                         // Voll befreit
-                        // System.out.println("Frei für "+test[1]+" Tage - also alle");
                         zm.allefrei = true;
                         iret = 0;
                     }
                 } else {
                     // Es stehen keine Termine für Analyse zur Verfügung also muß das Fenster für
                     // manuelle Eingabe geöffnet werden!!
-                    String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
                     String stichtag = DatFunk.sHeute()
                                              .substring(0, 6)
                             + Integer.valueOf(Integer.valueOf(SystemConfig.aktJahr) - 18)
@@ -1100,53 +1089,32 @@ public class RezTools {
                         iret = 0;
                     }
                 }
-                // iret = 1;
                 break;
             }
 
             /************************
-             * Keine Befreiung Aktuell und keine Vorjahr (Normalfall
+             * Keine Befreiung Aktuell und keine Vorjahr (Normalfall)
              ************************/
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("F")
-                    && (Reha.instance.patpanel.patDaten.get(69)
-                                                       .trim()
-                                                       .equals(""))) {
-                // Es liegt weder eine Befreiung für dieses noch für letztes Jahr vor.
-                // Standard
-                // System.out.println("Es liegt weder eine Befreiung für dieses noch für letztes
-                // Jahr vor.");
+            if (!istBefreit && !warImVorjahrBefreit) {
                 iret = 2;
                 break;
             }
             /************************
-             * Aktuell Befreit und im Vorjahr auch befreit
+             * Aktuell befreit und im Vorjahr auch befreit
              ************************/
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("T")
-                    && (!Reha.instance.patpanel.patDaten.get(69)
-                                                        .equals(""))) {
-                // Es liegt eine Befreiung vor und im Vorjahr ebenfenfalls befreit
-                // System.out.println("Es liegt eine Befreiung vor und im Vorjahr ebenfenfalls
-                // befreit");
+            if (istBefreit && warImVorjahrBefreit) {
                 iret = 0;
                 break;
             }
             /************************
-             * aktuell Nicht frei, Vorjahr frei
+             * aktuell nicht frei, Vorjahr frei
              ************************/
-            if ((Reha.instance.patpanel.patDaten.get(30)
-                                                .equals("F"))
-                    && (!Reha.instance.patpanel.patDaten.get(69)
-                                                        .equals(""))) {
-                // System.out.println("aktuell Nicht frei, Vorjahr frei");
+            if (!istBefreit && warImVorjahrBefreit) {
                 if (!bMitJahresWechsel) {// Alle Termine aktuell
                     iret = 2;
                 } else {// es gibt Termine im Vorjahr
                     Object[] obj = JahresWechsel(vAktTermine, SystemConfig.vorJahr);
                     if (!(Boolean) obj[0]) {// alle Termine waren im Vorjahr
-                        // System.out.println("1 - Termine aus dem Vorjahr(frei) = "+obj[1]+" Termine
-                        // aus diesem Jahr(Zuzahlung) = "+obj[2]);
                         if (vAktTermine.size() < maxAnzahl()) {
                             String meldung = "<html>Während der Befreiung wurden <b>"
                                     + Integer.toString(vAktTermine.size()) + "  von " + Integer.toString(maxAnzahl())
@@ -1187,8 +1155,6 @@ public class RezTools {
                         }
 
                     } else {// gemischte Termine
-                            // System.out.println("2 -Termine aus dem Vorjahr(frei) = "+obj[1]+" Termine aus
-                            // diesem Jahr(Zuzahlung) = "+obj[2]+" - obj[0]="+obj[0]);
                         zm.allefrei = false;
                         zm.allezuzahl = false;
                         zm.anfangfrei = true;
@@ -1202,13 +1168,7 @@ public class RezTools {
             /************************
              * Aktuelle Befreiung aber nicht im Vorjahr
              ************************/
-            // Fehler !!!!!!!!!!!!!!!!!!!!!!! muß korrigiert werden!!!!!!!!!!!!!!!!!!!!!!!
-            if (Reha.instance.patpanel.patDaten.get(30)
-                                               .equals("T")
-                    && (Reha.instance.patpanel.vecaktrez.get(59)
-                                                        .trim()
-                                                        .equals(""))) {
-                // System.out.println("Aktuelle Befreiung aber nicht im Vorjahr");
+            if (istBefreit && !warImVorjahrBefreit) {
                 if (!bMitJahresWechsel) {// Alle Termine aktuell
                     iret = 0;
                 } else {// es gibt Termine im Vorjahr
@@ -1239,8 +1199,6 @@ public class RezTools {
         zm.km = StringTools.ZahlTest((Reha.instance.patpanel.patDaten.get(48)));
         zm.preisgruppe = Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(41)));
         zm.gesamtZahl = Integer.parseInt((Reha.instance.patpanel.vecaktrez.get(64)));
-        // Hausbesuch als logischen wert
-        // System.out.println("Rückgabewert iret = "+iret);
         if (iret == 0) {
             if (testefuerbarcode) {
                 constructGanzFreiRezHMap(zm);
@@ -1259,22 +1217,10 @@ public class RezTools {
         if (iret == 3) {
             constructEndeFreiRezHMap(zm, false);
         }
-        /*
-         * System.out.println(macheUmsatzZeile(
-         * SqlInfo.holeFelder("select * from verordn where rez_nr='"+
-         * Reha.instance.patpanel.vecaktrez.get(1)+"' LIMIT 1"),"") );
-         */
-        // System.out.println("ZZ-Variante = "+iret);
         return iret;
     }
 
     /************
-    *
-    *
-    *
-    *
-    *
-    *
     *
     */
     public static void constructNormalRezHMap(ZuzahlModell zm, boolean unregelmaessig) {
