@@ -111,7 +111,8 @@ public class OpRgaf extends WindowAdapter {
                 try {
 					new OOService().start(officeNativePfad, officeProgrammPfad);
 				} catch (FileNotFoundException | OfficeApplicationException e) {
-					e.printStackTrace();
+				    logger.error("OpenOffice failed");
+		            logger.error(e.getLocalizedMessage());
 				}
                 aktIK = args[1];
 
@@ -131,11 +132,8 @@ public class OpRgaf extends WindowAdapter {
                 logger.debug("TestCase = " + testcase);
                 AbrechnungParameter(proghome);
                 FirmenDaten(proghome);
-
             }
-
             application.StarteDB();
-
             application.getJFrame();
         } else {
             JOptionPane.showMessageDialog(null,
@@ -150,13 +148,17 @@ public class OpRgaf extends WindowAdapter {
         try {
             UIManager.setLookAndFeel("com.jgoodies.looks.plastic.PlasticXPLookAndFeel");
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            logger.error("getJFrame failed - Look&Feel class missing?");
+            logger.error(e.getLocalizedMessage());
         } catch (InstantiationException e) {
-            e.printStackTrace();
+            logger.error("getJFrame failed - Look&Feel instantiation");
+            logger.error(e.getLocalizedMessage());
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            logger.error("getJFrame failed - Illeagal access");
+            logger.error(e.getLocalizedMessage());
         } catch (UnsupportedLookAndFeelException e) {
-            e.printStackTrace();
+            logger.error("getJFrame failed - Look&Feel missing?");
+            logger.error(e.getLocalizedMessage());
         }
         thisClass = this;
         jFrame = new JFrame() {
@@ -208,8 +210,10 @@ public class OpRgaf extends WindowAdapter {
 
         try {
             rehaReverseServer = new RehaReverseServer(7000);
-        } catch (Exception ex) {
+        } catch (Exception e) {
             rehaReverseServer = null;
+            logger.error("In getJFrame ReverseServer start failed");
+            logger.error(e.getLocalizedMessage());
         }
         sqlInfo.setFrame(jFrame);
         jFrame.addWindowListener(this);
@@ -234,7 +238,9 @@ public class OpRgaf extends WindowAdapter {
             new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
                     "AppName#OpRgaf#" + Integer.toString(OpRgaf.xport));
             new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort, "OpRgaf#" + RehaIOMessages.IS_STARTET);
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            logger.error("getJFrame ReverseSocket-Client failure");
+            logger.error(e.getLocalizedMessage());
             JOptionPane.showMessageDialog(null, "Fehler in der Socketkommunikation");
         }
         SwingUtilities.invokeLater(new Runnable() {
