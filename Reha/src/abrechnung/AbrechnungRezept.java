@@ -1307,7 +1307,6 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         ermittleAbrechnungsfall(true);
         if (hausbesuch) {
             doHausbesuchKomplett();
-            getVectorFromNodes();
         }
         ////// System.out.println("Nodes insgesamt ="+getNodeCount()+" VectorLänge =
         ////// "+vec_tabelle.size());
@@ -1320,17 +1319,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 String berichtid = aktRezept.getArztBerichtID();
                 if (!AbrechnungGKV.directCall) {
                     showTbInfo(aktRezept.getArztBerichtID());
-                    /*
-                     * String dlgcmd =
-                     * "<html>Für dieses Rezept wurde ein Therapiebericht angefordert!<br>"+
-                     * (berichtid.equals("") ?
-                     * "Es wurde aber <b><font color=#FF0000>kein</font> Therapiebericht erstellt</b>"
-                     * : "Der Therapiebericht wurde <b>bereits erstellt</b>")+
-                     * "<br><br>Position Therapiebericht wird an den letzten Behandlungstag angehängt</html>"
-                     * ; JOptionPane.showMessageDialog(null, dlgcmd);
-                     */ doTherapieBericht(therapiebericht);
-                    this.getVectorFromNodes();
-                    doTarifWechselCheck();
+                    addTherapieBericht(therapiebericht);
                     if (berichtid.equals("")) {
                         setToClipboard(rez_nr.trim());
                     }
@@ -1340,6 +1329,17 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 }
             }
         }
+        
+        if (aktRezept.getUseHygPausch()) {
+            Disziplinen diszi = new Disziplinen();
+            int currIdx = diszi.getIndex(this.aktDisziplin);
+            String currPrefix = diszi.getPrefix(diszi.getIndex(this.aktDisziplin));
+            String hmPosHygieneMehraufwand = currPrefix + "9944";
+            addHygieneMehraufwand(hmPosHygieneMehraufwand);
+        }
+        this.getVectorFromNodes();
+        doTarifWechselCheck();
+
         doPositionenErmitteln();
         doTreeRezeptWertermitteln();
         parseHTMLuniq(rez_nr);
@@ -1411,16 +1411,25 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
 
     }
 
-    private void doTherapieBericht(String berichtsposition) {
+    private void zurLetztenBehHinzufuegen(String position, boolean mitZuzahlung) {
         if (root.getChildCount() <= 0) {
             JOptionPane.showMessageDialog(null,
                     "Es sind keine Behandlungspositionen ermittelbar.\nWurden evtl. Positionen aus der Preisliste gelöscht?");
             return;
         }
+        boolean zuZahlFrei = mitZuzahlung ? false : true;
         JXTTreeTableNode xnode = (JXTTreeTableNode) root.getChildAt(root.getChildCount() - 1);
         JXTTreeTableNode ynode = (JXTTreeTableNode) getBasicNodeFromChild(xnode);
-        abrfallAnhaengen(xnode.getChildCount() - 1, ynode, ynode.abr.datum, berichtsposition,
-                Double.parseDouble("1.00"), true);
+        abrfallAnhaengen(xnode.getChildCount() - 1, ynode, ynode.abr.datum, position,
+                Double.parseDouble("1.00"), zuZahlFrei);
+    }
+    
+    private void addTherapieBericht(String berichtsposition) {
+        zurLetztenBehHinzufuegen(berichtsposition, false);
+    }
+
+    private void addHygieneMehraufwand(String hmPosition) {
+        zurLetztenBehHinzufuegen(hmPosition, false);
     }
 
     /*****************************************************************************************/
