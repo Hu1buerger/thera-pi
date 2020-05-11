@@ -136,13 +136,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     // und Check-Boxen
     Vector<Object> originale = new Vector<Object>();
 
-    public JRtaCheckBox[] jcb = { null, null, null, null };
+    public JRtaCheckBox[] jcb = { null, null, null, null, null };
     // Lemmi 20101231: Harte Index-Zahlen für "jcb" durch sprechende Konstanten
     // ersetzt !
     final int cBEGRADR = 0;
     final int cHAUSB = 1;
     final int cTBANGEF = 2;
     final int cVOLLHB = 3;
+    final int cHygienePausch = 4;
 
     public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
 
@@ -691,6 +692,19 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcb[cTBANGEF].addKeyListener(this);
             jpan.add(jcb[cTBANGEF], cc.xy(3, 15));
 
+            jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
+            jcb[cHygienePausch].setOpaque(false);
+            jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 30.09.2020");
+            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(5, 15));
+            if (neu) {
+                jcb[cHygienePausch].setSelected(false);
+            } else {
+                boolean dummy = myRezept.getUseHygPausch();
+                jcb[cHygienePausch].setSelected((myRezept.getUseHygPausch() ? true : false));
+            }
+            allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
+            jpan.add(jcb[cHygienePausch], cc.xy(7, 15));
+            
             jpan.addSeparator("Verordnete Heilmittel", cc.xyw(1, 17, 7));
 
             jtf[cANZ1].setName("anzahl1");
@@ -2164,6 +2178,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                                               // 'initRezeptAll')
             thisRezept.setHeimbew(jtf[cHEIMBEW].getText()); // dito
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
+            thisRezept.setUseHygPausch(jcb[cHygienePausch].isSelected() ? true : false);
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
             thisRezept.setKm(stest.equals("") ? "0.00" : stest);

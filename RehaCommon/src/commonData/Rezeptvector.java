@@ -512,7 +512,19 @@ public class Rezeptvector {
                                .toString());
     }
 
-    private String getvorJahrFrei() {
+    // Missbrauch des unbenutzten 'rsplit' für Pauschale 'HygieneMehrbedarf'
+    public boolean getUseHygPausch() {
+        return this.vec_rezept.get(58)
+                .contains("+HMB");
+    }
+    public String getUseHygPauschS() {
+        return getStringAt(58);
+    }
+    public void setUseHygPausch(boolean data) {
+        this.vec_rezept.set(58, (Boolean.valueOf(data) ? "+HMB" : "F"));
+    }
+
+    public String getvorJahrFrei() {
         return getStringAt(59);
     }
 
@@ -670,7 +682,7 @@ public class Rezeptvector {
         cmd.append("arztbericht='" + getArztberichtS() + "', ");
         cmd.append("lasteddate='" + getLastEdDate() + "', ");
         cmd.append("farbcode='" + getFarbCode() + "', ");
-        // rsplit
+        cmd.append("rsplit='" + getUseHygPauschS() + "', ");
         cmd.append("jahrfrei='" + getvorJahrFrei() + "', ");
         cmd.append("unter18='" + getUnter18S() + "', ");
         cmd.append("hbvoll='" + getHbVollS() + "', ");
@@ -683,4 +695,5 @@ public class Rezeptvector {
         cmd.append(" where id='" + getId() + "' LIMIT 1");
         SqlInfo.sqlAusfuehren(cmd.toString());
     }
+
 }
