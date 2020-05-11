@@ -1,19 +1,22 @@
 package opRgaf;
 
 import java.awt.Toolkit;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
-
+import java.util.LinkedHashMap;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
@@ -27,8 +30,10 @@ import logging.Logging;
 import office.OOService;
 import sql.DatenquellenFactory;
 
-public class OpRgaf implements WindowListener {
+public class OpRgaf extends WindowAdapter {
 
+    private static final Logger logger = LoggerFactory.getLogger(OpRgaf.class);
+    
     /**
      * @param args
      */
@@ -52,6 +57,8 @@ public class OpRgaf implements WindowListener {
     public static HashMap<String, String> hmAbrechnung = new HashMap<String, String>();
     public static HashMap<String, String> hmFirmenDaten = null;
     public static HashMap<String, String> hmAdrPDaten = new HashMap<String, String>();
+    
+    
 
     public static boolean testcase = false;
     public OpRgafTab otab = null;
@@ -64,15 +71,43 @@ public class OpRgaf implements WindowListener {
     public static OpRgAfIni iniOpRgAf;
     static String proghome;
 
+    static final LinkedHashMap<String, String[]> lhmSuchArt;
+    static { 
+        lhmSuchArt = new LinkedHashMap<>();
+        lhmSuchArt.put("Rechnungsnummer gleich", new String[] {  "=", "0", "", ""});
+        lhmSuchArt.put("Rechnungsnummer enth\u00e4lt", new String[] { "like", "1", "%", "%"});
+        lhmSuchArt.put("Rechnungsbetrag =", new String[] { "rgesamt =", "2", "", ""});
+        lhmSuchArt.put("Rechnungsbetrag >=", new String[] { "rgesamt >=", "3", "", ""});
+        lhmSuchArt.put("Rechnungsbetrag <=", new String[] { "rgesamt <=", "4", "", ""});
+        lhmSuchArt.put("Noch offen =", new String[] { "roffen =", "5", "", ""});
+        lhmSuchArt.put("Noch offen >=", new String[] { "t1.roffen >=", "6", "", ""});
+        lhmSuchArt.put("Noch offen <=", new String[] { "t1.roffen <=", "7", "", ""});
+        lhmSuchArt.put("Pat. Nachname beginnt mit", new String[] { "like", "8", "", "%"});
+        lhmSuchArt.put("Rezeptnummer =", new String[] { "=", "9", "", ""});
+        lhmSuchArt.put("Rechnungsdatum =", new String[] { "=", "10", "", ""});
+        lhmSuchArt.put("Rechnungsdatum >=", new String[] { ">=", "11", "", ""});
+        lhmSuchArt.put("Rechnungsdatum <=", new String[] { "<=", "12", "", ""});
+        lhmSuchArt.put("Krankenkasse enth\u00e4lt", new String[] { "like", "13", "%", "%"});
+    }
+    // ENum to use to access above value[i]
+    enum ehmSuchArtFelderIdx {
+        Operatr,
+        Idx,
+        Prefix,
+        Postfix
+    }
+    
+    
+    // TODO: redesign to constructor & have main call constr.
     public static void main(String[] args) {
-        new Logging("oprgaf");
+        // new Logging("oprgaf");
         OpRgaf application = new OpRgaf();
         application.getInstance();
         application.getInstance().sqlInfo = new SqlInfo();
         if (args.length > 0 || testcase) {
             proghome = Path.Instance.getProghome();
             if (!testcase) {
-                System.out.println("hole daten aus INI-Datei " + args[0]);
+                logger.info("hole daten aus INI-Datei " + args[0]);
                 INIFile inif = new INIFile(args[0] + "ini/" + args[1] + "/rehajava.ini");
 
                 inif = new INIFile(args[0] + "ini/" + args[1] + "/rehajava.ini");
@@ -97,8 +132,8 @@ public class OpRgaf implements WindowListener {
                 FirmenDaten(proghome);
             }
             if (testcase) {
-                System.out.println(iniOpRgAf.getMahnParameter());
-                System.out.println("TestCase = " + testcase);
+                logger.debug(iniOpRgAf.getMahnParameter());
+                logger.debug("TestCase = " + testcase);
                 AbrechnungParameter(proghome);
                 FirmenDaten(proghome);
 
@@ -109,7 +144,7 @@ public class OpRgaf implements WindowListener {
             application.getJFrame();
         } else {
             JOptionPane.showMessageDialog(null,
-                    "Keine Datenbankparameter übergeben!\nReha-Statistik kann nicht gestartet werden");
+                    "Keine Datenbankparameter \u00fcbergeben!\nReha-Statistik kann nicht gestartet werden");
         }
 
     }
@@ -184,7 +219,7 @@ public class OpRgaf implements WindowListener {
         sqlInfo.setFrame(jFrame);
         jFrame.addWindowListener(this);
         jFrame.setSize(1000, 675);
-        jFrame.setTitle("Thera-Pi  Rezeptgebühr-/Ausfall-/Verkaufsrechnungen ausbuchen u. Mahnwesen  [IK: " + aktIK
+        jFrame.setTitle("Thera-Pi  Rezeptgeb\u00fchr-/Ausfall-/Verkaufsrechnungen ausbuchen u. Mahnwesen  [IK: " + aktIK
                 + "] " + "[Server-IP: " + "dbIpAndName" + "]"); //FIXME: dpipandname
         jFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         jFrame.setLocationRelativeTo(null);
@@ -244,20 +279,16 @@ public class OpRgaf implements WindowListener {
             obj.conn = new DatenquellenFactory(aktIK).createConnection();
             OpRgaf.thisClass.sqlInfo.setConnection(obj.conn);
             OpRgaf.DbOk = true;
-            System.out.println("Datenbankkontakt hergestellt");
+            logger.info("Datenbankkontakt hergestellt");
         } catch (final SQLException ex) {
-            System.out.println("SQLException: " + ex.getMessage());
-            System.out.println("SQLState: " + ex.getSQLState());
-            System.out.println("VendorError: " + ex.getErrorCode());
+            logger.error("SQLException: " + ex.getMessage());
+            logger.error("SQLState: " + ex.getSQLState());
+            logger.error("VendorError: " + ex.getErrorCode());
+            logger.error(ex.getLocalizedMessage());
             OpRgaf.DbOk = false;
 
         }
         return;
-    }
-
-
-    @Override
-    public void windowActivated(WindowEvent arg0) {
     }
 
     @Override
@@ -265,8 +296,10 @@ public class OpRgaf implements WindowListener {
         if (OpRgaf.thisClass.conn != null) {
             try {
                 OpRgaf.thisClass.conn.close();
-                System.out.println("Datenbankverbindung wurde geschlossen");
+                logger.info("Datenbankverbindung wurde geschlossen");
             } catch (SQLException e) {
+                logger.error("In windowClosed - couldn't close DB-connection");
+                logger.error(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -278,8 +311,10 @@ public class OpRgaf implements WindowListener {
         if (OpRgaf.thisClass.conn != null) {
             try {
                 OpRgaf.thisClass.conn.close();
-                System.out.println("Datenbankverbindung wurde geschlossen");
+                logger.info("Datenbankverbindung wurde geschlossen");
             } catch (SQLException e) {
+                logger.error("In windowClosing - couldn't close DB-connection");
+                logger.error(e.getLocalizedMessage());
                 e.printStackTrace();
             }
         }
@@ -287,29 +322,15 @@ public class OpRgaf implements WindowListener {
             try {
                 new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort, "OpRgaf#" + RehaIOMessages.IS_FINISHED);
                 rehaReverseServer.serv.close();
-                System.out.println("ReverseServer geschlossen");
-            } catch (Exception ex) {
-                ex.printStackTrace();
+                logger.info("ReverseServer geschlossen");
+            } catch (Exception e) {
+                logger.error("In windowClosing - couldn't close rehaReverseServer");
+                logger.error(e.getLocalizedMessage());
+                e.printStackTrace();
             }
 
         }
        
-    }
-
-    @Override
-    public void windowDeactivated(WindowEvent arg0) {
-    }
-
-    @Override
-    public void windowDeiconified(WindowEvent arg0) {
-    }
-
-    @Override
-    public void windowIconified(WindowEvent arg0) {
-    }
-
-    @Override
-    public void windowOpened(WindowEvent arg0) {
     }
 
     public static void AbrechnungParameter(String proghome) {
