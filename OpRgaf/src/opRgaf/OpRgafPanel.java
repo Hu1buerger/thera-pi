@@ -12,6 +12,7 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
@@ -39,6 +40,8 @@ import org.jdesktop.swingworker.SwingWorker;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -75,8 +78,8 @@ import office.OOService;
 
 public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBack {
 
-
     private static final long serialVersionUID = -7883557713071422132L;
+    private static final Logger logger = LoggerFactory.getLogger(OpRgafPanel.class);
 
     JRtaTextField suchen = null;
     JRtaTextField offen = null;
@@ -119,23 +122,75 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                     + "UNION SELECT rnr,rdatum,rgesamt,roffen,rpbetrag,rbezdatum,rmahndat1,rmahndat2,reznr,id as id,pat_intern as pat_id "
                     + "FROM rgaffaktura ) t1 LEFT JOIN pat5 AS t2 ON (t1.pat_id = t2.pat_intern) LEFT JOIN kass_adr AS t3 ON ( t2.kassenid = t3.id )";
 
-    String[] spalten = { "Name,Vorname,Geburtstag", "Rechn.Nr.", "Rechn.Datum", "Gesamtbetrag", "Offen", "Bearb.Gebühr",
-            "bezahlt am", "1.Mahnung", "2.Mahnung", "Krankenkasse", "RezeptNr.", "id" };
+//    String[] spalten = { "Name,Vorname,Geburtstag", "Rechn.Nr.", "Rechn.Datum", "Gesamtbetrag", "Offen", "Bearb.Gebühr",
+//            "bezahlt am", "1.Mahnung", "2.Mahnung", "Krankenkasse", "RezeptNr.", "id" };
+
+    private static enum enSpaltenNamen {
+        NAME("Name,Vorname,Geburtstag",0, String.class),
+        RNR("Rechn.Nr.", 1, String.class),
+        RDAT("Rechn.Datum", 2, Date.class),
+        RGES("Gesamtbetrag", 3, Double.class),
+        ROFF("Offen", 4, Double.class),
+        RBG("Bearb.Gebühr", 5, Double.class),
+        RBZDT("bezahlt am", 6, Date.class),
+        MAHN1("1.Mahnung", 7, Date.class),
+        MAHN2("2.Mahnung", 8, Date.class),
+        RKK("Krankenkasse", 9, String.class),
+        RRNR("RezeptNr.", 10, String.class),
+        RID("Id", 11, Integer.class);
+        
+        public final String name;
+        public final int idx;
+        public final Class<?> klasse;
+        private enSpaltenNamen(String Name, int Idx, Class<?> Klasse) {
+            name = Name;
+            idx = Idx;
+            klasse = Klasse;
+        }
+    };
+
+/*    enum suchArt {
+        RNREQ("rechNrEq", "Rechnungsnummer gleich", "where rnr =", 0),
+        RNRCT("rechNrCont", "Rechnungsnummer enthält", "rnr like", 1),
+        RBTEQ("rechBetrEq", "Rechnungsbetrag =", "rgesamt =", 2),
+        RBTGE("rechBetrGrEq", "Rechnungsbetrag >=", "rgesamt >=", 3),
+        RBTLE("rechBetrLeEq", "Rechnungsbetrag <=", "rgesamt <=", 4),
+        ROFEQ("rechBetrOfEq", "Noch offen =", "roffen =", 5),
+        ROFGE("rechBetrOfGrEq", "Noch offen >=", "t1.roffen >=", 6);
+        
+        public final String kurzf;
+        public final String beschreibung;
+        public final String dbSuchKrit;
+        public final int idx;
+        
+        private suchArt(String kurzf, String beschreibung, String dbSuchKrit, int idx) {
+            this.kurzf = kurzf;
+            this.beschreibung = beschreibung;
+            this.dbSuchKrit = dbSuchKrit;
+            this.idx = idx;
+        }
+    }
+*/
+    // HashMap<String, String[]> hmSuchArt;
+    
     String[] colnamen = { "nix", "rnr", "rdatum", "rgesamt", "roffen", "rpbetrag", "rbezdatum", "rmahndat1",
             "rmahndat2", "nix", "nix", "id" };
     OpRgafTab eltern = null;
 
+/*
     class IdxCol { // Indices fuer sprechende Spaltenzugriffe
         static final short Name = 0, RNr = 1, RDat = 2, GBetr = 3, Offen = 4, BGeb = 5, bez = 6, mahn1 = 7, mahn2 = 8,
                 kk = 9, RezNr = 10, id = 11;
     }
-
+*/
     private OpShowGesamt sumPan;
     private RgAfVkSelect selPan;
-
+    
     public OpRgafPanel(OpRgafTab xeltern) {
         super();
         this.eltern = xeltern;
+        // hmSuchArt = eltern.hmSuchArt;
+        // logger.debug(java.util.Arrays.asList(enSpaltenNamen.values()).toString());
         startKeyListener();
         startActionListener();
         setLayout(new BorderLayout());
@@ -173,14 +228,19 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         int colCnt = 2, rowCnt = 2;
 
         builder.addLabel("Suchkriterium", cc.xy(colCnt++, rowCnt)); // 2,2
+        
 
-        String[] args = { "Rechnungsnummer =", "Rechnungsnummer enthält", "Rechnungsbetrag =", "Rechnungsbetrag >=",
+        ArrayList<String> alSuchBeschreibungen = new ArrayList<String>(OpRgaf.lhmSuchArt.keySet());
+        // logger.debug("alSuchBeschr.= " + alSuchBeschreibungen.toString());
+/*        String[] args = { suchArt.RNREQ.beschreibung, "Rechnungsnummer enthält", "Rechnungsbetrag =", "Rechnungsbetrag >=",
                 "Rechnungsbetrag <=", "Noch offen =", "Noch offen >=", "Noch offen <=", "Pat. Nachname beginnt mit",
                 "Rezeptnummer =", "Rechnungsdatum =", "Rechnungsdatum >=", "Rechnungsdatum <=",
                 "Krankenkasse enthält" };
+        logger.debug("args= " + args);
+*/
+        int vorauswahl = OpRgaf.iniOpRgAf.getVorauswahl(alSuchBeschreibungen.size());
 
-        int vorauswahl = OpRgaf.iniOpRgAf.getVorauswahl(args.length);
-        combo = new JRtaComboBox(args);
+        combo = new JRtaComboBox(alSuchBeschreibungen.toArray(new String[alSuchBeschreibungen.size()]));
         combo.setSelectedIndex(vorauswahl);
         builder.add(combo, cc.xy(++colCnt, rowCnt)); // 4,2
 
@@ -216,42 +276,62 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
             return builder.getPanel();
         }
 
-        tabmod.setColumnIdentifiers(spalten);
+        // setColumnIdentifiers wants a Vector?!
+        Vector<String> vecSpaltenNamen = new Vector();
+        for ( enSpaltenNamen Name : enSpaltenNamen.values()) {
+            vecSpaltenNamen.add(Name.name);
+        }
+        tabmod.setColumnIdentifiers(vecSpaltenNamen);
         tab = new JXTable(tabmod);
         tab.setHorizontalScrollEnabled(true);
 
         DateTableCellEditor tble = new DateTableCellEditor();
-        tab.getColumn(1)
+        // Rech-Nr
+        tab.getColumn(enSpaltenNamen.RNR.idx)
            .setCellRenderer(new MitteRenderer());
 
-        tab.getColumn(2)
+        // Rech-Datum
+        tab.getColumn(enSpaltenNamen.RDAT.idx)
            .setCellEditor(tble);
 
-        tab.getColumn(3)
+        // Rech-Gesamt Betr.
+        tab.getColumn(enSpaltenNamen.RGES.idx)
            .setCellRenderer(new DoubleTableCellRenderer());
-        tab.getColumn(3)
+        tab.getColumn(enSpaltenNamen.RGES.idx)
+           .setCellEditor(new DblCellEditor());
+        
+        // Rech-Offen
+        tab.getColumn(enSpaltenNamen.ROFF.idx)
+           .setCellRenderer(new DoubleTableCellRenderer());
+        tab.getColumn(enSpaltenNamen.ROFF.idx)
+           .setCellEditor(new DblCellEditor());
+        
+        // Bearb. Gebuehr
+        tab.getColumn(enSpaltenNamen.RBG.idx)
+           .setCellRenderer(new DoubleTableCellRenderer());
+        tab.getColumn(enSpaltenNamen.RBG.idx)
            .setCellEditor(new DblCellEditor());
 
-        tab.getColumn(4)
-           .setCellRenderer(new DoubleTableCellRenderer());
-        tab.getColumn(4)
-           .setCellEditor(new DblCellEditor());
-
-        tab.getColumn(5)
-           .setCellRenderer(new DoubleTableCellRenderer());
-        tab.getColumn(5)
-           .setCellEditor(new DblCellEditor());
-
-        tab.getColumn(6)
+        // Rech-Bez.Datum
+        tab.getColumn(enSpaltenNamen.RBZDT.idx)
            .setCellEditor(tble);
-        tab.getColumn(7)
+        
+        // Rech-1.Mahnung
+        tab.getColumn(enSpaltenNamen.MAHN1.idx)
            .setCellEditor(tble);
-        tab.getColumn(8)
+        
+        // Rech-2.Mahnung
+        tab.getColumn(enSpaltenNamen.MAHN2.idx)
            .setCellEditor(tble);
-        tab.getColumn(10)
+        
+        // Rech-Rez.Nr.
+        tab.getColumn(enSpaltenNamen.RRNR.idx)
            .setMinWidth(80);
-        tab.getColumn(11)
+        
+        // OP-Id
+        tab.getColumn(enSpaltenNamen.RID.idx)
            .setMaxWidth(50);
+        
         tab.getSelectionModel()
            .addListSelectionListener(new OPListSelectionHandler());
         tab.setHighlighters(HighlighterFactory.createSimpleStriping(HighlighterFactory.CLASSIC_LINE_PRINTER));
@@ -298,6 +378,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         return builder.getPanel();
     }
 
+    // TODO: Diesen Test evtl. in SysStart/Init verschieben
     private boolean chkSalesTableStruct() {
         HashMap<String, String> hmMapNumFields = new HashMap<String, String>();
         hmMapNumFields.put("v_offen", "verkliste");
@@ -340,7 +421,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         Set keys = hmMapNumFields.keySet();
         for (Iterator it = keys.iterator(); it.hasNext();) {
             String key = (String) it.next();
-            System.out.println("key: " + key + "  ist vom Typ: " + types.get(key).toString());
+            logger.debug("key: " + key + "  ist vom Typ: " + types.get(key).toString());
             if (!types.get(key)
                     .toString()
                     .contains("decimal(10,2)")) {
@@ -440,7 +521,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         if (tabmod.getRowCount() <= 0) {
             return;
         }
-        final String rnr = tab.getValueAt(tab.getSelectedRow(), 1)
+        final String rnr = tab.getValueAt(tab.getSelectedRow(), enSpaltenNamen.RNR.idx)
                               .toString();
         if (rnr.startsWith("AFR")) {
 
@@ -449,8 +530,8 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                 protected Void doInBackground() throws Exception {
 
                     try {
-                        // System.out.println("in Ausfallrechnung");
-                        String id = tab.getValueAt(tab.getSelectedRow(), 11)
+                        // logger.debug("in Ausfallrechnung");
+                        String id = tab.getValueAt(tab.getSelectedRow(), enSpaltenNamen.RID.idx)
                                        .toString();
                         String rez_nr = SqlInfo.holeEinzelFeld(
                                 "select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
@@ -479,7 +560,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
     }
 
     private void setzeBezahlBetrag(final int i) {
-        tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), IdxCol.Offen)));
+        tfs[0].setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(i), enSpaltenNamen.ROFF.idx)));
     }
 
     private void sucheEinleiten() {
@@ -515,7 +596,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
             return;
         }
         BigDecimal nochoffen = BigDecimal.valueOf(
-                (Double) tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen));
+                (Double) tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.ROFF.idx));
         BigDecimal eingang = BigDecimal.valueOf(Double.parseDouble(tfs[0].getText()
                                                                          .replace(",", ".")));
         BigDecimal restbetrag = nochoffen.subtract(eingang);
@@ -534,24 +615,25 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         sumPan.substFromSuchOffen(eingang);
 
         String cmd = "";
-        String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RezNr)
+        String rgaf_reznum = tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.RRNR.idx)
                                    .toString();
-        String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.RNr)
+        String rgaf_rechnum = tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.RNR.idx)
                                     .toString();
 
         if (bar.isSelected()) {
-            String ktext = rgaf_rechnum + "," + tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Name);
+            String ktext = rgaf_rechnum + ","
+                           + tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.NAME.idx);
             // Name, Vorname, Geburtstag (soweit 35 Zeichen reichen)
             if (ktext.length() > 35) { ktext = ktext.substring(0, 34);}
             cmd = "insert into kasse set einnahme='" + dcf.format(eingang)
                                                           .replace(",", ".")
                     + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='" + ktext + "'," + 
                     "rez_nr='" + rgaf_reznum + "'";
-            // System.out.println(cmd);
+            // logger.debug(cmd);
             SqlInfo.sqlAusfuehren(cmd);
         }
-        tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), IdxCol.bez);
-        tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), IdxCol.Offen);
+        tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), enSpaltenNamen.RBZDT.idx);
+        tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), enSpaltenNamen.ROFF.idx);
 
         if (rgaf_rechnum.startsWith("RGR-")) { // Rezept bezahlt setzen
             SqlInfo.sqlAusfuehren(
@@ -561,7 +643,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                     "update lza set zzstatus='1', rez_bez='T' where rez_nr = '" + rgaf_reznum + "' LIMIT 1");
         }
 
-        int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.id);
+        int id = (Integer) tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.RID.idx);
         if (rgaf_rechnum.startsWith("RGR-") || rgaf_rechnum.startsWith("AFR-")) { // aus rgaffaktura ausbuchen
             cmd = "update rgaffaktura set roffen='" + dcf.format(restbetrag)
                                                          .replace(",", ".")
@@ -604,10 +686,11 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
             return;
         }
-        int suchart = combo.getSelectedIndex();
-        OpRgaf.iniOpRgAf.setVorauswahl(suchart); // Auswahl merken
-        String suchVal = combo.getItemAt(combo.getSelectedIndex()).toString();
-        // System.out.println("OpRgafPanel-doSuchen-suche: " +'"' + suchVal + '"' + "("
+        int suchartIdx = combo.getSelectedIndex();
+        OpRgaf.iniOpRgAf.setVorauswahl(suchartIdx); // Auswahl merken
+        String suchVal = combo.getItemAt(suchartIdx).toString();
+        
+        // logger.debug("OpRgafPanel-doSuchen-suche: " +'"' + suchVal + '"' + "("
         // + suchart + ")"); // s. String[] args
         String cmd = "";
         String tmpStr = selPan.bills2search("rnr");
@@ -620,10 +703,13 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         }
 
         try {
+            
+//            logger.debug("suchVal: " + suchVal + " suchartIdx=" + suchartIdx);            
+
 //            switch(suchVal){        // <- funktioniert erst ab Java 1.7
-            switch (suchart) {
+            switch (suchartIdx) {
             case 0:
-                cmd = stmtString + " where rnr ='" + searchStr + "'";
+                cmd = stmtString + whereToSearch + "rnr " + "=" + "'" + searchStr + "'";
                 break;
             case 1: // Rechnungsnummer enthält
                 if (searchStr.contains("sto") || searchStr.contains("tor") || searchStr.contains("orn")
@@ -670,17 +756,21 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                 break;
             }
         } catch (Exception ex) {
+            logger.error("Konnte suche-cmd nicht bauen");
+            logger.error(ex.getLocalizedMessage());
             // ex.printStackTrace();
         }
 
         if (!cmd.equals("")) {
             buts[btAusbuchen].setEnabled(false);
             suchen.setEnabled(false);
-            // System.out.println("suche nach: "+'"'+cmd+'"');
+            // logger.debug("suche nach: "+'"'+cmd+'"');
             try {
                 starteSuche(cmd);
             } catch (Exception ex) {
-                ex.printStackTrace();
+                logger.error("Couldn't start search in doSuchen");
+                logger.error(ex.getLocalizedMessage());
+                // ex.printStackTrace();
                 JOptionPane.showMessageDialog(null, "Korrekte Auflistung des Suchergebnisses fehlgeschlagen");
             }
 
@@ -713,24 +803,14 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {
-            switch (columnIndex) {
-            case 0:
-            case 1:
-            case 9:
-            case 10:
-                return String.class;
-            case 2:
-            case 6:
-            case 7:
-            case 8:
-                return Date.class;
-            case 3:
-            case 4:
-            case 5:
-                return Double.class;
-            case 11:
-                return Integer.class;
+            // logger.debug("Checking class of " + columnIndex);
+            for ( enSpaltenNamen spalte : enSpaltenNamen.values()) {
+                if ( spalte.idx == columnIndex) {
+                    // logger.debug("Spalte " + columnIndex + " ist " + spalte.name + " und hat Class: " + spalte.klasse.toString());
+                    return spalte.klasse;
+                }
             }
+            logger.error("This should never be reached. In getColumnClass, returning String.class as default");
             return String.class;
         }
 
@@ -755,7 +835,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         try {
             stmt = OpRgaf.thisClass.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.error("SQL-createStatement in starteSuche: ");
+            logger.error(e.getLocalizedMessage());
+            // e.printStackTrace();
         }
         try {
 
@@ -819,9 +901,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
             }
 
         } catch (SQLException ev) {
-            System.out.println("SQLException: " + ev.getMessage());
-            System.out.println("SQLState: " + ev.getSQLState());
-            System.out.println("VendorError: " + ev.getErrorCode());
+            logger.error("SQLException: " + ev.getMessage());
+            logger.error("SQLState: " + ev.getSQLState());
+            logger.error("VendorError: " + ev.getErrorCode());
         } finally {
             if (rs != null) {
                 try {
@@ -844,7 +926,12 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         /*
          * ausgewaehlte Spalten dem Inhalt anpassen
          */
-        int columns2adjust[] = { 0, 4, 7, 8, 10 }; // Name,Vorname,Geburtstag, Offen, 1.Mahnung, 2.Mahnung, RezeptNr.
+        int columns2adjust[] = { 
+                enSpaltenNamen.NAME.idx, 
+                enSpaltenNamen.ROFF.idx, 
+                enSpaltenNamen.MAHN1.idx, 
+                enSpaltenNamen.MAHN2.idx,
+                enSpaltenNamen.RRNR.idx }; // Name,Vorname,Geburtstag, Offen, 1.Mahnung, 2.Mahnung, RezeptNr.
         for (int col : columns2adjust) {
             tab.packColumn(col, 5);
         }
@@ -878,7 +965,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                                 "select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
                         new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
                                 "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + rez_nr);
-                        // System.out.println("Satz "+i);
+                        // logger.debug("Satz "+i);
 
                         if (rnr.startsWith("VR-")) { // test ob VR -> bar ausbuchen enabled/disabled
                             if (!OpRgaf.iniOpRgAf.getVrCashAllowed()) {
@@ -908,7 +995,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
     @Override
     public void tableChanged(TableModelEvent arg0) {
         if (arg0.getType() == TableModelEvent.INSERT) {
-            System.out.println("Insert");
+            logger.debug("Insert");
             return;
         }
         if (arg0.getType() == TableModelEvent.UPDATE) {
@@ -957,7 +1044,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                         String cmd = "update verkliste set " + hmMap2VerkListe.get(colname) + " ="
                                 + (value != null ? "'" + value + "'" : "null") + " where verklisteID='" + id
                                 + "' LIMIT 1";
-                        System.out.println(cmd);
+                        logger.debug(cmd);
                         SqlInfo.sqlAusfuehren(cmd);
                     } else {
                         new SwingWorker<Void, Void>() { // andere 'rückgängig' machen (= Suche neu ausführen)
@@ -977,14 +1064,14 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                 } else {
                     String cmd = "update rgaffaktura set " + colname + "="
                             + (value != null ? "'" + value + "'" : "null") + " where id='" + id + "' LIMIT 1";
-                    // System.out.println(cmd);
+                    // logger.debug(cmd);
                     SqlInfo.sqlAusfuehren(cmd);
                     tfs[0].setText(
-                            dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen)));
+                            dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), enSpaltenNamen.ROFF.idx)));
                 }
 
             } catch (Exception ex) {
-                System.out.println(ex);
+                logger.error(ex.toString());
                 JOptionPane.showMessageDialog(null, "Fehler in der Dateneingabe");
             }
             return;
@@ -996,9 +1083,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
             return;
         }
         String db = "";
-        String id = tab.getValueAt(tab.getSelectedRow(), 11)
+        String id = tab.getValueAt(tab.getSelectedRow(), enSpaltenNamen.RID.idx)
                        .toString();
-        String rgnr = tab.getValueAt(tab.getSelectedRow(), 1)
+        String rgnr = tab.getValueAt(tab.getSelectedRow(), enSpaltenNamen.RNR.idx)
                          .toString();
         String rez_nr = SqlInfo.holeEinzelFeld("select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
         String pat_intern = SqlInfo.holeEinzelFeld("select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
@@ -1006,7 +1093,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         String rezgeb = SqlInfo.holeEinzelFeld("select rgbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
         String pauschale = SqlInfo.holeEinzelFeld("select rpbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
         String gesamt = SqlInfo.holeEinzelFeld("select rgesamt from rgaffaktura where id='" + id + "' LIMIT 1");
-        // System.out.println("Rezeptnummer = "+rez_nr);
+        // logger.debug("Rezeptnummer = "+rez_nr);
         new InitHashMaps();
 
         String test = SqlInfo.holeEinzelFeld("select id from verordn where rez_nr = '" + rez_nr + "' LIMIT 1");
@@ -1081,7 +1168,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         hmRezgeb.put("<rgpatgeboren>", DatFunk.sDatInDeutsch(
                 SqlInfo.holeEinzelFeld("select geboren from pat5 where pat_intern='" + pat_intern + "' LIMIT 1")));
 
-        // System.out.println(hmRezgeb);
+        // logger.debug(hmRezgeb);
         String url = OpRgaf.proghome + "vorlagen/" + OpRgaf.aktIK + "/RezeptgebuehrRechnung.ott.Kopie.ott";
         try {
             officeStarten(url);
@@ -1141,7 +1228,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
     private void officeStarten(String url) throws OfficeApplicationException, NOAException, TextException {
         IDocumentService documentService = null;
-        //// System.out.println("Starte Datei -> "+url);
+        //// logger.debug("Starte Datei -> "+url);
       
 
         documentService =   new OOService().getOfficeapplication().getDocumentService();
@@ -1176,7 +1263,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
                     try {
 
                     } catch (RuntimeException ex) {
-                        // System.out.println("Fehler bei "+placeholderDisplayText);
+                        // logger.error("Fehler bei "+placeholderDisplayText);
                     }
                     placeholders[i].getTextRange()
                                    .setText(((String) entry.getValue()));
