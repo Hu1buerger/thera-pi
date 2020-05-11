@@ -277,7 +277,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         }
 
         // setColumnIdentifiers wants a Vector?!
-        Vector<String> vecSpaltenNamen = new Vector();
+        Vector<String> vecSpaltenNamen = new Vector<String>();
         for ( enSpaltenNamen Name : enSpaltenNamen.values()) {
             vecSpaltenNamen.add(Name.name);
         }
@@ -674,9 +674,9 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
         boolean useRGR = selPan.useRGR(); // Checkbox-Einstellung merken
         boolean useAFR = selPan.useAFR();
         boolean useVKR = selPan.useVKR();
-        selPan.setRGR_AFR_VKR(true, false, false); // wird immer eine RGR gesucht?
+        selPan.setRGR_AFR_VKR(true, false, false); // wird immer eine RGR gesucht? Bzw. hat AFR keine RzNr?
         doSuchen();
-        selPan.setRGR_AFR_VKR(useRGR, useRGR, useVKR); // Checkbox-Einstellung wiederherstellen
+        selPan.setRGR_AFR_VKR(useRGR, useAFR, useVKR); // Checkbox-Einstellung wiederherstellen
     }
 
     private void doSuchen() {
