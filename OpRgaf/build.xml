@@ -9,6 +9,7 @@
 	<property name="Reha.location" value="../Reha" />
 	<property name="RehaCommon.location" value="../RehaCommon" />
 	<property name="datenbank.location" value="../datenbank" />
+	<property name="mandant.location" value="../mandant" />
 	<property name="debuglevel" value="source,lines,vars" />
 	<property name="target" value="1.8" />
 	<property name="source" value="1.8" />
@@ -64,10 +65,15 @@
 		<pathelement location="${datenbank.location}/bin" />
 		<pathelement location="${datenbank.location}/bin-tests" />
 		<path refid="RehaCommon.classpath" />
-		<pathelement
-			location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar" />
-		<pathelement
-			location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
+		<pathelement location="${Libraries.location}/lib/ini/ini4j-0.5.4.jar" />
+		<pathelement location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
+	</path>
+	<path id="mandant.classpath">
+		<pathelement location="${mandant.location}/bin" />
+		<pathelement location="${mandant.location}/bin-tests" />
+		<pathelement location="${Libraries.location}/lib/logging/slf4j-api-1.7.25.jar" />
+		<path refid="datenbank.classpath" />
+ 		<path refid="RehaCommon.classpath" />
 	</path>
 	<path id="OpRgaf.classpath">
 		<pathelement location="bin" />
@@ -92,6 +98,7 @@
 		<pathelement
 			location="${Libraries.location}/lib/sql/mysql-connector-java-5.1.5-bin.jar" />
 		<path refid="datenbank.classpath" />
+		<path refid="mandant.classpath" />
 		<pathelement
 			location="${Libraries.location}/lib/logging/logback-classic-1.2.3.jar" />
 		<pathelement
@@ -133,6 +140,8 @@
 		<ant antfile="build.xml" dir="${RehaCommon.location}"
 			inheritAll="false" target="build-project" />
 		<ant antfile="build.xml" dir="${datenbank.location}"
+			inheritAll="false" target="build-project" />
+		<ant antfile="build.xml" dir="${mandant.location}"
 			inheritAll="false" target="build-project" />
 	</target>
 	<target depends="init" name="build-project">
