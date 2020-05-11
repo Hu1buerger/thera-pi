@@ -49,16 +49,11 @@ public class OpRgaf extends WindowAdapter {
 
     public String dieseMaschine = null;
 
-
-    
-
     public static String aktIK = "510841109";
 
     public static HashMap<String, String> hmAbrechnung = new HashMap<String, String>();
     public static HashMap<String, String> hmFirmenDaten = null;
     public static HashMap<String, String> hmAdrPDaten = new HashMap<String, String>();
-    
-    
 
     public static boolean testcase = false;
     public OpRgafTab otab = null;
@@ -132,7 +127,7 @@ public class OpRgaf extends WindowAdapter {
                 FirmenDaten(proghome);
             }
             if (testcase) {
-                logger.debug(iniOpRgAf.getMahnParameter());
+                logger.debug(iniOpRgAf.getMahnParameter().toString());
                 logger.debug("TestCase = " + testcase);
                 AbrechnungParameter(proghome);
                 FirmenDaten(proghome);
