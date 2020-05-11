@@ -20,6 +20,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
+import java.util.stream.Stream;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -146,6 +147,20 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
             name = Name;
             idx = Idx;
             klasse = Klasse;
+        }
+        
+        public static Class<?> getKlasse(int Idx) {
+            for (enSpaltenNamen spalte : values()) {
+                if ( spalte.idx == Idx)
+                    return spalte.klasse;
+            }
+            // If in doubt, use a String :D
+            return String.class;
+        }
+        
+        @Override
+        public String toString() {
+            return this.name;
         }
     };
 
@@ -803,15 +818,7 @@ public class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_I
 
         @Override
         public Class<?> getColumnClass(int columnIndex) {
-            // logger.debug("Checking class of " + columnIndex);
-            for ( enSpaltenNamen spalte : enSpaltenNamen.values()) {
-                if ( spalte.idx == columnIndex) {
-                    // logger.debug("Spalte " + columnIndex + " ist " + spalte.name + " und hat Class: " + spalte.klasse.toString());
-                    return spalte.klasse;
-                }
-            }
-            logger.error("This should never be reached. In getColumnClass, returning String.class as default");
-            return String.class;
+            return enSpaltenNamen.getKlasse(columnIndex);
         }
 
         @Override
