@@ -512,18 +512,6 @@ public class Rezeptvector {
                                .toString());
     }
 
-    // Missbrauch des unbenutzten 'rsplit' für Pauschale 'HygieneMehrbedarf'
-    public boolean getUseHygPausch() {
-        return this.vec_rezept.get(58)
-                .contains("+HMB");
-    }
-    public String getUseHygPauschS() {
-        return getStringAt(58);
-    }
-    public void setUseHygPausch(boolean data) {
-        this.vec_rezept.set(58, (Boolean.valueOf(data) ? "+HMB" : "F"));
-    }
-
     public String getvorJahrFrei() {
         return getStringAt(59);
     }
@@ -619,6 +607,15 @@ public class Rezeptvector {
         setStringAt(72, data);
     }
 
+    public boolean getUseHygPausch() {
+        return getBoolAt(73);
+    }
+    public String getUseHygPauschS() {
+        return getStringAt(73);
+    }
+    public void setUseHygPausch(boolean data) {
+        setStringAt(73, (data ? "T" : "F"));
+    }
     public void setNewRezNb(String rezClass) {
         int reznr = SqlInfo.erzeugeNummer(rezClass.toLowerCase());
         if (reznr < 0) {
@@ -682,7 +679,7 @@ public class Rezeptvector {
         cmd.append("arztbericht='" + getArztberichtS() + "', ");
         cmd.append("lasteddate='" + getLastEdDate() + "', ");
         cmd.append("farbcode='" + getFarbCode() + "', ");
-        cmd.append("rsplit='" + getUseHygPauschS() + "', ");
+        // rsplit
         cmd.append("jahrfrei='" + getvorJahrFrei() + "', ");
         cmd.append("unter18='" + getUnter18S() + "', ");
         cmd.append("hbvoll='" + getHbVollS() + "', ");
@@ -690,7 +687,8 @@ public class Rezeptvector {
         cmd.append("zzregel='" + getZzRegel() + "', ");
         cmd.append("anzahlhb='" + getAnzHB() + "', ");
         cmd.append("icd10='" + getICD10() + "', ");
-        cmd.append("icd10_2='" + getICD10_2() + "' ");
+        cmd.append("icd10_2='" + getICD10_2() + "', ");
+        cmd.append("pauschale='" + getUseHygPauschS() + "' ");
 
         cmd.append(" where id='" + getId() + "' LIMIT 1");
         SqlInfo.sqlAusfuehren(cmd.toString());
