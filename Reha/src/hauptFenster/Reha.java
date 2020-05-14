@@ -57,6 +57,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -2266,6 +2267,35 @@ public class Reha implements RehaEventListener {
         }
     }
 
+    static void testeVoTableStruc(String tableName) {
+        Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
+        int nbOfFields = feldNamen.size();
+        if (!(feldNamen.contains("pauschale")) && (nbOfFields == 72)) {
+            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN PAUSCHALE enum('T','F') NOT NULL DEFAULT 'F'");
+            if (retVal) {
+                String meldung = "Die Tabelle " + tableName + "\n"
+                        + "wurde erfolgreich um das Feld 'PAUSCHALE' ergänzt.";
+                logger.info(meldung.replace("\n", " "));
+                SwingUtilities.invokeLater(new Runnable() {
+                    String txt = meldung;
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(null, txt);
+                    }
+                });
+
+
+            }
+        } else {
+            logger.info("testeVoTableStruc: nix zu tun in Tabelle " + tableName + ".");
+        }
+    }
+    
+    static void testeVoTables() {
+        testeVoTableStruc ("lza");
+        testeVoTableStruc ("verordn");
+    }
+    
     ActionListener actionListener = new MenuActionListener(this);
 
     public void activateWebCam() {
