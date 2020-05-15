@@ -1,5 +1,5 @@
 # Changelog
-Alle nennenswerten Änderungen werden in dieser Datei dokumentitert.
+Alle nennenswerten Änderungen werden in dieser Datei dokumentiert.
 
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
@@ -8,19 +8,25 @@ Datumsformat ist jjjj-mm-tt, also Jahr-Monat-Tag
 ## unveröffentlicht
 ## [1.1.6] alpha 
 ### added
-- Hygienepauschale in Rezept aufgenommen #383
+- Hygienepauschale in Rezept aufgenommen (https://gitlab.com/thera-pi/thera-pi/-/issues/383)
 - der Ausführungspfad (proghome) kann über die Umgebungsvariable THERAPIHOME gesetzt werden.
-- Gitlab: Quelle wird automatisch compiliert, getestet und artifakte erstellt.
+- Gitlab: Quelle wird automatisch compiliert, getestet und Artefakte erstellt.
 - Konvention Testdatenbank IK = 123456789
 - Feature Toggle ermöglicht das Schalten von neuen Features im Hauptbaum
 
-###changed
-- RehaHMK/src/rehaHMKPanels/RehaHMKPanel2.java no longer uses depr. sun.image.jpeg lib und compiliert jetzt auch mit openjdk
+### changed
+- RehaHMK/src/rehaHMKPanels/RehaHMKPanel2.java no longer uses deprecated sun.image.jpeg lib und kompiliert jetzt auch mit openJDK
 
-###fixed
-- Eigenanteil wird falsch berechnet #373 
-- Heilmittel Sparte wird korrekt in Rezeptkopie übernommen
-- OP öffnet sich nicht mehr #374
+### fixed
+- ICD-10 Recherche bei geöffnetem Rezept nicht aufrufbar. (https://gitlab.com/thera-pi/thera-pi/-/issues/208)
+- Kopie RGR falsche Vorlage - Werkzeugsymbol (https://gitlab.com/thera-pi/thera-pi/-/issues/354)
+- Kopieren von Rezepten - HM-Sparte wird nicht übernommen (https://gitlab.com/thera-pi/thera-pi/-/issues/357)
+- SQL-Modul: Fehler beim Lesen der Ini (https://gitlab.com/thera-pi/thera-pi/-/issues/359)
+- Updateservice von Pi 1.0 ab 1.1.x deaktivieren (https://gitlab.com/thera-pi/thera-pi/-/issues/365)
+- 1.1.5 Eigenanteil wird falsch berechnet (https://gitlab.com/thera-pi/thera-pi/-/issues/373)
+- OP öffnet sich nicht mehr (https://gitlab.com/thera-pi/thera-pi/-/issues/374)
+- Probleme unter Linux / macOS wegen überflüssiger Leerzeichen (https://gitlab.com/thera-pi/thera-pi/-/issues/384)
+- Build-Info fehlt im Download-Paket (https://gitlab.com/thera-pi/thera-pi/-/issues/385)
 
 
 ## [1.1.5] - 2020-04-03
