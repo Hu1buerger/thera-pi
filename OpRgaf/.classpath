@@ -32,6 +32,5 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry combineaccessrules="false" kind="src" path="/mandant"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
