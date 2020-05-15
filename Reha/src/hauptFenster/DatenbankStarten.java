@@ -103,6 +103,7 @@ final class DatenbankStarten implements Runnable {
                 Reha.testeNummernKreis();
                 Reha.testeStrictMode();
                 Reha.testeMaxAllowed();
+                Reha.testeVoTables();
 
             } catch (java.lang.ArrayIndexOutOfBoundsException ex) {
                 ex.printStackTrace();

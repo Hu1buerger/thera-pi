@@ -512,7 +512,7 @@ public class Rezeptvector {
                                .toString());
     }
 
-    private String getvorJahrFrei() {
+    public String getvorJahrFrei() {
         return getStringAt(59);
     }
 
@@ -607,6 +607,15 @@ public class Rezeptvector {
         setStringAt(72, data);
     }
 
+    public boolean getUseHygPausch() {
+        return getBoolAt(73);
+    }
+    public String getUseHygPauschS() {
+        return getStringAt(73);
+    }
+    public void setUseHygPausch(boolean data) {
+        setStringAt(73, (data ? "T" : "F"));
+    }
     public void setNewRezNb(String rezClass) {
         int reznr = SqlInfo.erzeugeNummer(rezClass.toLowerCase());
         if (reznr < 0) {
@@ -678,9 +687,11 @@ public class Rezeptvector {
         cmd.append("zzregel='" + getZzRegel() + "', ");
         cmd.append("anzahlhb='" + getAnzHB() + "', ");
         cmd.append("icd10='" + getICD10() + "', ");
-        cmd.append("icd10_2='" + getICD10_2() + "' ");
+        cmd.append("icd10_2='" + getICD10_2() + "', ");
+        cmd.append("pauschale='" + getUseHygPauschS() + "' ");
 
         cmd.append(" where id='" + getId() + "' LIMIT 1");
         SqlInfo.sqlAusfuehren(cmd.toString());
     }
+
 }
