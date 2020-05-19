@@ -67,14 +67,14 @@ public class RezeptTest {
         sqlinf.setConnection(conn);
         SystemPreislisten.ladepreise("Ergo", ik.digitString());
         rez = rez.parallelStream()
-                 .filter(r -> r.REZ_NR != null)
+                 .filter(r -> r.rezNr != null)
                  .collect(Collectors.toList());
         for (Rezept rezept : rez) {
-            if (rezept.REZ_NR != null)
+            if (rezept.rezNr != null)
 
-                assertEquals(rezept.REZ_NR, rezept.positionenundanzahl()
+                assertEquals(rezept.rezNr, rezept.positionenundanzahl()
                                                   .toString(),
-                        RezTools.Y_holePosUndAnzahlAusRezept(rezept.REZ_NR)
+                        RezTools.Y_holePosUndAnzahlAusRezept(rezept.rezNr)
                                 .toString());
         }
     }
@@ -89,10 +89,10 @@ public class RezeptTest {
         Optional<Rezept> rez = new RezeptDto(ik).byRezeptNr("ER1");
 
         Rezept rezept = rez.get();
-        if (rezept.REZ_NR != null)
-            assertEquals(rezept.REZ_NR, rezept.positionenundanzahl()
+        if (rezept.rezNr != null)
+            assertEquals(rezept.rezNr, rezept.positionenundanzahl()
                                               .toString(),
-                    RezTools.Y_holePosUndAnzahlAusRezept(rezept.REZ_NR)
+                    RezTools.Y_holePosUndAnzahlAusRezept(rezept.rezNr)
                             .toString());
     }
 
@@ -106,10 +106,10 @@ public class RezeptTest {
         Optional<Rezept> rez = new RezeptDto(ik).byRezeptNr("ER1424");
 
         Rezept rezept = rez.get();
-        if (rezept.REZ_NR != null)
-            assertEquals(rezept.REZ_NR, rezept.positionenundanzahl()
+        if (rezept.rezNr != null)
+            assertEquals(rezept.rezNr, rezept.positionenundanzahl()
                                               .toString(),
-                    RezTools.Y_holePosUndAnzahlAusRezept(rezept.REZ_NR)
+                    RezTools.Y_holePosUndAnzahlAusRezept(rezept.rezNr)
                             .toString());
     }
 }

@@ -25,7 +25,7 @@ public class RezeptDtoTest {
         RezeptDto rezdto = new RezeptDto(new IK("123456789"));
         Optional<Rezept> rez = rezdto.byRezeptNr("ER1");
         assertTrue(rez.isPresent());
-        assertEquals("ER1",rez.get().REZ_NR);
+        assertEquals("ER1",rez.get().rezNr);
 
     }
 
