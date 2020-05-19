@@ -101,7 +101,6 @@ public class Rezept {
     public static final int ZZSTATUS_OK = 1;
     public static final int ZZSTATUS_NOTOK = 2;
     
-    
     public Rezept() {
         this.rezGeb = new Money();
         this.preise1 = new Money();
@@ -130,16 +129,16 @@ public class Rezept {
         this.artDerBeh3 = fromRez.artDerBeh3;
         this.artDerBeh4 = fromRez.artDerBeh4;
         this.befr = fromRez.befr;
-        this.rezGeb = new Money(fromRez.rezGeb.toString());
+        this.rezGeb = new Money(fromRez.rezGeb);
         
         this.rezBez = fromRez.rezBez;
         this.arzt = fromRez.arzt;
         this.arztId = fromRez.arztId;
         this.aerzte = fromRez.aerzte;
-        this.preise1 = new Money(fromRez.preise1.toString());
-        this.preise2 = new Money(fromRez.preise2.toString());
-        this.preise3 = new Money(fromRez.preise3.toString());
-        this.preise4 = new Money(fromRez.preise4.toString());
+        this.preise1 = new Money(fromRez.preise1);
+        this.preise2 = new Money(fromRez.preise2);
+        this.preise3 = new Money(fromRez.preise3);
+        this.preise4 = new Money(fromRez.preise4);
         this.datum = fromRez.datum;
         this.diagnose = fromRez.diagnose;
         this.heimbewohn = fromRez.heimbewohn;

@@ -310,6 +310,10 @@ public class Reha implements RehaEventListener {
 
     }
 
+    public Mandant mandant() {
+        return mandant;
+    }
+    
     public static void main(String[] args) {
         System.setProperty("java.net.preferIPv4Stack", "true");
         new Logging("reha");

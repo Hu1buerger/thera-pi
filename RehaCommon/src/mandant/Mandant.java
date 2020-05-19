@@ -19,6 +19,10 @@ public class Mandant {
     public String ikDigitString() {
         return ik.digitString();
     }
+    
+    public IK ik() {
+        return ik;
+    }
 
     @Override
     public String toString() {
