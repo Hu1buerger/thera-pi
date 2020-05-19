@@ -335,7 +335,7 @@ public class Reha implements RehaEventListener {
 
     private final static Mandant nullMandant = new Mandant("000000000", "Übungs-Mandant");
     private Mandant mandant;
-    private static String aktIK = nullMandant.ik();
+    private static String aktIK = nullMandant.ikDigits();
     private static String aktMandant = nullMandant.name();
 
     public static Reha instance = new Reha(nullMandant);
@@ -367,6 +367,10 @@ public class Reha implements RehaEventListener {
 
     }
 
+    public Mandant mandant() {
+        return mandant;
+    }
+    
     public static void main(String[] args) {
         System.setProperty("java.net.preferIPv4Stack", "true");
         new Logging("reha");
@@ -393,10 +397,10 @@ public class Reha implements RehaEventListener {
 
     public void startWithMandantSet() {
 
-        aktIK = mandant.ik();
+        aktIK = mandant.ikDigits();
         aktMandant = mandant.name();
 
-        String iniPath = Path.Instance.getProghome() + "ini/" + mandant.ik() + "/";
+        String iniPath = Path.Instance.getProghome() + "ini/" + mandant.ikDigits() + "/";
 
         INITool.init(iniPath);
         logger.info("Insgesamt sind " + INITool.anzahlInisInDB() + " INI-Dateien in der Tabelle inidatei abgelegt");

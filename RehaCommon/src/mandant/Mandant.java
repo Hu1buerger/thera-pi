@@ -16,8 +16,12 @@ public class Mandant {
         return name;
     }
 
-    public String ik() {
+    public String ikDigits() {
         return ik.digitString();
+    }
+    
+    public IK ik() {
+        return ik;
     }
 
     @Override

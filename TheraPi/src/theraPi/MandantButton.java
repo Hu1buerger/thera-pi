@@ -9,7 +9,7 @@ class MandantButton extends JButton {
 
     MandantButton(Mandant mandant) {
         this.mandant = mandant;
-        this.setText(mandant.name() + " - IK" + mandant.ik());
+        this.setText(mandant.name() + " - IK" + mandant.ikDigits());
 
     }
 

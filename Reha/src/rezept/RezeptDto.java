@@ -26,10 +26,10 @@ public class RezeptDto {
     private static final String selectAllFromLzaDBWhere = "SELECT * from " + rezDBLZA + " WHERE ";
     
 
-    public RezeptDto(IK ik) {
-        this.ik = ik;
+    public RezeptDto(IK Ik) {
+        ik = Ik;
     }
-
+    
     List<Rezept> all() {
         String sql = SelectAllSql;
         return retrieveList(sql);

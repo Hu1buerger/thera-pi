@@ -13,6 +13,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Connection;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -41,7 +42,9 @@ import events.PatStammEventClass;
 import events.PatStammEventListener;
 import hauptFenster.Reha;
 import hauptFenster.UIFSplitPane;
+import mandant.Mandant;
 import rehaInternalFrame.JPatientInternal;
+import rezept.Rezept;
 
 /**
  * @author juergen
@@ -89,15 +92,18 @@ public class PatientHauptPanel extends JXPanel {
     public Gutachten gutachten = null;
     public String[] tabTitel = { "aktuelle Rezepte", "Rezept-Historie", "Therapieberichte", "Dokumentation",
             "Gutachten", "Arzt & KK", "Plandaten" };
-    public JLabel[] rezlabs =  new JLabel[15];
+    public JLabel[] rezlabs = new JLabel[15];
 
-    // Labels: 0-, 1-, 2-'angelegt von', 3-ktraeger, 4-Arzt, 5-Rezeptart, 6-BegrAdR, 7-TBericht
+    // Labels: 0-, 1-, 2-'angelegt von', 3-ktraeger, 4-Arzt, 5-Rezeptart, 6-BegrAdR,
+    // 7-TBericht
     public JTextArea rezdiag = null;
 
-    public ImageIcon[] imgzuzahl =  new ImageIcon[4];
+    public ImageIcon[] imgzuzahl = new ImageIcon[4];
     public ImageIcon[] imgrezstatus = new ImageIcon[2];
     public Vector<String> patDaten = new Vector<String>();
+    // TODO: remove after Rezepte has been sorted
     public Vector<String> vecaktrez = null;
+    public Rezept rezAktRez = null;
     public Vector<String> vecakthistor = null;
 
     // PatStamm-Event Listener == extrem wichtig
@@ -129,8 +135,12 @@ public class PatientHauptPanel extends JXPanel {
 
     InfoDialogRGAFoffen infoDlg = null;
 
+    private Connection connection;
+
     public PatientHauptPanel(String name, JPatientInternal internal, Connection connection) {
         super();
+
+        this.connection = connection;
         setName(name);
         setDoubleBuffered(true);
 
@@ -150,7 +160,8 @@ public class PatientHauptPanel extends JXPanel {
         setLayout(lay);
 
         add(getToolBarPatient(), cc.xyw(1, 2, 3));
-        add(constructSplitPaneLR(connection), cc.xyw(1, 3, 3));
+        // add(constructSplitPaneLR(mand.getConnection()), cc.xyw(1, 3, 3));
+        add(constructSplitPaneLR(), cc.xyw(1, 3, 3));
         setVisible(true);
         setzeFocus();
     }
@@ -171,9 +182,9 @@ public class PatientHauptPanel extends JXPanel {
         patientInternal = null;
     }
 
-    private UIFSplitPane constructSplitPaneLR(Connection connection) {
+    private UIFSplitPane constructSplitPaneLR() {
         UIFSplitPane jSplitLR = UIFSplitPane.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                getStammDatenPatient(connection), constructSplitPaneOU(connection));
+                getStammDatenPatient(), constructSplitPaneOU());
         jSplitLR.setOpaque(false);
         jSplitLR.setDividerSize(7);
         jSplitLR.setDividerBorderVisible(true);
@@ -185,9 +196,9 @@ public class PatientHauptPanel extends JXPanel {
         return jSplitLR;
     }
 
-    private UIFSplitPane constructSplitPaneOU(Connection connection) {
+    private UIFSplitPane constructSplitPaneOU() {
         UIFSplitPane jSplitRechtsOU = UIFSplitPane.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, getMemosPatient(),
-                getMultiFunctionTab(connection));
+                getMultiFunctionTab());
         jSplitRechtsOU.setOpaque(false);
         jSplitRechtsOU.setDividerSize(7);
         jSplitRechtsOU.setDividerBorderVisible(true);
@@ -199,7 +210,7 @@ public class PatientHauptPanel extends JXPanel {
         return jSplitRechtsOU;
     }
 
-    private JScrollPane getStammDatenPatient(Connection connection) {
+    private JScrollPane getStammDatenPatient() {
         stammDatenPanel = new PatientStammDatenPanel(this, connection);
         JScrollPane jscr = JCompTools.getTransparentScrollPane(stammDatenPanel);
         jscr.validate();
@@ -215,7 +226,7 @@ public class PatientHauptPanel extends JXPanel {
         return jscr;
     }
 
-    private synchronized JScrollPane getMultiFunctionTab(Connection connection) {
+    private synchronized JScrollPane getMultiFunctionTab() {
         patMultiFunctionPanel = new PatientMultiFunctionPanel(this, connection);
         JScrollPane jscr = JCompTools.getTransparentScrollPane(patMultiFunctionPanel);
         jscr.validate();
@@ -344,7 +355,6 @@ public class PatientHauptPanel extends JXPanel {
                                .reactOnMouseClicked(arg0);
             }
         };
-
 
     }
 

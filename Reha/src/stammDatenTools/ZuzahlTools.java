@@ -18,7 +18,9 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
 public class ZuzahlTools {
-    /** EnumMap anlegen, mit ZuZahlStatus als key, Icon als value **/
+    /**
+     * TODO: EnumMap anlegen, mit ZuZahlStatus als key, Icon als value 
+     * **/
     public enum ZZStat {
         ZUZAHLFREI,
         ZUZAHLOK,
