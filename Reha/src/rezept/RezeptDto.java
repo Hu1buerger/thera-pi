@@ -18,7 +18,13 @@ import sql.DatenquellenFactory;
 public class RezeptDto {
     private IK ik;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDto.class);
-    private static final String SelectAllSql = "select * from verordn union select * from lza order by rez_nr;";
+    private static final String aktRezDB = "verordn";
+    private static final String rezDBLZA = "lza";
+    private static final String SelectAllSql = "select * from " + aktRezDB 
+                                                + " union select * from " + rezDBLZA + " order by rez_nr;";
+    private static final String selectAllFromRezDBWhere = "SELECT * from " + aktRezDB + " WHERE ";
+    private static final String selectAllFromLzaDBWhere = "SELECT * from " + rezDBLZA + " WHERE ";
+    
 
     public RezeptDto(IK ik) {
         this.ik = ik;
@@ -30,9 +36,71 @@ public class RezeptDto {
     }
 
     List<Rezept> allfromVerordn(){
-    final String sql =      "select * from verordn  order by rez_nr";
-    return retrieveList(sql);
+        final String sql = "select * from " + aktRezDB + " order by rez_nr";
+        return retrieveList(sql);
+    }
 
+    public Optional<Rezept> byRezeptNr(String rezeptNummer) {
+        String sql = selectAllFromRezDBWhere + "REZ_NR LIKE '" + rezeptNummer + "'"
+                + "UNION " + selectAllFromLzaDBWhere + "REZ_NR LIKE '" + rezeptNummer + "';";
+        Rezept rezept = retrieveFirst(sql);
+
+        return Optional.ofNullable(rezept);
+    }
+    
+    public Optional<Rezept> byRezeptId(String rezeptId) {
+        String sql = selectAllFromRezDBWhere + "ID = '" + rezeptId + "'"
+                + "UNION " + selectAllFromLzaDBWhere + "ID = '" + rezeptId + "';";
+        Rezept rezept = retrieveFirst(sql);
+
+        return Optional.ofNullable(rezept);
+    }
+
+    public List<Rezept> getRezepteByPatNr(String patientID) {
+        String sql = selectAllFromRezDBWhere + "PAT_INTERN = '" + patientID + "'"
+                + "UNION " + selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "';";
+
+        return retrieveList(sql);
+    }
+
+    public void updateRezeptTermine(String Id, String TerminListe) {
+        String sql = "UPDATE " + aktRezDB + "SET termine='" + TerminListe
+                    + "' WHERE id ='" + Id + "' LIMIT 1";
+        updateDataset(sql);
+    }
+    
+    public void rezeptAbschluss(String Id, boolean status) {
+        String sql = "UPDATE " + aktRezDB + "SET abschluss='" + ( status ? "T" : "F")
+                    + "' WHERE id='" + Id + "' LIMIT 1";
+        updateDataset(sql);
+    }
+    
+    private void updateDataset(String sql) {
+        Connection con;
+        try {
+            con = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = con.createStatement().execute(sql);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            logger.error("In updateDataset:");
+            logger.error(e.getLocalizedMessage());
+        }
+    }
+
+    private Rezept retrieveFirst(String sql) {
+        Rezept rezept = null;
+        try (Connection con = new DatenquellenFactory(ik.digitString())
+                                                       .createConnection();
+
+                ResultSet rs = con.createStatement()
+                                  .executeQuery(sql)) {
+            if (rs.next()) {
+                rezept = ofResultset(rs);
+            }
+        } catch (SQLException e) {
+            logger.error("could not retrieve Rezept from Database", e);
+        }
+        return rezept;
     }
 
     private List<Rezept> retrieveList(String sql) {
@@ -52,129 +120,187 @@ public class RezeptDto {
         }
     }
 
-    public Optional<Rezept> byRezeptNr(String rezeptNummer) {
-        String sql = "SELECT * FROM verordn WHERE REZ_NR LIKE '" + rezeptNummer + "'"
-                + "UNION SELECT * FROM lza WHERE REZ_NR LIKE '" + rezeptNummer + "';";
-        Rezept rezept = retrieveFirst(sql);
-
-        return Optional.ofNullable(rezept);
-    }
-
-    private Rezept retrieveFirst(String sql) {
-        Rezept rezept = null;
-        try (Connection con = new DatenquellenFactory(ik.digitString())
-                                                       .createConnection();
-
-                ResultSet rs = con.createStatement()
-                                  .executeQuery(sql)) {
-            if (rs.next()) {
-                rezept = ofResultset(rs);
-            }
-        } catch (SQLException e) {
-            logger.error("could not retrieve Rezept from Database", e);
-        }
-        return rezept;
-    }
-
     private Rezept ofResultset(ResultSet rs) throws SQLException {
         Rezept rez = new Rezept();
-        rez.PAT_INTERN = rs.getInt("PAT_INTERN");
-        rez.REZ_NR = rs.getString("REZ_NR");
-        rez.REZ_DATUM =
+        rez.patIntern = rs.getInt("PAT_INTERN");
+        rez.rezNr = rs.getString("REZ_NR");
+        rez.rezDatum =
 
                 rs.getDate("REZ_DATUM") == null ? null
                         : rs.getDate("REZ_DATUM")
                             .toLocalDate();
-        rez.ANZAHL1 = rs.getInt("ANZAHL1");
-        rez.ANZAHL2 = rs.getInt("ANZAHL2");
-        rez.ANZAHL3 = rs.getInt("ANZAHL3");
-        rez.ANZAHL4 = rs.getInt("ANZAHL4");
-        rez.ANZAHLKM = new BigDecimal(rs.getString("ANZAHLKM"));
-        rez.ART_DBEH1 = rs.getInt("ART_DBEH1");
-        rez.ART_DBEH2 = rs.getInt("ART_DBEH2");
-        rez.ART_DBEH3 = rs.getInt("ART_DBEH3");
-        rez.ART_DBEH4 = rs.getInt("ART_DBEH4");
-        rez.BEFR = "T".equals(Optional.ofNullable(rs.getString("BEFR"))
+        rez.anzahl1 = rs.getInt("ANZAHL1");
+        rez.anzahl2 = rs.getInt("ANZAHL2");
+        rez.anzahl3 = rs.getInt("ANZAHL3");
+        rez.anzahl4 = rs.getInt("ANZAHL4");
+        rez.anzahlKM = new BigDecimal(rs.getString("ANZAHLKM"));
+        rez.artDerBeh1 = rs.getInt("ART_DBEH1");
+        rez.artDerBeh2 = rs.getInt("ART_DBEH2");
+        rez.artDerBeh3 = rs.getInt("ART_DBEH3");
+        rez.artDerBeh4 = rs.getInt("ART_DBEH4");
+        rez.befr = "T".equals(Optional.ofNullable(rs.getString("BEFR"))
                            .orElse(""));
-        rez.REZ_GEB = new Money(rs.getString("REZ_GEB"));
-        rez.REZ_BEZ = "T".equals(Optional.ofNullable(rs.getString("REZ_BEZ"))
+        rez.rezGeb = new Money(rs.getString("REZ_GEB"));
+        rez.rezBez = "T".equals(Optional.ofNullable(rs.getString("REZ_BEZ"))
                               .orElse(""));
-        rez.ARZT = rs.getString("ARZT");
-        rez.ARZTID = rs.getInt("ARZTID");
-        rez.AERZTE = rs.getString("AERZTE");
-        rez.PREISE1 = new Money(rs.getString("PREISE1"));
-        rez.PREISE2 = new Money(rs.getString("PREISE2"));
-        rez.PREISE3 = new Money(rs.getString("PREISE3"));
-        rez.PREISE4 = new Money(rs.getString("PREISE4"));
-        rez.DATUM = rs.getDate("DATUM") == null ? null
+        rez.arzt = rs.getString("ARZT");
+        rez.arztId = rs.getInt("ARZTID");
+        rez.aerzte = rs.getString("AERZTE");
+        rez.preise1 = new Money(rs.getString("PREISE1"));
+        rez.preise2 = new Money(rs.getString("PREISE2"));
+        rez.preise3 = new Money(rs.getString("PREISE3"));
+        rez.preise4 = new Money(rs.getString("PREISE4"));
+        rez.datum = rs.getDate("DATUM") == null ? null
                 : rs.getDate("DATUM")
                     .toLocalDate();
-        rez.DIAGNOSE = rs.getString("DIAGNOSE");
-        rez.HEIMBEWOHN = "T".equals(Optional.ofNullable(rs.getString("HEIMBEWOHN"))
+        rez.diagnose = rs.getString("DIAGNOSE");
+        rez.heimbewohn = "T".equals(Optional.ofNullable(rs.getString("HEIMBEWOHN"))
                                  .orElse(""));
-        rez.VERAENDERD = rs.getDate("VERAENDERD") == null ? null
+        rez.veraenderd = rs.getDate("VERAENDERD") == null ? null
                 : rs.getDate("VERAENDERD")
                     .toLocalDate();
-        rez.VERAENDERA = rs.getInt("VERAENDERA");
-        rez.REZEPTART = rs.getString("REZEPTART");
-        rez.LOGFREI1 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI1"))
+        rez.veraendera = rs.getInt("VERAENDERA");
+        rez.rezeptArt = rs.getString("REZEPTART");
+        rez.logfrei1 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI1"))
                                .orElse(""));
-        rez.LOGFREI2 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI2"))
+        rez.logfrei2 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI2"))
                                .orElse(""));
-        rez.NUMFREI1 = rs.getInt("NUMFREI1");
-        rez.NUMFREI2 = rs.getInt("NUMFREI2");
-        rez.CHARFREI1 = rs.getString("CHARFREI1");
-        rez.CHARFREI2 = rs.getString("CHARFREI2");
-        rez.TERMINE = rs.getString("TERMINE");
-        rez.ID = rs.getInt("ID");
-        rez.KTRAEGER = rs.getString("KTRAEGER");
-        rez.KID = rs.getInt("KID");
-        rez.PATID = rs.getInt("PATID");
-        rez.ZZSTATUS = rs.getInt("ZZSTATUS");
-        rez.LASTDATE = rs.getDate("LASTDATE") == null ? null
+        rez.numfrei1 = rs.getInt("NUMFREI1");
+        rez.numfrei2 = rs.getInt("NUMFREI2");
+        rez.charfrei1 = rs.getString("CHARFREI1");
+        rez.charfrei2 = rs.getString("CHARFREI2");
+        rez.termine = rs.getString("TERMINE");
+        rez.id = rs.getInt("ID");
+        rez.ktraeger = rs.getString("KTRAEGER");
+        rez.kId = rs.getInt("KID");
+        rez.patId = rs.getInt("PATID");
+        rez.zzStatus = rs.getInt("ZZSTATUS");
+        rez.lastdate = rs.getDate("LASTDATE") == null ? null
                 : rs.getDate("LASTDATE")
                     .toLocalDate();
-        rez.PREISGRUPPE = rs.getInt("PREISGRUPPE");
-        rez.BEGRUENDADR = "T".equals(Optional.ofNullable(rs.getString("BEGRUENDADR"))
+        rez.preisgruppe = rs.getInt("PREISGRUPPE");
+        rez.begruendADR = "T".equals(Optional.ofNullable(rs.getString("BEGRUENDADR"))
                                   .orElse(""));
-        rez.HAUSBES = "T".equals(Optional.ofNullable(rs.getString("HAUSBES"))
+        rez.hausbes = "T".equals(Optional.ofNullable(rs.getString("HAUSBES"))
                               .orElse(""));
-        rez.INDIKATSCHL = rs.getString("INDIKATSCHL");
-        rez.ANGELEGTVON = rs.getString("ANGELEGTVON");
-        rez.BARCODEFORM = rs.getInt("BARCODEFORM");
-        rez.DAUER = rs.getString("DAUER");
-        rez.POS1 = rs.getString("POS1");
-        rez.POS2 = rs.getString("POS2");
-        rez.POS3 = rs.getString("POS3");
-        rez.POS4 = rs.getString("POS4");
-        rez.FREQUENZ = rs.getString("FREQUENZ");
-        rez.LASTEDIT = rs.getString("LASTEDIT");
-        rez.BERID = rs.getInt("BERID");
-        rez.ARZTBERICHT = "T".equals(Optional.ofNullable(rs.getString("ARZTBERICHT"))
+        rez.indikatSchl = rs.getString("INDIKATSCHL");
+        rez.angelegtVon = rs.getString("ANGELEGTVON");
+        rez.barcodeform = rs.getInt("BARCODEFORM");
+        rez.dauer = rs.getString("DAUER");
+        rez.pos1 = rs.getString("POS1");
+        rez.pos2 = rs.getString("POS2");
+        rez.pos3 = rs.getString("POS3");
+        rez.pos4 = rs.getString("POS4");
+        rez.frequenz = rs.getString("FREQUENZ");
+        rez.lastedit = rs.getString("LASTEDIT");
+        rez.berId = rs.getInt("BERID");
+        rez.arztBericht = "T".equals(Optional.ofNullable(rs.getString("ARZTBERICHT"))
                                   .orElse(""));
-        rez.LASTEDDATE = rs.getDate("LASTEDDATE") == null ? null
+        rez.lastEdDate = rs.getDate("LASTEDDATE") == null ? null
                 : rs.getDate("LASTEDDATE")
                     .toLocalDate();
-        rez.FARBCODE = rs.getString("FARBCODE");
-        rez.RSPLIT = rs.getString("RSPLIT");
-        rez.JAHRFREI = rs.getString("JAHRFREI");
-        rez.UNTER18 = "T".equals(Optional.ofNullable(rs.getString("UNTER18"))
+        rez.farbcode = rs.getString("FARBCODE");
+        rez.rsplit = rs.getString("RSPLIT");
+        rez.jahrfrei = rs.getString("JAHRFREI");
+        rez.unter18 = "T".equals(Optional.ofNullable(rs.getString("UNTER18"))
                               .orElse(""));
-        rez.HBVOLL = "T".equals(Optional.ofNullable(rs.getString("HBVOLL"))
+        rez.hbVoll = "T".equals(Optional.ofNullable(rs.getString("HBVOLL"))
                              .orElse(""));
-        rez.ABSCHLUSS = "T".equals(Optional.ofNullable(rs.getString("ABSCHLUSS"))
+        rez.abschluss = "T".equals(Optional.ofNullable(rs.getString("ABSCHLUSS"))
                                 .orElse(""));
-        rez.ZZREGEL = rs.getInt("ZZREGEL");
-        rez.ANZAHLHB = rs.getInt("ANZAHLHB");
-        rez.KUERZEL1 = rs.getString("KUERZEL1");
-        rez.KUERZEL2 = rs.getString("KUERZEL2");
-        rez.KUERZEL3 = rs.getString("KUERZEL3");
-        rez.KUERZEL4 = rs.getString("KUERZEL4");
-        rez.KUERZEL5 = rs.getString("KUERZEL5");
-        rez.KUERZEL6 = rs.getString("KUERZEL6");
-        rez.ICD10 = rs.getString("ICD10");
-        rez.ICD10_2 = rs.getString("ICD10_2");
+        rez.zzRegel = rs.getInt("ZZREGEL");
+        rez.anzahlHb = rs.getInt("ANZAHLHB");
+        rez.kuerzel1 = rs.getString("KUERZEL1");
+        rez.kuerzel2 = rs.getString("KUERZEL2");
+        rez.kuerzel3 = rs.getString("KUERZEL3");
+        rez.kuerzel4 = rs.getString("KUERZEL4");
+        rez.kuerzel5 = rs.getString("KUERZEL5");
+        rez.kuerzel6 = rs.getString("KUERZEL6");
+        rez.icd10 = rs.getString("ICD10");
+        rez.icd10_2 = rs.getString("ICD10_2");
+        rez.pauschale = "T".equals(Optional.ofNullable(rs.getString("PAUSCHALE"))
+                                .orElse(""));
 
         return rez;
+    }
+    
+    public void rezeptInDBSpeichern(Rezept rez) {
+        String sql = "update " + rezDBLZA + " set "
+                + "REZ_NR='" + rez.getRezNr() + "', "
+                + "ID='" + rez.getId() + "', "
+                + "REZEPTART='" + rez.getRezeptArt() + "', "
+                + "REZ_DATUM='" + rez.getRezDatum() + "', "
+                + "PAT_INTERN='" + rez.getPatIntern() + "', "
+                + "PATID='" + rez.getPatId() + "', "
+                + "ANZAHL1='" + rez.getAnzahl1() + "', "
+                + "ANZAHL2='" + rez.getAnzahl2() + "', "
+                + "ANZAHL3='" + rez.getAnzahl3() + "', "
+                + "ANZAHL4='" + rez.getAnzahl4() + "', "
+                + "ANZAHLKM='" + rez.getAnzahlKM() + "', "
+                + "ART_DBEH1='" + rez.getArtDerBeh1() + "', "
+                + "ART_DBEH2='" + rez.getArtDerBeh2() + "', "
+                + "ART_DBEH3='" + rez.getArtDerBeh3() + "', "
+                + "ART_DBEH4='" + rez.getArtDerBeh4() + "', "
+                + "BEFR='" + rez.getBefr() + "', "
+                + "REZ_GEB='" + rez.getRezGeb() + "', "
+                + "REZ_BEZ='" + rez.getRezBez() + "', "
+                + "ARZT='" + rez.getArzt() + "', "
+                + "ARZTID='" + rez.getArztId() + "', "
+                + "AERZTE='" + rez.getAerzte() + "', "
+                + "PREISE1='" + rez.getPreise1() + "', "
+                + "PREISE2='" + rez.getPreise2() + "', "
+                + "PREISE3='" + rez.getPreise3() + "', "
+                + "PREISE4='" + rez.getPreise4() + "', "
+                + "DATUM='" + rez.getDatum() + "', "
+                + "DIAGNOSE='" + rez.getDiagnose() + "', "
+                + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
+                + "VERAENDERD='" + rez.getVeraenderd() + "', "
+                + "VERAENDERA='" + rez.getVeraendera() + "', "
+                + "LOGFREI1='" + rez.getLogfrei1() + "', "
+                + "LOGFREI2='" + rez.getLogfrei2() + "', "
+                + "NUMFREI1='" + rez.getNumfrei1() + "', "
+                + "NUMFREI2='" + rez.getNumfrei2() + "', "
+                + "CHARFREI1='" + rez.getCharfrei1() + "', "
+                + "CHARFREI2='" + rez.getCharfrei2() + "', "
+                + "TERMINE='" + rez.getTermine() + "', "
+                + "KTRAEGER='" + rez.getKtraeger() + "', "
+                + "KID='" + rez.getkId() + "', "
+                + "ZZSTATUS='" + rez.getZZStatus() + "', "
+                + "LASTDATE='" + rez.getLastdate() + "', "
+                + "PREISGRUPPE='" + rez.getPreisGruppe() + "', "
+                + "BEGRUENDADR='" + rez.getBegruendADR() + "', "
+                + "HAUSBES='" + rez.getHausBesuch() + "', "
+                + "INDIKATSCHL='" + rez.getIndikatSchl() + "', "
+                + "ANGELEGTVON='" + rez.getAngelegtVon() + "', "
+                + "LASTEDDATE='" + rez.getLastEdDate() + "', "
+                + "BARCODEFORM='" + rez.getBarcodeform() + "', "
+                + "DAUER='" + rez.getDauer() + "', "
+                + "POS1='" + rez.getPos1() + "', "
+                + "POS2='" + rez.getPos2() + "', "
+                + "POS3='" + rez.getPos3() + "', "
+                + "POS4='" + rez.getPos4() + "', "
+                + "FREQUENZ='" + rez.getFrequenz() + "', "
+                + "LASTEDIT='" + rez.getLastedit() + "', "
+                + "BERID='" + rez.getBerId() + "', "
+                + "ARZTBERICHT='" + rez.getArztBericht() + "', "
+                + "FARBCODE='" + rez.getFarbcode() + "', "
+                + "RSPLIT='" + rez.getRSplit() + "', "
+                + "JAHRFREI='" + rez.getJahrfrei() + "', "
+                + "UNTER18='" + rez.getUnter18() + "', "
+                + "HBVOLL='" + rez.getHbVoll() + "', "
+                + "ABSCHLUSS='" + rez.getAbschluss() + "', "
+                + "ZZREGEL='" + rez.getZZRegel() + "', "
+                + "ANZAHLHB='" + rez.getAnzahlHb() + "', "
+                + "KUERZEL1='" + rez.getKuerzel1() + "', "
+                + "KUERZEL2='" + rez.getKuerzel2() + "', "
+                + "KUERZEL3='" + rez.getKuerzel3() + "', "
+                + "KUERZEL4='" + rez.getKuerzel4() + "', "
+                + "KUERZEL5='" + rez.getKuerzel5() + "', "
+                + "KUERZEL6='" + rez.getKuerzel6() + "', "
+                + "ICD10='" + rez.getIcd10() + "', "
+                + "ICD10_2='" + rez.getIcd10_2() + "', "
+                + "PAUSCHALE='" + rez.getPauschale() + "', "
+         + "WHERE id='" + rez.getId() + "' LIMIT 1";
+        updateDataset(sql);
     }
 }
