@@ -210,20 +210,89 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private Component eingabeDiag = null;
 //    private Mandant mand = null;
 
-    private Rezeptvector myRezept = null;
-    private Rezeptvector tmpRezept = null;
+    private Rezeptvector vecMyRezept = null;
+    private Rezept rezMyRezept = null;
+    private Rezeptvector vecTmpRezept = null;
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
+    public RezNeuanlage(Rezept rez, boolean neu) { 
+        super();
+        // mand = Mand;
+        try {
+            this.neu = neu;
+            this.rez = rez; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
+            
+            rezMyRezept = new Rezept();
+            verordnenderArzt = new ArztVec();
+            // TODO: sets the classmember in Rezeptvector-class for later operations
+            vecMyRezept.setVec_rez(vec);
+            diszis = new Disziplinen();
+
+            // TODO: old code also checked vec-size 0-length
+            if (this.neu) {
+                aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
+            }
+
+            setName("RezeptNeuanlage");
+            rtp = new RehaTPEventClass();
+            rtp.addRehaTPEventListener(this);
+
+            addKeyListener(this);
+
+            setLayout(new BorderLayout());
+            setOpaque(true);
+            setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+            add(getDatenPanel(), BorderLayout.CENTER);
+            add(getButtonPanel(), BorderLayout.SOUTH);
+            setBackgroundPainter(Reha.instance.compoundPainter.get("RezNeuanlage"));
+            validate();
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    setzeFocus();
+                }
+            });
+            initReady = true;
+            if (!neu) {
+                if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) { // Lemmi Doku: Das sieht aus wie der
+                                                                       // Read-Only-Modus fuer das Rezept
+                    for (int i = 0; i < jtf.length; i++) { // Lemmi Doku: alle Textfelder unbedienbar machen
+                        if (jtf[i] != null) {
+                            jtf[i].setEnabled(false);
+                        }
+                    }
+                    for (int i = 0; i < jcb.length; i++) { // Lemmi Doku: alle CheckBoxen unbedienbar machen
+                        if (jcb[i] != null) {
+                            jcb[i].setEnabled(false);
+                        }
+                    }
+                    for (int i = 0; i < jcmb.length; i++) { // Lemmi Doku: alle ComboBoxen unbedienbar machen
+                        if (jcmb[i] != null) {
+                            jcmb[i].setEnabled(false);
+                        }
+                    }
+                }
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null,
+                    "Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
+            logger.error("Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
+            logger.error( RezNeuanlage.makeStacktraceToString(ex));
+        }
+
+    }
+    
     public RezNeuanlage(Vector<String> vec, boolean neu) { 
         super();
         // mand = Mand;
         try {
             this.neu = neu;
             this.vec = vec; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
-            myRezept = new Rezeptvector();
+            vecMyRezept = new Rezeptvector();
+            rezMyRezept = new Rezept();
             verordnenderArzt = new ArztVec();
-            myRezept.setVec_rez(vec);
+            vecMyRezept.setVec_rez(vec);
             diszis = new Disziplinen();
 
             if (vec.size() > 0 && this.neu) {
@@ -293,7 +362,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 }
             }
             if (!this.neu) {
-                int itest = myRezept.getFarbCode();
+                int itest = vecMyRezept.getFarbCode();
                 if (itest >= 0) {
                     jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
                 } else {
@@ -554,10 +623,10 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             allowShortCut(jcmb[cRKLASSE], "RezeptClass");
             /********************/
 
-            if (myRezept.isEmpty()) {
+            if (vecMyRezept.isEmpty()) {
                 jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);                    
             } else {
-                String rezClassInVO = myRezept.getRezClass();
+                String rezClassInVO = vecMyRezept.getRezClass();
                 for (int i = 0; i < strRezepklassenAktiv.length; i++) {
                     if (strRezepklassenAktiv[i].equals(rezClassInVO)) {
                         jcmb[cRKLASSE].setSelectedIndex(i);
@@ -675,16 +744,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 if (Reha.instance.patpanel.patDaten.get(44)
                                                    .equals("T")) {
                     // Wenn Heimbewohner
-                    if (myRezept.getHausbesuch()) {
+                    if (vecMyRezept.getHausbesuch()) {
                         jcb[cVOLLHB].setEnabled(true);
-                        jcb[cVOLLHB].setSelected((myRezept.getHbVoll() ? true : false));
+                        jcb[cVOLLHB].setSelected((vecMyRezept.getHbVoll() ? true : false));
                     } else {
                         jcb[cVOLLHB].setEnabled(false);
                         jcb[cVOLLHB].setSelected(false);
                     }
                 } else {
                     // Wenn kein(!!) Heimbewohner
-                    if (myRezept.getHausbesuch()) {
+                    if (vecMyRezept.getHausbesuch()) {
                         jcb[cVOLLHB].setEnabled(false);
                         jcb[cVOLLHB].setSelected(true);
                     } else {
@@ -710,7 +779,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 jcb[cHygienePausch].setSelected(false);
             } else {
                
-                jcb[cHygienePausch].setSelected((myRezept.getUseHygPausch() ));
+                jcb[cHygienePausch].setSelected((vecMyRezept.getUseHygPausch() ));
             }
             allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
             jpan.add(jcb[cHygienePausch], cc.xy(7, 15));
@@ -818,8 +887,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 .setUnitIncrement(15);
 
             if (this.neu) {
-                if (myRezept.isEmpty()) {
-                    initRezeptNeu(myRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
+                if (vecMyRezept.isEmpty()) {
+                    initRezeptNeu(vecMyRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
                     this.holePreisGruppe(Reha.instance.patpanel.patDaten.get(68)
                                                                         .trim()); // setzt jtf[cPREISGR] u.
                                                                                   // this.preisgruppe
@@ -830,10 +899,10 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                                               // jcmb[cBARCOD]
                 } else { // myRezept enthaelt Daten
                     try {
-                        String[] xartdbeh = new String[] { myRezept.getHMkurz(1), myRezept.getHMkurz(2),
-                                myRezept.getHMkurz(3), myRezept.getHMkurz(4) };
-                        initRezeptKopie(myRezept);
-                        this.holePreisGruppe(myRezept.getKtraeger());
+                        String[] xartdbeh = new String[] { vecMyRezept.getHMkurz(1), vecMyRezept.getHMkurz(2),
+                                vecMyRezept.getHMkurz(3), vecMyRezept.getHMkurz(4) };
+                        initRezeptKopie(vecMyRezept);
+                        this.holePreisGruppe(vecMyRezept.getKtraeger());
                         this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                           .toString()
                                                           .trim(),
@@ -845,14 +914,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                 jcmb[cLEIST1 + i].setSelectedVecIndex(1, xartdbeh[i]);
                             }
                         }
-                        jcmb[cINDI].setSelectedItem(myRezept.getIndiSchluessel());
+                        jcmb[cINDI].setSelectedItem(vecMyRezept.getIndiSchluessel());
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
 
                 }
             } else {
-                this.holePreisGruppe(myRezept.getKtraeger());
+                this.holePreisGruppe(vecMyRezept.getKtraeger());
                 this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                   .toString()
                                                   .trim(),
@@ -861,7 +930,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                .toString()
                                                .trim());
             }
-            verordnenderArzt.init(myRezept.getArztId());
+            verordnenderArzt.init(vecMyRezept.getArztId());
             copyVecToForm();
 
             jscr.validate();
@@ -1029,16 +1098,16 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                             if (!neuDateTest()) {
                                 return;
                             }
-                            copyFormToVec1stTime(myRezept);
-                            myRezept.setNewRezNb(rezKlasse);
-                            Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(myRezept.getRezNb());
+                            copyFormToVec1stTime(vecMyRezept);
+                            vecMyRezept.setNewRezNb(rezKlasse);
+                            Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(vecMyRezept.getRezNb());
                         } else {
-                            copyFormToVec(myRezept);
+                            copyFormToVec(vecMyRezept);
                         }
                         closeDialog();
                         aufraeumen();
                         // ?? automat. HMR-Check ??
-                        myRezept.writeRez2DB();
+                        vecMyRezept.writeRez2DB();
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -1338,14 +1407,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                             mitsamstag);
                 }
             }
-            tmpRezept = new Rezeptvector();
+            vecTmpRezept = new Rezeptvector();
             if (getInstance().neu) {
-                initRezeptNeu(tmpRezept);
+                initRezeptNeu(vecTmpRezept);
             } else {
-                tmpRezept.setVec_rez(myRezept.getVec_rez());
+                vecTmpRezept.setVec_rez(vecMyRezept.getVec_rez());
             }
-            copyFormToVec1stTime(tmpRezept);
-            boolean checkok = new HMRCheck(tmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
+            copyFormToVec1stTime(vecTmpRezept);
+            boolean checkok = new HMRCheck(vecTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
             if (checkok) {
                 JOptionPane.showMessageDialog(null,
                         "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> den geltenden Heilmittelrichtlinien</b></html>");
@@ -1858,68 +1927,68 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * Rezepts und setzt auch die ComboBoxen und CheckBoxen
      */
     private void copyVecToForm() {
-        String test = StringTools.NullTest(myRezept.getKtrName());
+        String test = StringTools.NullTest(vecMyRezept.getKtrName());
         jtf[cKTRAEG].setText(test); // kasse
-        test = StringTools.NullTest(myRezept.getKtraeger());
+        test = StringTools.NullTest(vecMyRezept.getKtraeger());
         jtf[cKASID].setText(test); // kid
-        test = StringTools.NullTest(myRezept.getArzt());
+        test = StringTools.NullTest(vecMyRezept.getArzt());
         jtf[cARZT].setText(verordnenderArzt.getNNameLanr()); // arzt - LANR
-        test = StringTools.NullTest(myRezept.getArztId());
+        test = StringTools.NullTest(vecMyRezept.getArztId());
         jtf[cARZTID].setText(test); // arztid
-        test = StringTools.NullTest(myRezept.getRezeptDatum());
+        test = StringTools.NullTest(vecMyRezept.getRezeptDatum());
         if (!test.equals("")) {
             jtf[cREZDAT].setText(DatFunk.sDatInDeutsch(test));
         }
-        test = StringTools.NullTest(myRezept.getLastDate());
+        test = StringTools.NullTest(vecMyRezept.getLastDate());
         if (!test.equals("")) {
             jtf[cBEGINDAT].setText(DatFunk.sDatInDeutsch(test));
         }
-        int itest = myRezept.getRezArt();
+        int itest = vecMyRezept.getRezArt();
         if (itest >= 0) {
             jcmb[cVERORD].setSelectedIndex(itest);
         }
-        jcb[cBEGRADR].setSelected(myRezept.getBegrAdR());
-        jcb[cHAUSB].setSelected(myRezept.getHausbesuch());
+        jcb[cBEGRADR].setSelected(vecMyRezept.getBegrAdR());
+        jcb[cHAUSB].setSelected(vecMyRezept.getHausbesuch());
 
-        jcb[cVOLLHB].setSelected(myRezept.getHbVoll());
+        jcb[cVOLLHB].setSelected(vecMyRezept.getHbVoll());
 
-        jcb[cTBANGEF].setSelected(myRezept.getArztbericht());
-        jtf[cANZ1].setText(myRezept.getAnzBehS(1));
-        jtf[cANZ2].setText(myRezept.getAnzBehS(2));
-        jtf[cANZ3].setText(myRezept.getAnzBehS(3));
-        jtf[cANZ4].setText(myRezept.getAnzBehS(4));
+        jcb[cTBANGEF].setSelected(vecMyRezept.getArztbericht());
+        jtf[cANZ1].setText(vecMyRezept.getAnzBehS(1));
+        jtf[cANZ2].setText(vecMyRezept.getAnzBehS(2));
+        jtf[cANZ3].setText(vecMyRezept.getAnzBehS(3));
+        jtf[cANZ4].setText(vecMyRezept.getAnzBehS(4));
 
-        itest = StringTools.ZahlTest(myRezept.getArtDBehandl(1));
+        itest = StringTools.ZahlTest(vecMyRezept.getArtDBehandl(1));
         jcmb[cLEIST1].setSelectedIndex(leistungTesten(0, itest));
-        itest = StringTools.ZahlTest(myRezept.getArtDBehandl(2));
+        itest = StringTools.ZahlTest(vecMyRezept.getArtDBehandl(2));
         jcmb[cLEIST2].setSelectedIndex(leistungTesten(1, itest));
-        itest = StringTools.ZahlTest(myRezept.getArtDBehandl(3));
+        itest = StringTools.ZahlTest(vecMyRezept.getArtDBehandl(3));
         jcmb[cLEIST3].setSelectedIndex(leistungTesten(2, itest));
-        itest = StringTools.ZahlTest(myRezept.getArtDBehandl(4));
+        itest = StringTools.ZahlTest(vecMyRezept.getArtDBehandl(4));
         jcmb[cLEIST4].setSelectedIndex(leistungTesten(3, itest));
 
-        test = StringTools.NullTest(myRezept.getFrequenz());
+        test = StringTools.NullTest(vecMyRezept.getFrequenz());
         jtf[cFREQ].setText(test);
-        test = StringTools.NullTest(myRezept.getDauer());
+        test = StringTools.NullTest(vecMyRezept.getDauer());
         jtf[cDAUER].setText(test);
 
-        test = StringTools.NullTest(myRezept.getIndiSchluessel());
+        test = StringTools.NullTest(vecMyRezept.getIndiSchluessel());
         jcmb[cINDI].setSelectedItem(test);
 
-        itest = myRezept.getBarcodeform();
+        itest = vecMyRezept.getBarcodeform();
         if (itest >= 0) {
             jcmb[cBARCOD].setSelectedIndex(itest);
         } else {
-            myRezept.setBarcodeform(jcmb[cBARCOD].getSelectedIndex()); // default wird in ladePreisliste() gesetzt
+            vecMyRezept.setBarcodeform(jcmb[cBARCOD].getSelectedIndex()); // default wird in ladePreisliste() gesetzt
         }
 
-        test = StringTools.NullTest(myRezept.getAngelegtVon());
+        test = StringTools.NullTest(vecMyRezept.getAngelegtVon());
         jtf[cANGEL].setText(test);
         if (!test.trim()
                  .equals("")) {
             jtf[cANGEL].setEnabled(false);
         }
-        jta.setText(StringTools.NullTest(myRezept.getDiagn()));
+        jta.setText(StringTools.NullTest(vecMyRezept.getDiagn()));
         if (!jtf[cKASID].getText()
                         .equals("")) {
             holePreisGruppe(jtf[cKASID].getText()
@@ -1931,14 +2000,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         jtf[cHEIMBEW].setText(Reha.instance.patpanel.patDaten.get(44)); // heimbewohn
         jtf[cBEFREIT].setText(Reha.instance.patpanel.patDaten.get(30)); // befreit
         jtf[cANZKM].setText(Reha.instance.patpanel.patDaten.get(48)); // kilometer
-        jtf[cPATID].setText(myRezept.getPatIdS());
-        jtf[cPATINT].setText(myRezept.getPatIntern());
+        jtf[cPATID].setText(vecMyRezept.getPatIdS());
+        jtf[cPATINT].setText(vecMyRezept.getPatIntern());
 
         // ICD-10
-        jtf[cICD10].setText(myRezept.getICD10());
-        jtf[cICD10_2].setText(myRezept.getICD10_2());
+        jtf[cICD10].setText(vecMyRezept.getICD10());
+        jtf[cICD10_2].setText(vecMyRezept.getICD10_2());
 
-        itest = myRezept.getFarbCode();
+        itest = vecMyRezept.getFarbCode();
         if (itest >= 0) {
             jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
         }
@@ -2307,16 +2376,15 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private void doAbbrechen() {
         // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
         // des geaenderten Rezept-Dialoges
-        // Solche gravierenden Aenderungen der Programmlogik duerfen erst dann eingefuehrt
-        // werden
-        // wenn sich der Benutzer auf einer System-Init-Seite entscheiden kann ob er
-        // diese
-        // Funktionalitaet will oder nicht
-        // Wir im RTA wollen die Abfagerei definitiv nicht!
-        // Wenn meine Damen einen Vorgang abbrechen wollen, dann wollen sie den Vorgang
-        // abbrechen
-        // und nicht gefrag werden ob sie den Vorgang abbrechen wollen.
-        // Steinhilber
+        /* 
+         * Solche gravierenden Aenderungen der Programmlogik duerfen erst dann eingefuehrt
+         * werden wenn sich der Benutzer auf einer System-Init-Seite entscheiden kann ob er
+         * diese Funktionalitaet will oder nicht.
+         * Wir im RTA wollen die Abfagerei definitiv nicht!
+         * Wenn meine Damen einen Vorgang abbrechen wollen, dann wollen sie den Vorgang
+         * abbrechen und nicht gefrag werden ob sie den Vorgang abbrechen wollen.
+         * Steinhilber
+         */
         // Lemmi 20110116: Gerne auch mit Steuer-Parameter
         if ((Boolean) SystemConfig.hmRezeptDlgIni.get("RezAendAbbruchWarn")) {
             if (HasChanged() && askForCancelUsaved() == JOptionPane.NO_OPTION)
