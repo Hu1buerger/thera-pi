@@ -3202,54 +3202,48 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
         // Rezept-Neuanlage
         Vector<String> vecRezVorlage = new Vector<String>();
-        if (kopierModus == REZEPTKOPIERE_LETZTES) {
-            RezeptVorlage vorlage = new RezeptVorlage(btnNeu.getLocationOnScreen());
-            if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
-                                             // bereits selbst disposed !
-                vorlage.setModal(true);
-                vorlage.toFront();
-                vorlage.setVisible(true);
-            }
-            // Die Rezept-Kopiervorlage steht jetzt in vorlage.vecResult oder es wurde
-            // nichts gefunden !
-            vecRezVorlage = vorlage.vecResult;
-
-            if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
-                                             // bereits selbst disposed !
-                vorlage.dispose();
-            }
-            vorlage = null;
-        } else if (kopierModus == REZEPTKOPIERE_GEWAEHLTES) { // Vorschlag von J. Steinhilber integriert: Kopiere
-                                                               // das angewaehlte Rezept
-            String rezToCopy = AktuelleRezepte.getActiveRezNr();
-            vecRezVorlage = (SqlInfo.holeSatz("verordn", " * ", "REZ_NR = '" + rezToCopy + "'",
-                    Arrays.asList(new String[] {})));
-
-        } else if (kopierModus == REZEPTKOPIERE_HISTORIENREZEPT) {
-            
-            String rezToCopy = null;
-            if ((rezToCopy = Historie.getActiveRezNr()) != null) {
-                vecRezVorlage = (SqlInfo.holeSatz("lza", " * ", "REZ_NR = '" + rezToCopy + "'",
+        String rezToCopy = null;
+        switch (kopierModus) {
+            case REZEPTKOPIERE_LETZTES: 
+                RezeptVorlage vorlage = new RezeptVorlage(btnNeu.getLocationOnScreen());
+                if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
+                                                 // bereits selbst disposed !
+                    vorlage.setModal(true);
+                    vorlage.toFront();
+                    vorlage.setVisible(true);
+                }
+                // Die Rezept-Kopiervorlage steht jetzt in vorlage.vecResult oder es wurde
+                // nichts gefunden !
+                vecRezVorlage = vorlage.vecResult;
+    
+                if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
+                                                 // bereits selbst disposed !
+                    vorlage.dispose();
+                }
+                vorlage = null;
+                break;
+                
+            case REZEPTKOPIERE_GEWAEHLTES:           // Vorschlag von J. Steinhilber integriert: Kopiere
+                                                     // das angewaehlte Rezept
+                rezToCopy = AktuelleRezepte.getActiveRezNr();
+                vecRezVorlage = (SqlInfo.holeSatz("verordn", " * ", "REZ_NR = '" + rezToCopy + "'",
                         Arrays.asList(new String[] {})));
-
-            } else {
-                JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgew\u00e4hlt");
+                break;
+                
+            case REZEPTKOPIERE_HISTORIENREZEPT:
+            
+                rezToCopy = null;
+                if ((rezToCopy = Historie.getActiveRezNr()) != null) {
+                    vecRezVorlage = (SqlInfo.holeSatz("lza", " * ", "REZ_NR = '" + rezToCopy + "'",
+                            Arrays.asList(new String[] {})));
+    
+                } else {
+                    JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgew\u00e4hlt");
+                }
+                break;
             }
-        }
-
+        
         return vecRezVorlage;
-/*       
-        RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecRezVorlage.clone(), lneu);
-        neuRez.getSmartTitledPanel()
-              .setContentContainer(rezNeuAn);
-        if (vecRezVorlage.size() < 1)
-            neuRez.getSmartTitledPanel()
-                  .setTitle("Rezept Neuanlage");
-        else // Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
-             // Rezept-Neuanlage
-            neuRez.getSmartTitledPanel()
-                  .setTitle("Rezept Neuanlage als Kopie von <-- " + vecRezVorlage.get(1));
-*/
     }
 
     public Vector<String> getModelTermine() {
