@@ -83,7 +83,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     /**
      * McM '18: Umbau Struktur
      *     Konzept:
-     *         - Rezeptvector 'vec' wird ersetzt durch 'myRezept' (Instanz der Klasse 'Rezept'; Zugriff \u00fcber get/set)
+     *         - Rezeptvector 'vec' wird ersetzt durch 'myRezept' (Instanz der Klasse 'Rezept'; Zugriff ueber get/set)
      *         - zu Beginn ist myRezept entweder leer (komplette Neuanlage) oder enthaelt Daten der Kopiervorlage
      *         - ein neues Rezept wird mit Daten aus dem Patienten-Record u. der gewaehlten Rezeptklasse initialisiert
      *         - ein kopiertes Rezept wird zuerst bereinigt (Behandlungen, Zuzahlung, ... entfernen)
@@ -96,14 +96,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      */
     // Lemmi Doku: Das sind die Text-Eingabefgelder im Rezept
     public JRtaTextField[] jtf = new JRtaTextField[32];
-    // Lemmi 20101231: Harte Index-Zahlen f\u00fcr "jtf" durch sprechende Konstanten
+    // Lemmi 20101231: Harte Index-Zahlen fuer "jtf" durch sprechende Konstanten
     // ersetzt !
     final int cKTRAEG = 0;
     final int cARZT = 1;
     final int cREZDAT = 2;
     final int cBEGINDAT = 3;
     final int cANZ1 = 4; // Lemmi 20101231: ACHTUNG
-                         // die Positionen cANZ1 bis cANZ4 m\u00fcssen immer
+                         // die Positionen cANZ1 bis cANZ4 muessen immer
                          // nacheinander definiert sein
     final int cANZ2 = 5;
     final int cANZ3 = 6;
@@ -117,13 +117,13 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     final int cHEIMBEW = 14;
     final int cBEFREIT = 15;
     final int cPOS1 = 16; // Lemmi 20101231: ACHTUNG
-                          // die Positionen cPOS1 bis cPOS4 m\u00fcssen immer
+                          // die Positionen cPOS1 bis cPOS4 muessen immer
                           // nacheinander definiert sein
     final int cPOS2 = 17;
     final int cPOS3 = 18;
     final int cPOS4 = 19;
     final int cPREIS1 = 20; // Lemmi 20101231: ACHTUNG
-                            // die Positionen cPREIS1 bis cPREIS4 m\u00fcssen immer
+                            // die Positionen cPREIS1 bis cPREIS4 muessen immer
                             // nacheinander definiert sein
     final int cPREIS2 = 21;
     final int cPREIS3 = 22;
@@ -142,7 +142,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     Vector<Object> originale = new Vector<Object>();
 
     public JRtaCheckBox[] jcb = { null, null, null, null, null };
-    // Lemmi 20101231: Harte Index-Zahlen f\u00fcr "jcb" durch sprechende Konstanten
+    // Lemmi 20101231: Harte Index-Zahlen fuer "jcb" durch sprechende Konstanten
     // ersetzt !
     final int cBEGRADR = 0;
     final int cHAUSB = 1;
@@ -155,7 +155,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     final int cRKLASSE = 0;
     final int cVERORD = 1;
     final int cLEIST1 = 2; // Lemmi 20101231: ACHTUNG
-                           // die Positionen cLEIST1 bis cLEIST4 m\u00fcssen immer
+                           // die Positionen cLEIST1 bis cLEIST4 muessen immer
                            // nacheinander definiert sein
     final int cLEIST2 = 3;
     final int cLEIST3 = 4;
@@ -200,7 +200,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     String[] strRezepklassenAktiv = null;
 
-    // McM 16/11: Steuerung der Abk\u00fcrzungen bei Rezepteingabe
+    // McM 16/11: Steuerung der Abkuerzungen bei Rezepteingabe
     private boolean ctrlIsPressed = false;
     private Component eingabeRezDate = null;
     private Component eingabeBehFrequ = null;
@@ -251,7 +251,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             initReady = true;
             if (!neu) {
                 if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) { // Lemmi Doku: Das sieht aus wie der
-                                                                       // Read-Only-Modus f\u00fcr das Rezept
+                                                                       // Read-Only-Modus fuer das Rezept
                     for (int i = 0; i < jtf.length; i++) { // Lemmi Doku: alle Textfelder unbedienbar machen
                         if (jtf[i] != null) {
                             jtf[i].setEnabled(false);
@@ -437,7 +437,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         }
     }
 
-    // Lemmi 20101231: pr\u00fcft, ob sich Eintraege geaendert haben
+    // Lemmi 20101231: prueft, ob sich Eintraege geaendert haben
     // ACHTUNG: Die Reihenfolge der Abfragen mu\u00df in SaveChangeStatus() und
     // HasChanged() exakt identisch sein !
     public Boolean HasChanged() {
@@ -463,7 +463,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         // alle CheckBoxen
         for (i = 0; i < jcb.length; i++) { // CheckBoxen
-            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begr\u00fcndung au\u00dfer der Regel vorhanden ? .....
+            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begruendung au\u00dfer der Regel vorhanden ? .....
                 return true;
         }
 
@@ -499,7 +499,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         JScrollPane jscr = null;
 
         try {
-            // Lemmi 20101231: Harte Index-Zahlen f\u00fcr "jtf" durch sprechende Konstanten
+            // Lemmi 20101231: Harte Index-Zahlen fuer "jtf" durch sprechende Konstanten
             // ersetzt !
             jtf[cKTRAEG] = new JRtaTextField("NIX", false); // kasse/kostentraeger
             jtf[cARZT] = new JRtaTextField("NIX", false); // arzt
@@ -1188,13 +1188,13 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     }
 
-    // Lemmi Doku: pr\u00fcft ob die Heilmittel \u00fcberhaupt und in der korrekten
+    // Lemmi Doku: prueft ob die Heilmittel ueberhaupt und in der korrekten
     // Reihenfolge eingetragen worden sind
     private boolean anzahlTest() {
         int itest;
         int maxanzahl = 0, aktanzahl = 0;
 
-        for (int i = 0; i < 4; i++) { // \u00fcber alle 4 Leistungs- und Anzahl-Positionen rennen
+        for (int i = 0; i < 4; i++) { // ueber alle 4 Leistungs- und Anzahl-Positionen rennen
             itest = jcmb[cLEIST1 + i].getSelectedIndex();
             if (itest > 0) {
                 if (i == 0) { // die 1. Position besonders abfragen - diese mu\u00df existieren !
@@ -1486,7 +1486,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     }
 
-    /** Holt die passenden Inikationsschl\u00fcssel gemae\u00df aktiver Disziplin**/
+    /** Holt die passenden Inikationsschluessel gemae\u00df aktiver Disziplin**/
     private void fuelleIndis(String typeOfVO) {
         try {
             if (jcmb[cINDI].getItemCount() > 0) {
@@ -1769,11 +1769,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     /**
      *
-     * initialisiert ein Rezept mit Daten, die immer gesetzt werden m\u00fcssen
+     * initialisiert ein Rezept mit Daten, die immer gesetzt werden muessen
      */
     private void initRezeptAll(Rezeptvector thisRezept) {
         if (thisRezept.getKtraeger()
-                    .equals("")) { // eher ein Fall f\u00fcr check/speichern!
+                    .equals("")) { // eher ein Fall fuer check/speichern!
             JOptionPane.showMessageDialog(null,
                     "Achtung - kann Preisgruppe nicht ermitteln - Rezept kann sp\u00e4ter nicht abgerechnet werden!");
         }
@@ -1790,7 +1790,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         thisRezept.setHeimbew(Reha.instance.patpanel.patDaten.get(44)); // koennte sich geaendert haben
         thisRezept.setBefreit(Reha.instance.patpanel.patDaten.get(30)); // dito
-        thisRezept.setGebuehrBezahlt(false); // kann noch nicht bezahlt sein (Rezeptgeb\u00fchr)
+        thisRezept.setGebuehrBezahlt(false); // kann noch nicht bezahlt sein (Rezeptgebuehr)
         thisRezept.setGebuehrBetrag("0.00");
     }
 
@@ -1818,13 +1818,13 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      *
      * initialisiert ein kopiertes Rezept
      *  - aktualisiert Daten aus dem aktuellen Patienten,
-     *  - l\u00f6scht Daten, die nur f\u00fcr die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
+     *  - l\u00f6scht Daten, die nur fuer die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
     private void initRezeptKopie(Rezeptvector thisRezept) {
         String kasseInVo = thisRezept.getKtrName();
         String kasseInPatStamm = Reha.instance.patpanel.patDaten.get(13);
         if (!kasseInVo.equals(kasseInPatStamm)) {
-            // Kasse im Rezept stimmt nicht mit Kasse im Patientenstamm \u00fcberein:
+            // Kasse im Rezept stimmt nicht mit Kasse im Patientenstamm ueberein:
             // Pat. hat inzwischen Kasse gewechselt oder es ist ein BG- oder
             // Privatrezept
             if (askForKeepCurrent(kasseInVo, kasseInPatStamm) == JOptionPane.NO_OPTION) {
@@ -2071,7 +2071,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     szzstatus = "0";
                     break;
                 }
-                //// System.out.println("ZuzahlStatus = Zuzahlung (zun\u00e4chst) erforderlich, pr\u00fcfe
+                //// System.out.println("ZuzahlStatus = Zuzahlung (zun\u00e4chst) erforderlich, pruefe
                 //// ob befreit oder unter 18");
                 if (Reha.instance.patpanel.patDaten.get(30)
                                                    .equals("T")) {
@@ -2114,7 +2114,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                     if (DatFunk.TageDifferenz(
                                             DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(41)),
                                             DatFunk.sHeute()) >= 0) {
-                                        // Behandlung mu\u00df nach befr_ab liegen
+                                        // Behandlung muss nach befr_ab liegen
                                         szzstatus = "0";
                                     } else {
                                         // Behandlung kann auch vor befr_ab liegen
@@ -2307,7 +2307,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private void doAbbrechen() {
         // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
         // des geaenderten Rezept-Dialoges
-        // Solche gravierenden \u00c4nderungen der Programmlogik d\u00fcrfen erst dann eingef\u00fchrt
+        // Solche gravierenden Aenderungen der Programmlogik duerfen erst dann eingefuehrt
         // werden
         // wenn sich der Benutzer auf einer System-Init-Seite entscheiden kann ob er
         // diese
@@ -2390,44 +2390,3 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         return jcmb[cRKLASSE].getSelectedIndex();
     }
 }
-
-/**
-00:54:40.338 [AWT-EventQueue-0] ERROR patientenFenster.RezNeuanlage - Fehler im Konstruktor RezNeuanlage: null
-00:54:40.341 [AWT-EventQueue-0] ERROR patientenFenster.RezNeuanlage - patientenFenster.RezNeuanlage.SaveChangeStatus(RezNeuanlage.java:436)
-patientenFenster.RezNeuanlage.getDatenPanel(RezNeuanlage.java:861)
-patientenFenster.RezNeuanlage.<init>(RezNeuanlage.java:242)
-org.therapi.reha.patient.AktuelleRezepte.neuanlageRezept(AktuelleRezepte.java:3114)
-org.therapi.reha.patient.AktuelleRezepte$4.mouseClicked(AktuelleRezepte.java:544)
-java.awt.AWTEventMulticaster.mouseClicked(AWTEventMulticaster.java:270)
-java.awt.Component.processMouseEvent(Component.java:6542)
-javax.swing.JComponent.processMouseEvent(JComponent.java:3324)
-java.awt.Component.processEvent(Component.java:6304)
-java.awt.Container.processEvent(Container.java:2239)
-java.awt.Component.dispatchEventImpl(Component.java:4889)
-java.awt.Container.dispatchEventImpl(Container.java:2297)
-java.awt.Component.dispatchEvent(Component.java:4711)
-java.awt.LightweightDispatcher.retargetMouseEvent(Container.java:4904)
-java.awt.LightweightDispatcher.processMouseEvent(Container.java:4544)
-java.awt.LightweightDispatcher.dispatchEvent(Container.java:4476)
-java.awt.Container.dispatchEventImpl(Container.java:2283)
-java.awt.Window.dispatchEventImpl(Window.java:2746)
-java.awt.Component.dispatchEvent(Component.java:4711)
-java.awt.EventQueue.dispatchEventImpl(EventQueue.java:760)
-java.awt.EventQueue.access$500(EventQueue.java:97)
-java.awt.EventQueue$3.run(EventQueue.java:709)
-java.awt.EventQueue$3.run(EventQueue.java:703)
-java.security.AccessController.doPrivileged(Native Method)
-java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:74)
-java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:84)
-java.awt.EventQueue$4.run(EventQueue.java:733)
-java.awt.EventQueue$4.run(EventQueue.java:731)
-java.security.AccessController.doPrivileged(Native Method)
-java.security.ProtectionDomain$JavaSecurityAccessImpl.doIntersectionPrivilege(ProtectionDomain.java:74)
-java.awt.EventQueue.dispatchEvent(EventQueue.java:730)
-java.awt.EventDispatchThread.pumpOneEventForFilters(EventDispatchThread.java:205)
-java.awt.EventDispatchThread.pumpEventsForFilter(EventDispatchThread.java:116)
-java.awt.EventDispatchThread.pumpEventsForHierarchy(EventDispatchThread.java:105)
-java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:101)
-java.awt.EventDispatchThread.pumpEvents(EventDispatchThread.java:93)
-java.awt.EventDispatchThread.run(EventDispatchThread.java:82)
-*/
