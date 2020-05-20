@@ -3241,6 +3241,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgew\u00e4hlt");
                 }
                 break;
+                
+            default:
+                logger.error("In neuesRezeptVonKopie - switch on copyMode");
+                logger.error("Unknown copyMode: " + kopierModus);
             }
         
         return vecRezVorlage;
