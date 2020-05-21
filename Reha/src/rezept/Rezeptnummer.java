@@ -30,15 +30,16 @@ public class Rezeptnummer {
         // TODO: handle malformed rezNr
         // - disziplin can't be found - set INV?
         // - parseInt screws up
-        Disziplin diszi = Disziplin.INV;
+        disziplin = Disziplin.INV;
+        if ( rezNr == null)
+            return;
         String diszi2check = rezNr.substring(0, 2);
         for ( Disziplin d : Disziplin.values()) {
             if (diszi2check.equalsIgnoreCase(d.toString())) {
-                diszi = d;
+                disziplin = d;
                 break;
             }
         };
-        this.disziplin = diszi;
         
         this.rezeptZiffern = Integer.parseInt(rezNr.substring(2));
     }
