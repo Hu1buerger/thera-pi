@@ -67,15 +67,12 @@ public class Rezeptnummer {
     public String toString() {
         return "Rezeptnummer [disziplin=" + disziplin + ", rezeptZiffern=" + rezeptZiffern + "]";
     }
-   
+    
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((disziplin == null) ? 0 : disziplin.hashCode());
-        return prime * result + Integer.hashCode(rezeptZiffern);
+        return Objects.hash(disziplin, rezeptZiffern);
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj)
