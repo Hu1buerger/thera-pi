@@ -129,9 +129,9 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
     private void starteSucheVorlage(String strPatIntern, String strDiszi) {
 
         // Suche neuestes Rezept inkl. der vorab bestimmten Disziplin
-        String cmd = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + strPatIntern + " AND rez_nr like \"" + strDiszi
-                + "%\"" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + strPatIntern
-                + " AND rez_nr like \"" + strDiszi + "%\"" + " ORDER BY rez_datum desc LIMIT 1";
+        String cmd = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + strPatIntern + " AND rez_nr like '" + strDiszi
+                + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + strPatIntern
+                + " AND rez_nr like '" + strDiszi + "%'" + " ORDER BY rez_datum desc LIMIT 1";
 
         starteSuche(cmd, "vorlage"); // das füllt den Member-Vektor "vecResult"
     }

@@ -75,11 +75,21 @@ public class RezeptDto {
         updateDataset(sql);
     }
     
+    public Rezept juengstesRezeptVonPatientInDiszi (String patIntern, String diszi) {
+        // Suche neuestes Rezept inkl. der Disziplin
+        
+        String sql = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + patIntern + " AND rez_nr like '" + diszi
+                + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + patIntern
+                + " AND rez_nr like '" + diszi + "%'" + " ORDER BY rez_datum desc LIMIT 1";
+        return  retrieveFirst(sql);
+
+    }
+    
     private void updateDataset(String sql) {
-        Connection con;
+        Connection conn;
         try {
-            con = new DatenquellenFactory(ik.digitString()).createConnection();
-            boolean rs = con.createStatement().execute(sql);
+            conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             logger.error("In updateDataset:");
@@ -89,10 +99,10 @@ public class RezeptDto {
 
     private Rezept retrieveFirst(String sql) {
         Rezept rezept = null;
-        try (Connection con = new DatenquellenFactory(ik.digitString())
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
                                                        .createConnection();
 
-                ResultSet rs = con.createStatement()
+                ResultSet rs = conn.createStatement()
                                   .executeQuery(sql)) {
             if (rs.next()) {
                 rezept = ofResultset(rs);
@@ -105,9 +115,9 @@ public class RezeptDto {
 
     private List<Rezept> retrieveList(String sql) {
         List<Rezept> rezeptLste = new LinkedList<>();
-        try (Connection con = new DatenquellenFactory(ik.digitString())
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
                                                        .createConnection()) {
-            ResultSet rs = con.createStatement()
+            ResultSet rs = conn.createStatement()
                               .executeQuery(sql);
             while (rs.next()) {
                 rezeptLste.add(ofResultset(rs));
@@ -123,7 +133,7 @@ public class RezeptDto {
     private Rezept ofResultset(ResultSet rs) throws SQLException {
         Rezept rez = new Rezept();
         rez.patIntern = rs.getInt("PAT_INTERN");
-        rez.rezNr = rs.getString("REZ_NR");
+        rez.rezNr = new Rezeptnummer(rs.getString("REZ_NR"));
         rez.rezDatum =
 
                 rs.getDate("REZ_DATUM") == null ? null
@@ -160,7 +170,7 @@ public class RezeptDto {
                 : rs.getDate("VERAENDERD")
                     .toLocalDate();
         rez.veraendera = rs.getInt("VERAENDERA");
-        rez.rezeptArt = rs.getString("REZEPTART");
+        rez.rezeptArt = rs.getInt("REZEPTART");
         rez.logfrei1 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI1"))
                                .orElse(""));
         rez.logfrei2 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI2"))
@@ -263,7 +273,7 @@ public class RezeptDto {
                 + "CHARFREI1='" + rez.getCharfrei1() + "', "
                 + "CHARFREI2='" + rez.getCharfrei2() + "', "
                 + "TERMINE='" + rez.getTermine() + "', "
-                + "KTRAEGER='" + rez.getKtraeger() + "', "
+                + "KTRAEGER='" + rez.getKTraegerName() + "', "
                 + "KID='" + rez.getkId() + "', "
                 + "ZZSTATUS='" + rez.getZZStatus() + "', "
                 + "LASTDATE='" + rez.getLastdate() + "', "

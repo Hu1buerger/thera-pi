@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import CommonTools.DatFunk;
 import core.Disziplin;
 
 public class Rezept {
@@ -19,7 +20,7 @@ public class Rezept {
     Rezeptnummer rezNr;
     Disziplin disziplin;
     int id;
-    String rezeptArt; // erstverordn, VO oder Adr - why not as Enum?
+    int rezeptArt; // erstverordn, VO oder Adr - why not as Enum?
     LocalDate rezDatum;
 
     int patIntern;
@@ -74,6 +75,7 @@ public class Rezept {
     int preisgruppe;
     boolean begruendADR;
     boolean hausbes;
+    int anzahlHb;
     String indikatSchl;
     String angelegtVon;
     LocalDate lastEdDate;
@@ -93,7 +95,6 @@ public class Rezept {
     boolean unter18;
     boolean hbVoll;
     boolean abschluss;
-    int anzahlHb;
     String kuerzel1;
     String kuerzel2;
     String kuerzel3;
@@ -284,6 +285,26 @@ public class Rezept {
     }
     
     /**
+     * Return the Anzahl(derBehan)X where X is passed in int i
+     * @param i - The index at which to retrieve ADB
+     * @return the int at index i
+     */
+    public int getAnzahlBehandlungen(int i) {
+        switch (i) {
+            case 1:
+                return getAnzahl1(); // a reminder about the default-getter
+            case 2:
+                return getAnzahl2();
+            case 3:
+                return getAnzahl3();
+            case 4:
+                return anzahl4; // just a reminder that this can also be done
+            default:
+                logger.error("Rezept-Class Invalid AnzahlDerBehandlungindex requested - only 1-4 are impl. so far");
+                return -1;
+        }
+    }
+    /**
      * Return the ArtDBehX where X is passed in int i
      * @param i - The index at which to retrieve ADB
      * @return the int at index i
@@ -304,6 +325,16 @@ public class Rezept {
         
         }
     }
+
+    /**
+     * Returns an array of ints containing all 4 fields "anzahlN" in order
+     * 
+     * @return int[] of anzahl1-4
+     */
+    public int[] getAnzahlAlle() {
+        return new int[] { anzahl1, anzahl2, anzahl3, anzahl4};
+    }
+    
 
     /**
      * Public standard getter/setters
@@ -332,14 +363,14 @@ public class Rezept {
     /**
      * @return the rezeptArt
      */
-    public String getRezeptArt() {
+    public int getRezeptArt() {
         return rezeptArt;
     }
 
     /**
      * @param rezeptArt the rezeptArt to set
      */
-    public void setRezeptArt(String rezeptArt) {
+    public void setRezeptArt(int rezeptArt) {
         this.rezeptArt = rezeptArt;
     }
 
@@ -350,6 +381,29 @@ public class Rezept {
         this.rezNr = new Rezeptnummer(rezNr);
     }
 
+    /**
+     * @return the rezDatum
+     */
+    public LocalDate getRezDatum() {
+        return rezDatum;
+    }
+
+    /**
+     * set the rezDatum
+     */
+    public void setRezDatum(LocalDate Datum) {
+        rezDatum = Datum;
+    }
+    
+    /**
+     * set the rezDatum
+     */
+    // TODO: make sure we get & set Datum in correct format.
+    public void setRezDatum(String Datum) {
+        rezDatum = LocalDate.parse(Datum);
+    }
+    
+    
     /**
      * @return the patIntern
      */
@@ -420,15 +474,6 @@ public class Rezept {
         this.anzahl4 = anzahl4;
     }
 
-    /**
-     * Returns an array of ints containing all 4 fields "anzahlN" in order
-     * 
-     * @return int[] of anzahl1-4
-     */
-    public int[] getAnzahlAlle() {
-        return new int[] { anzahl1, anzahl2, anzahl3, anzahl4};
-    }
-    
     /**
      * Returns an array of ints containing all 4 fields "artDerBehN" in order
      * 
@@ -573,12 +618,28 @@ public class Rezept {
     }
 
     /**
+     * Set the Arzt(-Name?) as String
+     * @param the ArztId as String
+     */
+    public void setArzt(String Arzt) {
+        arzt = Arzt;
+    }
+    
+    /**
      * @return the ArztId
      */
     public int getArztId() {
         return arztId;
     }
 
+    /**
+     * Set the Arzt-ID as int
+     * @param the ArztId as int
+     */
+    public void setArztId(int ArztId) {
+        arztId = ArztId;
+    }
+    
     /**
      * @return the aerzte
      */
@@ -715,13 +776,6 @@ public class Rezept {
     }
 
     /**
-     * @return the rezDatum
-     */
-    public LocalDate getRezDatum() {
-        return rezDatum;
-    }
-
-    /**
      * @return the termine as is in DB (one String w/ LFs)
      */
     public String getTermine() {
@@ -740,11 +794,22 @@ public class Rezept {
     /**
      * @return the ktraeger
      */
-    public String getKtraeger() {
+    public String getKTraegerName() {
         return ktraeger;
     }
 
     /**
+     * Set the ktraeger
+     * 
+     * @param String - name of the KostenTraeger
+     */
+    public void setKTraegerName(String KTraeger) {
+        ktraeger = KTraeger;
+    }
+    
+    /**
+     * Retrieve the KostenTraegerID
+     * 
      * @return the kId
      */
     public int getkId() {
@@ -752,6 +817,8 @@ public class Rezept {
     }
 
     /**
+     * Set the KostenTraegerID
+     * 
      * @param kId the kId to set
      */
     public void setkId(int kId) {
@@ -1035,6 +1102,15 @@ public class Rezept {
      */
     public int getAnzahlHb() {
         return anzahlHb;
+    }
+    
+    /**
+     * set the anzahlHausBesuche
+     * 
+     * @param int
+     */
+    public void setAnzahlHb(int Anzahl) {
+        anzahlHb= Anzahl;
     }
 
     /**
