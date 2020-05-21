@@ -14,6 +14,7 @@ import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
 import commonData.Rezeptvector;
 import hauptFenster.Reha;
+import rezept.Rezept;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 
@@ -101,6 +102,10 @@ public class HMRCheck {
             neurezept = true;
         }
         fehlertext = new FehlerTxt();
+    }
+
+    public HMRCheck(Rezept rezTmpRezept, String currDisziFromActRK, Vector<Vector<String>> preisvec2) {
+        // TODO Auto-generated constructor stub
     }
 
     /**

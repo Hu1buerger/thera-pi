@@ -27,12 +27,23 @@ public class DatFunk {
         return splittArray[2] + "." + splittArray[1] + "." + splittArray[0];
     }
 
+    /**
+     * Returns a date in the format yyyy-MM-dd
+     * 
+     * @param sDeutschDat in the format d.M.yyyy
+     * @return
+     */
     public static String sDatInSQL(String sDeutschDat) {
         return LocalDate.parse(sDeutschDat, inFormatter)
                         .format(reverseHyphonFormatter);
 
     }
 
+    /**
+     * Returns a String of .now() in the format dd.MM.yyyy
+     * 
+     * @return current date as String dd.MM.yyyy
+     */
     public static String sHeute() {
         return LocalDate.now()
                         .format(outFormatter);

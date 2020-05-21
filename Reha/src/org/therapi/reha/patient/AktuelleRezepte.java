@@ -3196,7 +3196,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
      *   - der Historie
      *   
      * @param kopierModus
-     * @param neuRez
+     * @param neuRez ??
      */
     private Vector<String> neuesRezeptVonKopie(int kopierModus) {
         // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei

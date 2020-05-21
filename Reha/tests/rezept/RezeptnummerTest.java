@@ -23,6 +23,8 @@ public class RezeptnummerTest {
        // assertThrows();
         assertEquals("Expecting INV as Disziplin after calling String-constr. with invalid rezNr",
                 Disziplin.INV, rezNr.disziplin());
+        assertEquals("Expecting 101 as rezDigits after calling String-constr. with invalid rezNr",
+                101, rezNr.rezeptZiffern());
     }
     
     @Test
