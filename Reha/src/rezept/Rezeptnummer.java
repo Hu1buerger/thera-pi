@@ -20,11 +20,6 @@ public class Rezeptnummer {
         disziplin = Disziplin.INV;
     }
     
-    public static void main(String[] args) {
-        Rezeptnummer rezNr = new Rezeptnummer(args[0]);
-        System.out.println("RezNr:" + rezNr.rezeptNummer());
-    }
-
     /**
      * PRE: expects a String in the format of e.g. "ER101"
      * POST: class members diszi and rezNr are set
@@ -34,7 +29,7 @@ public class Rezeptnummer {
     public Rezeptnummer(String rezNr) {
         // TODO: handle malformed rezNr
         // - disziplin can't be found - set INV?
-        // - parseInt screws up
+        // - parseInt screws up (e.g. BER1.01)
         disziplin = Disziplin.INV;
         if ( rezNr == null)
             return;
