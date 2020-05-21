@@ -1,0 +1,74 @@
+/**
+ * 
+ */
+package rezept;
+
+import java.util.Objects;
+
+import core.Disziplin;
+
+/**
+ * @author keith
+ *
+ */
+public class Rezeptnummer {
+    
+    Disziplin disziplin;
+    int rezeptZiffern;
+    
+    /**
+     * PRE: expects a String in the format of "ER101"
+     * POST: class members diszi and rezNr are set
+     * 
+     * @param rezNr
+     */
+    public Rezeptnummer(String rezNr) {
+        // TODO: handle malformed rezNr
+        // - disziplin can't be found
+        // - parseInt screws up
+        this.disziplin = Disziplin.valueOf(rezNr.substring(0, 2));
+        this.rezeptZiffern = Integer.parseInt(rezNr.substring(2));
+    }
+    // constructor only passing in INT -> take from sysconfig def. disz or set inv?
+    
+    public Rezeptnummer(Disziplin disziplin, int rezeptZiffern) {
+        super();
+        this.disziplin = disziplin;
+        this.rezeptZiffern = rezeptZiffern;
+    }
+    
+    public Disziplin disziplin() {
+        return disziplin;
+    }
+    
+    public String rezeptNummer() {
+        // TODO: if diszi == (COMMON || INV) => boing!
+        return disziplin.hmpraefix + Integer.toString(rezeptZiffern);
+    }
+    @Override
+    public String toString() {
+        return "Rezeptnummer [disziplin=" + disziplin + ", rezeptZiffern=" + rezeptZiffern + "]";
+    }
+   
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((disziplin == null) ? 0 : disziplin.hashCode());
+        return prime * result + Integer.hashCode(rezeptZiffern);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Rezeptnummer other = (Rezeptnummer) obj;
+        return disziplin == other.disziplin && rezeptZiffern == other.rezeptZiffern;
+    }
+
+    
+}
