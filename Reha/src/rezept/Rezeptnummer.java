@@ -13,8 +13,8 @@ import core.Disziplin;
  */
 public class Rezeptnummer {
     
-    Disziplin disziplin;
-    int rezeptZiffern;
+    private Disziplin disziplin;
+    private int rezeptZiffern;
     
     public Rezeptnummer() {
         disziplin = Disziplin.INV;
@@ -46,13 +46,17 @@ public class Rezeptnummer {
     // constructor only passing in INT -> take from sysconfig def. diszi or set inv?
     
     public Rezeptnummer(Disziplin disziplin, int rezeptZiffern) {
-        super();
+        // super();
         this.disziplin = disziplin;
         this.rezeptZiffern = rezeptZiffern;
     }
     
     public Disziplin disziplin() {
         return disziplin;
+    }
+    
+    public int rezeptZiffern() {
+        return rezeptZiffern;
     }
     
     public String rezeptNummer() {
