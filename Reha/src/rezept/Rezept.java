@@ -8,8 +8,16 @@ import java.util.Map;
 import java.util.Vector;
 import java.util.function.BiConsumer;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import core.Disziplin;
+
 public class Rezept {
-    String rezNr;
+    private static final Logger logger = LoggerFactory.getLogger(Rezept.class);
+            
+    Rezeptnummer rezNr;
+    Disziplin disziplin;
     int id;
     String rezeptArt; // erstverordn, VO oder Adr - why not as Enum?
     LocalDate rezDatum;
@@ -79,7 +87,7 @@ public class Rezept {
     String lastedit;
     int berId;
     boolean arztBericht;
-    String farbcode;
+    String farbcode; // this is varChar in DB - but seems to be used (sometimes?) as int
     String rsplit;
     String jahrfrei; // vielleicht auch localdate
     boolean unter18;
@@ -102,6 +110,7 @@ public class Rezept {
     public static final int ZZSTATUS_NOTOK = 2;
     
     public Rezept() {
+        this.disziplin = Disziplin.INV;
         this.rezGeb = new Money();
         this.preise1 = new Money();
         this.preise2 = new Money();
@@ -117,6 +126,7 @@ public class Rezept {
      */
     public Rezept(Rezept fromRez) {
         this.patIntern = fromRez.patIntern;
+        this.disziplin = fromRez.disziplin;
         this.rezNr = fromRez.rezNr;
         this.rezDatum = fromRez.rezDatum;
         this.anzahl1 = fromRez.anzahl1;
@@ -195,7 +205,7 @@ public class Rezept {
     
     @Override
     public String toString() {
-        return "Rezept [PAT_INTERN=" + patIntern + ", REZ_NR=" + rezNr + ", REZ_datum=" + rezDatum + ", anzahl1="
+        return "Rezept [PAT_INTERN=" + patIntern + ", REZ_NR=" + rezNr + ", disziplin=" + disziplin + ", REZ_datum=" + rezDatum + ", anzahl1="
                 + anzahl1 + ", anzahl2=" + anzahl2 + ", anzahl3=" + anzahl3 + ", anzahl4=" + anzahl4 + ", anzahlkm="
                 + anzahlKM + ", art_dbeh1=" + artDerBeh1 + ", art_dbeh2=" + artDerBeh2 + ", art_dbeh3=" + artDerBeh3
                 + ", art_dbeh4=" + artDerBeh4 + ", befr=" + befr + ", rezGeb=" + rezGeb + ", rezBez=" + rezBez
@@ -264,6 +274,38 @@ public class Rezept {
     }
 
     /**
+     * Returns the first 2 chars of RezNr, expecting Rezepte to be of the format e.g. "ER101"
+     * 
+     * @return String e.g. "ER"
+     */
+    public String getRezClass() {
+        return getRezNr().substring(0, 2)
+                             .toUpperCase();
+    }
+    
+    /**
+     * Return the ArtDBehX where X is passed in int i
+     * @param i - The index at which to retrieve ADB
+     * @return the int at index i
+     */
+    public int getArtDerBehandlung(int i) {
+        switch (i) {
+        case 1:
+            return getArtDerBeh1();
+        case 2:
+            return getArtDerBeh2();
+        case 3:
+            return getArtDerBeh3();
+        case 4:
+            return getArtDerBeh4();
+        default:
+            logger.error("Rezept-Class Invalid ArtDerBehandlungindex requested - only 1-4 are impl. so far");
+            return -1;
+        
+        }
+    }
+
+    /**
      * Public standard getter/setters
      *  if field type is bool there are 3 possible types:
      * 
@@ -277,7 +319,7 @@ public class Rezept {
      * @return the rezNr
      */
     public String getRezNr() {
-        return rezNr;
+        return rezNr.rezeptNummer();
     }
 
     /**
@@ -305,7 +347,7 @@ public class Rezept {
      * @param rezNr the rezNr to set
      */
     public void setRezNr(String rezNr) {
-        this.rezNr = rezNr;
+        this.rezNr = new Rezeptnummer(rezNr);
     }
 
     /**
