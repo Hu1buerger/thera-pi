@@ -16,20 +16,33 @@ public class Rezeptnummer {
     Disziplin disziplin;
     int rezeptZiffern;
     
+    public Rezeptnummer() {
+        disziplin = Disziplin.INV;
+    }
+    
     /**
-     * PRE: expects a String in the format of "ER101"
+     * PRE: expects a String in the format of e.g. "ER101"
      * POST: class members diszi and rezNr are set
      * 
      * @param rezNr
      */
     public Rezeptnummer(String rezNr) {
         // TODO: handle malformed rezNr
-        // - disziplin can't be found
+        // - disziplin can't be found - set INV?
         // - parseInt screws up
-        this.disziplin = Disziplin.valueOf(rezNr.substring(0, 2));
+        Disziplin diszi = Disziplin.INV;
+        String diszi2check = rezNr.substring(0, 2);
+        for ( Disziplin d : Disziplin.values()) {
+            if (diszi2check.equalsIgnoreCase(d.toString())) {
+                diszi = d;
+                break;
+            }
+        };
+        this.disziplin = diszi;
+        
         this.rezeptZiffern = Integer.parseInt(rezNr.substring(2));
     }
-    // constructor only passing in INT -> take from sysconfig def. disz or set inv?
+    // constructor only passing in INT -> take from sysconfig def. diszi or set inv?
     
     public Rezeptnummer(Disziplin disziplin, int rezeptZiffern) {
         super();
@@ -43,7 +56,7 @@ public class Rezeptnummer {
     
     public String rezeptNummer() {
         // TODO: if diszi == (COMMON || INV) => boing!
-        return disziplin.hmpraefix + Integer.toString(rezeptZiffern);
+        return disziplin + Integer.toString(rezeptZiffern);
     }
     @Override
     public String toString() {
