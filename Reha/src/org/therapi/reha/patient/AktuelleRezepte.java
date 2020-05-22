@@ -1482,7 +1482,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     ZuzahlTools.unter18TestDirekt(tage, true, false);
                 }
                 // Kuerzel5
-                if (!Reha.instance.patpanel.rezAktRez.getKuerzel5().isEmpty()) {
+                if (!Reha.instance.patpanel.rezAktRez.getHMKuerzel5().isEmpty()) {
                     logger.debug("Rez: Kuerzel5 is not empty");
                     ZuzahlTools.jahresWechselTest(Reha.instance.patpanel.rezAktRez.getRezNr(), true, false);
                 }
@@ -2181,22 +2181,22 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         for (int i = 0; i < vec.size(); i++) {
             // POS1(48)-4(51):
             vec.get(i)
-               .set(3, (Reha.instance.patpanel.rezAktRez.getPos1()
+               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1()
                                                         .trim()
                                                         .equals("") ? ""
-                                                                : (String) Reha.instance.patpanel.rezAktRez.getPos1())
-                       + (Reha.instance.patpanel.rezAktRez.getPos2()
+                                                                : (String) Reha.instance.patpanel.rezAktRez.getHMPos1())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos2()
                                                           .trim()
                                                           .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getPos2())
-                       + (Reha.instance.patpanel.rezAktRez.getPos3()
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos2())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos3()
                                                           .trim()
                                                           .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getPos3())
-                       + (Reha.instance.patpanel.rezAktRez.getPos4()
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos3())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos4()
                                                           .trim()
                                                           .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getPos4()));
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos4()));
             dtermm.addRow(vec.get(i));
         }
         termineSpeichern();

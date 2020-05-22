@@ -563,6 +563,32 @@ public class Rezept {
     }
 
     /**
+     * Sets 1 of the 4 ArtDerBehandlungen by index to value
+     * 
+     * @param idx Which field to set (ArtDerBehan[1-4])
+     * @param value The value to set the field to
+     */
+    public void setArtDerBeh(int idx, int value) {
+        switch (idx) {
+            case 1:
+                setArtDerBeh1(value);
+                break;
+            case 2:
+                setArtDerBeh2(value);
+                break;
+            case 3:
+                setArtDerBeh3(value);
+                break;
+            case 4:
+                setArtDerBeh4(value);
+                break;
+            default:
+                logger.error("Can only set ArtDerBehandlungen 1-4");
+                
+        }
+    }
+    
+    /**
      * @return the anzahlKM
      */
     public BigDecimal getAnzahlKM() {
@@ -688,11 +714,27 @@ public class Rezept {
     }
 
     /**
+     * Set the preise1
+     */
+    public void setPreise1(Money preis) {
+        preise1 = preis;
+    }
+
+    
+    /**
      * @return the preise2
      */
     public Money getPreise2() {
         return preise2;
     }
+    
+    /**
+     * Set the preise2
+     */
+    public void setPreise2(Money preis) {
+        preise2 = preis;
+    }
+
 
     /**
      * @return the preise3
@@ -700,12 +742,53 @@ public class Rezept {
     public Money getPreise3() {
         return preise3;
     }
+    
+    /**
+     * Set the preise3
+     */
+    public void setPreise3(Money preis) {
+        preise3 = preis;
+    }
+
+    
 
     /**
      * @return the preise4
      */
     public Money getPreise4() {
         return preise4;
+    }
+
+    /**
+     * Set the preise4
+     */
+    public void setPreise4(Money preis) {
+        preise4= preis;
+    }
+
+    /**
+     * Sets 1 of the 4 Preise by index to value
+     * 
+     * @param idx Which field to set (preise[1-4])
+     * @param value The value to set the field to
+     */
+    public void setPreis(int idx, Money value) {
+        switch (idx) {
+            case 1:
+                setPreise1(value);
+                break;
+            case 2:
+                setPreise2(value);
+                break;
+            case 3:
+                setPreise3(value);
+                break;
+            case 4:
+                setPreise4(value);
+                break;
+            default:
+                logger.error("Can only set Preise 1-4");
+        }
     }
 
     /**
@@ -1137,61 +1220,88 @@ public class Rezept {
     }
 
     /**
+     * Set the zzRegel
+     */
+    public void setZZRegel(int zzR) {
+        zzRegel = zzR;
+    }
+
+    
+    /**
      * @return the pos1
      */
-    public String getPos1() {
+    public String getHMPos1() {
         return pos1;
     }
 
     /**
      * @param pos1 the pos1 to set
      */
-    public void setPos1(String pos1) {
+    public void setHMPos1(String pos1) {
         this.pos1 = pos1;
     }
 
     /**
      * @return the pos2
      */
-    public String getPos2() {
+    public String getHMPos2() {
         return pos2;
     }
 
     /**
      * @param pos2 the pos2 to set
      */
-    public void setPos2(String pos2) {
+    public void setHMPos2(String pos2) {
         this.pos2 = pos2;
     }
 
     /**
      * @return the pos3
      */
-    public String getPos3() {
+    public String getHMPos3() {
         return pos3;
     }
 
     /**
      * @param pos3 the pos3 to set
      */
-    public void setPos3(String pos3) {
+    public void setHMPos3(String pos3) {
         this.pos3 = pos3;
     }
 
     /**
      * @return the pos4
      */
-    public String getPos4() {
+    public String getHMPos4() {
         return pos4;
     }
 
     /**
      * @param pos4 the pos4 to set
      */
-    public void setPos4(String pos4) {
+    public void setHMPos4(String pos4) {
         this.pos4 = pos4;
     }
 
+    public void setHMPos(int idx, String value) {
+        switch (idx) {
+            case 1:
+                setHMPos1(value);
+                break;
+            case 2:
+                setHMPos2(value);
+                break;
+            case 3:
+                setHMPos3(value);
+                break;
+            case 4:
+                setHMPos4(value);
+                break;
+            default:
+                logger.error("Invalid index received. Es sind nur HM-Positionen 1-4 setzbar");
+        }
+    }
+    
     /**
      * @return the farbcode
      */
@@ -1214,12 +1324,20 @@ public class Rezept {
     }
 
     /**
-     * @return the jahrfrei
+     * @return the jahrfrei (=VorJahrFrei?)
      */
     public String getJahrfrei() {
         return jahrfrei;
     }
 
+    /**
+     * Set the jahrFrei
+     */
+    public void setJahrfrei(String vjf) {
+        jahrfrei = vjf;
+    }
+
+    
     /**
      * @return the unter18
      */
@@ -1284,88 +1402,119 @@ public class Rezept {
     /**
      * @return the kuerzel1
      */
-    public String getKuerzel1() {
+    public String getHMKuerzel1() {
         return kuerzel1;
     }
 
     /**
      * @param kuerzel1 the kuerzel1 to set
      */
-    public void setKuerzel1(String kuerzel1) {
+    public void setHMKuerzel1(String kuerzel1) {
         this.kuerzel1 = kuerzel1;
     }
 
     /**
      * @return the kuerzel2
      */
-    public String getKuerzel2() {
+    public String getHMKuerzel2() {
         return kuerzel2;
     }
 
     /**
      * @param kuerzel2 the kuerzel2 to set
      */
-    public void setKuerzel2(String kuerzel2) {
+    public void setHMKuerzel2(String kuerzel2) {
         this.kuerzel2 = kuerzel2;
     }
 
     /**
      * @return the kuerzel3
      */
-    public String getKuerzel3() {
+    public String getHMKuerzel3() {
         return kuerzel3;
     }
 
     /**
      * @param kuerzel3 the kuerzel3 to set
      */
-    public void setKuerzel3(String kuerzel3) {
+    public void setHMKuerzel3(String kuerzel3) {
         this.kuerzel3 = kuerzel3;
     }
 
     /**
      * @return the kuerzel4
      */
-    public String getKuerzel4() {
+    public String getHMKuerzel4() {
         return kuerzel4;
     }
 
     /**
      * @param kuerzel4 the kuerzel4 to set
      */
-    public void setKuerzel4(String kuerzel4) {
+    public void setHMKuerzel4(String kuerzel4) {
         this.kuerzel4 = kuerzel4;
     }
     
     /**
      * @param kuerzel5 the kuerzel5 to set
      */
-    public void setKuerzel5(String kuerzel5) {
+    public void setHMKuerzel5(String kuerzel5) {
         this.kuerzel5 = kuerzel5;
     }
 
     /**
      * @return the kuerzel5
      */
-    public String getKuerzel5() {
+    public String getHMKuerzel5() {
         return kuerzel5;
     }
-
 
     /**
      * @return the kuerzel6
      */
-    public String getKuerzel6() {
+    public String getHMKuerzel6() {
         return kuerzel6;
     }
-
+    
     /**
      * @param kuerzel6 the kuerzel6 to set
      */
-    public void setKuerzel6(String kuerzel6) {
+    public void setHMKuerzel6(String kuerzel6) {
         this.kuerzel6 = kuerzel6;
     }
-
+    
+    /**
+     * Set 1 of the 6 (HM-?)KuerzelX to value
+     *  
+     * @param idx - the Kuerzel to set
+     * @param value the value to set it to
+     */
+    public void setHMKuerzel(int idx, String value){
+        switch (idx) {
+            
+            case 1:
+                setHMKuerzel1(value);
+                break;
+            case 2:
+                setHMKuerzel2(value);
+                break;
+            case 3:
+                setHMKuerzel3(value);
+                break;
+            case 4:
+                setHMKuerzel4(value);
+                break;
+            case 5:
+                setHMKuerzel5(value);
+                break;
+            case 6:
+                setHMKuerzel6(value);
+                break;
+            default:
+                logger.error("Invalid index received upon change Kuerzel");
+        }
+    }
+   
     /**
      * @return the icd10
      */
