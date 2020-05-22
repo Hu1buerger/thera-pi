@@ -299,11 +299,11 @@ public class Rezept {
     public int getAnzahlBehandlungen(int i) {
         switch (i) {
             case 1:
-                return getAnzahl1(); // a reminder about the default-getter
+                return getBehAnzahl1(); // a reminder about the default-getter
             case 2:
-                return getAnzahl2();
+                return getBehAnzahl2();
             case 3:
-                return getAnzahl3();
+                return getBehAnzahl3();
             case 4:
                 return anzahl4; // just a reminder that this can also be done
             default:
@@ -444,56 +444,56 @@ public class Rezept {
     /**
      * @return the anzahl1
      */
-    public int getAnzahl1() {
+    public int getBehAnzahl1() {
         return anzahl1;
     }
 
     /**
      * @param anzahl1 the anzahl1 to set
      */
-    public void setAnzahl1(int anzahl1) {
+    public void setBehAnzahl1(int anzahl1) {
         this.anzahl1 = anzahl1;
     }
 
     /**
      * @return the anzahl2
      */
-    public int getAnzahl2() {
+    public int getBehAnzahl2() {
         return anzahl2;
     }
 
     /**
      * @param anzahl2 the anzahl2 to set
      */
-    public void setAnzahl2(int anzahl2) {
+    public void setBehAnzahl2(int anzahl2) {
         this.anzahl2 = anzahl2;
     }
 
     /**
      * @return the anzahl3
      */
-    public int getAnzahl3() {
+    public int getBehAnzahl3() {
         return anzahl3;
     }
 
     /**
      * @param anzahl3 the anzahl3 to set
      */
-    public void setAnzahl3(int anzahl3) {
+    public void setBehAnzahl3(int anzahl3) {
         this.anzahl3 = anzahl3;
     }
 
     /**
      * @return the anzahl4
      */
-    public int getAnzahl4() {
+    public int getBehAnzahl4() {
         return anzahl4;
     }
 
     /**
      * @param anzahl4 the anzahl4 to set
      */
-    public void setAnzahl4(int anzahl4) {
+    public void setBehAnzahl4(int anzahl4) {
         this.anzahl4 = anzahl4;
     }
 
@@ -616,7 +616,7 @@ public class Rezept {
     }
 
     /**
-     * Returns a bool depending on rezBez. To get a String "T"/"F" use getRezBez
+     * Rezept(Gebuehr) bezahlt? To get a String "T"/"F" use getRezBez
      * @return the rezBez
      */
     public boolean isRezBez() {
@@ -636,6 +636,7 @@ public class Rezept {
     }
     
     /**
+     * Rezept(Gebuehr) bezahlt?
      * @param rezBez the rezBez to set
      */
     public void setRezBez(boolean rezBez) {
@@ -893,10 +894,18 @@ public class Rezept {
     /**
      * @return the lASTDATE
      */
-    public LocalDate getLastdate() {
+    public LocalDate getLastDate() {
         return lastDate;
     }
 
+    /**
+     * Set the LastDate (Spaetester Beh. Beginn??)
+     */
+    public void setLastDate(LocalDate datum) {
+        lastDate = datum;
+    }
+
+    
     /**
      * @return the PreisGruppe
      */
@@ -904,6 +913,14 @@ public class Rezept {
         return preisgruppe;
     }
 
+    /**
+     * Set the PreisGruppe
+     */
+    public void setPreisGruppe(int pg) {
+        preisgruppe = pg;
+    }
+
+    
     /**
      * @return the begruendADR
      */
@@ -918,6 +935,14 @@ public class Rezept {
     public String getBegruendADR() {
         return isBegruendADR() ? "T" : "F";
     }
+
+    /**
+     * Set the begruendADR
+     */
+    public void setBegruendADR(boolean begruendetADR) {
+        begruendADR = begruendetADR;
+    }
+
     
     /**
      * @return the hausBes bool. To get a String "T"/"F" use getHausBesuch()
@@ -938,12 +963,27 @@ public class Rezept {
     }
 
     /**
+     * Set the hausBesuch bool
+     */
+    public void setHausBesuch(boolean hb) {
+        hausbes = hb;
+    }
+    
+    /**
      * @return the iNDIKATSCHL
      */
     public String getIndikatSchl() {
         return indikatSchl;
     }
 
+    /**
+     * Set the IndikationsSchluessel
+     */
+    public void setIndikatSchl(String indiSchl) {
+        indikatSchl = indiSchl;
+    }
+
+    
     /**
      * @return the angelegtVon
      */
@@ -995,12 +1035,28 @@ public class Rezept {
     }
 
     /**
+     * Set the dauer
+     */
+    public void setDauer(String Dauer) {
+        dauer = Dauer;
+    }
+    
+    
+    /**
      * @return the frequenz
      */
     public String getFrequenz() {
         return frequenz;
     }
 
+    /**
+     * Set the Behandlungs Frequenz
+     */
+    public void setFrequenz(String bHz) {
+        frequenz = bHz;
+    }
+
+    
     /**
      * @return the matchcode of lastEditor (last edited by user)
      * 
@@ -1039,6 +1095,14 @@ public class Rezept {
     public String getArztBericht() {
         return isArztBericht() ? "T" : "F";
     }
+ 
+    /**
+     * Set the arztBericht
+     */
+    public void setArztBericht(boolean ab) {
+        arztBericht = ab;
+    }
+
     
     /**
      * @return the Abschluss as bool
@@ -1135,6 +1199,13 @@ public class Rezept {
         return farbcode;
     }
 
+    /**
+     * Set the farbcode
+     */
+    public void setFarbcode(int fc) {
+        farbcode = fc;
+    }
+    
     /**
      * @return the rsplit
      */
