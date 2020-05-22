@@ -1009,7 +1009,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                 listRezepte.get(i).getZZStatus(),
                                 DatFunk.sDatInDeutsch(listRezepte.get(i).getRezDatum().toString()),
                                 DatFunk.sDatInDeutsch(listRezepte.get(i).getErfassungsDatum().toString()),
-                                DatFunk.sDatInDeutsch(listRezepte.get(i).getLastdate().toString()),
+                                DatFunk.sDatInDeutsch(listRezepte.get(i).getLastDate().toString()),
                                 listRezepte.get(i).isAbschluss(),
                                 listRezepte.get(i).getPatIntern(),
                                 listRezepte.get(i).getIndikatSchl(),
@@ -2503,7 +2503,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         Reha.instance.patpanel.rezAktRez.getRezeptArt(),
                         (Reha.instance.patpanel.rezAktRez.getRezNr()),
                         DatFunk.sDatInDeutsch(Reha.instance.patpanel.rezAktRez.getRezDatum().toString()),
-                        DatFunk.sDatInDeutsch(Reha.instance.patpanel.rezAktRez.getLastdate().toString())).check();
+                        DatFunk.sDatInDeutsch(Reha.instance.patpanel.rezAktRez.getLastDate().toString())).check();
                 if (!checkok) {
                     int anfrage = JOptionPane.showConfirmDialog(null,
                             "Das Rezept entspricht nicht den geltenden Heilmittelrichtlinien\n"

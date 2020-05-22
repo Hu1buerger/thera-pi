@@ -919,11 +919,11 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      *
      * @param datum
      */
-    private void setLastDatInTable(String datum) {
+    private void setLastDatInTable(LocalDate datum) {
         int row = getselectedRow();
         if (row >= 0) {
             AktuelleRezepte.tabaktrez.getModel()
-                                     .setValueAt(datum, row, 4);
+                                     .setValueAt(datum.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), row, 4);
         }
     }
 
@@ -1361,11 +1361,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             mitsamstag);
                 }
             }
+            // TODO: The following block could be sorted properly
             rezTmpRezept = new Rezept();
             if (getInstance().neu) {
                 initRezeptNeu(rezTmpRezept);
             } else {
-                rezTmpRezept.setVec_rez(rezMyRezept.getVec_rez());
+                rezTmpRezept = new Rezept(rezMyRezept);
             }
             copyFormToVec1stTime(rezTmpRezept);
             boolean checkok = new HMRCheck(rezTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
@@ -1898,7 +1899,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         // }
         // test = StringTools.NullTest(rezMyRezept.getLastdate());
         // if (!test.equals("")) {
-            jtf[cBEGINDAT].setText(DatFunk.sDatInDeutsch(rezMyRezept.getLastdate().toString()));
+            jtf[cBEGINDAT].setText(DatFunk.sDatInDeutsch(rezMyRezept.getLastDate().toString()));
         // }
         int itest = rezMyRezept.getRezeptArt();
         if (itest >= 0) {
@@ -1910,10 +1911,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         jcb[cVOLLHB].setSelected(rezMyRezept.isHbVoll());
 
         jcb[cTBANGEF].setSelected(rezMyRezept.isArztBericht());
-        jtf[cANZ1].setText(Integer.toString(rezMyRezept.getAnzahl1()));
-        jtf[cANZ2].setText(Integer.toString(rezMyRezept.getAnzahl2()));
-        jtf[cANZ3].setText(Integer.toString(rezMyRezept.getAnzahl3()));
-        jtf[cANZ4].setText(Integer.toString(rezMyRezept.getAnzahl4()));
+        jtf[cANZ1].setText(Integer.toString(rezMyRezept.getBehAnzahl1()));
+        jtf[cANZ2].setText(Integer.toString(rezMyRezept.getBehAnzahl2()));
+        jtf[cANZ3].setText(Integer.toString(rezMyRezept.getBehAnzahl3()));
+        jtf[cANZ4].setText(Integer.toString(rezMyRezept.getBehAnzahl4()));
 
         // itest = rezMyRezept.getArtDerBehandlung(1);
         jcmb[cLEIST1].setSelectedIndex(leistungTesten(0, rezMyRezept.getArtDerBeh1()));
@@ -2024,12 +2025,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                                  .trim(),
                     jtf[cPREISGR].getText(), aktuelleDisziplin);
             setLastDatInTable(stest2);
-            thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
+            thisRezept.setLastDate(stest2);
             thisRezept.setLastEdDate(LocalDate.now());
             thisRezept.setLastEditor(Reha.aktUser);
-            thisRezept.setRezArt(jcmb[cVERORD].getSelectedIndex());
-            thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());
-            thisRezept.setHausbesuch(jcb[cHAUSB].isSelected());
+            thisRezept.setRezeptArt(jcmb[cVERORD].getSelectedIndex());
+            thisRezept.setBegruendADR(jcb[cBEGRADR].isSelected());
+            thisRezept.setHausBesuch(jcb[cHAUSB].isSelected());
             if (thisRezept.isHausBesuch()) {
                 String anzHB = String.valueOf(thisRezept.getAnzahlHb());
                 if (!anzHB.equals(jtf[cANZ1].getText())) {
@@ -2043,10 +2044,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 }
             }
             thisRezept.setArztBericht(jcb[cTBANGEF].isSelected());
-            thisRezept.setAnzBeh(1, jtf[cANZ1].getText());
-            thisRezept.setAnzBeh(2, jtf[cANZ2].getText());
-            thisRezept.setAnzBeh(3, jtf[cANZ3].getText());
-            thisRezept.setAnzBeh(4, jtf[cANZ4].getText());
+            thisRezept.setBehAnzahl1(Integer.parseInt(jtf[cANZ1].getText()));
+            thisRezept.setBehAnzahl2(Integer.parseInt(jtf[cANZ2].getText()));
+            thisRezept.setBehAnzahl3(Integer.parseInt(jtf[cANZ3].getText()));
+            thisRezept.setBehAnzahl4(Integer.parseInt(jtf[cANZ4].getText()));
 
             for (int i = 0; i < 4; i++) {
                 int idxVec = i + 1;
@@ -2072,19 +2073,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             thisRezept.setFrequenz(jtf[cFREQ].getText());
             thisRezept.setDauer(jtf[cDAUER].getText());
             if (jcmb[cINDI].getSelectedIndex() > 0) {
-                thisRezept.setIndiSchluessel((String) jcmb[cINDI].getSelectedItem());
+                thisRezept.setIndikatSchl((String) jcmb[cINDI].getSelectedItem());
             } else {
-                thisRezept.setIndiSchluessel("kein IndiSchl.");
+                thisRezept.setIndikatSchl("kein IndiSchl.");
             }
 
             thisRezept.setBarcodeform(jcmb[cBARCOD].getSelectedIndex());
             thisRezept.setAngelegtVon(jtf[cANGEL].getText());
-            thisRezept.setPreisgruppe(jtf[cPREISGR].getText());
+            thisRezept.setPreisGruppe(Integer.parseInt(jtf[cPREISGR].getText()));
 
             if (jcmb[cFARBCOD].getSelectedIndex() > 0) {
-                thisRezept.setFarbCode(13 + jcmb[cFARBCOD].getSelectedIndex());
+                thisRezept.setFarbcode(13 + jcmb[cFARBCOD].getSelectedIndex());
             } else {
-                thisRezept.setFarbCode(-1);
+                thisRezept.setFarbcode(-1);
             }
             //// System.out.println("Speichern bestehendes Rezept -> Preisgruppe =
             //// "+jtf[cPREISGR].getText());
@@ -2111,7 +2112,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 if (Reha.instance.patpanel.patDaten.get(30)
                                                    .equals("T")) {
                     // System.out.println("aktuelles Jahr ZuzahlStatus = Patient ist befreit");
-                    if (thisRezept.getGebuehrBezahlt()) {
+                    if (thisRezept.isRezBez()) {
                         szzstatus = Rezept.ZZSTATUS_OK;
                     } else {
 
@@ -2190,7 +2191,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     break;
                 }
                 /**********************/
-                if (thisRezept.getGebuehrBezahlt() || (thisRezept.getGebuehrBetrag() > 0.00)) {
+                if (thisRezept.isRezBez() || (thisRezept.getRezGeb() > 0.00)) {
                     szzstatus = Rezept.ZZSTATUS_OK;
                 } else {
                     // hier testen ob erster Behandlungstag bereits ab dem Befreiungszeitraum
