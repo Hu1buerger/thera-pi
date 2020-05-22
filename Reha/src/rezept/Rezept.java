@@ -50,7 +50,7 @@ public class Rezept {
     Money preise3;
     Money preise4;
 
-    LocalDate datum;
+    LocalDate erfassungsDatum;
     
     String diagnose;
     boolean heimbewohn;
@@ -66,18 +66,19 @@ public class Rezept {
     String termine;
     
     String ktraeger;
-    int kId;
+    int kId = -1;
     
     int zzStatus;
     int zzRegel = -1;
     
-    LocalDate lastdate;
+    LocalDate lastDate;
     int preisgruppe;
     boolean begruendADR;
     boolean hausbes;
     int anzahlHb;
     String indikatSchl;
     String angelegtVon;
+    String lastEditor;
     LocalDate lastEdDate;
     int barcodeform;
     String dauer;
@@ -86,10 +87,9 @@ public class Rezept {
     String pos3;
     String pos4;
     String frequenz;
-    String lastedit;
     int berId;
     boolean arztBericht;
-    String farbcode; // this is varChar in DB - but seems to be used (sometimes?) as int
+    int farbcode; // this is varChar in DB - but seems to be used (sometimes?) as int
     String rsplit;
     String jahrfrei; // vielleicht auch localdate
     boolean unter18;
@@ -109,6 +109,10 @@ public class Rezept {
     public static final int ZZSTATUS_BEFREIT = 0;
     public static final int ZZSTATUS_OK = 1;
     public static final int ZZSTATUS_NOTOK = 2;
+    
+    public static final int REZEPTART_ERSTVO = 0;
+    public static final int REZEPTART_FOLGEVO = 1;
+    public static final int REZEPTART_ADR = 2;
     
     public Rezept() {
         this.disziplin = Disziplin.INV;
@@ -150,7 +154,7 @@ public class Rezept {
         this.preise2 = new Money(fromRez.preise2);
         this.preise3 = new Money(fromRez.preise3);
         this.preise4 = new Money(fromRez.preise4);
-        this.datum = fromRez.datum;
+        this.erfassungsDatum = fromRez.erfassungsDatum;
         this.diagnose = fromRez.diagnose;
         this.heimbewohn = fromRez.heimbewohn;
         this.veraenderd = fromRez.veraenderd;
@@ -169,7 +173,7 @@ public class Rezept {
         this.patId = fromRez.patId;
         this.zzStatus = fromRez.zzStatus;
         this.zzRegel = fromRez.zzRegel;
-        this.lastdate = fromRez.lastdate;
+        this.lastDate = fromRez.lastDate;
         this.preisgruppe = fromRez.preisgruppe;
         this.begruendADR = fromRez.begruendADR;
         this.hausbes = fromRez.hausbes;
@@ -182,7 +186,7 @@ public class Rezept {
         this.pos3 = fromRez.pos3;
         this.pos4 = fromRez.pos4;
         this.frequenz = fromRez.frequenz;
-        this.lastedit = fromRez.lastedit;
+        this.lastEditor = fromRez.lastEditor;
         this.berId = fromRez.berId;
         this.arztBericht = fromRez.arztBericht;
         this.lastEdDate = fromRez.lastEdDate;
@@ -211,16 +215,16 @@ public class Rezept {
                 + anzahlKM + ", art_dbeh1=" + artDerBeh1 + ", art_dbeh2=" + artDerBeh2 + ", art_dbeh3=" + artDerBeh3
                 + ", art_dbeh4=" + artDerBeh4 + ", befr=" + befr + ", rezGeb=" + rezGeb + ", rezBez=" + rezBez
                 + ", arzt=" + arzt + ", arztid=" + arztId + ", aerzte=" + aerzte + ", preise1=" + preise1 + ", preise2="
-                + preise2 + ", preise3=" + preise3 + ", preise4=" + preise4 + ", datum=" + datum + ", diagnose="
+                + preise2 + ", preise3=" + preise3 + ", preise4=" + preise4 + ", erfassungsDatum=" + erfassungsDatum + ", diagnose="
                 + diagnose + ", heimbewohn=" + heimbewohn + ", veraenderd=" + veraenderd + ", veraendera=" + veraendera
                 + ", rezeptart=" + rezeptArt + ", logfrei1=" + logfrei1 + ", logfrei2=" + logfrei2 + ", numfrei1="
                 + numfrei1 + ", numfrei2=" + numfrei2 + ", charfrei1=" + charfrei1 + ", charfrei2=" + charfrei2
                 + ", termine=" + termine + ", id=" + id + ", ktraeger=" + ktraeger + ", Kid=" + kId + ", PATid=" + patId
-                + ", zzstatus=" + zzStatus + ", zzregel=" + zzRegel + ", lastdate=" + lastdate + ", preisgruppe=" + preisgruppe
+                + ", zzstatus=" + zzStatus + ", zzregel=" + zzRegel + ", lastdate=" + lastDate + ", preisgruppe=" + preisgruppe
                 + ", begruendadr=" + begruendADR + ", hausbes=" + hausbes + ", indikatschl=" + indikatSchl
                 + ", angelegtvon=" + angelegtVon + ", barcodeform=" + barcodeform + ", dauer=" + dauer + ", pos1="
                 + pos1 + ", pos2=" + pos2 + ", pos3=" + pos3 + ", pos4=" + pos4 + ", frequenz=" + frequenz
-                + ", lastedit=" + lastedit + ", BERid=" + berId + ", arztBERICHT=" + arztBericht + ", lasteddate="
+                + ", lastEditor=" + lastEditor + ", BERid=" + berId + ", arztBERICHT=" + arztBericht + ", lasteddate="
                 + lastEdDate + ", farbcode=" + farbcode + ", rsplit=" + rsplit + ", jahrfrei=" + jahrfrei + ", unter18="
                 + unter18 + ", hbvoll=" + hbVoll + ", abschluss=" + abschluss + ", anzahlhb="
                 + anzahlHb + ", kuerzel1=" + kuerzel1 + ", kuerzel2=" + kuerzel2 + ", kuerzel3=" + kuerzel3
@@ -397,12 +401,12 @@ public class Rezept {
     
     /**
      * set the rezDatum
-     */
+     *
     // TODO: make sure we get & set Datum in correct format.
     public void setRezDatum(String Datum) {
         rezDatum = LocalDate.parse(Datum);
     }
-    
+    */
     
     /**
      * @return the patIntern
@@ -696,6 +700,16 @@ public class Rezept {
     public String getHeimbewohn() {
         return isHeimbewohn() ? "T" : "F";
     }
+    
+    /**
+     * Set the bool heimbewohn
+     * 
+     */
+    public void setHeimbewohn(boolean bewohntHeim) {
+        heimbewohn = bewohntHeim;
+    }
+
+    
     /**
      * @return the veraenderd
      */
@@ -769,12 +783,20 @@ public class Rezept {
     }
 
     /**
-     * @return the Datum
+     * @return the Erfassungsdatum
      */
-    public LocalDate getDatum() {
-        return datum;
+    public LocalDate getErfassungsDatum() {
+        return erfassungsDatum;
     }
 
+    /**
+     * Set the Erfassungsdatum
+     */
+    public void setErfassungsDatum(LocalDate datum) {
+        erfassungsDatum = datum;
+    }
+
+    
     /**
      * @return the termine as is in DB (one String w/ LFs)
      */
@@ -826,10 +848,17 @@ public class Rezept {
     }
 
     /**
+     * Checks if the KassenID was previously set (somehow, somewhere :D )...
+     * @return
+     */
+    public boolean isKidSet() {
+        return kId != -1;
+    }
+    /**
      * @return the lASTDATE
      */
     public LocalDate getLastdate() {
-        return lastdate;
+        return lastDate;
     }
 
     /**
@@ -887,12 +916,27 @@ public class Rezept {
     }
 
     /**
+     * Set the angelegtVon
+     */
+    public void setAngelegtVon(String angelegtVon) {
+        this.angelegtVon = angelegtVon;
+    }
+
+    
+    /**
      * @return the lastEdDate
      */
     public LocalDate getLastEdDate() {
         return lastEdDate;
     }
 
+    /**
+     * Set the lastEdDate
+     */
+    public void setLastEdDate(LocalDate datum) {
+        lastEdDate = datum;
+    }
+    
     /**
      * @return the barcodeform
      */
@@ -922,12 +966,22 @@ public class Rezept {
     }
 
     /**
-     * @return the lastedit
+     * @return the matchcode of lastEditor (last edited by user)
+     * 
      */
-    public String getLastedit() {
-        return lastedit;
+    public String getLastEditor() {
+        return lastEditor;
     }
 
+    /**
+     * Set the matchcode of lastEditor (last edited by user)
+     * 
+     */
+    public void setLastEditor(String matchCode) {
+        lastEditor = matchCode;
+    }
+
+    
     /**
      * @return the berId
      */
@@ -1041,7 +1095,7 @@ public class Rezept {
     /**
      * @return the farbcode
      */
-    public String getFarbcode() {
+    public int getFarbcode() {
         return farbcode;
     }
 

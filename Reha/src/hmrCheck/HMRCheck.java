@@ -2,6 +2,8 @@ package hmrCheck;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -410,6 +412,12 @@ public class HMRCheck {
         return ret;
     }
 
+    public static LocalDate hmrLetztesDatum(LocalDate startDatum, int differenz, boolean samstagistwerktag) {
+        String startDat = startDatum.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String result = hmrLetztesDatum(startDat, differenz, samstagistwerktag);
+        return LocalDate.parse(result, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+    }
+    
     public static String hmrLetztesDatum(String startdatum, int differenz, boolean samstagistwerktag) {
 
         int werktage = 0;
