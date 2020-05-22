@@ -364,7 +364,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 // TODO: delete me once Rezepte have been sorted
                 int itest = vecMyRezept.getFarbCode();
                 logger.debug("vec: FarbCode=" + itest);
-                itest = Integer.parseInt(rez.getFarbcode());
+                itest = rez.getFarbcode();
                 logger.debug("rez: Farbcode=" + itest);
                 if (itest >= 0) {
                     jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));

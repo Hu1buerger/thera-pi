@@ -15,6 +15,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.sql.Connection;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -297,10 +299,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 }
             }
             if (!this.neu) {
-                // TODO: delete me once Rezepte have been sorted
-                int itest = rezMyRezept.getFarbcode();
-                logger.debug("vec: FarbCode=" + itest);
-                itest = Integer.parseInt(rez.getFarbcode());
+                
+                int itest = rez.getFarbcode();
+                
                 logger.debug("rez: Farbcode=" + itest);
                 if (itest >= 0) {
                     jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
@@ -922,8 +923,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         }
     }
 
-    private String chkLastBeginDat(String rezDat, String lastDat, String preisGroup, String aktDiszi) {
-        if (lastDat.equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
+    private LocalDate chkLastBeginDat(LocalDate rezDat, String lastDat, String preisGroup, String aktDiszi) {
+        LocalDate spaetestAnfang;
+        if (lastDat.trim().equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
             // Preisgruppe holen
             int pg = Integer.parseInt(preisGroup) - 1;
             // Frist zwischen Rezeptdatum und erster Behandlung
@@ -932,17 +934,20 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             // Kalendertage
             if ((Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
                                                                   .get(1)).get(pg)) {
-                lastDat = DatFunk.sDatPlusTage(rezDat, frist);
+                
+                spaetestAnfang = rezDat.plusDays(frist);
             } else { // Werktage
                 boolean mitsamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
                                                                                        .get(4)).get(pg);
-                lastDat = HMRCheck.hmrLetztesDatum(rezDat,
+                spaetestAnfang = HMRCheck.hmrLetztesDatum(rezDat,
                         (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
                                                                           .get(0)).get(pg),
                         mitsamstag);
             }
+        } else {
+            spaetestAnfang =  LocalDate.parse(lastDat, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
         }
-        return lastDat;
+        return spaetestAnfang;
     }
 
     public int leistungTesten(int combo, int veczahl) {
@@ -1781,11 +1786,11 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      *
      * initialisiert ein Rezept mit Daten, die immer gesetzt werden muessen
      */
-    private void initRezeptAll(Rezeptvector thisRezept) {
-        if (thisRezept.getKtraeger()
-                    .equals("")) { // eher ein Fall fuer check/speichern!
+    private void initRezeptAll(Rezept thisRezept) {
+        if (!thisRezept.isKidSet() ) { // eher ein Fall fuer check/speichern!
             JOptionPane.showMessageDialog(null,
-                    "Achtung - kann Preisgruppe nicht ermitteln - Rezept kann sp\u00e4ter nicht abgerechnet werden!");
+                    "Achtung - kann Preisgruppe nicht ermitteln - "
+                    + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
         }
 
         if (SystemConfig.AngelegtVonUser) {
@@ -1793,22 +1798,22 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         } else {
             thisRezept.setAngelegtVon("");
         }
-        thisRezept.setAngelegtDatum(DatFunk.sDatInSQL(DatFunk.sHeute()));
+        thisRezept.setErfassungsDatum(LocalDate.now());
 
-        thisRezept.setLastEdit(Reha.aktUser);
-        thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
+        thisRezept.setLastEditor(Reha.aktUser);
+        thisRezept.setLastEdDate(LocalDate.now());
 
-        thisRezept.setHeimbew(Reha.instance.patpanel.patDaten.get(44)); // koennte sich geaendert haben
-        thisRezept.setBefreit(Reha.instance.patpanel.patDaten.get(30)); // dito
-        thisRezept.setGebuehrBezahlt(false); // kann noch nicht bezahlt sein (Rezeptgebuehr)
-        thisRezept.setGebuehrBetrag("0.00");
+        thisRezept.setHeimbewohn("T".equals(Reha.instance.patpanel.patDaten.get(44))); // koennte sich geaendert haben
+        thisRezept.setBefr("T".equals(Reha.instance.patpanel.patDaten.get(30))); // dito
+        thisRezept.setRezBez(false); // kann noch nicht bezahlt sein (Rezeptgebuehr)
+
     }
 
     /**
      *
      * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
      */
-    private void initRezeptNeu(Rezeptvector thisRezept) {
+    private void initRezeptNeu(Rezept thisRezept) {
         thisRezept.createEmptyVec();
 
         thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
@@ -1828,18 +1833,18 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      *
      * initialisiert ein kopiertes Rezept
      *  - aktualisiert Daten aus dem aktuellen Patienten,
-     *  - l\u00f6scht Daten, die nur fuer die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
+     *  - loescht Daten, die nur fuer die Vorlage gelten (Behandlungen, Preise, Zuzahlung, ...)
      */
-    private void initRezeptKopie(Rezeptvector thisRezept) {
-        String kasseInVo = thisRezept.getKtrName();
+    private void initRezeptKopie(Rezept thisRezept) {
+        String kasseInVo = thisRezept.getKTraegerName();
         String kasseInPatStamm = Reha.instance.patpanel.patDaten.get(13);
         if (!kasseInVo.equals(kasseInPatStamm)) {
             // Kasse im Rezept stimmt nicht mit Kasse im Patientenstamm ueberein:
             // Pat. hat inzwischen Kasse gewechselt oder es ist ein BG- oder
             // Privatrezept
             if (askForKeepCurrent(kasseInVo, kasseInPatStamm) == JOptionPane.NO_OPTION) {
-                thisRezept.setKtrName(kasseInPatStamm);
-                thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
+                thisRezept.setKTraegerName(kasseInPatStamm);
+                thisRezept.setkId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68)));
             }
         }
         
@@ -1895,19 +1900,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         jcb[cVOLLHB].setSelected(rezMyRezept.isHbVoll());
 
         jcb[cTBANGEF].setSelected(rezMyRezept.isArztBericht());
-        jtf[cANZ1].setText(Integer.toString(rezMyRezept.getAnzahlBehandlungen(1)));
-        jtf[cANZ2].setText(Integer.toString(rezMyRezept.getAnzahlBehandlungen(2)));
-        jtf[cANZ3].setText(Integer.toString(rezMyRezept.getAnzahlBehandlungen(3)));
-        jtf[cANZ4].setText(Integer.toString(rezMyRezept.getAnzahlBehandlungen(4)));
+        jtf[cANZ1].setText(Integer.toString(rezMyRezept.getAnzahl1()));
+        jtf[cANZ2].setText(Integer.toString(rezMyRezept.getAnzahl2()));
+        jtf[cANZ3].setText(Integer.toString(rezMyRezept.getAnzahl3()));
+        jtf[cANZ4].setText(Integer.toString(rezMyRezept.getAnzahl4()));
 
         // itest = rezMyRezept.getArtDerBehandlung(1);
-        jcmb[cLEIST1].setSelectedIndex(leistungTesten(0, rezMyRezept.getArtDerBehandlung(1)));
+        jcmb[cLEIST1].setSelectedIndex(leistungTesten(0, rezMyRezept.getArtDerBeh1()));
         // itest = rezMyRezept.getArtDerBehandlung(2);
-        jcmb[cLEIST2].setSelectedIndex(leistungTesten(1, rezMyRezept.getArtDerBehandlung(2)));
+        jcmb[cLEIST2].setSelectedIndex(leistungTesten(1, rezMyRezept.getArtDerBeh2()));
         // itest = StringTools.ZahlTest(rezMyRezept.getArtDBehandl(3));
-        jcmb[cLEIST3].setSelectedIndex(leistungTesten(2, rezMyRezept.getArtDerBehandlung(3)));
+        jcmb[cLEIST3].setSelectedIndex(leistungTesten(2, rezMyRezept.getArtDerBeh3()));
         // itest = StringTools.ZahlTest(rezMyRezept.getArtDBehandl(4));
-        jcmb[cLEIST4].setSelectedIndex(leistungTesten(3, rezMyRezept.getArtDerBehandlung(4)));
+        jcmb[cLEIST4].setSelectedIndex(leistungTesten(3, rezMyRezept.getArtDerBeh4()));
 
         String test = StringTools.NullTest(rezMyRezept.getFrequenz());
         jtf[cFREQ].setText(test);
@@ -1991,21 +1996,26 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
             stest = jtf[cREZDAT].getText()
                                 .trim();
+            LocalDate rezDat;
             if (stest.equals(".  .")) {
                 stest = DatFunk.sHeute();
+                rezDat = LocalDate.now();
+            } else {
+                rezDat = LocalDate.parse(jtf[cREZDAT].getText().trim(), DateTimeFormatter.ofPattern("d.M.yyyy"));
             }
+            
             // TODO: This needs to handle a Rezept as param:
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
                     String.valueOf(stest), false, Reha.instance.patpanel.vecaktrez);
             // TODO: sort format of RezDatum upon String
-            thisRezept.setRezDatum(DatFunk.sDatInSQL(stest));
+            thisRezept.setRezDatum(rezDat);
             setRezDatInTable(stest);
-            String stest2 = chkLastBeginDat(stest, jtf[cBEGINDAT].getText()
+            LocalDate stest2 = chkLastBeginDat(rezDat, jtf[cBEGINDAT].getText()
                                                                  .trim(),
                     jtf[cPREISGR].getText(), aktuelleDisziplin);
             setLastDatInTable(stest2);
             thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
-            thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
+            thisRezept.setLastEdDate(LocalDate.now());
             thisRezept.setLastEdit(Reha.aktUser);
             thisRezept.setRezArt(jcmb[cVERORD].getSelectedIndex());
             thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());

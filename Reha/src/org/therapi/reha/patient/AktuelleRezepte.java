@@ -1008,7 +1008,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                 listRezepte.get(i).getRezNr(),
                                 listRezepte.get(i).getZZStatus(),
                                 DatFunk.sDatInDeutsch(listRezepte.get(i).getRezDatum().toString()),
-                                DatFunk.sDatInDeutsch(listRezepte.get(i).getDatum().toString()),
+                                DatFunk.sDatInDeutsch(listRezepte.get(i).getErfassungsDatum().toString()),
                                 DatFunk.sDatInDeutsch(listRezepte.get(i).getLastdate().toString()),
                                 listRezepte.get(i).isAbschluss(),
                                 listRezepte.get(i).getPatIntern(),
@@ -2500,7 +2500,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         disziSelect.getIndex(diszi), anzahlen, hmpositionen, preisgruppe - 1,
                         SystemPreislisten.hmPreise.get(diszi)
                                                   .get(preisgruppe - 1),
-                        Integer.parseInt(Reha.instance.patpanel.rezAktRez.getRezeptArt()),
+                        Reha.instance.patpanel.rezAktRez.getRezeptArt(),
                         (Reha.instance.patpanel.rezAktRez.getRezNr()),
                         DatFunk.sDatInDeutsch(Reha.instance.patpanel.rezAktRez.getRezDatum().toString()),
                         DatFunk.sDatInDeutsch(Reha.instance.patpanel.rezAktRez.getLastdate().toString())).check();

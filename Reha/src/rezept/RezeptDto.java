@@ -160,7 +160,7 @@ public class RezeptDto {
         rez.preise2 = new Money(rs.getString("PREISE2"));
         rez.preise3 = new Money(rs.getString("PREISE3"));
         rez.preise4 = new Money(rs.getString("PREISE4"));
-        rez.datum = rs.getDate("DATUM") == null ? null
+        rez.erfassungsDatum = rs.getDate("DATUM") == null ? null
                 : rs.getDate("DATUM")
                     .toLocalDate();
         rez.diagnose = rs.getString("DIAGNOSE");
@@ -185,7 +185,7 @@ public class RezeptDto {
         rez.kId = rs.getInt("KID");
         rez.patId = rs.getInt("PATID");
         rez.zzStatus = rs.getInt("ZZSTATUS");
-        rez.lastdate = rs.getDate("LASTDATE") == null ? null
+        rez.lastDate = rs.getDate("LASTDATE") == null ? null
                 : rs.getDate("LASTDATE")
                     .toLocalDate();
         rez.preisgruppe = rs.getInt("PREISGRUPPE");
@@ -202,14 +202,14 @@ public class RezeptDto {
         rez.pos3 = rs.getString("POS3");
         rez.pos4 = rs.getString("POS4");
         rez.frequenz = rs.getString("FREQUENZ");
-        rez.lastedit = rs.getString("LASTEDIT");
+        rez.lastEditor = rs.getString("LASTEDIT");
         rez.berId = rs.getInt("BERID");
         rez.arztBericht = "T".equals(Optional.ofNullable(rs.getString("ARZTBERICHT"))
                                   .orElse(""));
         rez.lastEdDate = rs.getDate("LASTEDDATE") == null ? null
                 : rs.getDate("LASTEDDATE")
                     .toLocalDate();
-        rez.farbcode = rs.getString("FARBCODE");
+        rez.farbcode = Integer.parseInt(rs.getString("FARBCODE"));
         rez.rsplit = rs.getString("RSPLIT");
         rez.jahrfrei = rs.getString("JAHRFREI");
         rez.unter18 = "T".equals(Optional.ofNullable(rs.getString("UNTER18"))
@@ -261,7 +261,7 @@ public class RezeptDto {
                 + "PREISE2='" + rez.getPreise2() + "', "
                 + "PREISE3='" + rez.getPreise3() + "', "
                 + "PREISE4='" + rez.getPreise4() + "', "
-                + "DATUM='" + rez.getDatum() + "', "
+                + "DATUM='" + rez.getErfassungsDatum() + "', "
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
                 + "VERAENDERD='" + rez.getVeraenderd() + "', "
@@ -290,7 +290,7 @@ public class RezeptDto {
                 + "POS3='" + rez.getPos3() + "', "
                 + "POS4='" + rez.getPos4() + "', "
                 + "FREQUENZ='" + rez.getFrequenz() + "', "
-                + "LASTEDIT='" + rez.getLastedit() + "', "
+                + "LASTEDIT='" + rez.getLastEditor() + "', "
                 + "BERID='" + rez.getBerId() + "', "
                 + "ARZTBERICHT='" + rez.getArztBericht() + "', "
                 + "FARBCODE='" + rez.getFarbcode() + "', "

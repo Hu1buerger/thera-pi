@@ -26,6 +26,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.TimerTask;
 import java.util.TooManyListenersException;
 import java.util.Vector;
@@ -340,6 +341,7 @@ public class Reha implements RehaEventListener {
 
     public void startWithMandantSet() {
 
+        Locale.setDefault(Locale.GERMANY);
         aktIK = mandant().ikDigitString();
         aktMandant = mandant().name();
 
