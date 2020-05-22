@@ -66,6 +66,7 @@ import javafx.util.converter.LocalDateStringConverter;
 import mandant.IK;
 import mandant.Mandant;
 import rechteTools.Rechte;
+import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
 import stammDatenTools.RezTools;
@@ -845,8 +846,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 } else { // myRezept enthaelt Daten
                     try {
                         // TODO: Check why only Kuerzel1-4 of 6...
-                        String[] xartdbeh = new String[] { rezMyRezept.getKuerzel1(), rezMyRezept.getKuerzel2(),
-                                rezMyRezept.getKuerzel3(), rezMyRezept.getKuerzel4() };
+                        String[] xartdbeh = new String[] { rezMyRezept.getHMKuerzel1(), rezMyRezept.getHMKuerzel2(),
+                                rezMyRezept.getHMKuerzel3(), rezMyRezept.getHMKuerzel4() };
                         initRezeptKopie(rezMyRezept);
                         this.holePreisGruppe(rezMyRezept.getKTraegerName());
                         this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
@@ -2054,19 +2055,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 itest = jcmb[cLEIST1 + i].getSelectedIndex();
                 if (itest > 0) { // 0 ist der Leereintrag!
                     int idxPv = itest - 1;
-                    thisRezept.setArtDBehandl(idxVec, preisvec.get(idxPv)
-                                                            .get(9));
-                    thisRezept.setPreis(idxVec, preisvec.get(idxPv)
-                                                      .get(neuerpreis ? 3 : 4));
-                    thisRezept.setHmPos(idxVec, preisvec.get(idxPv)
+                    thisRezept.setArtDerBeh(idxVec, Integer.parseInt(preisvec.get(idxPv)
+                                                            .get(9)));
+                    thisRezept.setPreis(idxVec,new Money(preisvec.get(idxPv)
+                                                      .get(neuerpreis ? 3 : 4)));
+                    thisRezept.setHMPos(idxVec, preisvec.get(idxPv)
                                                       .get(2));
-                    thisRezept.setHMkurz(idxVec, preisvec.get(idxPv)
+                    thisRezept.setHMKuerzel(idxVec, preisvec.get(idxPv)
                                                        .get(1));
                 } else {
-                    thisRezept.setArtDBehandl(idxVec, "0");
-                    thisRezept.setPreis(idxVec, "0.00");
-                    thisRezept.setHmPos(idxVec, "");
-                    thisRezept.setHMkurz(idxVec, "");
+                    thisRezept.setArtDerBeh(idxVec, 0);
+                    thisRezept.setPreis(idxVec, new Money("0.00"));
+                    thisRezept.setHMPos(idxVec, "");
+                    thisRezept.setHMKuerzel(idxVec, "");
                 }
             }
 
@@ -2092,7 +2093,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             Integer izuzahl = Integer.valueOf(jtf[cPREISGR].getText());
             int szzstatus = Rezept.ZZSTATUS_NOTSET;
 
-            String unter18 = "F";
+            boolean unter18 = false;
             for (int i = 0; i < 1; i++) {
                 if (SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                     .get(izuzahl - 1) <= 0) {
@@ -2187,7 +2188,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     } else {
                         szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     }
-                    unter18 = "T";
+                    unter18 = true;
                     break;
                 }
                 /**********************/
@@ -2216,25 +2217,27 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }
             /*****/
 
-            thisRezept.setUnter18("T".equals(unter18)); // oben schon berechnet
+            thisRezept.setUnter18(unter18); // oben schon ermittelt
             thisRezept.setZZStatus(szzstatus);
             thisRezept.setDiagnose(StringTools.Escaped(jta.getText()));
-            thisRezept.setvorJahrFrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
+            thisRezept.setJahrfrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
                                                                               // (?) (nicht editierbar -> kann in's
                                                                               // 'initRezeptAll')
             // Why is this a text-field?
             thisRezept.setHeimbewohn("T".equals(jtf[cHEIMBEW].getText())); // dito
             
-            thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
+            thisRezept.setHbVoll(jcb[cVOLLHB].isSelected()); // dito
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
-            thisRezept.setAnzahlKM(stest.equals("") ? "0.00" : stest);
+            
+            // TODO: This needs checking - "TausenderTrennzeichen" et all...
+            thisRezept.setAnzahlKM(new BigDecimal(stest));
             int rule = SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                        .get(Integer.parseInt(jtf[cPREISGR].getText()) - 1);
-            thisRezept.setZzRegel(rule);
-            thisRezept.setICD10(jtf[cICD10].getText()
+            thisRezept.setZZRegel(rule);
+            thisRezept.setIcd10(jtf[cICD10].getText()
                                          .replace(" ", ""));
-            thisRezept.setICD10_2(jtf[cICD10_2].getText()
+            thisRezept.setIcd10_2(jtf[cICD10_2].getText()
                                              .replace(" ", ""));
             setCursor(Cursors.normalCursor);
         } catch (Exception ex) {
