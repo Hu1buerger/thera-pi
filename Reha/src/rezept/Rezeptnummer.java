@@ -41,12 +41,6 @@ public class Rezeptnummer {
         String diszi2check = rezNr.replaceAll("[0-9]", "");
         disziplin = disziplin.ofShort(diszi2check);
         String rezNrDigits = rezNr.replaceAll("[a-zA-Z]", "");
-        for ( Disziplin d : Disziplin.values()) {
-            if (diszi2check.equalsIgnoreCase(d.toString())) {
-                disziplin = d;
-                break;
-            }
-        };
         
         this.rezeptZiffern = Integer.parseInt(rezNrDigits);
     }
