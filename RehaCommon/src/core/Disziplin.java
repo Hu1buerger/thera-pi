@@ -33,7 +33,19 @@ public enum Disziplin {
                 return d;
             }
         }
+
         return INV;
+    }
+
+    /*
+     * valueOF cannot be overriden. Use this, if IAE is not tolerable.
+     */
+    public static Disziplin ofShort(String value) {
+        try {
+            return Disziplin.valueOf(value);
+        } catch (Exception e) {
+            return INV;
+        }
     }
 
     /**
@@ -47,4 +59,9 @@ public enum Disziplin {
     public EnumSet<Disziplin> ohneReha() { // NO_UCD (unused code)
         return EnumSet.of(KG, MA, ER, LO, PO);
     }
+
+
+
+
+
 }
