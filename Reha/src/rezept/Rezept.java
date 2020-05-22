@@ -602,7 +602,7 @@ public class Rezept {
     }
 
     /**
-     * @return the rezGeb
+     * @return the RezeptGebuehr (amount in Euro)
      */
     public Money getRezGeb() {
         return rezGeb;
