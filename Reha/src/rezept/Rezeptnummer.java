@@ -36,7 +36,7 @@ public class Rezeptnummer {
         // - disziplin can't be found - set INV?
         // - parseInt screws up
         disziplin = Disziplin.INV;
-        if ( rezNr == null)
+        if ( rezNr == null || rezNr == "" )
             return;
         String diszi2check = rezNr.replaceAll("[0-9]", "");
         String rezNrDigits = rezNr.replaceAll("[a-zA-Z]", "");

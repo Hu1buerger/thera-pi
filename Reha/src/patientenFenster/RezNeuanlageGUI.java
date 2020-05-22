@@ -14,6 +14,7 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -61,9 +62,12 @@ import events.RehaTPEventListener;
 import gui.Cursors;
 import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
+import javafx.util.converter.LocalDateStringConverter;
+import mandant.IK;
 import mandant.Mandant;
 import rechteTools.Rechte;
 import rezept.Rezept;
+import rezept.RezeptDto;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
@@ -1045,6 +1049,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                 return;
                             }
                             copyFormToVec1stTime(rezMyRezept);
+                            // TODO: check for replacement:
                             rezMyRezept.setNewRezNb(rezKlasse);
                             Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rezMyRezept.getRezNr());
                         } else {
@@ -1053,7 +1058,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         closeDialog();
                         aufraeumen();
                         // ?? automat. HMR-Check ??
-                        rezMyRezept.writeRez2DB();
+                        Mandant mandant = Reha.instance.mandant();
+                        RezeptDto rDto = new RezeptDto(mandant.ik());
+                        rDto.rezeptInDBSpeichern(rezMyRezept);
+                        
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -1814,18 +1822,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
      */
     private void initRezeptNeu(Rezept thisRezept) {
-        thisRezept.createEmptyVec();
+        thisRezept = new Rezept();
 
-        thisRezept.setKtrName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
-        thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68)); // id des Kassen-record
+        thisRezept.setKTraegerName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
+        thisRezept.setkId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68))); // id des Kassen-record
 
         initRezeptAll(thisRezept);
 
         thisRezept.setArzt(Reha.instance.patpanel.patDaten.get(25)); // Hausarzt als default
-        thisRezept.setArztId(Reha.instance.patpanel.patDaten.get(67));
-        thisRezept.setKm(Reha.instance.patpanel.patDaten.get(48));
-        thisRezept.setPatIdS(Reha.instance.patpanel.patDaten.get(66));
-        thisRezept.setPatIntern(Reha.instance.patpanel.patDaten.get(29));
+        thisRezept.setArztId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(67)));
+        // TODO: check - do I need to filter the "tausender-trennzeichen"?
+        thisRezept.setAnzahlKM(new BigDecimal(Reha.instance.patpanel.patDaten.get(48).replace(".", "")));
+        thisRezept.setPatId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(66)));
+        thisRezept.setPatIntern(Integer.parseInt(Reha.instance.patpanel.patDaten.get(29)));
         // Barcode
     }
 
@@ -1850,11 +1859,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         
         initRezeptAll(thisRezept);
 
-        thisRezept.setRezNb("");
-        thisRezept.setRezeptDatum("");
+        thisRezept.setRezNr("");
         thisRezept.setTermine("");
-        thisRezept.setZzStat("");
-        thisRezept.setLastDate("");
+        // TODO: These were empty-String - check for lazy "isEmpty-then-set" in other methods
+        // thisRezept.setRezDatum(LocalDate.now());
+        // thisRezept.setZZStatus(Rezept.ZZSTATUS_NOTSET);
+        // thisRezept.setLastDate("");
     }
 
     private int askForKeepCurrent(String kasseInVO, String kassePatStamm) {
@@ -1954,7 +1964,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         jtf[cICD10].setText(rezMyRezept.getIcd10());
         jtf[cICD10_2].setText(rezMyRezept.getIcd10_2());
 
-        itest = Integer.parseInt(rezMyRezept.getFarbcode());
+        itest = rezMyRezept.getFarbcode();
         if (itest >= 0) {
             jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
         }
@@ -2016,19 +2026,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             setLastDatInTable(stest2);
             thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
             thisRezept.setLastEdDate(LocalDate.now());
-            thisRezept.setLastEdit(Reha.aktUser);
+            thisRezept.setLastEditor(Reha.aktUser);
             thisRezept.setRezArt(jcmb[cVERORD].getSelectedIndex());
             thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());
             thisRezept.setHausbesuch(jcb[cHAUSB].isSelected());
-            if (thisRezept.getHausbesuch()) {
-                String anzHB = String.valueOf(thisRezept.getAnzHB());
+            if (thisRezept.isHausBesuch()) {
+                String anzHB = String.valueOf(thisRezept.getAnzahlHb());
                 if (!anzHB.equals(jtf[cANZ1].getText())) {
                     int frage = JOptionPane.showConfirmDialog(null, "Achtung!\n\nDie Anzahl Hausbesuche = " + anzHB
                             + "\n" + "Die Anzahl des ersten Heilmittels = " + jtf[cANZ1].getText() + "\n\n"
                             + "Soll die Anzahl Hausbesuche ebenfalls auf " + jtf[cANZ1].getText() + " gesetzt werden?",
                             "Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                     if (frage == JOptionPane.YES_OPTION) {
-                        thisRezept.setAnzHB(jtf[cANZ1].getText());
+                        thisRezept.setAnzahlHb(Integer.parseInt(jtf[cANZ1].getText()));
                     }
                 }
             }
@@ -2105,7 +2115,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         szzstatus = "1";
                     } else {
 
-                        if (RezTools.mitJahresWechsel(thisRezept.getRezeptDatum())) {
+                        if (RezTools.mitJahresWechsel(thisRezept.getRezDatum())) {
 
                             String vorjahr = Reha.instance.patpanel.patDaten.get(69);
                             if (vorjahr.trim()
@@ -2206,7 +2216,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             /*****/
 
             thisRezept.setUnter18(unter18); // oben schon berechnet
-            thisRezept.setZzStat(szzstatus);
+            thisRezept.setZZStatus(szzstatus);
             thisRezept.setDiagn(StringTools.Escaped(jta.getText()));
             thisRezept.setvorJahrFrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
                                                                               // (?) (nicht editierbar -> kann in's
@@ -2215,7 +2225,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
-            thisRezept.setKm(stest.equals("") ? "0.00" : stest);
+            thisRezept.setAnzahlKM(stest.equals("") ? "0.00" : stest);
             int rule = SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                        .get(Integer.parseInt(jtf[cPREISGR].getText()) - 1);
             thisRezept.setZzRegel(rule);
