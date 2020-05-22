@@ -94,6 +94,8 @@ pages:
 ci_dist:
   stage: dist
   rules:
+    - if: '$CI_COMMIT_REF_NAME =~ /^WIP:/'
+      when: never
     - if: '$CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "entwicklung"'
       when: always
     - when: never
