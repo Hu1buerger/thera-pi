@@ -2089,21 +2089,21 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             //// System.out.println("Speichern bestehendes Rezept -> Preisgruppe =
             //// "+jtf[cPREISGR].getText());
             Integer izuzahl = Integer.valueOf(jtf[cPREISGR].getText());
-            String szzstatus = "";
+            int szzstatus = Rezept.ZZSTATUS_NOTSET;
 
             String unter18 = "F";
             for (int i = 0; i < 1; i++) {
                 if (SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                     .get(izuzahl - 1) <= 0) {
-                    szzstatus = "0";
+                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     break;
                 }
                 if (aktuelleDisziplin.equals("Reha")) {
-                    szzstatus = "0";
+                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     break;
                 }
                 if (aktuelleDisziplin.equals("Rsport") || aktuelleDisziplin.equals("Ftrain")) {
-                    szzstatus = "0";
+                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     break;
                 }
                 //// System.out.println("ZuzahlStatus = Zuzahlung (zun\u00e4chst) erforderlich, pruefe
@@ -2112,7 +2112,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                    .equals("T")) {
                     // System.out.println("aktuelles Jahr ZuzahlStatus = Patient ist befreit");
                     if (thisRezept.getGebuehrBezahlt()) {
-                        szzstatus = "1";
+                        szzstatus = Rezept.ZZSTATUS_OK;
                     } else {
 
                         if (RezTools.mitJahresWechsel(thisRezept.getRezDatum())) {
@@ -2134,10 +2134,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                 DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(41)),
                                                 ersterTag) >= 0) {
                                             // Behandlung liegt nach befr_ab
-                                            szzstatus = "0";
+                                            szzstatus = Rezept.ZZSTATUS_BEFREIT;
                                         } else {
                                             // Behandlung liegt vor befr_ab
-                                            szzstatus = "2";
+                                            szzstatus = Rezept.ZZSTATUS_NOTOK;
                                         }
                                     } catch (Exception ex) {
                                         JOptionPane.showMessageDialog(null,
@@ -2150,17 +2150,17 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                             DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(41)),
                                             DatFunk.sHeute()) >= 0) {
                                         // Behandlung muss nach befr_ab liegen
-                                        szzstatus = "0";
+                                        szzstatus = Rezept.ZZSTATUS_BEFREIT;
                                     } else {
                                         // Behandlung kann auch vor befr_ab liegen
-                                        szzstatus = "2";
+                                        szzstatus = Rezept.ZZSTATUS_NOTOK;
                                     }
                                 }
                             } else {
-                                szzstatus = "0";
+                                szzstatus = Rezept.ZZSTATUS_BEFREIT;
                             }
                         } else {
-                            szzstatus = "0";
+                            szzstatus = Rezept.ZZSTATUS_BEFREIT;
                         }
                     }
                     break;
@@ -2182,19 +2182,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         JOptionPane.showMessageDialog(null,
                                 "Achtung es sind noch " + (tage * -1) + " Tage bis zur Vollj\u00e4hrigkeit\n"
                                         + "Unter Umst\u00e4nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
-                        szzstatus = "3";
+                        szzstatus = Rezept.ZZSTATUS_BALD18;
                     } else {
-                        szzstatus = "0";
+                        szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     }
                     unter18 = "T";
                     break;
                 }
                 /**********************/
                 if (thisRezept.getGebuehrBezahlt() || (thisRezept.getGebuehrBetrag() > 0.00)) {
-                    szzstatus = "1";
+                    szzstatus = Rezept.ZZSTATUS_OK;
                 } else {
                     // hier testen ob erster Behandlungstag bereits ab dem Befreiungszeitraum
-                    szzstatus = "2";
+                    szzstatus = Rezept.ZZSTATUS_NOTOK;
                 }
             }
             /******/
@@ -2215,13 +2215,15 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }
             /*****/
 
-            thisRezept.setUnter18(unter18); // oben schon berechnet
+            thisRezept.setUnter18("T".equals(unter18)); // oben schon berechnet
             thisRezept.setZZStatus(szzstatus);
-            thisRezept.setDiagn(StringTools.Escaped(jta.getText()));
+            thisRezept.setDiagnose(StringTools.Escaped(jta.getText()));
             thisRezept.setvorJahrFrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
                                                                               // (?) (nicht editierbar -> kann in's
                                                                               // 'initRezeptAll')
-            thisRezept.setHeimbew(jtf[cHEIMBEW].getText()); // dito
+            // Why is this a text-field?
+            thisRezept.setHeimbewohn("T".equals(jtf[cHEIMBEW].getText())); // dito
+            
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
             stest = jtf[cANZKM].getText()
                                .trim(); // dito

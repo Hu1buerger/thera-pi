@@ -51,6 +51,7 @@ public class Rezept {
     LocalDate erfassungsDatum;
     
     String diagnose;
+    
     boolean heimbewohn;
     LocalDate veraenderd;
     int veraendera;
@@ -74,6 +75,7 @@ public class Rezept {
     boolean begruendADR;
     boolean hausbes;
     int anzahlHb;
+    boolean hbVoll;
     BigDecimal anzahlKM;
     
     String indikatSchl;
@@ -93,7 +95,6 @@ public class Rezept {
     String rsplit;
     String jahrfrei; // vielleicht auch localdate
     boolean unter18;
-    boolean hbVoll;
     boolean abschluss;
     String kuerzel1;
     String kuerzel2;
@@ -110,6 +111,7 @@ public class Rezept {
     public static final int ZZSTATUS_BEFREIT = 0;
     public static final int ZZSTATUS_OK = 1;
     public static final int ZZSTATUS_NOTOK = 2;
+    public static final int ZZSTATUS_BALD18 = 3;
     
     public static final int REZEPTART_ERSTVO = 0;
     public static final int REZEPTART_FOLGEVO = 1;
@@ -713,6 +715,14 @@ public class Rezept {
     }
 
     /**
+     * Set the diagnose
+     */
+    public void setDiagnose(String diag) {
+        diagnose = diag;
+    }
+    
+    
+    /**
      * @return the heimbewohn
      */
     public boolean isHeimbewohn() {
@@ -1176,7 +1186,14 @@ public class Rezept {
     public String getHbVoll() {
         return isHbVoll() ? "T" : "F";
     }
-    
+
+    /**
+     * @return the hbVoll
+     */
+    public void setHbVoll(boolean voll) {
+        hbVoll = voll;
+    }
+
     /**
      * @return the anzahlHb
      */
