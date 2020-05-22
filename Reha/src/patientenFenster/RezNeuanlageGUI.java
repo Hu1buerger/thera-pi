@@ -877,7 +877,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                .toString()
                                                .trim());
             }
-            verordnenderArzt.init(rezMyRezept.getArztId());
+            verordnenderArzt.init(Integer.toString(rezMyRezept.getArztId()));
             copyVecToForm();
 
             jscr.validate();
