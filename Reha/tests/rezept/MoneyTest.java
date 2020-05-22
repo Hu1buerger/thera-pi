@@ -1,7 +1,6 @@
 package rezept;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -47,6 +46,33 @@ public class MoneyTest {
         Money precise = new Money("1234567890123456789012345678901234567890");
         assertEquals(new Money("2469135780246913578024691357802469135780"), precise.add(precise));
 
+    }
+
+    @Test
+    public void money3isMoreThanMoney2() throws Exception {
+        Money threeBucks= new Money(3.0);
+        Money twoBucks = new Money(2.0);
+        assertTrue(threeBucks.isMoreThan(twoBucks));
+        assertFalse(threeBucks.isMoreThan(threeBucks));
+        assertFalse(twoBucks.isMoreThan(threeBucks));
+    }
+
+    @Test
+    public void money2islessThanMoney3() throws Exception {
+        Money threeBucks= new Money(3.0);
+        Money twoBucks = new Money(2.0);
+        assertFalse(threeBucks.isLessThan(twoBucks));
+        assertFalse(threeBucks.isLessThan(threeBucks));
+        assertTrue(twoBucks.isLessThan(threeBucks));
+    }
+
+    @Test
+    public void moneyhasSameValueAs() throws Exception {
+        Money threeBucks= new Money(3.0);
+        Money twoBucks = new Money(2.0);
+        assertFalse(threeBucks.hasSameValue(twoBucks));
+        assertTrue(threeBucks.hasSameValue(threeBucks));
+        assertFalse(twoBucks.hasSameValue(threeBucks));
     }
 
 }

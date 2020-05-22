@@ -12,11 +12,11 @@ public class Money implements Comparable<Money>{
 
     public Money() {
     }
-    
+
     public Money(Money geld) {
         value = geld.value;
     }
-    
+
     public Money(String string) {
         this.value= new BigDecimal(string);
 
@@ -80,6 +80,18 @@ public class Money implements Comparable<Money>{
         } else if (!value.equals(other.value))
             return false;
         return true;
+    }
+
+    public boolean isMoreThan(Money other) {
+        return value.compareTo(other.value) >0 ;
+    }
+
+    public boolean isLessThan(Money other) {
+        return value.compareTo(other.value) < 0;
+    }
+
+    public boolean hasSameValue(Money other) {
+        return value.compareTo(other.value) == 0;
     }
 
 
