@@ -35,8 +35,6 @@ public class Rezept {
     int artDerBeh3;
     int artDerBeh4;
 
-    BigDecimal anzahlKM;
-    
     boolean befr;
     Money rezGeb;
     boolean rezBez;
@@ -68,7 +66,7 @@ public class Rezept {
     String ktraeger;
     int kId = -1;
     
-    int zzStatus;
+    int zzStatus = ZZSTATUS_NOTSET;
     int zzRegel = -1;
     
     LocalDate lastDate;
@@ -76,6 +74,8 @@ public class Rezept {
     boolean begruendADR;
     boolean hausbes;
     int anzahlHb;
+    BigDecimal anzahlKM;
+    
     String indikatSchl;
     String angelegtVon;
     String lastEditor;
@@ -106,6 +106,7 @@ public class Rezept {
     boolean pauschale;
 
     // TODO: use some get-/set-RezToStatus-way, or at least enum
+    public static final int ZZSTATUS_NOTSET = -1;
     public static final int ZZSTATUS_BEFREIT = 0;
     public static final int ZZSTATUS_OK = 1;
     public static final int ZZSTATUS_NOTOK = 2;
@@ -416,12 +417,28 @@ public class Rezept {
     }
 
     /**
+     * Set the patIntern
+     */
+    public void setPatIntern(int internId) {
+        patIntern = internId;
+    }
+
+    
+    /**
      * @return the patId
      */
     public int getPatId() {
         return patId;
     }
 
+    /**
+     * Set the patId
+     */
+    public void setPatId(int patID) {
+        patId = patID;
+    }
+
+    
     /**
      * @return the anzahl1
      */
@@ -548,6 +565,15 @@ public class Rezept {
      */
     public BigDecimal getAnzahlKM() {
         return anzahlKM;
+    }
+
+    /**
+     * Set the Entfernung für HB in KiloMetern
+     * 
+     * @param BigDecimal for KM
+     */
+    public void setAnzahlKM(BigDecimal km) {
+        anzahlKM = km;
     }
 
     /**
