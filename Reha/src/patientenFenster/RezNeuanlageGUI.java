@@ -94,11 +94,16 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      * McM '18: Umbau Struktur
      *     Konzept:
      *         - Rezeptvector 'vec' wird ersetzt durch 'myRezept' (Instanz der Klasse 'Rezept'; Zugriff ueber get/set)
+     *          - done now uses Rezept/RezeptDto
      *         - zu Beginn ist myRezept entweder leer (komplette Neuanlage) oder enthaelt Daten der Kopiervorlage
+     *          - This still needs some tidying up, but mainly achieved
      *         - ein neues Rezept wird mit Daten aus dem Patienten-Record u. der gewaehlten Rezeptklasse initialisiert
+     *          - *should be* done
      *         - ein kopiertes Rezept wird zuerst bereinigt (Behandlungen, Zuzahlung, ... entfernen)
+     *          - *should be* done
      *         - Eintragen der Daten in's Rezeptformular u. Auslesen aus demselben jeweils mit 1 zentralen Funktion
      *         - Schreiben der Rezeptdaten in die DB uebernimmt die entspr. Fkt der Klasse 'Rezept'
+     *          - in class RezepteDto now
      *         - Fkt.:
      *             ladeZusatzDatenAlt/Neu() -> initRezept*()
      *             doSpeichernAlt/Neu -> copyFormToVec(), copyFormToVec1stTime()
@@ -108,6 +113,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     public JRtaTextField[] jtf = new JRtaTextField[32];
     // Lemmi 20101231: Harte Index-Zahlen fuer "jtf" durch sprechende Konstanten
     // ersetzt !
+    // Three cheers for Lemmi!!!
     final int cKTRAEG = 0;
     final int cARZT = 1;
     final int cREZDAT = 2;
@@ -230,6 +236,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     public RezNeuanlageGUI(Rezept rez, boolean neu) { 
         super();
         // mand = Mand;
+        // TODO: pulling mandant from Reha.instance is evil - better pass it in via param
         mand = Reha.instance.mandant();
         try {
             this.neu = neu;
@@ -240,7 +247,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             // TODO: sets the classmember in Rezeptvector-class for later operations
             diszis = new Disziplinen();
 
-            // TODO: old code also checked vec-size 0-length
+            // TODO: old code also checked vec-size 0-length - can we safely omit it?
             if (this.neu) {
                 aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
             }
@@ -456,7 +463,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     }
 
     // Lemmi 20101231: prueft, ob sich Eintraege geaendert haben
-    // ACHTUNG: Die Reihenfolge der Abfragen mu\u00df in SaveChangeStatus() und
+    // ACHTUNG: Die Reihenfolge der Abfragen muss in SaveChangeStatus() und
     // HasChanged() exakt identisch sein !
     public Boolean HasChanged() {
         int i, idx = 0;
@@ -468,9 +475,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 return true;
         }
 
-        // Das Feld mit "\u00c4rztliche Diagnose"
+        // Das Feld mit "Aerztliche Diagnose"
         if (!jta.getText()
-                .equals(originale.get(idx++))) // \u00c4rztliche Diagnose
+                .equals(originale.get(idx++))) // Aerztliche Diagnose
             return true;
 
         // alle ComboBoxen
@@ -481,7 +488,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
         // alle CheckBoxen
         for (i = 0; i < jcb.length; i++) { // CheckBoxen
-            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begruendung au\u00dfer der Regel vorhanden ? .....
+            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begruendung ausser der Regel vorhanden ? .....
                 return true;
         }
 
@@ -840,6 +847,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 // TODO: find a better replacement for isEmpty-check
                 // if (rezMyRezept.isEmpty()) {
                 if (rezMyRezept.getPreisGruppe() == -1) {
+                    logger.debug("Rezept was determinded to be empty");
                     initRezeptNeu(rezMyRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
                     this.holePreisGruppe(Reha.instance.patpanel.patDaten.get(68)
                                                                         .trim()); // setzt jtf[cPREISGR] u.
@@ -850,6 +858,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             preisgruppen[getPgIndex()]); // fuellt jcmb[cLEIST1..4] u.
                                                                               // jcmb[cBARCOD]
                 } else { // myRezept enthaelt Daten
+                    logger.debug("Rezept was determined to contain data");
                     try {
                         // TODO: Check why only Kuerzel1-4 of 6...
                         String[] xartdbeh = new String[] { rezMyRezept.getHMKuerzel1(), rezMyRezept.getHMKuerzel2(),
@@ -888,6 +897,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
             jscr.validate();
         } catch (Exception ex) {
+            logger.error("Could not create Rezeptfenster");
+            logger.error(ex.getLocalizedMessage());
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Fehler in der Erstellung des Rezeptfensters\n" + ex.getMessage());
         }
