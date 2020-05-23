@@ -1071,8 +1071,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
                             if (tmpDiszi != Disziplin.INV) {
                                 NummernKreis tmpRZN = new NummernKreis(mand.ik());
-                                Rezeptnummer tmpNeueRzNr = new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi));
-                                
                                 rezMyRezept.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
                                                                                                 .rezeptNummer());
                             } else {
@@ -2264,7 +2262,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                .trim(); // dito
             
             // TODO: Does setAnzahlKM need clearing of "TausenderTrennzeichen" et all...
-            thisRezept.setAnzahlKM(new BigDecimal(stest.contentEquals("") ? "0" : stest));
+            thisRezept.setAnzahlKM(new BigDecimal(stest.isEmpty() ? "0" : stest));
             int rule = SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                        .get(Integer.parseInt(jtf[cPREISGR].getText()) - 1);
             thisRezept.setZZRegel(rule);
