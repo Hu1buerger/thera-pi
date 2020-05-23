@@ -309,8 +309,10 @@ public class RezeptDto {
                 + "KUERZEL6='" + rez.getHMKuerzel6() + "', "
                 + "ICD10='" + rez.getIcd10() + "', "
                 + "ICD10_2='" + rez.getIcd10_2() + "', "
-                + "PAUSCHALE='" + rez.getPauschale() + "', "
+                + "PAUSCHALE='" + rez.getPauschale() + "' "
          + "WHERE id='" + rez.getId() + "' LIMIT 1";
         updateDataset(sql);
+        // logger.debug("Ran SQL command: ");
+        // logger.debug(sql);
     }
 }
