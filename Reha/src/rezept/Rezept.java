@@ -498,6 +498,29 @@ public class Rezept {
     }
 
     /**
+     * Takes an index indicating which BehandlungsAnzahl to retrieve.
+     * Will return -1 on invalid index (0 < idx < 5)
+     * 
+     * @param idx
+     * @return
+     */
+    public int getBehAnzahl(int idx) {
+        switch (idx) {
+            case 1:
+                return getBehAnzahl1();
+            case 2:
+                return getBehAnzahl2();
+            case 3:
+                return getBehAnzahl3();
+            case 4:
+                return getBehAnzahl4();
+            default:
+                logger.error("Invalid index for getBehAnzahl received. Only index 1-4 is currently implemented");
+                return -1;
+        }
+    }
+    
+    /**
      * Returns an array of ints containing all 4 fields "artDerBehN" in order
      * 
      * @return int[] of artDerBeh1-4
@@ -1283,6 +1306,32 @@ public class Rezept {
         this.pos4 = pos4;
     }
 
+    /**
+     * Get the HMPosX at idx
+     * @param idx the HMPosX to retrieve
+     * @return
+     */
+    public String getHMPos(int idx) {
+        switch (idx) {
+            case 1:
+                return getHMPos1();
+            case 2:
+                return getHMPos2();
+            case 3:
+                return getHMPos3();
+            case 4:
+                return getHMPos4();
+            default:
+                logger.error("Invalid index received. Es sind nur HM-Positionen 1-4 setzbar");
+                return "";
+        }
+    }
+    
+    /**
+     * Set the desired HMPos via an index. This will set HMPosX, where X=idx to value
+     * @param idx   the HMPos to set
+     * @param value the value to set it to
+     */
     public void setHMPos(int idx, String value) {
         switch (idx) {
             case 1:
