@@ -52,7 +52,6 @@ import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
-import commonData.Rezeptvector;
 import core.Disziplin;
 import environment.LadeProg;
 import environment.Path;
