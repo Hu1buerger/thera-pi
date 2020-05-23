@@ -11,6 +11,11 @@ import java.util.Vector;
 
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+// import com.sun.media.jfxmedia.logging.Logger;
+
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
@@ -21,6 +26,7 @@ import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 
 public class HMRCheck {
+    private static final Logger logger = LoggerFactory.getLogger(HMRCheck.class);
     Vector<Integer> anzahl = null;
     Vector<String> positionen = null;
     Vector<Vector<String>> preisvec = null;
@@ -119,6 +125,12 @@ public class HMRCheck {
      *
      */
     public boolean check() {
+        if (reznummer == null) {
+            logger.error("In HMRCheck - check - reznummer is null, nothing to run checks on."
+                    + "sort your constructor!");
+            return false;
+        }
+            
         if (reznummer.startsWith("RS") || reznummer.startsWith("FT") || reznummer.startsWith("RH")) {
             // McM: ist das korrekt? (Reha taucht im HMK nicht auf)
             return true;
