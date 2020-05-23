@@ -1788,7 +1788,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     private void holePreisGruppe(int idKtraeger) {
         try {
-            logger.debug("holePreisGruppe got idKtraeger:" + idKtraeger);
             Vector<Vector<String>> vec = null;
             // TODO: move the following SQL statements to rezepteDto
             if (SystemConfig.mitRs) {
@@ -2263,9 +2262,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected()); // dito
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
-            logger.debug("stest 4 KM is now: \"" + stest + "\"");
-            // TODO: This needs checking - "TausenderTrennzeichen" et all...
-            thisRezept.setAnzahlKM(new BigDecimal(stest));
+            
+            // TODO: Does setAnzahlKM need clearing of "TausenderTrennzeichen" et all...
+            thisRezept.setAnzahlKM(new BigDecimal(stest.contentEquals("") ? "0" : stest));
             int rule = SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                        .get(Integer.parseInt(jtf[cPREISGR].getText()) - 1);
             thisRezept.setZZRegel(rule);
