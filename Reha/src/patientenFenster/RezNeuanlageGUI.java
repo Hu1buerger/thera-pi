@@ -1198,7 +1198,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 Double preis = holePreisDouble(id, preisgruppe);
                 if (preis <= 0.0) {
                     JOptionPane.showMessageDialog(null,
-                            "Diese Position ist f\u00fcr die gew\u00e4hlte Preisgruppe ung\u00fcltig\nBitte weisen Sie in der Preislisten-Bearbeitung der Position ein K\u00fcrzel zu");
+                            "Diese Position ist f\u00fcr die gew\u00e4hlte Preisgruppe ung\u00fcltig\n"
+                            + "Bitte weisen Sie in der Preislisten-Bearbeitung der Position ein K\u00fcrzel zu");
                     ((JRtaComboBox) e.getSource()).setSelectedIndex(0);
                 }
             }
@@ -1215,13 +1216,17 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             "select id from adrgenehmigung where ik = (select ik_kostent from kass_adr where id = '"
                                     + kassenid + "') LIMIT 1");
                     if (!test.isEmpty()) {
-                        String meldung = "<html><b>Achtung!</b><br><br>Sie haben Verordnung au\u00dferhalb des Regelfalles gew\u00e4hlt!<br><br>Die Krankenkasse des Patienten besteht auf eine <br>"
-                                + "<b>Genehmigung f\u00fcr Verordnungen au\u00dferhalb des Regelfalles</b><br><br></html>";
+                        String meldung = "<html><b>Achtung!</b><br><br>Sie haben Verordnung au\u00dferhalb des"
+                                + " Regelfalles gew\u00e4hlt!<br><br>Die Krankenkasse des Patienten"
+                                + " besteht auf eine <br>"
+                                + "<b>Genehmigung f\u00fcr Verordnungen au\u00dferhalb des Regelfalles"
+                                + "</b><br><br></html>";
                         JOptionPane.showMessageDialog(null, meldung);
                     }
                 } catch (Exception ex) {
                     JOptionPane.showMessageDialog(null,
-                            "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpa\u00dft.\nFehlt zuf\u00e4llig die Tabelle adrgenehmigung?");
+                            "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpa\u00dft.\n"
+                            + "Fehlt zuf\u00e4llig die Tabelle adrgenehmigung?");
                     ex.printStackTrace();
                 }
                 return null;
@@ -1253,7 +1258,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     }
                     if (aktanzahl > maxanzahl) {
                         String cmd = "Sie haben mehrere Heilmittel mit unterschiedlicher Anzahl eingegeben.\n"
-                                + "Bitte geben Sie die Heilmittel so ein da\u00df das Heilmittel mit der gr\u00f6\u00dften Anzahl oben steht\n"
+                                + "Bitte geben Sie die Heilmittel so ein da\u00df das Heilmittel mit der"
+                                + " gr\u00f6\u00dften Anzahl oben steht\n"
                                 + "und dann (bezogen auf die Anzahl) in absteigender Reihgenfolge nach unten";
                         JOptionPane.showMessageDialog(null, cmd);
                         return false;
@@ -1302,7 +1308,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         String indi = (String) jcmb[cINDI].getSelectedItem();
         if (indi.equals("") || indi.contains("kein IndiSchl.")) {
             JOptionPane.showMessageDialog(null,
-                    "<html><b>Kein Indikationsschl\u00fcssel angegeben.<br>Die Angaben sind <font color='#ff0000'>nicht</font> gem\u00e4\u00df den g\u00fcltigen Heilmittelrichtlinien!</b></html>");
+                    "<html><b>Kein Indikationsschl\u00fcssel angegeben.<br>"
+                    + "Die Angaben sind <font color='#ff0000'>nicht</font> gem\u00e4\u00df "
+                    + "den g\u00fcltigen Heilmittelrichtlinien!</b></html>");
             return;
         }
         indi = indi.replace(" ", "");
@@ -1391,12 +1399,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             boolean checkok = new HMRCheck(rezTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
             if (checkok) {
                 JOptionPane.showMessageDialog(null,
-                        "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> den geltenden Heilmittelrichtlinien</b></html>");
+                        "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> "
+                        + "den geltenden Heilmittelrichtlinien</b></html>");
             } else {
                 logger.error("Rez not HMR-conform");
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Keine Behandlungspositionen angegeben, HMR-Check nicht m\u00f6glich!!!");
+            JOptionPane.showMessageDialog(null, "Keine Behandlungspositionen angegeben, "
+                                                + "HMR-Check nicht m\u00f6glich!!!");
         }
 
     }
@@ -1574,12 +1584,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         try {
             if (preisvec.size() <= 0) {
                 JOptionPane.showMessageDialog(null,
-                        "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\nRezept kann nicht angelegt werden");
+                        "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\n"
+                        + "Rezept kann nicht angelegt werden");
                 return;
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
-                    "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\nRezept kann nicht angelegt werden");
+                    "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\n"
+                    + "Rezept kann nicht angelegt werden");
             return;
         }
         jcmb[cLEIST1].setDataVectorWithStartElement(preisvec, 0, 9, "./.");
@@ -1739,8 +1751,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null,
                     "Fehler beim Speichern der Arztliste!\n"
-                            + "Bitte notieren Sie Patient, Rezeptnummer und den Arzt den Sie der\n"
-                            + "Arztliste hinzuf\u00fcgen wollten und informieren Sie umgehend den Administrator.\n\nDanke");
+                        + "Bitte notieren Sie Patient, Rezeptnummer und den Arzt den Sie der\n"
+                        + "Arztliste hinzuf\u00fcgen wollten und informieren Sie umgehend den Administrator.\n"
+                        + "\nDanke");
         }
         awahl.dispose();
         awahl = null;
@@ -1784,11 +1797,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             // TODO: move the following SQL statements to rezepteDto
             if (SystemConfig.mitRs) {
                 vec = SqlInfo.holeFelder(
-                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='" + idKtraeger
-                                + "' LIMIT 1");
+                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='"
+                                + idKtraeger + "' LIMIT 1");
             } else {
                 vec = SqlInfo.holeFelder(
-                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + idKtraeger + "' LIMIT 1");
+                        "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='"
+                                + idKtraeger + "' LIMIT 1");
             }
             if (vec.size() > 0) {
                 for (int i = 1; i < vec.get(0).size(); i++) {
@@ -2208,7 +2222,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     if (tage < 0 && tage >= -45) {
                         JOptionPane.showMessageDialog(null,
                                 "Achtung es sind noch " + (tage * -1) + " Tage bis zur Vollj\u00e4hrigkeit\n"
-                                        + "Unter Umst\u00e4nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
+                                + "Unter Umst\u00e4nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
                         szzstatus = Rezept.ZZSTATUS_BALD18;
                     } else {
                         szzstatus = Rezept.ZZSTATUS_BEFREIT;
@@ -2232,8 +2246,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 if (!jta.getText()
                         .contains(lzv[0])) {
                     int frage = JOptionPane.showConfirmDialog(null,
-                            "F\u00fcr den Patient ist eine Langfristverordnung eingetragen die diese Verordnung noch nicht einschlie\u00dft.\n\n"
-                                    + lzv[1] + "\n\nWollen Sie diesen Eintrag dieser Verordnung zuweisen?",
+                            "F\u00fcr den Patient ist eine Langfristverordnung eingetragen die diese "
+                            + "Verordnung noch nicht einschlie\u00dft.\n\n"
+                            + lzv[1] + "\n\nWollen Sie diesen Eintrag dieser Verordnung zuweisen?",
                             "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                     if (frage == JOptionPane.YES_OPTION) {
                         jta.setText(jta.getText() + "\n" + lzv[0]);
