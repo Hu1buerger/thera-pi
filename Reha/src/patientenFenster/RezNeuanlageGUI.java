@@ -1076,7 +1076,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             } else {
                                 logger.error("Couldn't find valid Disziplin to base new RezNr on");
                             }
-                            // What's this?
+                            // What's this ?? - better create a call-refresh or something...
                             Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rezMyRezept.getRezNr());
                         } else {
                             copyFormToRez(rezMyRezept);
