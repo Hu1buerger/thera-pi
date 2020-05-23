@@ -15,7 +15,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.math.BigDecimal;
-import java.sql.Connection;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -63,8 +62,6 @@ import events.RehaTPEventListener;
 import gui.Cursors;
 import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
-import javafx.util.converter.LocalDateStringConverter;
-import mandant.IK;
 import mandant.Mandant;
 import rechteTools.Rechte;
 import rezept.Money;
@@ -198,7 +195,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     private static final long serialVersionUID = 1L;
     private int preisgruppe = -1;
     public boolean feldergefuellt = false;
-    private String nummer = null;
     private String rezKlasse = null;
     private ArrayList<String> farbcodes = new ArrayList<>();
 
@@ -229,7 +225,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     // private Rezeptvector rezMyRezept = null;
     private Rezept rezMyRezept = null;
     private Rezept rezTmpRezept = null;
-    private Rezeptvector vecTmpRezept = null;
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
