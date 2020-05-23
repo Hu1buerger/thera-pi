@@ -646,7 +646,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         jPop.show(me.getComponent(), me.getX(), me.getY());
     }
 
-    // Lemmi Doku: RMT Men\u00fc in "aktuelle Rezepte" zur Einstellung des
+    // Lemmi Doku: RMT Menue in "aktuelle Rezepte" zur Einstellung des
     // Zuzahlungsstatus
     private JPopupMenu getTerminPopupMenu() {
         JPopupMenu jPopupMenu = new JPopupMenu();
@@ -942,7 +942,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     aktTerminBuffer.clear();
                     aktTerminBuffer.trimToSize();
                     
-                    List<Rezept> listRezepte = new LinkedList<>(rDto.getRezepteByPatNr(xpatint));
+                    List<Rezept> listRezepte = new LinkedList<>(rDto.getRezepteByPatNr(Integer.parseInt(xpatint)));
                     // TODO: remove once done with Rezepte
                     Vector<Vector<String>> vec = SqlInfo.holeSaetze("verordn",
                             "rez_nr,zzstatus,"
@@ -959,6 +959,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         // TODO: remove once Rezepte has been sorted
                         aktTerminBuffer.add(String.valueOf(vec.get(i).get(termineInTable)));
                         aktTerminBuffer.add(listRezepte.get(i).getTermine());
+                        // TODO: irgendwo lief mir ein ZZStatus wo 3 == bald18 bedeutet?
                         int iZuZahlStat = 3, rezstatus = 0;
                         ZZStat iconKey;
                         if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heisst 'befreit'??
@@ -1021,8 +1022,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         dtblm.addRow((Object[]) fields);
 
                         // Icons in akt. Zeile setzen
-                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i, 1);
-                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i, 5);
+                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i+1, 1);
+                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i+1, 5);
 
                         // TODO: remove once sorted rezepte
                         if (vec.get(i)
@@ -1079,7 +1080,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
-                            logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.vecaktrez.toString());
+                            logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
                                     (String) tabaktrez.getValueAt(row, idInTable));
@@ -1091,7 +1092,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
-                            logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.vecaktrez.toString());
+                            logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
                                     (String) tabaktrez.getValueAt(0, idInTable));
                         }

@@ -107,6 +107,7 @@ public class Rezept {
     boolean pauschale;
 
     // TODO: use some get-/set-RezToStatus-way, or at least enum
+    // TODO: seems like stammdatentools/ZuzahlTools also defines these (as enum)
     public static final int ZZSTATUS_NOTSET = -1;
     public static final int ZZSTATUS_BEFREIT = 0;
     public static final int ZZSTATUS_OK = 1;
