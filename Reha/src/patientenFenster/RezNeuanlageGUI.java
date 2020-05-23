@@ -366,8 +366,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                .getParent()
                                                .getParent()).dispose();
                     } else {
-                        holePreisGruppe(jtf[cKASID].getText()
-                                                   .trim());
+                        holePreisGruppe(Integer.parseInt(
+                                            jtf[cKASID].getText().trim()));
                         SwingUtilities.invokeLater(new Runnable() {
                             public void run() {
                                 jcmb[cRKLASSE].requestFocusInWindow();
@@ -849,8 +849,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 if (rezMyRezept.getPreisGruppe() == -1) {
                     logger.debug("Rezept was determinded to be empty");
                     initRezeptNeu(rezMyRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
-                    this.holePreisGruppe(Reha.instance.patpanel.patDaten.get(68)
-                                                                        .trim()); // setzt jtf[cPREISGR] u.
+                    this.holePreisGruppe(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68)
+                                                                        .trim())); // setzt jtf[cPREISGR] u.
                                                                                   // this.preisgruppe
                     this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                       .toString()
@@ -864,7 +864,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         String[] xartdbeh = new String[] { rezMyRezept.getHMKuerzel1(), rezMyRezept.getHMKuerzel2(),
                                 rezMyRezept.getHMKuerzel3(), rezMyRezept.getHMKuerzel4() };
                         initRezeptKopie(rezMyRezept);
-                        this.holePreisGruppe(rezMyRezept.getKTraegerName());
+                        this.holePreisGruppe(rezMyRezept.getkId());
                         this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                           .toString()
                                                           .trim(),
@@ -883,7 +883,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
                 }
             } else {
-                this.holePreisGruppe(rezMyRezept.getKTraegerName());
+                this.holePreisGruppe(rezMyRezept.getkId());
                 this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                   .toString()
                                                   .trim(),
@@ -1772,8 +1772,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             + "Und bedenken Sie bitte Ihr K\u00fcrzel wird dauerhaft diesem Rezept zugeordnet....";
                     JOptionPane.showMessageDialog(null, meldung);
                 } else {
-                    holePreisGruppe(jtf[cKASID].getText()
-                                               .trim());
+                    holePreisGruppe(Integer.parseInt(jtf[cKASID].getText()
+                                               .trim()));
                     ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
                                                  .toString()
                                                  .trim(),
@@ -1786,9 +1786,11 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         kwahl = null;
     }
 
-    private void holePreisGruppe(String idKtraeger) {
+    private void holePreisGruppe(int idKtraeger) {
         try {
+            logger.debug("holePreisGruppe got idKtraeger:" + idKtraeger);
             Vector<Vector<String>> vec = null;
+            // TODO: move the following SQL statements to rezepteDto
             if (SystemConfig.mitRs) {
                 vec = SqlInfo.holeFelder(
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='" + idKtraeger
@@ -1980,8 +1982,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         jta.setText(StringTools.NullTest(rezMyRezept.getDiagnose()));
         if (!jtf[cKASID].getText()
                         .equals("")) {
-            holePreisGruppe(jtf[cKASID].getText()
-                                       .trim());
+            holePreisGruppe(Integer.parseInt(
+                                jtf[cKASID].getText().trim()));
         } else {
             JOptionPane.showMessageDialog(null, "Ermittlung der Preisgruppen erforderlich");
         }
