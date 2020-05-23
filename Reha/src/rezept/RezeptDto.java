@@ -56,7 +56,7 @@ public class RezeptDto {
         return Optional.ofNullable(rezept);
     }
 
-    public List<Rezept> getRezepteByPatNr(String patientID) {
+    public List<Rezept> getRezepteByPatNr(int patientID) {
         String sql = selectAllFromRezDBWhere + "PAT_INTERN = '" + patientID + "'"
                 + "UNION " + selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "';";
 
