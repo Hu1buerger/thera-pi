@@ -104,6 +104,7 @@ import mandant.Mandant;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
 import patientenFenster.RezNeuanlage;
+import patientenFenster.RezNeuanlageGUI;
 import patientenFenster.RezTest;
 import patientenFenster.RezTestPanel;
 import patientenFenster.RezeptGebuehren;
@@ -3114,7 +3115,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(
                                   // TODO: need method that takes Rezept rez as param
-                                  new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu));
+                                  //new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu));
+                                  new RezNeuanlageGUI(Reha.instance.patpanel.rezAktRez, lneu));
+                    
                     neuRez.getSmartTitledPanel()
                           .setTitle("editieren Rezept ---> " + Reha.instance.patpanel.rezAktRez.getRezNr());
                 }
