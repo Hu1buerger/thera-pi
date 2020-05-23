@@ -30,7 +30,7 @@ public class NummernKreis {
         dq = new DatenquellenFactory(ik.digitString());
     };
 
-    int nextNumber(Disziplin d) throws SQLException {
+    public int nextNumber(Disziplin d) throws SQLException {
         Contracts.require(supportedDiszis.contains(d),
                 "Die Disziplin " + d + " wird nicht über die Nummern Tabelle gesteuert");
 

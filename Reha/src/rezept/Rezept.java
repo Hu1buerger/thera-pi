@@ -71,7 +71,7 @@ public class Rezept {
     int zzRegel = -1;
     
     LocalDate lastDate;
-    int preisgruppe;
+    int preisgruppe = -1;
     boolean begruendADR;
     boolean hausbes;
     int anzahlHb;
@@ -91,7 +91,7 @@ public class Rezept {
     String frequenz;
     int berId;
     boolean arztBericht;
-    int farbcode; // this is varChar in DB - but seems to be used (sometimes?) as int
+    int farbcode = -1; // this is varChar in DB - but seems to be used (sometimes?) as int
     String rsplit;
     String jahrfrei; // vielleicht auch localdate
     boolean unter18;

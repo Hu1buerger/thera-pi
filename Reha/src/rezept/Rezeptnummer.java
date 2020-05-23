@@ -20,11 +20,6 @@ public class Rezeptnummer {
         disziplin = Disziplin.INV;
     }
     
-    public static void main(String[] args) {
-        Rezeptnummer rezNr = new Rezeptnummer(args[0]);
-        System.out.println("RezNr:" + rezNr.rezeptNummer());
-    }
-
     /**
      * PRE: expects a String in the format of e.g. "ER101"
      * POST: class members diszi and rezNr are set

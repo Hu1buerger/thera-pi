@@ -54,6 +54,7 @@ import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
+import core.Disziplin;
 import environment.LadeProg;
 import environment.Path;
 import events.RehaTPEvent;
@@ -69,7 +70,9 @@ import rechteTools.Rechte;
 import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
+import rezept.Rezeptnummer;
 import stammDatenTools.RezTools;
+import systemEinstellungen.NummernKreis;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import systemTools.ListenerTools;
@@ -215,7 +218,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     private Component eingabeVerordn1 = null;
     private Component eingabeICD = null;
     private Component eingabeDiag = null;
-//    private Mandant mand = null;
+    private Mandant mand = null;
 
     // private Rezeptvector rezMyRezept = null;
     private Rezept rezMyRezept = null;
@@ -227,6 +230,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     public RezNeuanlageGUI(Rezept rez, boolean neu) { 
         super();
         // mand = Mand;
+        mand = Reha.instance.mandant();
         try {
             this.neu = neu;
             this.rez = rez; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
@@ -833,7 +837,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 .setUnitIncrement(15);
 
             if (this.neu) {
-                if (rezMyRezept.isEmpty()) {
+                // TODO: find a better replacement for isEmpty-check
+                // if (rezMyRezept.isEmpty()) {
+                if (rezMyRezept.getPreisGruppe() == -1) {
                     initRezeptNeu(rezMyRezept); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
                     this.holePreisGruppe(Reha.instance.patpanel.patDaten.get(68)
                                                                         .trim()); // setzt jtf[cPREISGR] u.
@@ -878,7 +884,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                .trim());
             }
             verordnenderArzt.init(Integer.toString(rezMyRezept.getArztId()));
-            copyVecToForm();
+            copyRezToForm();
 
             jscr.validate();
         } catch (Exception ex) {
@@ -1049,18 +1055,27 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             if (!neuDateTest()) {
                                 return;
                             }
-                            copyFormToVec1stTime(rezMyRezept);
-                            // TODO: check for replacement:
-                            rezMyRezept.setNewRezNb(rezKlasse);
+                            copyFormToRez1stTime(rezMyRezept);
+                            // TODO: clean up neue-RezNr holen
+                            Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
+                            if (tmpDiszi != Disziplin.INV) {
+                                NummernKreis tmpRZN = new NummernKreis(mand.ik());
+                                Rezeptnummer tmpNeueRzNr = new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi));
+                                
+                                rezMyRezept.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
+                                                                                                .rezeptNummer());
+                            } else {
+                                logger.error("Couldn't find valid Disziplin to base new RezNr on");
+                            }
+                            // What's this?
                             Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rezMyRezept.getRezNr());
                         } else {
-                            copyFormToVec(rezMyRezept);
+                            copyFormToRez(rezMyRezept);
                         }
                         closeDialog();
                         aufraeumen();
                         // ?? automat. HMR-Check ??
-                        Mandant mandant = Reha.instance.mandant();
-                        RezeptDto rDto = new RezeptDto(mandant.ik());
+                        RezeptDto rDto = new RezeptDto(mand.ik());
                         rDto.rezeptInDBSpeichern(rezMyRezept);
                         
                     } catch (Exception ex) {
@@ -1369,11 +1384,13 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             } else {
                 rezTmpRezept = new Rezept(rezMyRezept);
             }
-            copyFormToVec1stTime(rezTmpRezept);
+            copyFormToRez1stTime(rezTmpRezept);
             boolean checkok = new HMRCheck(rezTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
             if (checkok) {
                 JOptionPane.showMessageDialog(null,
                         "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> den geltenden Heilmittelrichtlinien</b></html>");
+            } else {
+                logger.error("Rez not HMR-conform");
             }
         } else {
             JOptionPane.showMessageDialog(null, "Keine Behandlungspositionen angegeben, HMR-Check nicht m\u00f6glich!!!");
@@ -1770,8 +1787,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo from kass_adr where id='" + idKtraeger + "' LIMIT 1");
             }
             if (vec.size() > 0) {
-                for (int i = 1; i < vec.get(0)
-                                       .size(); i++) {
+                for (int i = 1; i < vec.get(0).size(); i++) {
                     preisgruppen[i - 1] = Integer.parseInt(vec.get(0)
                                                               .get(i))
                             - 1;
@@ -1783,12 +1799,15 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                   .get(0));
             } else {
                 JOptionPane.showMessageDialog(null,
-                        "Achtung - kann Preisgruppe nicht ermitteln - Rezept kann sp\u00e4ter nicht abgerechnet werden!");
+                        "Achtung - kann Preisgruppe nicht ermitteln - "
+                        + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
-                    "Achtung - kann Preisgruppe nicht ermitteln - Rezept kann sp\u00e4ter nicht abgerechnet werden!\n"
-                            + "Untersuchen Sie die Krankenkasse im Kassenstamm un weisen Sie dieser Kasse die entsprechend Preisgruppe zu");
+                    "Achtung - kann Preisgruppe nicht ermitteln -"
+                    + " Rezept kann sp\u00e4ter nicht abgerechnet werden!\n"
+                    + "Untersuchen Sie die Krankenkasse im Kassenstamm un weisen "
+                    + "Sie dieser Kasse die entsprechend Preisgruppe zu");
         }
     }
 
@@ -1884,7 +1903,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      * laedt die Daten aus der Rezept-Instanz myRezept in die Dialog-Felder des
      * Rezepts und setzt auch die ComboBoxen und CheckBoxen
      */
-    private void copyVecToForm() {
+    private void copyRezToForm() {
         // TODO: find a replacement for the following test:
         // String test = StringTools.NullTest(rezMyRezept);
         jtf[cKTRAEG].setText(rezMyRezept.getKTraegerName()); // kasse
@@ -1979,10 +1998,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      * Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec1stTime(Rezept thisRezept) {
+    private void copyFormToRez1stTime(Rezept thisRezept) {
         // TODO: this method needs properly adjusting to Rezept-class
         thisRezept.setAnzahlHb(Integer.parseInt(jtf[cANZ1].getText()));
-        copyFormToVec(thisRezept);
+        copyFormToRez(thisRezept);
     }
 
     /***********
@@ -1990,7 +2009,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
      * laedt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz
      * @param thisRezept
      */
-    private void copyFormToVec(Rezept thisRezept) {
+    private void copyFormToRez(Rezept thisRezept) {
      // TODO: this method needs properly adjusting to Rezept-class
         try {
             if (!komplettTest()) {
@@ -2117,7 +2136,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         szzstatus = Rezept.ZZSTATUS_OK;
                     } else {
 
-                        if (RezTools.mitJahresWechsel(thisRezept.getRezDatum())) {
+                        // if (RezTools.mitJahresWechsel(thisRezept.getRezDatum())) {
+                        if (thisRezept.getRezDatum().getYear() 
+                                                    - Integer.parseInt(SystemConfig.aktJahr) <0) {
 
                             String vorjahr = Reha.instance.patpanel.patDaten.get(69);
                             if (vorjahr.trim()
@@ -2192,7 +2213,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     break;
                 }
                 /**********************/
-                if (thisRezept.isRezBez() || (thisRezept.getRezGeb() > 0.00)) {
+                if (thisRezept.isRezBez() || (thisRezept.getRezGeb().isMoreThan(new Money("0.00")))) {
                     szzstatus = Rezept.ZZSTATUS_OK;
                 } else {
                     // hier testen ob erster Behandlungstag bereits ab dem Befreiungszeitraum
@@ -2229,7 +2250,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected()); // dito
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
-            
+            logger.debug("stest 4 KM is now: \"" + stest + "\"");
             // TODO: This needs checking - "TausenderTrennzeichen" et all...
             thisRezept.setAnzahlKM(new BigDecimal(stest));
             int rule = SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
