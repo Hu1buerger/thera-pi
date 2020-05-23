@@ -1176,7 +1176,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         setRezeptDaten();
     }
 
-    public void aktualisiereRezAktRez(String Id) {
+    public void aktualisiereRezAktRez(int Id) {
         Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(Id).get();
         setRezeptDaten();
     }
@@ -1569,8 +1569,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // TODO: delete me once Rezepte has been sorted
             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
                     "id = '" + String.valueOf(tabaktrez.getValueAt(ix, idInTable)) + "'", Arrays.asList(new String[] {})));
-            Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(String.valueOf(tabaktrez.getValueAt(ix, idInTable)))
-                                                                                                                .get();
+            Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(Integer.parseInt(String.valueOf(
+                                                                tabaktrez.getValueAt(ix, idInTable)))).get();
             // Huh??
             Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix, 0);
 
@@ -3141,7 +3141,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             // TODO: Remove once Rezepte has been sorted
                             aktualisiereVector(String.valueOf(tabaktrez.getValueAt(tabaktrez.getSelectedRow()
                                                                                                  , idInTable)));
-                            aktualisiereRezAktRez(String.valueOf(tabaktrez.getValueAt(tabaktrez.getSelectedRow(), idInTable)));
+                            // TODO: find a nicer way to get the tab-content as int (can we define column as int?)
+                            aktualisiereRezAktRez(Integer.parseInt(String.valueOf(
+                                                tabaktrez.getValueAt(tabaktrez.getSelectedRow(), idInTable))));
 
                             // falls typ des zzstatus (@idx 39) im vecaktrez auf typ ZZStat umgestellt wird,
                             // oder get-Methoden erstellt werden,

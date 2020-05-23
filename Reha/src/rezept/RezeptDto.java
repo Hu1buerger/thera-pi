@@ -48,7 +48,7 @@ public class RezeptDto {
         return Optional.ofNullable(rezept);
     }
     
-    public Optional<Rezept> byRezeptId(String rezeptId) {
+    public Optional<Rezept> byRezeptId(int rezeptId) {
         String sql = selectAllFromRezDBWhere + "ID = '" + rezeptId + "'"
                 + "UNION " + selectAllFromLzaDBWhere + "ID = '" + rezeptId + "';";
         Rezept rezept = retrieveFirst(sql);
