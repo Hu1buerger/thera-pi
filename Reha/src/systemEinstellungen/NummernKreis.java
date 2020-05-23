@@ -30,6 +30,13 @@ public class NummernKreis {
         dq = new DatenquellenFactory(ik.digitString());
     };
 
+
+    /**
+     * Returns a new number on every call and changes Database accordingly.
+     * @param d
+     * @return
+     * @throws SQLException
+     */
     public int nextNumber(Disziplin d) throws SQLException {
         Contracts.require(supportedDiszis.contains(d),
                 "Die Disziplin " + d + " wird nicht über die Nummern Tabelle gesteuert");
