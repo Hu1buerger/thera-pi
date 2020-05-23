@@ -114,6 +114,32 @@ public class HMRCheck {
 
     public HMRCheck(Rezept rezTmpRezept, String currDisziFromActRK, Vector<Vector<String>> preisvec2) {
         // TODO Auto-generated constructor stub
+        diszis = new Disziplinen();
+        diszis.setCurrTypeOfVO(currDisziFromActRK);
+        anzahl = new Vector<Integer>();
+        positionen = new Vector<String>();
+        indischluessel = rezTmpRezept.getIndikatSchl().replace(" ", "");
+        disziplin = diszis.getCurrDisziIdx();
+        for (int i = 0; i < 4; i++) {
+            String tmp = rezTmpRezept.getHMPos(i + 1);
+            if (tmp != "") {
+                anzahl.add(i, rezTmpRezept.getBehAnzahl(i + 1));
+                positionen.add(i, tmp);
+            } else {
+                break;
+            }
+        }
+        preisvec = preisvec2;
+        rezeptart = rezTmpRezept.getRezeptArt();
+        reznummer = rezTmpRezept.getRezNr();
+        unter18 = rezTmpRezept.isUnter18();
+//        rezdatum = DatFunk.sDatInDeutsch(rezTmpRezept.getRezDatum());
+        rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        if (reznummer.equals("")) {
+            neurezept = true;
+        }
+        fehlertext = new FehlerTxt();
     }
 
     /**
