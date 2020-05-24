@@ -1545,6 +1545,32 @@ public class Rezept {
     }
     
     /**
+     * Get 1 of the 6 (HM-?)KuerzelX
+     *  
+     * @param idx - the Kuerzel to set
+     */
+    public String getHMKuerzel(int idx){
+        switch (idx) {
+            
+            case 1:
+                return getHMKuerzel1();
+            case 2:
+                return getHMKuerzel2();
+            case 3:
+                return getHMKuerzel3();
+            case 4:
+                return getHMKuerzel4();
+            case 5:
+                return getHMKuerzel5();
+            case 6:
+                return getHMKuerzel6();
+            default:
+                logger.error("Invalid index received upon get (HM-)Kuerzel. Only 1-6 are available.");
+                return "";
+        }
+    }
+    
+    /**
      * Set 1 of the 6 (HM-?)KuerzelX to value
      *  
      * @param idx - the Kuerzel to set
