@@ -64,13 +64,13 @@ public class RezeptDto {
     }
 
     public void updateRezeptTermine(String Id, String TerminListe) {
-        String sql = "UPDATE " + aktRezDB + "SET termine='" + TerminListe
+        String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
     
     public void rezeptAbschluss(int Id, boolean status) {
-        String sql = "UPDATE " + aktRezDB + "SET abschluss='" + ( status ? "T" : "F")
+        String sql = "UPDATE " + aktRezDB + " SET abschluss='" + ( status ? "T" : "F")
                     + "' WHERE id='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
@@ -94,6 +94,7 @@ public class RezeptDto {
             // TODO Auto-generated catch block
             logger.error("In updateDataset:");
             logger.error(e.getLocalizedMessage());
+            logger.error("SQL-Statement was: '" + sql + "'");
         }
     }
 
