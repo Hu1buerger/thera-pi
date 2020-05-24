@@ -284,7 +284,7 @@ public class Rezept {
 
         }
     }
-
+    
     /**
      * Returns the first 2 chars of RezNr, expecting Rezepte to be of the format e.g. "ER101"
      * 
@@ -349,7 +349,7 @@ public class Rezept {
 
     /**
      * Public standard getter/setters
-     *  if field type is bool there are 3 possible types:
+     *  if member is of type boolean there are 3 possible types:
      * 
      *  1. isField() - will return a bool
      *  2. getField() - will return a String repr. of the bool in the form of "T"/"F"

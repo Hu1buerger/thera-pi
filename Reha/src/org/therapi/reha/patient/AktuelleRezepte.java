@@ -2490,16 +2490,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } catch (Exception ex) {
                     idtest = 0;
                 }
-                logger.debug("Vec: idtest (ArtDerBeh" + i + ") =" +idtest);
+                logger.debug("Vec: idtest (ArtDerBeh" + (i - 1) + ") =" +idtest);
                 idtest = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i - 1);
                 logger.debug("Rez: idtest (ArtDerBeh" + (i - 1) + ") =" + idtest);
                 if (idtest > 0) {
                     try {
-                        anzahlen.add(Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(1 + i)));
+                        // anzahlen.add(Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(1 + i)));
+                        anzahlen.add(Reha.instance.patpanel.rezAktRez.getBehAnzahl(i - 1));
                     } catch (Exception ex) {
+                        // My guess is this was supposed to be done if parseInt barfed at emptyString?
+                        // In this case we shouldn't need the entire try-catch block, since getBehAnz in Rezepte
+                        // now returns an int - and this should be "0" if not set previously anyhow...
+                        // Any other exceptions should probably not lead to continuation of the program
                         anzahlen.add(0);
                     }
                     try {
+                        // TODO: caller and called should be adjusted to new Disziplin-class and possibly caller
+                        //   handle int as input
                         position = RezTools.getPosFromID(Integer.toString(idtest), Integer.toString(preisgruppe),
                                 SystemPreislisten.hmPreise.get(diszi)
                                                           .get(preisgruppe - 1));
