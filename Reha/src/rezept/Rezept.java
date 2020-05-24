@@ -118,6 +118,9 @@ public class Rezept {
     public static final int REZEPTART_FOLGEVO = 1;
     public static final int REZEPTART_ADR = 2;
     
+    // Auxiliary helpers
+    public boolean isToBeInserted;
+    
     public Rezept() {
         this.disziplin = Disziplin.INV;
         this.rezGeb = new Money();
