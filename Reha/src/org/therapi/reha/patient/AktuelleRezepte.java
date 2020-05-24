@@ -3476,7 +3476,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             return;
         }
 
-        Reha.instance.progLoader.Dta301Fenster(1, Reha.instance.patpanel.vecaktrez.get(1));
+        Reha.instance.progLoader.Dta301Fenster(1, Reha.instance.patpanel.rezAktRez.getRezNr());
         // Hier der Aufruf der Fallsteuerungs .JAR
     }
 
