@@ -541,7 +541,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             e.printStackTrace();
                         }
                     }
-                    if (rezGeschlossen()) {
+                    if (rezGeschlossenMitWarnung()) {
                         return;
                     }
                     neuanlageRezept(false, "", REZEPTKOPIERE_NIX);
@@ -565,7 +565,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             public void keyPressed(KeyEvent arg0) {
                 if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
                     arg0.consume();
-                    if (rezGeschlossen()) {
+                    if (rezGeschlossenMitWarnung()) {
                         return;
                     }
                     neuanlageRezept(false, "", REZEPTKOPIERE_NIX);
@@ -1697,7 +1697,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         for (int i = 0; i < 1; i++) {
             if (cmd.equals("terminplus")) {
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 try {
@@ -1760,7 +1760,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             }
             if (cmd.equals("terminminus")) {
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 int row = tabaktterm.getSelectedRow();
@@ -1784,7 +1784,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 break;
             }
             if (cmd.equals("terminsortieren")) {
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 int row = tabaktterm.getRowCount();
@@ -1847,7 +1847,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             + "....und welches der nicht vorhandenen Rezepte m\u00f6chten Sie bittesch\u00f6n \u00e4ndern....");
                     return;
                 }
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 neuanlageRezept(false, "", REZEPTKOPIERE_NIX);
@@ -1862,7 +1862,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             + "....und welches der nicht vorhandenen Rezepte m\u00f6chten Sie bittesch\u00f6n l\u00f6schen....");
                     return;
                 }
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 int currow = tabaktrez.getSelectedRow();
@@ -1974,7 +1974,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 if (!Rechte.hatRecht(Rechte.Rezept_editvoll, true)) {
                     return;
                 }
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 int currow = tabaktrez.getSelectedRow();
@@ -2005,7 +2005,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 if (!Rechte.hatRecht(Rechte.Rezept_editvoll, true)) {
                     return;
                 }
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
                 int currow = tabaktrez.getSelectedRow();
@@ -2032,10 +2032,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 if (!Rechte.hatRecht(Rechte.Rezept_editvoll, true)) {
                     return;
                 }
-                if (rezGeschlossen()) {
+                if (rezGeschlossenMitWarnung()) {
                     return;
                 }
-                if (rezBefreit()) {
+                if (rezBefreitMitWarnung()) {
                     return;
                 }
                 int currow = tabaktrez.getSelectedRow();
@@ -2845,9 +2845,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return true;
     }
 
-    private boolean rezGeschlossen() {
-        if (Reha.instance.patpanel.vecaktrez.get(62)
-                                            .equals("T")) {
+    private boolean rezGeschlossenMitWarnung() {
+        if (Reha.instance.patpanel.rezAktRez.isAbschluss()) {
             JOptionPane.showMessageDialog(null,
                     "Das Rezept ist bereits abgeschlossen\n\u00c4nderungen sind nur noch durch berechtigte Personen m\u00f6glich");
             return true;
@@ -2856,9 +2855,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
     }
 
-    private boolean rezBefreit() {
-        if (Reha.instance.patpanel.vecaktrez.get(12)
-                                            .equals("T")) {
+    private boolean rezBefreitMitWarnung() {
+        if (Reha.instance.patpanel.rezAktRez.isBefr()) {
             JOptionPane.showMessageDialog(null, "Das Rezept ist zuzahlungsbefreit!");
             return true;
         } else {
