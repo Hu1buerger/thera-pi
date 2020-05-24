@@ -2569,6 +2569,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // Icon Rezepstatus -> abgeschlossen:
             dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[1], currow,
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
+            // This is an empty stub:
             doAbschliessen();
             rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), true);
             // TODO: remove me once Rezepteumbau has been completed
@@ -3082,6 +3083,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Rwert>", "0,00");
     }
 
+    // TODO: Adjust to new Rezeptnummern-class
     public static void setZuzahlImageActRow(ZZStat key, String reznr) {
         try {
             if (tabaktrez == null) {
@@ -3214,6 +3216,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 neuRez.setPinPanel(pinPanel);
                 if (lneu) {
                     
+                    // TODO: This whole block assumes "Rezept" is a vector - checks for size and alike
+                    //   need to be sorted to new Rezept-class
                     Vector<String> vecKopierVorlage = neuesRezeptVonKopie(kopierModus);
                     
                     // TODO: This needs to take Rezept rez as param & use (deep?) copy
@@ -3232,8 +3236,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geoeffnet:
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(
-                                  // TODO: need method that takes Rezept rez as param
-                                  //new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu));
                                   new RezNeuanlageGUI(Reha.instance.patpanel.rezAktRez, lneu));
                     
                     neuRez.getSmartTitledPanel()
@@ -3265,14 +3267,17 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             // falls typ des zzstatus (@idx 39) im vecaktrez auf typ ZZStat umgestellt wird,
                             // oder get-Methoden erstellt werden,
                             // sind die beiden Hilfsvariablen obsolet:
-                            int iZzStat = Reha.instance.patpanel.rezAktRez.getZZStatus();
+                            // int iZzStat = Reha.instance.patpanel.rezAktRez.getZZStatus();
                             String sRezNr = Reha.instance.patpanel.rezAktRez.getRezNr();
 
-                            ZZStat iconKey = ZuzahlTools.getIconKey(iZzStat, sRezNr);
+                            ZZStat iconKey = ZuzahlTools.getIconKey(Reha.instance.patpanel.rezAktRez.getZZStatus(),
+                                                                                                            sRezNr);
                             setZuzahlImageActRow(iconKey, sRezNr);
 
                             // IndiSchluessel
-                            dtblm.setValueAt(Reha.instance.patpanel.rezAktRez.getIndikatSchl(), tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_INDIKATSCHL);
+                            dtblm.setValueAt(Reha.instance.patpanel.rezAktRez.getIndikatSchl(),
+                                                                    tabaktrez.getSelectedRow(),
+                                                                MyAktRezeptTableModel.AKTREZTABMODELCOL_INDIKATSCHL);
                             tabaktrez.validate();
                             tabaktrez.repaint();
                         } catch (Exception ex) {
