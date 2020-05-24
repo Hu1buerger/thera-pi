@@ -69,7 +69,7 @@ public class RezeptDto {
         updateDataset(sql);
     }
     
-    public void rezeptAbschluss(String Id, boolean status) {
+    public void rezeptAbschluss(int Id, boolean status) {
         String sql = "UPDATE " + aktRezDB + "SET abschluss='" + ( status ? "T" : "F")
                     + "' WHERE id='" + Id + "' LIMIT 1";
         updateDataset(sql);
