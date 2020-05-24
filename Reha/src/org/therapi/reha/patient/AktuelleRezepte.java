@@ -2753,6 +2753,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return doublette;
     }
 
+    /**
+     * Checks the dates for too many days between Rezept-Datum & Behandlungsbeginn and/or too many days between 2 Termine
+     * 
+     * @param latestdat
+     * @param starttag
+     * @param tageanzahl
+     * @param disziplin
+     * @param preisgruppe
+     * @return
+     */
+    // TODO: To properly use the new rezept-class the strings *tag should be changed to LocalDate & disziplin to class disziplin
+    // TODO: Move this entire check to some other class like AktuelleRezepteChecks.java or whatnot
     private boolean doTageTest(String latestdat, String starttag, int tageanzahl, String disziplin, int preisgruppe) {
         String vglalt;
         String vglneu;
@@ -2801,7 +2813,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 long utage = 0;
                 // Wenn nach Kalendertagen ermittelt werden soll
                 if (ktagebreak) {
-                    if (!"RSFT".contains(Reha.instance.patpanel.vecaktrez.get(1)
+                    if (!"RSFT".contains(Reha.instance.patpanel.rezAktRez.getRezNr()
                                                                          .substring(0, 2))) {
                         if (((utage = DatFunk.TageDifferenz(vglalt, vglneu)) > fristbreak) && (kommentar.trim()
                                                                                                         .equals(""))) {
@@ -2814,7 +2826,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         }
                     }
                 } else {
-                    if (!"RSFT".contains(Reha.instance.patpanel.vecaktrez.get(1)
+                    if (!"RSFT".contains(Reha.instance.patpanel.rezAktRez.getRezNr()
                                                                          .substring(0, 2))) {
                         if ((utage = HMRCheck.hmrTageDifferenz(vglalt, vglneu, fristbreak, breaksamstag)) > 0
                                 && kommentar.trim()
