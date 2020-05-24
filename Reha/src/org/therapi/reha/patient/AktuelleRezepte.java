@@ -21,6 +21,7 @@ import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -3486,8 +3487,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         boolean buchen = true;
         DecimalFormat dfx = new DecimalFormat("0.00");
         Rezeptvector currVO = new Rezeptvector();
+        Rezept rezCurrVO = new Rezept(Reha.instance.patpanel.rezAktRez);
         currVO.setVec_rez(Reha.instance.patpanel.vecaktrez);
+        
         String sRezNr = currVO.getRezNb();
+        logger.debug("Vec: sRezNr=" + sRezNr);
+        sRezNr = rezCurrVO.getRezNr();
+        logger.debug("Rez: sRezNr=" + sRezNr);
         if (ZuzahlTools.existsRGR(sRezNr)) {
             int anfrage = JOptionPane.showConfirmDialog(null,
                     "<html>" + ZuzahlTools.rgrOK(sRezNr) + "<br><br>" + "Wollen Sie eine Kopie erstellen?</html>",
@@ -3499,7 +3505,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             return;
         } else {
             // vvv Pruefungen aus der Bar-Quittung auch hier !
-            if (currVO.getZzStat().equals(String.valueOf(ZZStat.ZUZAHLFREI))) {
+            // if (currVO.getZzStat().equals(String.valueOf(ZZStat.ZUZAHLFREI))) {
+            // TODO: switch the following to ZZStat enum?
+            if(rezCurrVO.getZZStatus() == Rezept.ZZSTATUS_BEFREIT) {
                 JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
                 return;
             }
@@ -3527,12 +3535,21 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         resetHmAdrRData();
         String termine = currVO.getTermine();
+        logger.debug("Vec: termine=" + termine);
+        termine = rezCurrVO.getTermine();
+        logger.debug("Rez: termine=" + termine);
         RezTools.testeRezGebArt(false, false, sRezNr, termine);
 
-        // String mit den Anzahlen und HM-K\u00fcrzeln erzeugen
+        // String mit den Anzahlen und HM-Kuerzeln erzeugen
         for (i = 1; i < 5; i++) {
             String hmKurz = currVO.getHMkurz(i);
-            String aktAnzBehandlg = currVO.getAnzBehS(i);
+            logger.debug("Rez: hmKurz=" + hmKurz);
+            hmKurz = rezCurrVO.getHMKuerzel(i);
+            logger.debug("Vec: hmKurz=" + hmKurz);
+            String sAktAnzBehandlg = currVO.getAnzBehS(i);
+            logger.debug("Rez: hmKurz=" + sAktAnzBehandlg);
+            int aktAnzBehandlg = rezCurrVO.getAnzahlBehandlungen(i);
+            logger.debug("Vec: hmKurz=" + aktAnzBehandlg);
             if ((hmKurz != null) && hmKurz.length() > 0) {
                 behandl += ((behandl.length() > 0) ? ", " : "") + aktAnzBehandlg + " * " + hmKurz;
             }
@@ -3540,7 +3557,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         strZuzahlung = SystemConfig.hmAdrRDaten.get("<Rendbetrag>");
 
-        String cmd = "select abwadress,id from pat5 where pat_intern='" + currVO.getPatIntern() + "' LIMIT 1";
+        String cmd = "select abwadress,id from pat5 where pat_intern='" + rezCurrVO.getPatIntern() + "' LIMIT 1";
         Vector<Vector<String>> adrvec = SqlInfo.holeFelder(cmd);
         String[] adressParams = null;
 
@@ -3558,7 +3575,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         hmRezgeb.put("<rgbehandlung>", behandl);
 
-        hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(currVO.getRezeptDatum()));
+        // hmRezgeb.put("<rgdatum>", DatFunk.sDatInDeutsch(currVO.getRezeptDatum()));
+        hmRezgeb.put("<rgdatum>", rezCurrVO.getRezDatum().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
 
         hmRezgeb.put("<rgbetrag>", strZuzahlung);
         hmRezgeb.put("<rgpauschale>", SystemConfig.hmAbrechnung.get("rgrpauschale"));
@@ -3569,8 +3587,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         hmRezgeb.put("<rgort>", adressParams[3]);
         hmRezgeb.put("<rgbanrede>", adressParams[4]);
 
-        hmRezgeb.put("<rgpatintern>", currVO.getPatIntern());
-
+        hmRezgeb.put("<rgpatintern>", Integer.toString(rezCurrVO.getPatIntern()));
+        
         hmRezgeb.put("<rgpatnname>", SystemConfig.hmAdrPDaten.get("<Pnname>"));
         hmRezgeb.put("<rgpatvname>", SystemConfig.hmAdrPDaten.get("<Pvname>"));
         hmRezgeb.put("<rgpatgeboren>", SystemConfig.hmAdrPDaten.get("<Pgeboren>"));
