@@ -1088,25 +1088,25 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             }
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
+                                    "id = '" + String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
-                                    Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                                    String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                         } else {
                             rezneugefunden = true;
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
+                                    "id = '" + String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
-                                    Integer.toString((Integer) tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                                    String.valueOf(tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                         }
 
                         try {
