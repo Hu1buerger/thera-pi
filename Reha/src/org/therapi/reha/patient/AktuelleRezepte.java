@@ -2565,15 +2565,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             /*********************/
             /********************************************************************************/
-            dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[1], currow, 5); // Icon Rezepstatus -> abgeschlossen
+            // Icon Rezepstatus -> abgeschlossen:
+            dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[1], currow,
+                                                                MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
             doAbschliessen();
+            rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), true);
+            // TODO: remove me once Rezepteumbau has been completed
             String xcmd = "update verordn set abschluss='T' where id='" + Reha.instance.patpanel.vecaktrez.get(35)
                     + "' LIMIT 1";
-            SqlInfo.sqlAusfuehren(xcmd);
+            // SqlInfo.sqlAusfuehren(xcmd);
+            // TODO: remove me once Rezepte Umbau has been completed
             Reha.instance.patpanel.vecaktrez.set(62, "T");
+            Reha.instance.patpanel.rezAktRez.setAbschluss(true);
+            // TODO: move the following SQL-Stmt into some Dto-class
             Vector<Vector<String>> kdat = SqlInfo.holeFelder("select ik_kasse,ik_kostent from kass_adr where id='"
                     + Reha.instance.patpanel.vecaktrez.get(37) + "' LIMIT 1");
-            String ikkass = "", ikkost = "", kname = "", rnr = "", patint = "";
+            String ikkass = "", ikkost = "", kname = "", rnr = "", patintS = "";
+            int patint = -1;
             if (kdat.size() > 0) {
                 ikkass = kdat.get(0)
                              .get(0);
@@ -2583,9 +2591,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 ikkass = "";
                 ikkost = "";
             }
+            // TODO: lots of removes once Rezepteumbau has been completed
             kname = Reha.instance.patpanel.vecaktrez.get(36);
-            patint = Reha.instance.patpanel.vecaktrez.get(0);
+            logger.debug("Vec: kname=" +kname);
+            kname = Reha.instance.patpanel.rezAktRez.getKTraegerName();
+            logger.debug("Rez: kname=" + kname);
+            patintS = Reha.instance.patpanel.vecaktrez.get(0);
+            logger.debug("Vec: patint=" + patintS);
+            patint = Reha.instance.patpanel.rezAktRez.getPatIntern();
+            logger.debug("Rez: patint=" + patint);
             rnr = Reha.instance.patpanel.vecaktrez.get(1);
+            // TODO: move the following SQL statement to some dto (RezepteDto?)
+            // TODO: change rnr.substring to new Rezeptnummern-class + Disziplin
             String cmd = "insert into fertige set ikktraeger='" + ikkost + "', ikkasse='" + ikkass + "', " + "name1='"
                     + kname + "', rez_nr='" + rnr + "', pat_intern='" + patint + "', rezklasse='" + rnr.substring(0, 2)
                     + "'";
@@ -2595,13 +2612,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 return;
             }
             // bereits abgeschlossen muss geoeffnet werden
-            dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[0], currow, 5);
+            dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[0], currow, 
+                                                                MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
             doAufschliessen();
+            // TODO: delete me once Rezepteumbau has been completed
             String xcmd = "update verordn set abschluss='F' where id='" + Reha.instance.patpanel.vecaktrez.get(35)
                     + "' LIMIT 1";
+            // TODO: delete me once RezepteUmbau has been completed
             Reha.instance.patpanel.vecaktrez.set(62, "F");
-            SqlInfo.sqlAusfuehren(xcmd);
+            Reha.instance.patpanel.rezAktRez.setAbschluss(false);
+            rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), false);
+            // SqlInfo.sqlAusfuehren(xcmd);
+            // TODO: delete me once RezepteUmbau has been completed
             String rnr = Reha.instance.patpanel.vecaktrez.get(1);
+            logger.debug("Vec: rnr=" + rnr);
+            rnr = Reha.instance.patpanel.rezAktRez.getRezNr();
+            logger.debug("Rez: rnr=" + rnr);
+            // TODO: move the following SQL statement to some dto (RezepteDto?)
             String cmd = "delete from fertige where rez_nr='" + rnr + "' LIMIT 1";
             SqlInfo.sqlAusfuehren(cmd);
             JComponent abrech1 = AktiveFenster.getFensterAlle("Abrechnung-1");

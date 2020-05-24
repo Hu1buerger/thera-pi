@@ -1224,6 +1224,14 @@ public class Rezept {
     public String getAbschluss() {
         return isAbschluss() ? "T" : "F";
     }
+    
+    /**
+     * Set the Abschluss as bool
+     */
+    public void setAbschluss(boolean Abschluss) {
+        abschluss = Abschluss;
+    }
+    
     /**
      * @return the zZSTATUS
      */
