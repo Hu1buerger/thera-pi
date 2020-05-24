@@ -960,7 +960,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             dtblm.setRowCount(0);
                         }
                         // TODO: remove once Rezepte has been sorted
-                        aktTerminBuffer.add(String.valueOf(vec.get(i).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_TERMINE)));
+                        // Comment the following line to disable vec-based termine to be added
+                        // aktTerminBuffer.add(String.valueOf(vec.get(i).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_TERMINE)));
                         aktTerminBuffer.add(listRezepte.get(i).getTermine());
                         // TODO: irgendwo lief mir ein ZZStatus wo 3 == bald18 bedeutet?
                         int iZuZahlStat = 3, rezstatus = 0;
@@ -1004,13 +1005,16 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             rezstatus = 1; // Enum?
                         logger.debug("rezStatus from Rez:" + rezstatus);
 
+                        
+                        // Comment following block to disable vec-based Rezepte to be shown
+                        /*
                         dtblm.addRow(vec.get(i)); // Rezept in Tabelle eintragen
                         // Icons in akt. Zeile setzen
                         dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i,
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
                         dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i,
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
-                        
+                        */
                         // Using Rezepte, we collected all vals, so here's the selection for the panel:
                         Object[] fields = new Object[]{
                                 listRezepte.get(i).getRezNr(),
@@ -1084,25 +1088,25 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             }
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'",
+                                    "id = '" + Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
-                                    (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
+                                    Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                         } else {
                             rezneugefunden = true;
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'",
+                                    "id = '" + Integer.toString((Integer) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
-                                    (String) tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
+                                    Integer.toString((Integer) tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                         }
 
                         try {
