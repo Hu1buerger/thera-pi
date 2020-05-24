@@ -20,6 +20,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -2646,13 +2647,26 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             Vector<Vector<String>> tests = null;
             Vector<String> dummy = new Vector<String>();
-            String lastrezdate = DatFunk.sDatInSQL(
+            String lastrezdateS = DatFunk.sDatInSQL(
                     DatFunk.sDatPlusTage(DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)), -90));
+            logger.debug("Vec: lastrezdate=" + lastrezdateS);
+            LocalDate lastrezdate = Reha.instance.patpanel.rezAktRez.getRezDatum().minusDays(90);
+            logger.debug("Rez: lastrezdate=" + lastrezdate.toString());
+            // TODO: change to new Rezeptnummern + diszi class
             String diszi = Reha.instance.patpanel.vecaktrez.get(1)
                                                            .substring(0, 2);
+            logger.debug("Vec: diszi=" + diszi);
+            diszi = Reha.instance.patpanel.rezAktRez.getRezNr().substring(0, 2);
+            logger.debug("Rez: diszi=" + diszi);
+            // TODO: move the following SQL-stmt to some Dto-class (RezepteDto?)
             String cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
                     + Reha.instance.patpanel.vecaktrez.get(0) + "' and rez_nr != '"
                     + Reha.instance.patpanel.vecaktrez.get(1) + "'";
+            logger.debug("Vec: sql-cmd='" + cmd + "'");
+            cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
+                    + Reha.instance.patpanel.rezAktRez.getPatIntern() + "' and rez_nr != '"
+                    + Reha.instance.patpanel.rezAktRez.getRezNr() + "'";
+            logger.debug("Rez: sql-cmd='" + cmd + "'");
 
             tests = SqlInfo.holeFelder(cmd);
             // zuerst in den aktuellen Rezepten nachsehen
@@ -2666,15 +2680,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // Terminen enthalten ist
 
             for (int i = 0; i < tests.size(); i++) {
+                // RezNr:
                 if (tests.get(i)
                          .get(1)
                          .startsWith(diszi)) {
                     for (int i2 = 0; i2 < anzahl; i2++) {
+                        // Termine:
                         if (tests.get(i)
                                  .get(2)
                                  .contains(dtermm.getValueAt(i2, 0)
                                                  .toString())) {
                             dummy.clear();
+                            // RezNr:
                             dummy.add(tests.get(i)
                                            .get(1));
                             dummy.add(dtermm.getValueAt(i2, 0)
@@ -2693,21 +2710,30 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // Terminen enthalten ist
             // 4. dann testen ob der Rezeptdatumsvergleich > als 3 Monate trifft dies zu
             // abbruch
+            // TODO: delete me once Rezepteumbau has been completed
             cmd = "select rez_datum,rez_nr,termine from lza where pat_intern = '"
                     + Reha.instance.patpanel.vecaktrez.get(0) + "' and rez_nr != '"
-                    + Reha.instance.patpanel.vecaktrez.get(1) + "' and rez_datum >= '" + lastrezdate + "'";
+                    + Reha.instance.patpanel.vecaktrez.get(1) + "' and rez_datum >= '" + lastrezdateS + "'";
+            logger.debug("Vec: cmd='" + cmd + "'");
+            cmd = "select rez_datum,rez_nr,termine from lza where pat_intern = '"
+                    + Reha.instance.patpanel.rezAktRez.getPatIntern() + "' and rez_nr != '"
+                    + Reha.instance.patpanel.rezAktRez.getRezNr() + "' and rez_datum >= '" + lastrezdate + "'";
+            logger.debug("Rez: cmd='" + cmd + "'");
 
             tests = SqlInfo.holeFelder(cmd);
             for (int i = 0; i < tests.size(); i++) {
+                // RezNr:
                 if (tests.get(i)
                          .get(1)
                          .startsWith(diszi)) {
                     for (int i2 = 0; i2 < anzahl; i2++) {
+                        // Termine:
                         if (tests.get(i)
                                  .get(2)
                                  .contains(dtermm.getValueAt(i2, 0)
                                                  .toString())) {
                             dummy.clear();
+                            // RezNr:
                             dummy.add(tests.get(i)
                                            .get(1));
                             dummy.add(dtermm.getValueAt(i2, 0)
