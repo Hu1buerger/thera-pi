@@ -169,7 +169,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     int iformular = -1;
 
     // int MyAktRezeptTableModel.AKTREZTABMODELCOL_ID = 8;
-    int termineInTable = 9;
+    // int termineInTable = 9;
     
     private static final int REZEPTKOPIERE_NIX = 0;
     private static final int REZEPTKOPIERE_LETZTES = 1;
@@ -957,19 +957,20 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             dtblm.setRowCount(0);
                         }
                         // TODO: remove once Rezepte has been sorted
-                        aktTerminBuffer.add(String.valueOf(vec.get(i).get(termineInTable)));
+                        aktTerminBuffer.add(String.valueOf(vec.get(i).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_TERMINE)));
                         aktTerminBuffer.add(listRezepte.get(i).getTermine());
                         // TODO: irgendwo lief mir ein ZZStatus wo 3 == bald18 bedeutet?
                         int iZuZahlStat = 3, rezstatus = 0;
                         ZZStat iconKey;
-                        if (((Vector) vec.get(i)).get(1) == null) { // McM: zzstatus leer heisst 'befreit'??
+                        if (((Vector) vec.get(i)).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON) == null) { // McM: zzstatus leer heisst 'befreit'??
                             iZuZahlStat = 0; // ?? nicht besser 'not set' ??
                             logger.debug("ZZStatus not set (def. NULL)");
-                        } else if (!((Vector) vec.get(i)).get(1)
+                        } else if (!((Vector) vec.get(i)).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON)
                                                          .equals("")) {
                             logger.debug("ZZStatus is not empty");
-                            iZuZahlStat = Integer.parseInt(((Vector) vec.get(i)).get(1)
-                                                                                .toString());
+                            iZuZahlStat = Integer.parseInt(((Vector) vec.get(i))
+                                                                .get(MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON)
+                                                                    .toString());
                             logger.debug("Set iZuZahlStat to " + iZuZahlStat);
                         }
                         /* for an int this ain't gonna work/necc.
@@ -986,12 +987,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         logger.debug("Set iZuZahlStat from RezDto to " + iZuZahlStat);
                         //}
                         final String testreznum = String.valueOf(vec.get(i)
-                                                                    .get(0));
+                                                                    .get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr));
                         logger.debug("testreznum from Vec: " + testreznum);
                         logger.debug("testreznum from rezDto: " + listRezepte.get(i).getRezNr());
                         iconKey = ZuzahlTools.getIconKey(iZuZahlStat, testreznum);
 
-                        if (((Vector) vec.get(i)).get(5)
+                        if (((Vector) vec.get(i)).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS)
                                                  .equals("T")) {
                             rezstatus = 1;
                         }
@@ -1002,8 +1003,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
                         dtblm.addRow(vec.get(i)); // Rezept in Tabelle eintragen
                         // Icons in akt. Zeile setzen
-                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
-                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
+                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i,
+                                                                MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
+                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i,
+                                                                MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
                         
                         // Using Rezepte, we collected all vals, so here's the selection for the panel:
                         Object[] fields = new Object[]{
@@ -1029,7 +1032,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
                         // TODO: remove once sorted rezepte
                         if (vec.get(i)
-                               .get(0)
+                               .get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                .startsWith("RH") && Reha.instance.dta301panel != null) {
                             new SwingWorker<Void, Void>() {
                                 @Override
