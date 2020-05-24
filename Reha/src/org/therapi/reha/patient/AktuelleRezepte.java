@@ -984,7 +984,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             */
                         logger.debug("iZuZahlStat from Vec: " + iZuZahlStat);
                         iZuZahlStat = listRezepte.get(i).getZZStatus();
-                        logger.debug("Set iZuZahlStat from RezDto to " + iZuZahlStat);
+                        logger.debug("iZuZahlStat from Rez: " + iZuZahlStat);
                         //}
                         final String testreznum = String.valueOf(vec.get(i)
                                                                     .get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr));
@@ -1072,7 +1072,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             row = 0;
                             rezneugefunden = true;
                             for (int ii = 0; ii < anz; ii++) {
-                                if (tabaktrez.getValueAt(ii, 0)
+                                if (tabaktrez.getValueAt(ii, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                              .equals(xrez_nr)) {
                                     row = ii;
                                     break;
@@ -1189,7 +1189,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     public void setRezeptDaten() {
         int row = tabaktrez.getSelectedRow();
         if (row >= 0) {
-            String reznr = (String) tabaktrez.getValueAt(row, 0);
+            String reznr = (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
             rezAngezeigt = reznr;
             String id = String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
             rezDatenPanel.setRezeptDaten(reznr, id);
@@ -1233,7 +1233,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     public void setzeBild(int satz, int icon) {
-        dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[icon], satz, 1);
+        dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[icon], satz, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
         tabaktrez.validate();
         tabaktrez.repaint();
     }
@@ -1247,6 +1247,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Ranzahltage>", "0");
     }
 
+    /**
+     * Collects the termine from a given RzNr - it's possible we can do w/o the SQL, since we already get all data
+     * for a Rezept and only display a selection thereof in aktRez-tab. The Vector based code only had a limited number
+     * of fields selected at this point in time
+     * 
+     * @param xreznr
+     * @param termine
+     */
     public void holeEinzelTermineAusRezept(String xreznr, String termine) {
         try {
             Vector<String> xvec = null;
@@ -1573,16 +1581,20 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             // TODO: delete me once Rezepte has been sorted
             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                    "id = '" + String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'", Arrays.asList(new String[] {})));
+                    "id = '" + String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID))
+                       + "'", Arrays.asList(new String[] {})));
             Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(Integer.parseInt(String.valueOf(
-                                                                tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)))).get();
+                                                                tabaktrez.getValueAt(ix,
+                                                                      MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)))).get();
             // Huh??
-            Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix, 0);
+            Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix,
+                                                                      MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
 
-            rezDatenPanel.setRezeptDaten(String.valueOf(tabaktrez.getValueAt(ix, 0)),
+            rezDatenPanel.setRezeptDaten(String.valueOf(tabaktrez.getValueAt(ix,
+                                                                      MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)),
                     String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
             setCursor(Cursors.normalCursor);
-            final String testreznum = tabaktrez.getValueAt(ix, 0)
+            final String testreznum = tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                                .toString();
 
             try {
