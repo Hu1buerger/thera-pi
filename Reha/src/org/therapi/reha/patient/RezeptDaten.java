@@ -21,6 +21,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import org.jdesktop.swingx.JXPanel;
+import org.therapi.reha.patient.AktuelleRezepte.MyAktRezeptTableModel;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -287,7 +288,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             }
             int row = AktuelleRezepte.tabaktrez.getSelectedRow();
             if (row >= 0) {
-                if (AktuelleRezepte.dtblm.getValueAt(row, 1) != Reha.instance.patpanel.imgzuzahl[zzbild]) {
+                if (AktuelleRezepte.dtblm.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON) != Reha.instance.patpanel.imgzuzahl[zzbild]) {
                     org.therapi.reha.patient.AktuelleRezepte.setZuzahlImage(zzbild);
                 }
             }

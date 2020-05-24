@@ -168,7 +168,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     int aktuellAngezeigt = -1;
     int iformular = -1;
 
-    int idInTable = 8;
+    // int MyAktRezeptTableModel.AKTREZTABMODELCOL_ID = 8;
     int termineInTable = 9;
     
     private static final int REZEPTKOPIERE_NIX = 0;
@@ -483,26 +483,26 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-        tabaktrez.getColumn(1)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON)
                  .setMaxWidth(45);
-        tabaktrez.getColumn(3) 
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_ANGELEGTDATUM) 
                  .setMaxWidth(75); // Angelegt am
-        tabaktrez.getColumn(5)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS)
                  .setMaxWidth(45); // Status
 
-        tabaktrez.getColumn(6)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_PATINTERN)
                  .setMinWidth(0); // Pat-Nr.
-        tabaktrez.getColumn(6)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_PATINTERN)
                  .setMaxWidth(0);
 
-        tabaktrez.getColumn(idInTable)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)
                  .setMinWidth(0); // verordn->id
-        tabaktrez.getColumn(idInTable)
+        tabaktrez.getColumn(MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)
                  .setMaxWidth(0);
         for (int i = 0; i < column.length; i++) {
             switch (i) {
-            case 1: // Bez. Icons
-            case 5: // Status
+            case MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON: // Bez. Icons
+            case MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS: // Status
                 tabaktrez.getColumn(i)
                          .setCellRenderer(renderer);
                 break;
@@ -1002,8 +1002,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
                         dtblm.addRow(vec.get(i)); // Rezept in Tabelle eintragen
                         // Icons in akt. Zeile setzen
-                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i, 1);
-                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i, 5);
+                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
+                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
                         
                         // Using Rezepte, we collected all vals, so here's the selection for the panel:
                         Object[] fields = new Object[]{
@@ -1022,8 +1022,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         dtblm.addRow((Object[]) fields);
 
                         // Icons in akt. Zeile setzen
-                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i+1, 1);
-                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i+1, 5);
+                        dtblm.setValueAt(ZuzahlTools.getZzIcon(iconKey), i,
+                                                        MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
+                        dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[rezstatus], i,
+                                                        MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
 
                         // TODO: remove once sorted rezepte
                         if (vec.get(i)
@@ -1076,25 +1078,25 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             }
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + (String) tabaktrez.getValueAt(row, idInTable) + "'",
+                                    "id = '" + (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
-                                    (String) tabaktrez.getValueAt(row, idInTable));
+                                    (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
                         } else {
                             rezneugefunden = true;
                             // TODO: remove me once Rezepte has been sorted
                             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                                    "id = '" + (String) tabaktrez.getValueAt(row, idInTable) + "'",
+                                    "id = '" + (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
                             Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
-                                    (String) tabaktrez.getValueAt(0, idInTable));
+                                    (String) tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
                         }
 
                         try {
@@ -1186,7 +1188,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (row >= 0) {
             String reznr = (String) tabaktrez.getValueAt(row, 0);
             rezAngezeigt = reznr;
-            String id = String.valueOf(tabaktrez.getValueAt(row, idInTable));
+            String id = String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
             rezDatenPanel.setRezeptDaten(reznr, id);
         }
     }
@@ -1339,7 +1341,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         inEinzelTermine = true;
         Vector<String> xvec = null;
         if (vvec == null) {
-            xvec = SqlInfo.holeSatz("verordn", "termine", "id='" + tabaktrez.getValueAt(row, idInTable) + "'",
+            xvec = SqlInfo.holeSatz("verordn", "termine", "id='" + tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'",
                     Arrays.asList(new String[] {}));
         } else {
             xvec = vvec;
@@ -1425,8 +1427,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Ranzahltage>", Integer.toString(reihen));
         // TODO: Change to Rezept-DTO
         SqlInfo.aktualisiereSatz("verordn", "termine='" + sb.toString() + "'",
-                "id='" + (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), idInTable) + "'");
-        String rezId = (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), idInTable);
+                "id='" + (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'");
+        String rezId = (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
         rDto.updateRezeptTermine(rezId, sb.toString());
         
         // TODO: Remove me once Rezepte has been sorted
@@ -1568,14 +1570,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             // TODO: delete me once Rezepte has been sorted
             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
-                    "id = '" + String.valueOf(tabaktrez.getValueAt(ix, idInTable)) + "'", Arrays.asList(new String[] {})));
+                    "id = '" + String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'", Arrays.asList(new String[] {})));
             Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(Integer.parseInt(String.valueOf(
-                                                                tabaktrez.getValueAt(ix, idInTable)))).get();
+                                                                tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)))).get();
             // Huh??
             Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix, 0);
 
             rezDatenPanel.setRezeptDaten(String.valueOf(tabaktrez.getValueAt(ix, 0)),
-                    String.valueOf(tabaktrez.getValueAt(ix, idInTable)));
+                    String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
             setCursor(Cursors.normalCursor);
             final String testreznum = tabaktrez.getValueAt(ix, 0)
                                                .toString();
@@ -1852,7 +1854,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     return;
                 }
                 String reznr = (String) tabaktrez.getValueAt(currow, 0);
-                String rezid = (String) tabaktrez.getValueAt(currow, idInTable);
+                String rezid = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
                 int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie das Rezept " + reznr + " wirklich l\u00f6schen?",
                         "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                 if (frage == JOptionPane.NO_OPTION) {
@@ -2286,7 +2288,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (currow < 0) {
             return;
         }
-        if (dtblm.getValueAt(currow, 5) == null) {
+        if (dtblm.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS) == null) {
             // derzeit offen also abschliessen
             if (!Rechte.hatRecht(Rechte.Rezept_lock, true)) {
                 return;
@@ -2878,7 +2880,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
          *
          */
         private static final long serialVersionUID = 1L;
-
+        
+        public static final int AKTREZTABMODELCOL_REZNr = 0;
+        public static final int AKTREZTABMODELCOL_BEZICON = 1; // zzstatus
+        public static final int AKTREZTABMODELCOL_REZDATUM = 2;
+        public static final int AKTREZTABMODELCOL_ANGELEGTDATUM = 3;
+        public static final int AKTREZTABMODELCOL_SPAETBEHBEG = 4;
+        public static final int AKTREZTABMODELCOL_REZSTATUS = 5; // abschluss
+        public static final int AKTREZTABMODELCOL_PATINTERN = 6;
+        public static final int AKTREZTABMODELCOL_INDIKATSCHL = 7;
+        public static final int AKTREZTABMODELCOL_ID = 8;
+        public static final int AKTREZTABMODELCOL_TERMINE = 9;
+        
         @Override
         public Class<?> getColumnClass(int columnIndex) {
             if (columnIndex == 1 || columnIndex == 5) {
@@ -2972,10 +2985,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             int row = tabaktrez.getSelectedRow();
             if (row >= 0) {
-                if (dtblm.getValueAt(row, 0)
+                if (dtblm.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                          .toString()
                          .equals(reznr)) {
-                    dtblm.setValueAt(ZuzahlTools.getZzIcon(key), row, 1);
+                    dtblm.setValueAt(ZuzahlTools.getZzIcon(key), row, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
                 }
             }
         } catch (Exception ex) {
@@ -3140,10 +3153,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             RezeptDaten.feddisch = false;
                             // TODO: Remove once Rezepte has been sorted
                             aktualisiereVector(String.valueOf(tabaktrez.getValueAt(tabaktrez.getSelectedRow()
-                                                                                                 , idInTable)));
+                                                                                                 , MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                             // TODO: find a nicer way to get the tab-content as int (can we define column as int?)
                             aktualisiereRezAktRez(Integer.parseInt(String.valueOf(
-                                                tabaktrez.getValueAt(tabaktrez.getSelectedRow(), idInTable))));
+                                                tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID))));
 
                             // falls typ des zzstatus (@idx 39) im vecaktrez auf typ ZZStat umgestellt wird,
                             // oder get-Methoden erstellt werden,
@@ -3155,7 +3168,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             setZuzahlImageActRow(iconKey, sRezNr);
 
                             // IndiSchluessel
-                            dtblm.setValueAt(Reha.instance.patpanel.rezAktRez.getIndikatSchl(), tabaktrez.getSelectedRow(), 7);
+                            dtblm.setValueAt(Reha.instance.patpanel.rezAktRez.getIndikatSchl(), tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_INDIKATSCHL);
                             tabaktrez.validate();
                             tabaktrez.repaint();
                         } catch (Exception ex) {
@@ -3266,7 +3279,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (row >= 0) {
             try {
                 int mod = tabaktrez.convertRowIndexToModel(row);
-                String rez_nr = dtblm.getValueAt(mod, 0)
+                String rez_nr = dtblm.getValueAt(mod, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                      .toString()
                                      .trim();
                 SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
