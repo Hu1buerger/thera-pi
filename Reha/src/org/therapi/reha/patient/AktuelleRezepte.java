@@ -85,6 +85,7 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
+import core.Disziplin;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -2235,6 +2236,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             logger.debug("Rez: pghmr=" + pghmr);
             String disziplin = StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
             logger.debug("Vec: diszi=" + disziplin);
+            // TODO: change to new RezeptNummern & Disziplin classes
             disziplin = StringTools.getDisziplin(Reha.instance.patpanel.rezAktRez.getRezNr());
             logger.debug("Rez: diszi=" + disziplin);
             if (SystemPreislisten.hmHMRAbrechnung.get(disziplin)
@@ -2325,6 +2327,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             dummypeisgruppe = Reha.instance.patpanel.rezAktRez.getPreisGruppe() - 1;
             logger.debug("Rez: dummyPG=" + dummypeisgruppe);
 
+            // TODO: this whole block can be moved to own method/class (aktuelleRezepteChecks.java?)
+            //  passing patId & rezNr as params
+            /*********************/
+            // First block: various Patientenstammdaten checks
             if (Reha.instance.patpanel.patDaten.get(23)
                                                .trim()
                                                .length() != 5) {
@@ -2373,7 +2379,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 return;
             }
 
+            // Ok, now we've got enough valid Patientenstammdaten to bill a Rezept
+            
             /*********************/
+            // Next Block, are the Termine within legal range of HMV?
+            
+            // TODO: Change to new RezeptNummern & Diszi-class
             String diszi = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.rezAktRez.getRezNr());
             int preisgruppe = Reha.instance.patpanel.rezAktRez.getPreisGruppe();
 
@@ -2381,6 +2392,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 return;
             }
 
+            /*********************/
+            // Next Block, are the duplicates (of Termine?)
             Vector<Vector<String>> doublette = null;
             if (((doublette = doDoublettenTest(anzterm)).size() > 0)) {
                 String msg = "<html><b><font color='#ff0000'>Achtung!</font><br><br>"
@@ -2402,6 +2415,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
             }
 
+            /*********************/
+            // Next Block, check IndikationsSchluessel & associated ICD10
             int idtest = 0;
             String indi = Reha.instance.patpanel.rezAktRez.getIndikatSchl();
             if (indi.equals("") || indi.contains("kein IndiSchl.")) {
@@ -2417,11 +2432,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 // fuer die Suche alles entfernen das nicht in der icd10-Tabelle aufgefuehrt sein
                 // kann
                 String suchenach = RezNeuanlage.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10());
+                // TODO: put following SQL statement in some Dto-class
                 if (SqlInfo.holeEinzelFeld("select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
                            .equals("")) {
                     int frage = JOptionPane.showConfirmDialog(null,
                             "<html><b>Der eingetragene 1. ICD-10-Code ist falsch: <font color='#ff0000'>"
-                                    + Reha.instance.patpanel.vecaktrez.get(71)
+                                    + Reha.instance.patpanel.rezAktRez.getIcd10()
                                                                       .trim()
                                     + "</font></b><br>" + "HMR-Check nicht m\u00f6glich!<br><br>"
                                     + "Wollen Sie jetzt das ICD-10-Tool starten?<br><br></html>",
@@ -2433,7 +2449,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     return;
 
                 }
-                if (Reha.instance.patpanel.vecaktrez.get(72)
+                if (Reha.instance.patpanel.rezAktRez.getIcd10_2()
                                                     .trim()
                                                     .length() > 0) {
                     suchenach = RezNeuanlage.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10_2());
@@ -2442,7 +2458,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                .equals("")) {
                         int frage = JOptionPane.showConfirmDialog(null,
                                 "<html><b>Der eingetragene 2. ICD-10-Code ist falsch: <font color='#ff0000'>"
-                                        + Reha.instance.patpanel.rezAktRez.getIcd10()
+                                        + Reha.instance.patpanel.rezAktRez.getIcd10_2()
                                                                           .trim()
                                         + "</font></b><br>" + "HMR-Check nicht m\u00f6glich!<br><br>"
                                         + "Wollen Sie jetzt das ICD-10-Tool starten?<br><br></html>",
@@ -2474,6 +2490,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } catch (Exception ex) {
                     idtest = 0;
                 }
+                logger.debug("Vec: idtest (ArtDerBeh" + i + ") =" +idtest);
+                idtest = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i - 1);
+                logger.debug("Rez: idtest (ArtDerBeh" + (i - 1) + ") =" + idtest);
                 if (idtest > 0) {
                     try {
                         anzahlen.add(Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(1 + i)));
