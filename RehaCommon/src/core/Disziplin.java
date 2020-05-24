@@ -38,7 +38,7 @@ public enum Disziplin {
     }
 
     /*
-     * valueOF cannot be overriden. Use this, if IAE is not tolerable.
+     * valueOF cannot be overridden. Use this, if IAE is not tolerable.
      */
     public static Disziplin ofShort(String value) {
         try {
