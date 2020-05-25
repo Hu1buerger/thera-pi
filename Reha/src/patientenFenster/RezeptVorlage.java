@@ -54,18 +54,22 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
     Vector<String> vecDiszi = new Vector<String>();
     public Vector<String> vecResult = new Vector<String>();
     public boolean bHasSelfDisposed = false;
+    
+    private int patIntern;
 
-    public RezeptVorlage(Point pt) {
+    public RezeptVorlage(Point pt, int PatIntern) {
         super(null, "RezeptVorlage");
 
         // Ermittlung der Rezept-Daten zu diesem Patienten
-        String strPatIntern = Reha.instance.patpanel.vecaktrez.get(0);
+        // int iPatIntern = Reha.instance.patpanel.rezAktRez.getPatIntern();
+        patIntern = PatIntern;
 
+        // Sort-unique on diszi (as substr. out of RzNr) from all Rezepte (akt. & hist.) of Patient (ident. by PatIntern)
         String cmd = "SELECT DISTINCT SUBSTR(REZ_NR,1,2) as diszi from "
                 + "(SELECT \"lza\", `PAT_INTERN`,`REZ_NR`, `REZ_DATUM` FROM `lza` lza WHERE `PAT_INTERN` = "
-                + strPatIntern + " union "
+                + patIntern + " union "
                 + "SELECT \"verordn\", `PAT_INTERN`,`REZ_NR`, `REZ_DATUM` FROM `verordn` ver WHERE `PAT_INTERN` = "
-                + strPatIntern + ") uni";
+                + patIntern + ") uni";
         // ORDER BY REZ_NR asc, rez_datum desc
         starteSuche(cmd, "diszi"); // das fuellt den Member-Vektor "vecDiszi"
 
@@ -115,7 +119,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                 strSelectedDiszi = vecDiszi.get(0);
             // mit der Disziplin such wir jetzt noch das konkrete letzte Rezept zu dieser
             // Disziplin
-            starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
+            starteSucheVorlage(strSelectedDiszi);
             this.dispose();
             bHasSelfDisposed = true;
             return;
@@ -126,11 +130,11 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
     /****************************************************/
 
     // ermittelt die ganz konkrete Vorlage fuer die Kopieraktion
-    private void starteSucheVorlage(String strPatIntern, String strDiszi) {
+    private void starteSucheVorlage(String strDiszi) {
 
         // Suche neuestes Rezept inkl. der vorab bestimmten Disziplin
-        String cmd = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + strPatIntern + " AND rez_nr like '" + strDiszi
-                + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + strPatIntern
+        String cmd = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + patIntern + " AND rez_nr like '" + strDiszi
+                + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + patIntern
                 + " AND rez_nr like '" + strDiszi + "%'" + " ORDER BY rez_datum desc LIMIT 1";
 
         starteSuche(cmd, "vorlage"); // das fuellt den Member-Vektor "vecResult"
@@ -294,13 +298,13 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
         if (arg0.getActionCommand()
                 .equals("kopieren")) {
             // hier wird vecResult gef\u00fcllt
-            starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
+            starteSucheVorlage(strSelectedDiszi);
             this.dispose();
         }
         if (vecDiszi.contains(arg0.getActionCommand())) { // Wenn eine der gefundenen Disziplinen angewaehlt worden ist
             strSelectedDiszi = arg0.getActionCommand();
             // hier wird vecResult gefuellt
-            starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
+            starteSucheVorlage(strSelectedDiszi);
             this.dispose();
         }
         if (arg0.getActionCommand()
