@@ -33,6 +33,8 @@ import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -67,6 +69,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
      *
      */
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(ArztBericht.class);
     private RehaTPEventClass rtp = null;
     private boolean neu;
     private String reznr;
@@ -358,8 +361,15 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         // hier testen ob ohne Rezeptbezug, wenn ja kann der Vector nicht verwendet
         // werden
         if ((!this.reznr.equals("")) && (this.aufrufvon < 1)) {
+         // TODO: delete me once Rezepte have been sorted
             name = Reha.instance.patpanel.vecaktrez.get(15);
+            logger.debug("Vec: name=" + name);
+            name = Reha.instance.patpanel.rezAktRez.getArzt();
+            logger.debug("Rez: name=" + name);
             arztid = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(16));
+            logger.debug("Vec: arztid=" + arztid);
+            arztid = Reha.instance.patpanel.rezAktRez.getArztId();
+            logger.debug("Rez: arztid=" + arztid);
         } else if ((!this.reznr.equals("")) && (this.aufrufvon == 1)) {
             try {
                 name = SqlInfo.holeEinzelFeld("select arzt from lza where rez_nr = '" + this.reznr + "' LIMIT 1");
@@ -418,7 +428,11 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         try {
             String xdiagnose = "";
             if ((!this.reznr.equals("")) && (this.aufrufvon == 0)) {
+             // TODO: delete me once Rezepte have been sorted
                 xdiagnose = Reha.instance.patpanel.vecaktrez.get(23);
+                logger.debug("Vec: diagnose=" + xdiagnose);
+                xdiagnose = Reha.instance.patpanel.rezAktRez.getDiagnose();
+                logger.debug("Rez: diagnose=" + xdiagnose);
                 if (xdiagnose.equals("")) {
                     xdiagnose = SqlInfo.holeEinzelFeld("select diagnose from bericht1 where berichtid='"
                             + Integer.toString(this.berichtid) + "' LIMIT 1");
@@ -742,7 +756,9 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         }
         this.berichtid = berichtnr;
         if (this.aufrufvon == 0) {
+            // TODO: delete me once Rezepte have been sorted
             Reha.instance.patpanel.vecaktrez.set(54, Integer.toString(berichtnr));
+            Reha.instance.patpanel.rezAktRez.setBerId(berichtnr);
             Reha.instance.patpanel.rezlabs[7].setForeground(Color.BLACK);
             Reha.instance.patpanel.rezlabs[7].setText("Therapiebericht o.k.");
         } else if (this.aufrufvon == 1) {
@@ -1023,9 +1039,15 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
                  * "<Rposition4>"));
                  */
                 String diszi = RezTools.getDisziplinFromRezNr(reznr);
+             // TODO: delete me once Rezepte have been sorted
                 regleBHashMap(diszi, Reha.instance.patpanel.vecaktrez.get(41), Reha.instance.patpanel.vecaktrez.get(8),
                         Reha.instance.patpanel.vecaktrez.get(9), Reha.instance.patpanel.vecaktrez.get(10),
                         Reha.instance.patpanel.vecaktrez.get(11));
+                regleBHashMap(diszi, Reha.instance.patpanel.rezAktRez.getPreisGruppe(), 
+                                     Reha.instance.patpanel.rezAktRez.getArtDerBeh1(),
+                                     Reha.instance.patpanel.rezAktRez.getArtDerBeh2(),
+                                     Reha.instance.patpanel.rezAktRez.getArtDerBeh3(),
+                                     Reha.instance.patpanel.rezAktRez.getArtDerBeh4());
             } else {
                 //
                 String diszi = RezTools.getDisziplinFromRezNr(reznr);
@@ -1076,6 +1098,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
 
     }
 
+    // TODO: Delete me once Rezepte have been sorted, this whole method has been recreated below taking ints as params where applicable
     private void regleBHashMap(String disziplin, String preisgruppe, String id1, String id2, String id3, String id4) {
         int ipg = Integer.parseInt(preisgruppe);
         String dummy = "";
@@ -1101,6 +1124,42 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         if (!id4.equals("0")) {
             dummy = RezTools.getLangtextFromID(id4, Integer.toString(ipg - 1), SystemPreislisten.hmPreise.get(disziplin)
                                                                                                          .get(ipg - 1));
+            SystemConfig.hmAdrBDaten.put("<Blang4>", String.valueOf(dummy));
+        }
+        /*
+         * System.out.println(SystemConfig.hmAdrBDaten.get("<Blang1>"));
+         * System.out.println(SystemConfig.hmAdrBDaten.get("<Blang2>"));
+         * System.out.println(SystemConfig.hmAdrBDaten.get("<Blang3>"));
+         * System.out.println(SystemConfig.hmAdrBDaten.get("<Blang4>"));
+         */
+    }
+    
+    // TODO: the called method "getLangtextFromID" never uses the cast-around param ipg - rid ourselves of it...
+    private void regleBHashMap(String disziplin, int preisgruppe, int id1, int id2, int id3, int id4) {
+        int ipg = preisgruppe - 1;
+        String dummy = "";
+        // System.out.println(disziplin+"-"+preisgruppe+"-"+id1+"-"+id2+"-"+id3+"-"+id4);
+        for (int i = 1; i < 5; i++) {
+            SystemConfig.hmAdrBDaten.put("<Blang" + Integer.toString(i) + ">", "");
+        }
+        if (id1 != 0) {
+            dummy = RezTools.getLangtextFromID(Integer.toString(id1), Integer.toString(ipg), SystemPreislisten.hmPreise.get(disziplin)
+                                                                                                         .get(ipg));
+            SystemConfig.hmAdrBDaten.put("<Blang1>", String.valueOf(dummy));
+        }
+        if (id2 != 0) {
+            dummy = RezTools.getLangtextFromID(Integer.toString(id2), Integer.toString(ipg), SystemPreislisten.hmPreise.get(disziplin)
+                                                                                                         .get(ipg));
+            SystemConfig.hmAdrBDaten.put("<Blang2>", String.valueOf(dummy));
+        }
+        if (id3 != 0) {
+            dummy = RezTools.getLangtextFromID(Integer.toString(id3), Integer.toString(ipg), SystemPreislisten.hmPreise.get(disziplin)
+                                                                                                         .get(ipg));
+            SystemConfig.hmAdrBDaten.put("<Blang3>", String.valueOf(dummy));
+        }
+        if (id4 != 0) {
+            dummy = RezTools.getLangtextFromID(Integer.toString(id4), Integer.toString(ipg), SystemPreislisten.hmPreise.get(disziplin)
+                                                                                                         .get(ipg));
             SystemConfig.hmAdrBDaten.put("<Blang4>", String.valueOf(dummy));
         }
         /*
