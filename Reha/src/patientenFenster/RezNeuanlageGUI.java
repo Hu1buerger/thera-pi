@@ -76,6 +76,7 @@ import systemTools.ListenerTools;
 public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListener, FocusListener, RehaTPEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RezNeuanlageGUI.class);
+    
     private final class Icd10Listener extends MouseAdapter {
         @Override
         public void mouseClicked(MouseEvent e) {
@@ -925,7 +926,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                      .setValueAt(datum, row, 2);
         }
     }
-
+    
     /**
      * 'spaetester Beginn' in Tabelle uebernehmen
      *
@@ -939,32 +940,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         }
     }
 
-    private LocalDate chkLastBeginDat(LocalDate rezDat, String lastDat, String preisGroup, String aktDiszi) {
-        LocalDate spaetestAnfang;
-        if (lastDat.trim().equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
-            // Preisgruppe holen
-            int pg = Integer.parseInt(preisGroup) - 1;
-            // Frist zwischen Rezeptdatum und erster Behandlung
-            int frist = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
-                                                                          .get(0)).get(pg);
-            // Kalendertage
-            if ((Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
-                                                                  .get(1)).get(pg)) {
-                
-                spaetestAnfang = rezDat.plusDays(frist);
-            } else { // Werktage
-                boolean mitsamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
-                                                                                       .get(4)).get(pg);
-                spaetestAnfang = HMRCheck.hmrLetztesDatum(rezDat,
-                        (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
-                                                                          .get(0)).get(pg),
-                        mitsamstag);
-            }
-        } else {
-            spaetestAnfang =  LocalDate.parse(lastDat, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-        }
-        return spaetestAnfang;
-    }
 
     public int leistungTesten(int combo, int veczahl) {
         int retwert = 0;
@@ -986,38 +961,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     public RezNeuanlageGUI getInstance() {
         return this;
-    }
-
-    public static String macheIcdString(String string) {
-        String String1 = string.trim()
-                               .substring(0, 1)
-                               .toUpperCase();
-        String String2 = string.trim()
-                               .substring(1)
-                               .toUpperCase()
-                               .replace(" ", "")
-                               .replace("*", "")
-                               .replace("!", "")
-                               .replace("+", "")
-                               .replace("R", "")
-                               .replace("L", "")
-                               .replace("B", "")
-                               .replace("G", "")
-                               .replace("V", "")
-                               .replace("Z", "");
-        ;
-        return String1 + String2;
-
-    }
-
-    private String chkIcdFormat(String string) {
-        int posDot = string.indexOf(".");
-        if ((string.length() > 3) && (posDot < 0)) {
-            String tmp1 = string.substring(0, 3);
-            String tmp2 = string.substring(3);
-            return tmp1 + "." + tmp2;
-        }
-        return string;
     }
 
     @Override
@@ -1111,7 +1054,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         if (jtf[cICD10].getText()
                                        .trim()
                                        .length() > 0) {
-                            String suchenach = macheIcdString(jtf[cICD10].getText());
+                            String suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10].getText());
                             if (SqlInfo.holeEinzelFeld(
                                     "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
                                        .equals("")) {
@@ -1121,7 +1064,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                             if (jtf[cICD10_2].getText()
                                              .trim()
                                              .length() > 0) {
-                                suchenach = macheIcdString(jtf[cICD10_2].getText());
+                                suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10_2].getText());
                                 if (SqlInfo.holeEinzelFeld(
                                         "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
                                            .equals("")) {
@@ -1541,7 +1484,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     }
 
-    /** Holt die passenden Inikationsschluessel gemae\u00df aktiver Disziplin**/
+    /** Holt die passenden Inikationsschluessel gemaess aktiver Disziplin**/
     private void fuelleIndis(String typeOfVO) {
         try {
             if (jcmb[cINDI].getItemCount() > 0) {
@@ -1702,7 +1645,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }
             if (componentName.equals("icd10")) {
                 String text = jtf[cICD10].getText();
-                jtf[cICD10].setText(chkIcdFormat(text));
+                jtf[cICD10].setText(RezeptFensterTools.chkIcdFormat(text));
                 if (ctrlIsPressed & jumpForward) {
                     eingabeDiag.requestFocusInWindow();
                 }
@@ -1710,7 +1653,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }
             if (componentName.equals("icd10_2")) {
                 String text = jtf[cICD10_2].getText();
-                jtf[cICD10_2].setText(chkIcdFormat(text));
+                jtf[cICD10_2].setText(RezeptFensterTools.chkIcdFormat(text));
                 return;
             }
         }
@@ -2059,7 +2002,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             // TODO: sort format of RezDatum upon String
             thisRezept.setRezDatum(rezDat);
             setRezDatInTable(stest);
-            LocalDate stest2 = chkLastBeginDat(rezDat, jtf[cBEGINDAT].getText()
+            LocalDate stest2 = RezeptFensterTools.chkLastBeginDat(rezDat, jtf[cBEGINDAT].getText()
                                                                  .trim(),
                     jtf[cPREISGR].getText(), aktuelleDisziplin);
             setLastDatInTable(stest2);
@@ -2145,7 +2088,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     szzstatus = Rezept.ZZSTATUS_BEFREIT;
                     break;
                 }
-                //// System.out.println("ZuzahlStatus = Zuzahlung (zun\u00e4chst) erforderlich, pruefe
+                //// System.out.println("ZuzahlStatus = Zuzahlung (zunaechst) erforderlich, pruefe
                 //// ob befreit oder unter 18");
                 if (Reha.instance.patpanel.patDaten.get(30)
                                                    .equals("T")) {
@@ -2240,9 +2183,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }
             /******/
 
-            String[] lzv = holeLFV("anamnese", "pat5", "pat_intern", jtf[cPATINT].getText(), rezKlasse.toUpperCase()
+            String[] lzv = RezeptFensterTools.holeLFV("anamnese", "pat5", "pat_intern", jtf[cPATINT].getText(), rezKlasse.toUpperCase()
                                                                                                       .substring(0, 2));
-            if (!lzv[0].equals("")) {
+            if (!lzv[0].isEmpty()) {
                 if (!jta.getText()
                         .contains(lzv[0])) {
                     int frage = JOptionPane.showConfirmDialog(null,
@@ -2341,35 +2284,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         } else {
             return new String[] { "0.00", "" };
         }
-    }
-
-    /**
-     *
-     * Test, ob eine Langfristverordnung vorliegt
-     */
-    public static String[] holeLFV(String hole_feld, String db, String where_feld, String suchen, String voart) {
-        String cmd = "select " + hole_feld + " from " + db + " where " + where_feld + "='" + suchen + "' LIMIT 1";
-        String anamnese = SqlInfo.holeEinzelFeld(cmd);
-        String[] retstring = { "", "" };
-        if (anamnese.indexOf("$$LFV$$" + voart.toUpperCase() + "$$") >= 0) {
-            String[] zeilen = anamnese.split("\n");
-            for (int i = 0; i < zeilen.length; i++) {
-                if (zeilen[i].startsWith("$$LFV$$" + voart.toUpperCase() + "$$")) {
-                    String[] woerter = zeilen[i].split(Pattern.quote("$$"));
-                    try {
-                        retstring[1] = "LangfristVerordnung: " + woerter[1] + "\n" + "Disziplin: " + woerter[2] + "\n"
-                                + "Aktenzeichen: " + woerter[3] + "\n" + "Genehmigungsdatum: " + woerter[4] + "\n"
-                                + "G\u00fcltig ab: " + woerter[5] + "\n" + "G\u00fcltig bis: " + woerter[6] + "\n";
-                        retstring[0] = String.valueOf(zeilen[i]);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    return retstring;
-                }
-            }
-
-        }
-        return retstring;
     }
 
     public static String makeStacktraceToString(Exception ex) {
