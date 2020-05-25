@@ -191,7 +191,7 @@ public class PatientToolBarLogic {
                     String sbetreff = "Patient(in): " + StringTools.EGross(patientHauptPanel.patDaten.get(2)) + ", "
                             + StringTools.EGross(patientHauptPanel.patDaten.get(3)) + " PatID: " + spat_intern;
                     if (AktuelleRezepte.tabaktrez.getRowCount() > 0) {
-                        srez_nr = Reha.instance.patpanel.vecaktrez.get(1);
+                        srez_nr = Reha.instance.patpanel.rezAktRez.getRezNr();
                     }
                     if (!RehaIOServer.rehaMailIsActive) {
                         if (Reha.aktUser.startsWith("Therapeut")) {
@@ -235,7 +235,7 @@ public class PatientToolBarLogic {
             }
             String srez_nr = "-1";
             if (AktuelleRezepte.tabaktrez.getRowCount() > 0) {
-                srez_nr = Reha.instance.patpanel.vecaktrez.get(1);
+                srez_nr = Reha.instance.patpanel.rezAktRez.getRezNr();
             }
             if (srez_nr.isEmpty() || (!srez_nr.startsWith("RH"))) {
                 try {
