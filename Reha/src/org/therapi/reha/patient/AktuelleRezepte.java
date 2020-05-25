@@ -3333,7 +3333,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         String rezToCopy = null;
         switch (kopierModus) {
             case REZEPTKOPIERE_LETZTES: 
-                RezeptVorlage vorlage = new RezeptVorlage(btnNeu.getLocationOnScreen());
+                RezeptVorlage vorlage = new RezeptVorlage(btnNeu.getLocationOnScreen(), Reha.instance.patpanel.rezAktRez.getPatIntern());
                 if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
                                                  // bereits selbst disposed !
                     vorlage.setModal(true);
