@@ -56,13 +56,18 @@ public class RezeptDto {
         return Optional.ofNullable(rezept);
     }
 
-    public List<Rezept> getRezepteByPatNr(int patientID) {
-        String sql = selectAllFromRezDBWhere + "PAT_INTERN = '" + patientID + "'"
-                + "UNION " + selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "';";
+    public List<Rezept> getAktuelleRezepteByPatNr(int patientID) {
+        String sql = selectAllFromRezDBWhere + "PAT_INTERN = '" + patientID + "'";
 
         return retrieveList(sql);
     }
+    
+    public List<Rezept> getHistorischeRezepteByPatNr(int patientID) {
+        String sql = selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "'";
 
+        return retrieveList(sql);
+    }
+    
     public void updateRezeptTermine(String Id, String TerminListe) {
         String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
@@ -180,6 +185,7 @@ public class RezeptDto {
         rez.numfrei2 = rs.getInt("NUMFREI2");
         rez.charfrei1 = rs.getString("CHARFREI1");
         rez.charfrei2 = rs.getString("CHARFREI2");
+        //TODO List<Termin>
         rez.termine = rs.getString("TERMINE");
         rez.id = rs.getInt("ID");
         rez.ktraeger = rs.getString("KTRAEGER");
@@ -198,10 +204,10 @@ public class RezeptDto {
         rez.angelegtVon = rs.getString("ANGELEGTVON");
         rez.barcodeform = rs.getInt("BARCODEFORM");
         rez.dauer = rs.getString("DAUER");
-        rez.pos1 = rs.getString("POS1");
-        rez.pos2 = rs.getString("POS2");
-        rez.pos3 = rs.getString("POS3");
-        rez.pos4 = rs.getString("POS4");
+        rez.pos1 = rs.getString("POS1").trim ();
+        rez.pos2 = rs.getString("POS2").trim ();
+        rez.pos3 = rs.getString("POS3").trim ();
+        rez.pos4 = rs.getString("POS4").trim ();
         rez.frequenz = rs.getString("FREQUENZ");
         rez.lastEditor = rs.getString("LASTEDIT");
         rez.berId = rs.getInt("BERID");

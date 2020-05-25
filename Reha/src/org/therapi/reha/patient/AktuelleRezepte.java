@@ -167,7 +167,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     Vector<String> formular = new Vector<String>();
     Vector<String> aktTerminBuffer = new Vector<String>();
     RezeptDto rDto = null;
-    List<Rezept> lDtoRezepte;
+    List<Rezept> listAktuelleRez;
     int aktuellAngezeigt = -1;
     int iformular = -1;
 
@@ -945,7 +945,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     aktTerminBuffer.clear();
                     aktTerminBuffer.trimToSize();
                     
-                    List<Rezept> listRezepte = new LinkedList<>(rDto.getRezepteByPatNr(Integer.parseInt(xpatint)));
+                    listAktuelleRez = new LinkedList<>(rDto.getAktuelleRezepteByPatNr(Integer.parseInt(xpatint)));
                     // TODO: remove once done with Rezepte
                     Vector<Vector<String>> vec = SqlInfo.holeSaetze("verordn",
                             "rez_nr,zzstatus,"
@@ -962,7 +962,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         // TODO: remove once Rezepte has been sorted
                         // Comment the following line to disable vec-based termine to be added
                         // aktTerminBuffer.add(String.valueOf(vec.get(i).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_TERMINE)));
-                        aktTerminBuffer.add(listRezepte.get(i).getTermine());
+                        aktTerminBuffer.add(listAktuelleRez.get(i).getTermine());
                         // TODO: irgendwo lief mir ein ZZStatus wo 3 == bald18 bedeutet?
                         int iZuZahlStat = 3, rezstatus = 0;
                         ZZStat iconKey;
@@ -987,13 +987,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             logger.debug("ZZStatus is not empty");
                             */
                         logger.debug("iZuZahlStat from Vec: " + iZuZahlStat);
-                        iZuZahlStat = listRezepte.get(i).getZZStatus();
+                        iZuZahlStat = listAktuelleRez.get(i).getZZStatus();
                         logger.debug("iZuZahlStat from Rez: " + iZuZahlStat);
                         //}
                         final String testreznum = String.valueOf(vec.get(i)
                                                                     .get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr));
                         logger.debug("testreznum from Vec: " + testreznum);
-                        logger.debug("testreznum from rezDto: " + listRezepte.get(i).getRezNr());
+                        logger.debug("testreznum from rezDto: " + listAktuelleRez.get(i).getRezNr());
                         iconKey = ZuzahlTools.getIconKey(iZuZahlStat, testreznum);
 
                         if (((Vector) vec.get(i)).get(MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS)
@@ -1001,7 +1001,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             rezstatus = 1;
                         }
                         logger.debug("rezStatus from vec:" + rezstatus);
-                        if(listRezepte.get(i).isAbschluss())
+                        if(listAktuelleRez.get(i).isAbschluss())
                             rezstatus = 1; // Enum?
                         logger.debug("rezStatus from Rez:" + rezstatus);
 
@@ -1017,16 +1017,16 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         */
                         // Using Rezepte, we collected all vals, so here's the selection for the panel:
                         Object[] fields = new Object[]{
-                                listRezepte.get(i).getRezNr(),
-                                listRezepte.get(i).getZZStatus(),
-                                DatFunk.sDatInDeutsch(listRezepte.get(i).getRezDatum().toString()),
-                                DatFunk.sDatInDeutsch(listRezepte.get(i).getErfassungsDatum().toString()),
-                                DatFunk.sDatInDeutsch(listRezepte.get(i).getLastDate().toString()),
-                                listRezepte.get(i).isAbschluss(),
-                                listRezepte.get(i).getPatIntern(),
-                                listRezepte.get(i).getIndikatSchl(),
-                                listRezepte.get(i).getId(),
-                                listRezepte.get(i).getTermine()
+                                listAktuelleRez.get(i).getRezNr(),
+                                listAktuelleRez.get(i).getZZStatus(),
+                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getRezDatum().toString()),
+                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getErfassungsDatum().toString()),
+                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getLastDate().toString()),
+                                listAktuelleRez.get(i).isAbschluss(),
+                                listAktuelleRez.get(i).getPatIntern(),
+                                listAktuelleRez.get(i).getIndikatSchl(),
+                                listAktuelleRez.get(i).getId(),
+                                listAktuelleRez.get(i).getTermine()
                         };
                         // And now add them: 
                         dtblm.addRow((Object[]) fields);
@@ -1049,7 +1049,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                 }
                             }.execute();
                         }
-                        if (listRezepte.get(i).getRezNr().startsWith("RH") && Reha.instance.dta301panel != null) {
+                        if (listAktuelleRez.get(i).getRezNr().startsWith("RH") && Reha.instance.dta301panel != null) {
                             new SwingWorker<Void, Void>() {
                                 @Override
                                 protected Void doInBackground() throws Exception {
@@ -1091,7 +1091,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     "id = '" + String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
-                            Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
+                            Reha.instance.patpanel.rezAktRez = listAktuelleRez.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
@@ -1103,7 +1103,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     "id = '" + String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)) + "'",
                                     Arrays.asList(new String[] {})));
                             logger.debug("vecaktrez from Vec: " + Reha.instance.patpanel.vecaktrez.toString());
-                            Reha.instance.patpanel.rezAktRez = listRezepte.get(row);
+                            Reha.instance.patpanel.rezAktRez = listAktuelleRez.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
                                     String.valueOf(tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
@@ -2207,16 +2207,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         for (int i = 0; i < vec.size(); i++) {
             // POS1(48)-4(51):
             vec.get(i)
-               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1()
-                                                        .trim()
-                                                        .equals("") ? ""
-                                                                : (String) Reha.instance.patpanel.rezAktRez.getHMPos1())
+               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1())
                        + (Reha.instance.patpanel.rezAktRez.getHMPos2()
-                                                          .trim()
                                                           .equals("") ? ""
                                                                   : "," + Reha.instance.patpanel.rezAktRez.getHMPos2())
                        + (Reha.instance.patpanel.rezAktRez.getHMPos3()
-                                                          .trim()
                                                           .equals("") ? ""
                                                                   : "," + Reha.instance.patpanel.rezAktRez.getHMPos3())
                        + (Reha.instance.patpanel.rezAktRez.getHMPos4()
@@ -2488,7 +2483,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             Disziplinen disziSelect = new Disziplinen();
 
-            // TODO: adjust to Rezepte-class
+            // TODO: Delete me when Rezepteumbau has been completed
             // get(6+2) = ArtDerBeh1 - 6+5 ArtDerBeh4
             for (int i = 2; i <= 5; i++) {
                 try {
