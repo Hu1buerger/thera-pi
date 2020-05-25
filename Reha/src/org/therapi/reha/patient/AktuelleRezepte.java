@@ -167,6 +167,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     Vector<String> formular = new Vector<String>();
     Vector<String> aktTerminBuffer = new Vector<String>();
     RezeptDto rDto = null;
+    Rezept rezAktuellesRezept;
     List<Rezept> listAktuelleRez;
     int aktuellAngezeigt = -1;
     int iformular = -1;
@@ -1094,7 +1095,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             Reha.instance.patpanel.rezAktRez = listAktuelleRez.get(row);
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
-                            rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, 0),
+                            rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr),
                                     String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
                         } else {
                             rezneugefunden = true;
