@@ -812,7 +812,7 @@ public class Gutachten extends JXPanel implements ActionListener, TableModelList
                 // LVA-Entlassmitteilung
                 try {
                     new LadeProg(Path.Instance.getProghome() + "LVAEntlass.jar" + " " + Path.Instance.getProghome()
-                            + "ini/" + Reha.getAktIK() + "/rehajava.ini" + " " + Reha.instance.patpanel.vecaktrez.get(1)
+                            + "ini/" + Reha.getAktIK() + "/rehajava.ini" + " " + Reha.instance.patpanel.rezAktRez.getRezNr()
                             + " " + Path.Instance.getProghome() + "ini/" + Reha.getAktIK() + "/fremdprog.ini");
                 } catch (Exception ex) {
                     ex.printStackTrace();
