@@ -36,11 +36,16 @@ public class ArztVec {
 
 
 
-    public boolean init(String idInDb) {
+    public boolean init(int idInDb) {
         String cmd = "select * from arzt where id ='" + idInDb + "' LIMIT 1";
         return getRecord (cmd);
     }
 
+    // TODO: one of these days, we'll only use ints as doc-Ids, until then we'll cast and pretend we got what we need...
+    public boolean init(String idInDb) {
+        return init(Integer.parseInt(idInDb.trim()));
+    }
+    
     private boolean getRecord (String cmd) {
         this.vecvec_aerzte = SqlInfo.holeFelder(cmd);
         if(this.vecvec_aerzte.size()<=0){
