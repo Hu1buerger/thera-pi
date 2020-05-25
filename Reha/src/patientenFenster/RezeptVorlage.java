@@ -67,14 +67,14 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                 + "SELECT \"verordn\", `PAT_INTERN`,`REZ_NR`, `REZ_DATUM` FROM `verordn` ver WHERE `PAT_INTERN` = "
                 + strPatIntern + ") uni";
         // ORDER BY REZ_NR asc, rez_datum desc
-        starteSuche(cmd, "diszi"); // das füllt den Member-Vektor "vecDiszi"
+        starteSuche(cmd, "diszi"); // das fuellt den Member-Vektor "vecDiszi"
 
         pinPanel = new PinPanel();
         pinPanel.setName("RezeptVorlage");
         pinPanel.getGruen()
                 .setVisible(false);
         setPinPanel(pinPanel);
-        getSmartTitledPanel().setTitle("Rezeptvorlage wählen");
+        getSmartTitledPanel().setTitle("Rezeptvorlage w\u00e4hlen");
 
         setSize(300, 270);
         setPreferredSize(new Dimension(300, 270));
@@ -83,7 +83,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
         rgb = new RezeptVorlageHintergrund();
         rgb.setLayout(new BorderLayout());
 
-        // Das erzeugt den farbigen Fensterhintergrund mit Farbverlauf für den Dialog
+        // Das erzeugt den farbigen Fensterhintergrund mit Farbverlauf fuer den Dialog
         new SwingWorker<Void, Void>() {
 
             @Override
@@ -108,7 +108,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
         pack();
 
-        // prüfe die Anzahl der gefundenen Ergebnisse und treffe voreilige
+        // pruefe die Anzahl der gefundenen Ergebnisse und treffe voreilige
         // Entscheidungen !
         if (vecDiszi.size() < 2) {
             if (vecDiszi.size() == 1)
@@ -125,7 +125,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
     /****************************************************/
 
-    // ermittelt die ganz konkrete Vorlage für die Kopieraktion
+    // ermittelt die ganz konkrete Vorlage fuer die Kopieraktion
     private void starteSucheVorlage(String strPatIntern, String strDiszi) {
 
         // Suche neuestes Rezept inkl. der vorab bestimmten Disziplin
@@ -133,7 +133,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                 + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + strPatIntern
                 + " AND rez_nr like '" + strDiszi + "%'" + " ORDER BY rez_datum desc LIMIT 1";
 
-        starteSuche(cmd, "vorlage"); // das füllt den Member-Vektor "vecResult"
+        starteSuche(cmd, "vorlage"); // das fuellt den Member-Vektor "vecResult"
     }
 
     private void starteSuche(String sstmt, String strMode) {
@@ -198,7 +198,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
         pb.addLabel(
                 "<html>Es existieren Rezepte in mehreren Disziplinen.<br><br>"
-                        + "Bitte die Disziplin wählen, deren letztes Rezept Sie JETZT kopieren wollen</html>",
+                        + "Bitte die Disziplin w\u00e4hlen, deren letztes Rezept Sie JETZT kopieren wollen</html>",
                 cc.xyw(2, 2, 5));
 
         int iAnzAktiv = SystemConfig.rezeptKlassenAktiv.size();
@@ -206,7 +206,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
         int iYpos = 4; // Start-Position der Radio-Buttons;
         Boolean bFirst = true;
 
-        for (int iVorh = 0; iVorh < iAnzVorh; iVorh++) { // renne über alle gefunden Rezept-Disziplinen
+        for (int iVorh = 0; iVorh < iAnzVorh; iVorh++) { // renne ueber alle gefunden Rezept-Disziplinen
 
             for (int iAktiv = 0; iAktiv < iAnzAktiv; iAktiv++) { // Gleiche ab gegen die aktuelle aktiven Disziplinen
                 if (vecDiszi.get(iVorh)
@@ -231,9 +231,9 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                                                                .get(0),
                             cc.xy(6, iYpos));
 
-                    iYpos += 2; // nächste Y-Position festlegen
+                    iYpos += 2; // naechste Y-Position festlegen
                     bFirst = false;
-                    break; // für das innere "for"
+                    break; // fuer das innere "for"
                 }
             }
         }
@@ -293,13 +293,13 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
         if (arg0.getActionCommand()
                 .equals("kopieren")) {
-            // hier wird vecResult gefüllt
+            // hier wird vecResult gef\u00fcllt
             starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
             this.dispose();
         }
-        if (vecDiszi.contains(arg0.getActionCommand())) { // Wenn eine der gefundenen Disziplinen angewählt worden ist
+        if (vecDiszi.contains(arg0.getActionCommand())) { // Wenn eine der gefundenen Disziplinen angewaehlt worden ist
             strSelectedDiszi = arg0.getActionCommand();
-            // hier wird vecResult gefüllt
+            // hier wird vecResult gefuellt
             starteSucheVorlage(Reha.instance.patpanel.vecaktrez.get(0), strSelectedDiszi);
             this.dispose();
         }
@@ -326,7 +326,7 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
                 this.dispose();
             }
 
-            // System.out.println("Return Gedrückt");
+            // System.out.println("Return Gedrueckt");
         }
         if (event.getKeyCode() == KeyEvent.VK_ESCAPE) { // 27 Abbruch mit der Tastatur
             // int iTest = KeyEvent.VK_ENTER;
