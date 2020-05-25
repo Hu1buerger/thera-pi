@@ -62,7 +62,9 @@ public class Rezept {
     String charfrei1;
     String charfrei2;
     
+    // TODO: Change to Behandlung-class
     String termine;
+    // Behandlung termine;    
     
     String ktraeger;
     int kId = -1;
@@ -1273,7 +1275,7 @@ public class Rezept {
      * @param pos1 the pos1 to set
      */
     public void setHMPos1(String pos1) {
-        this.pos1 = pos1;
+        this.pos1 = pos1.trim ();
     }
 
     /**
@@ -1287,7 +1289,7 @@ public class Rezept {
      * @param pos2 the pos2 to set
      */
     public void setHMPos2(String pos2) {
-        this.pos2 = pos2;
+        this.pos2 = pos2.trim ();
     }
 
     /**
@@ -1301,7 +1303,7 @@ public class Rezept {
      * @param pos3 the pos3 to set
      */
     public void setHMPos3(String pos3) {
-        this.pos3 = pos3;
+        this.pos3 = pos3.trim ();
     }
 
     /**
@@ -1315,7 +1317,7 @@ public class Rezept {
      * @param pos4 the pos4 to set
      */
     public void setHMPos4(String pos4) {
-        this.pos4 = pos4;
+        this.pos4 = pos4.trim ();
     }
 
     /**

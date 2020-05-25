@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 public class Behandlung implements Comparable<Behandlung> {
     LocalDate datum;
@@ -11,7 +12,9 @@ public class Behandlung implements Comparable<Behandlung> {
     String unterbrechungsbegruendung;
     /** Mehrere mit kommata getrennt. */
     List<String> heilmittel;
+    LocalDate erfassungsDatum;
     private DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    private DateTimeFormatter sqlFormat = DateTimeFormatter.ofPattern("yyyyy-MM-dd");
 
     Behandlung(String fromDB) {
         String[] parts = fromDB.split("@");
@@ -20,6 +23,7 @@ public class Behandlung implements Comparable<Behandlung> {
         unterbrechungsbegruendung = parts[2];
         heilmittel = Arrays.asList(parts[3].replace(" ", "")
                                            .split(","));
+        erfassungsDatum = LocalDate.parse(parts[4],sqlFormat);
     }
 
     public Behandlung(LocalDate of, String kollege, String string2, String heilmittel) {
@@ -31,62 +35,33 @@ public class Behandlung implements Comparable<Behandlung> {
         unterbrechungsbegruendung = string2;
         this.heilmittel = Arrays.asList(heilmittel.replace(" ", "")
                                                   .split(","));
+        erfassungsDatum = LocalDate.now();
     }
 
     @Override
     public String toString() {
-        return "Termin [datum=" + datum + ", kollege=" + kollege + ", unterbrechungsbegründung="
-                + unterbrechungsbegruendung + ", heilmittel=" + heilmittel + "]";
+        return "Behandlung [datum=" + datum + ", kollege=" + kollege + ", unterbrechungsbegruendung="
+                + unterbrechungsbegruendung + ", heilmittel=" + heilmittel + ", erfassungsDatum=" + erfassungsDatum
+                + "]";
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((datum == null) ? 0 : datum.hashCode());
-        result = prime * result + ((heilmittel == null) ? 0 : heilmittel.hashCode());
-        result = prime * result + ((unterbrechungsbegruendung == null) ? 0 : unterbrechungsbegruendung.hashCode());
-        return prime * result + ((kollege == null) ? 0 : kollege.hashCode());
+        return Objects.hash(datum, erfassungsDatum, heilmittel, kollege, unterbrechungsbegruendung);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj) {
+        if (this == obj)
             return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
+        if (obj == null)
             return false;
-        }
+        if (getClass() != obj.getClass())
+            return false;
         Behandlung other = (Behandlung) obj;
-        if (datum == null) {
-            if (other.datum != null) {
-                return false;
-            }
-        } else if (!datum.equals(other.datum)) {
-            return false;
-        }
-        if (heilmittel == null) {
-            if (other.heilmittel != null) {
-                return false;
-            }
-        } else if (!heilmittel.equals(other.heilmittel)) {
-            return false;
-        }
-        if (unterbrechungsbegruendung == null) {
-            if (other.unterbrechungsbegruendung != null) {
-                return false;
-            }
-        } else if (!unterbrechungsbegruendung.equals(other.unterbrechungsbegruendung)) {
-            return false;
-        }
-        if (kollege == null) {
-            if (other.kollege != null) {
-                return false;
-            }
-        } else if (!kollege.equals(other.kollege)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(datum, other.datum) && Objects.equals(erfassungsDatum, other.erfassungsDatum)
+                && Objects.equals(heilmittel, other.heilmittel) && Objects.equals(kollege, other.kollege)
+                && Objects.equals(unterbrechungsbegruendung, other.unterbrechungsbegruendung);
     }
 
     @Override
