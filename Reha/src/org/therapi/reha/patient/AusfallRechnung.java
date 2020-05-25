@@ -21,6 +21,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -46,6 +48,7 @@ import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import hauptFenster.Reha;
 import oOorgTools.OOTools;
+import rezept.Money;
 import systemEinstellungen.SystemConfig;
 import systemTools.LeistungTools;
 
@@ -54,6 +57,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
      *
      */
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(AusfallRechnung.class);
 
     public JRtaCheckBox[] leistung = { null, null, null, null, null };
 
@@ -124,7 +128,11 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         pb.addLabel("Bitte die Positionen auswählen die Sie berechnen wollen", cc.xyw(2, 2, 4));
 
         pb.addLabel("Heilmittel 1", cc.xy(3, 4));
+     // TODO: delete me once Rezepte have been sorted
         String lab = Reha.instance.patpanel.vecaktrez.get(48);
+        logger.debug("Rez: lab=" + lab);
+        lab = Reha.instance.patpanel.rezAktRez.getHMPos1();
+        logger.debug("Vec: lab=" + lab);
         leistung[0] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[0].setOpaque(false);
         if (!lab.equals("")) {
@@ -136,7 +144,11 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         pb.add(leistung[0], cc.xyw(5, 4, 2));
 
         pb.addLabel("Heilmittel 2", cc.xy(3, 6));
+     // TODO: delete me once Rezepte have been sorted
         lab = Reha.instance.patpanel.vecaktrez.get(49);
+        logger.debug("Rez: lab=" + lab);
+        lab = Reha.instance.patpanel.rezAktRez.getHMPos2();
+        logger.debug("Vec: lab=" + lab);
         leistung[1] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[1].setOpaque(false);
         if (!lab.equals("")) {
@@ -148,7 +160,11 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         pb.add(leistung[1], cc.xyw(5, 6, 2));
 
         pb.addLabel("Heilmittel 3", cc.xy(3, 8));
+     // TODO: delete me once Rezepte have been sorted
         lab = Reha.instance.patpanel.vecaktrez.get(50);
+        logger.debug("Rez: lab=" + lab);
+        lab = Reha.instance.patpanel.rezAktRez.getHMPos3();
+        logger.debug("Vec: lab=" + lab);
         leistung[2] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[2].setOpaque(false);
         if (!lab.equals("")) {
@@ -160,7 +176,11 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         pb.add(leistung[2], cc.xyw(5, 8, 2));
 
         pb.addLabel("Heilmittel 4", cc.xy(3, 10));
+     // TODO: delete me once Rezepte have been sorted
         lab = Reha.instance.patpanel.vecaktrez.get(51);
+        logger.debug("Rez: lab=" + lab);
+        lab = Reha.instance.patpanel.rezAktRez.getHMPos4();
+        logger.debug("Vec: lab=" + lab);
         leistung[3] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[3].setOpaque(false);
         if (!lab.equals("")) {
@@ -279,8 +299,11 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         StringBuffer buf = new StringBuffer();
         buf.append("insert into rgaffaktura set ");
         buf.append("rnr='" + afrNummer + "', ");
-        buf.append("reznr='" + Reha.instance.patpanel.vecaktrez.get(1) + "', ");
-        buf.append("pat_intern='" + Reha.instance.patpanel.vecaktrez.get(0) + "', ");
+     // TODO: delete me once Rezepte have been sorted
+        // buf.append("reznr='" + Reha.instance.patpanel.vecaktrez.get(1) + "', ");
+        // buf.append("pat_intern='" + Reha.instance.patpanel.vecaktrez.get(0) + "', ");
+        buf.append("reznr='" + Reha.instance.patpanel.rezAktRez.getRezNr() + "', ");
+        buf.append("pat_intern='" + String.valueOf(Reha.instance.patpanel.rezAktRez.getPatIntern()) + "', ");
         buf.append("rgesamt='" + SystemConfig.hmAdrAFRDaten.get("<AFRgesamt>")
                                                            .replace(",", ".")
                 + "', ");
@@ -311,7 +334,8 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         String[] inpos = { null, null };
         String spos = "";
         String sart = "";
-        Double gesamt = new Double(0.00);
+        Double dGesamt = new Double(0.00);
+        Money gesamt = new Money("0");
         int preisgruppe = 0;
         DecimalFormat df = new DecimalFormat("0.00");
 
@@ -321,27 +345,58 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
             mapkurz = "<AFRkurz" + (i + 1) + ">";
             maplang = "<AFRlang" + (i + 1) + ">";
             if (leistung[i].isSelected()) {
-                Double preis = new Double(Reha.instance.patpanel.vecaktrez.get(18 + i));
+             // TODO: delete me once Rezepte have been sorted
+                Double dPreis = new Double(Reha.instance.patpanel.vecaktrez.get(18 + i));
+                logger.debug("Vec: preis=" + dPreis);
+                Money preis = Reha.instance.patpanel.rezAktRez.getPreis(i);
                 String s = df.format(preis);
                 SystemConfig.hmAdrAFRDaten.put(mappos, leistung[i].getText());
                 SystemConfig.hmAdrAFRDaten.put(mappreis, s);
-                gesamt = gesamt + preis;
+                dGesamt = dGesamt + dPreis;
+                gesamt.add(preis);
+                logger.debug("Vec: gesamt= " + String.valueOf(dGesamt));
+                logger.debug("Rez: gesamt= " + gesamt.toString());
 
+             // TODO: delete me once Rezepte have been sorted
                 spos = Reha.instance.patpanel.vecaktrez.get(8 + i);
+                logger.debug("Vec: spos= " + spos);
+                spos = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i);
+                logger.debug("Rez: spos= " + spos);
                 sart = Reha.instance.patpanel.vecaktrez.get(1);
+                logger.debug("Vec: sart= " + sart);
+                sart = Reha.instance.patpanel.rezAktRez.getRezNr();
+                logger.debug("Rez: sart= " + sart);
                 sart = sart.substring(0, 2);
+             // TODO: delete me once Rezepte have been sorted
                 preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
+                logger.debug("Vec: Preisgruppe=" + preisgruppe);
+                preisgruppe = Reha.instance.patpanel.rezAktRez.getPreisGruppe() -1;
+                logger.debug("Rez: Preisgruppe=" + preisgruppe);
+                
                 inpos = LeistungTools.getLeistung(sart, spos, preisgruppe);
+                
                 SystemConfig.hmAdrAFRDaten.put(maplang, inpos[0]);
                 SystemConfig.hmAdrAFRDaten.put(mapkurz, inpos[1]);
                 //// System.out.println(inpos[0]);
                 //// System.out.println(inpos[1]);
 
             } else {
+             // TODO: delete me once Rezepte have been sorted
                 spos = Reha.instance.patpanel.vecaktrez.get(8 + i);
+                logger.debug("Vec: spos= " + spos);
+                spos = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i);
+                logger.debug("Rez: spos= " + spos);
                 sart = Reha.instance.patpanel.vecaktrez.get(1);
+                logger.debug("Vec: sart= " + sart);
+                sart = Reha.instance.patpanel.rezAktRez.getRezNr();
+                logger.debug("Rez: sart= " + sart);
                 sart = sart.substring(0, 2);
+             // TODO: delete me once Rezepte have been sorted
                 preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
+                logger.debug("Vec: Preisgruppe=" + preisgruppe);
+                preisgruppe = Reha.instance.patpanel.rezAktRez.getPreisGruppe() -1;
+                logger.debug("Rez: Preisgruppe=" + preisgruppe);
+                
                 inpos = LeistungTools.getLeistung(sart, spos, preisgruppe);
 
                 SystemConfig.hmAdrAFRDaten.put(mappos, leistung[i].getText());
@@ -352,7 +407,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
             }
 
         }
-        SystemConfig.hmAdrAFRDaten.put("<AFRgesamt>", df.format(gesamt));
+        SystemConfig.hmAdrAFRDaten.put("<AFRgesamt>", df.format(dGesamt));
         /// Hier muß noch die Rechnungsnummer bezogen und eingetragen werden
         afrNummer = "AFR-" + Integer.toString(SqlInfo.erzeugeNummer("afrnr"));
         SystemConfig.hmAdrAFRDaten.put("<AFRnummer>", afrNummer);
