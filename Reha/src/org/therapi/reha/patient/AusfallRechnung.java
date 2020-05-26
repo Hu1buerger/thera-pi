@@ -385,7 +385,8 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
              // TODO: delete me once Rezepte have been sorted
                 spos = Reha.instance.patpanel.vecaktrez.get(8 + i);
                 logger.debug("Vec: spos= " + spos);
-                spos = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i);
+                // Q&D - should rather do proper to-int conversion of the code
+                spos = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
                 logger.debug("Rez: spos= " + spos);
                 sart = Reha.instance.patpanel.vecaktrez.get(1);
                 logger.debug("Vec: sart= " + sart);
