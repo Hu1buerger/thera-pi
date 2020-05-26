@@ -1021,7 +1021,7 @@ public class RezTools {
         boolean istBefreit = Reha.instance.patpanel.patDaten.get(30)
                                                             .equals("T");
 
-        // 1. Schritt haben wir bereits Termineintr\ufffdge die man auswerten kann
+        // 1. Schritt haben wir bereits Termineintraege die man auswerten kann
         if ((vAktTermine = holeEinzelTermineAusRezept("", termine)).size() > 0) {
             // Es gibt Termine in der Tabelle
             bTermine = true;
@@ -2418,7 +2418,7 @@ public class RezTools {
                 retobj[1] = ((Double) retobj[1]) + bdendrezgeb.doubleValue();
                 /*******************************/
 
-                if (!kmgeld.equals("")) {// Wenn Kilometer abgerechnet werden k\ufffdnnen
+                if (!kmgeld.equals("")) {// Wenn Kilometer abgerechnet werden koennen
                     // System.out.println("Es k\u00f6nnten Kilometer abgerechnet werden");
                     if (kmBesserAlsPauschale(kmpausch, kmgeld, Double.parseDouble(Integer.toString(zm.km)),
                             zm.preisgruppe, RezTools.getDisziplinFromRezNr(SystemConfig.hmAdrRDaten.get("<Rnummer>")))) {
