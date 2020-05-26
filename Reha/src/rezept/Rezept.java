@@ -297,27 +297,6 @@ public class Rezept {
                              .toUpperCase();
     }
     
-    // TODO: this already has been implemented as getBehAnzahl(int idx) - remove one of the two
-    /**
-     * Return the Anzahl(derBehan)X where X is passed in int i
-     * @param i - The index at which to retrieve ADB
-     * @return the int at index i
-     */
-    public int getAnzahlBehandlungen(int i) {
-        switch (i) {
-            case 1:
-                return getBehAnzahl1(); // a reminder about the default-getter
-            case 2:
-                return getBehAnzahl2();
-            case 3:
-                return getBehAnzahl3();
-            case 4:
-                return anzahl4; // just a reminder that this can also be done
-            default:
-                logger.error("Rezept-Class Invalid AnzahlDerBehandlungindex requested - only 1-4 are impl. so far");
-                return -1;
-        }
-    }
     /**
      * Return the ArtDBehX where X is passed in int i
      * @param i - The index at which to retrieve ADB
