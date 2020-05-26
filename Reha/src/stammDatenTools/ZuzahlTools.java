@@ -43,7 +43,7 @@ public class ZuzahlTools {
         String rez_geb = "";
         int zzregel = -1;
         if (kassid.equals("-1")) {
-            JOptionPane.showMessageDialog(null, "Keine gültige Kasse angegeben");
+            JOptionPane.showMessageDialog(null, "Keine g\u00fcltige Kasse angegeben");
             return false;
         }
         if (rez_nr.equals("")) {
@@ -77,7 +77,7 @@ public class ZuzahlTools {
     /**********************************************************/
 
     public static Object[] unter18TestDirekt(Vector<String> termine, boolean azTest, boolean jahrTest) {
-        // Rez geb f�llig //Anzahl Term //Anzahl frei //Anzahl unfrei //Zuzahlstatus
+        // Rez geb f\ufffdllig //Anzahl Term //Anzahl frei //Anzahl unfrei //Zuzahlstatus
         Object[] ret = { new Boolean(false), Integer.valueOf(-1), Integer.valueOf(-1), Integer.valueOf(-1),
                 Integer.valueOf(-1) };
         // Vector vec = SqlInfo.holeFelder("select
@@ -174,8 +174,8 @@ public class ZuzahlTools {
                 //// System.out.println("Tagex = ---------------> "+tagex);
                 if (tagex <= 0 && tagex > -45) {
                     // JOptionPane.showMessageDialog(null ,"Achtung es sind noch "+(tagex*-1)+" Tage
-                    // bis zur Vollj�hrigkeit\n"+
-                    // "Unter Umst�nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
+                    // bis zur Vollj\ufffdhrigkeit\n"+
+                    // "Unter Umst\ufffdnden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
                     Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Rezept.ZZSTATUS_BALD18);
                     SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Rezept.ZZSTATUS_BALD18 + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
                     ret[4] = Integer.valueOf(Rezept.ZZSTATUS_BALD18);
@@ -287,7 +287,7 @@ public class ZuzahlTools {
         String preisgrp = "";
         int zzregel = -1;
         if (kassid.equals("-1")) {
-            JOptionPane.showMessageDialog(null, "Keine gültige Kasse angegeben");
+            JOptionPane.showMessageDialog(null, "Keine g\u00fcltige Kasse angegeben");
             return -1;
         }
         Vector<Vector<String>> vec = SqlInfo.holeFelder(
@@ -332,7 +332,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * füllt die EnumMap: ZuZahlStatus als key, Icon als value
+     * f\u00fcllt die EnumMap: ZuZahlStatus als key, Icon als value
      *
      * @author McM
      */
@@ -349,7 +349,7 @@ public class ZuzahlTools {
      * liefert Icon passend zum (ZZStat-)Key
      *
      * @param Zuzahlstatus
-     * @return das zugehörige Icon
+     * @return das zugeh\u00f6rige Icon
      *
      * @author McM
      */
@@ -374,7 +374,7 @@ public class ZuzahlTools {
             iconKey = ZZStat.ZUZAHLOK;
             break;
         case 2:
-            if (existsRGR(rezNr)) { // Prüfen, ob RGR existiert. Falls ja, Icon entspr. setzen!
+            if (existsRGR(rezNr)) { // Pr\u00fcfen, ob RGR existiert. Falls ja, Icon entspr. setzen!
                 iconKey = ZZStat.ZUZAHLRGR;
             } else {
                 iconKey = ZZStat.ZUZAHLNICHTOK;
@@ -387,7 +387,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Prüfung, ob es zum Rezept bereits eine RG-Rechnung gibt
+     * Pr\u00fcfung, ob es zum Rezept bereits eine RG-Rechnung gibt
      *
      * @param String Rezeptnummer
      * @return true/false
@@ -421,23 +421,23 @@ public class ZuzahlTools {
     }
 
     /**
-     * Vorhandensein der RG-Rechnung zu einem Rezept bestätigen
+     * Vorhandensein der RG-Rechnung zu einem Rezept best\u00e4tigen
      *
      * @param xreznr
-     * @return OK-String (enthält HTML-Tags!)
+     * @return OK-String (enth\u00e4lt HTML-Tags!)
      *
      * @author McM
      */
     public static String rgrOK(String rezNb) {
         String rgrNr = getRgr(rezNb);
         if (rgrNr.length() > 0) {
-            return "Für dieses Rezept wurde bereits eine Rezeptgebührrechnung <b>" + rgrNr + "</b> angelegt!";
+            return "F\u00fcr dieses Rezept wurde bereits eine Rezeptgeb\u00fchrrechnung <b>" + rgrNr + "</b> angelegt!";
         }
         return "Fehler: rgrOK()";
     }
 
     /**
-     * Prüfung, ob eine RG-Rechnung bar bezahlt wurde
+     * Pr\u00fcfung, ob eine RG-Rechnung bar bezahlt wurde
      *
      * @param xreznr
      * @return true/false
@@ -454,7 +454,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Prüfung, ob die Zuzahlung für ein Rezept bar bezahlt wurde
+     * Pr\u00fcfung, ob die Zuzahlung f\u00fcr ein Rezept bar bezahlt wurde
      *
      * @param xreznr
      * @return true/false
@@ -474,7 +474,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Prüfung, ob die Zuzahlung für ein Rezept kassiert oder eine RGR erstellt
+     * Pr\u00fcfung, ob die Zuzahlung f\u00fcr ein Rezept kassiert oder eine RGR erstellt
      * wurde
      *
      * @param xreznr
