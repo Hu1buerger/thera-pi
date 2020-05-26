@@ -1998,7 +1998,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             
             // TODO: This needs to handle a Rezept as param:
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
-                    String.valueOf(stest), false, Reha.instance.patpanel.vecaktrez);
+                    String.valueOf(stest), false, Reha.instance.patpanel.rezAktRez);
             // TODO: sort format of RezDatum upon String
             thisRezept.setRezDatum(rezDat);
             setRezDatInTable(stest);
