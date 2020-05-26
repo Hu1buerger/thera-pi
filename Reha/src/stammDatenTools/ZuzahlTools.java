@@ -1,5 +1,6 @@
 package stammDatenTools;
 
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -8,16 +9,20 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JOptionPane;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import CommonTools.DatFunk;
 import CommonTools.ExUndHop;
 import CommonTools.SqlInfo;
 import hauptFenster.Reha;
+import rezept.Rezept;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
 public class ZuzahlTools {
+    private static final Logger logger = LoggerFactory.getLogger(ZuzahlTools.class);
     /**
      * TODO: EnumMap anlegen, mit ZuZahlStatus als key, Icon als value 
      * **/
@@ -92,17 +97,35 @@ public class ZuzahlTools {
             }
         };
         Collections.sort(tage, comparator);
+        // TODO: delete me once Rezepte have been sorted
         String rez_nr = Reha.instance.patpanel.vecaktrez.get(1);
-        String unter18 = Reha.instance.patpanel.vecaktrez.get(60);
+        logger.debug("Vec: rez_nr=" + rez_nr);
+        rez_nr = Reha.instance.patpanel.rezAktRez.getRezNr();
+        logger.debug("Rez: rez_nr=" + rez_nr);
+        String sUnter18 = Reha.instance.patpanel.vecaktrez.get(60);
+        logger.debug("Vec: sUnter18=" + sUnter18);
+        boolean unter18 = Reha.instance.patpanel.rezAktRez.isUnter18();
+        logger.debug("Rez: unter18=" + unter18);
         // String pat_int = (String) Reha.instance.patpanel.vecaktrez.get(0);
-        String aktzzstatus = Reha.instance.patpanel.vecaktrez.get(39);
-        String aktzzregel = Reha.instance.patpanel.vecaktrez.get(63);
-        if (unter18.equals("T") && (!aktzzregel.equals("0"))) {
+        String sAktzzstatus = Reha.instance.patpanel.vecaktrez.get(39);
+        logger.debug("Vec: aktzzstatus=" + sAktzzstatus);
+        int aktzzstatus = Reha.instance.patpanel.rezAktRez.getZZStatus();
+        logger.debug("Rez: aktzzstatus=" + aktzzstatus);
+        String sAktzzregel = Reha.instance.patpanel.vecaktrez.get(63);
+        logger.debug("Vec: aktzzregel=" + sAktzzregel);
+        int aktzzregel = Reha.instance.patpanel.rezAktRez.getZZRegel();
+        logger.debug("Rez: aktzzregel=" + aktzzregel);
+        if (unter18 && (aktzzregel == 0)) {
             String stichtag = "";
             String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
             String gebtag = (DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(22))).substring(0, 6)
                     + Integer.valueOf(Integer.valueOf(SystemConfig.aktJahr) - 18)
                              .toString();
+            logger.debug("Vec: gebtag=" + gebtag);
+            gebtag = Reha.instance.patpanel.rezAktRez.getRezDatum().format(DateTimeFormatter.ofPattern("dd.MM."))
+                    + Integer.valueOf(Integer.valueOf(SystemConfig.aktJahr) - 18)
+                                                                                 .toString();
+            logger.debug("Rez: gebtag=" + gebtag);
 
             boolean einergroesser = false;
             int erstergroesser = -1;
@@ -121,20 +144,29 @@ public class ZuzahlTools {
                 // datFunk.TageDifferenz(geburtstag ,stichtag));
 
             }
-            if ((aktzzstatus.equals("3") || aktzzstatus.equals("0") || aktzzstatus.equals("2")) && einergroesser) {
+            // Der urspruengliche Code hate hier int-Werte benutzt. Sollte die Abfrage mit den Namen
+            // keinen Sinn ergeben, so eine andere int <-> Namen/Bdeutung Aufluesung irgendwo...
+            if ((aktzzstatus == Rezept.ZZSTATUS_BALD18
+                    || aktzzstatus == Rezept.ZZSTATUS_BEFREIT
+                    || aktzzstatus == Rezept.ZZSTATUS_NOTOK)
+                 && einergroesser) {
                 // String cmd = "update verordn set zzstatus='2' where rez_nr='"+rez_nr+" LIMIT
                 // 1";
                 // new ExUndHop().setzeStatement(cmd);
-                SqlInfo.aktualisiereSaetze("verordn", "zzstatus='2'", "rez_nr='" + rez_nr + "' LIMIT 1");
-                Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), 2);
+                SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Rezept.ZZSTATUS_NOTOK + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
+                Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Rezept.ZZSTATUS_NOTOK);
                 ret[0] = new Boolean(true);
                 ret[1] = Integer.valueOf(tage.size());
                 ret[2] = Integer.valueOf(erstergroesser - 1);
                 ret[3] = ((Integer) ret[1]) - (Integer) ret[2];
-                ret[4] = Integer.valueOf(2);
+                ret[4] = Integer.valueOf(Rezept.ZZSTATUS_NOTOK);
                 return ret.clone();
             }
-            if ((aktzzstatus.equals("2") || aktzzstatus.equals("1")) && (!einergroesser)) {
+            // Der urspruengliche Code hate hier int-Werte benutzt. Sollte die Abfrage mit den Namen
+            // keinen Sinn ergeben, so eine andere int <-> Namen/Bdeutung Aufluesung irgendwo...
+            if ((aktzzstatus == Rezept.ZZSTATUS_NOTOK
+                    || aktzzstatus == Rezept.ZZSTATUS_OK)
+                 && (!einergroesser)) {
                 // String cmd = "update verordn set zzstatus='3' where rez_nr='"+rez_nr+" LIMIT
                 // 1";
                 // new ExUndHop().setzeStatement(cmd);
@@ -144,24 +176,24 @@ public class ZuzahlTools {
                     // JOptionPane.showMessageDialog(null ,"Achtung es sind noch "+(tagex*-1)+" Tage
                     // bis zur Vollj�hrigkeit\n"+
                     // "Unter Umst�nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
-                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), 3);
-                    SqlInfo.aktualisiereSaetze("verordn", "zzstatus='3'", "rez_nr='" + rez_nr + "' LIMIT 1");
-                    ret[4] = Integer.valueOf(3);
+                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Rezept.ZZSTATUS_BALD18);
+                    SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Rezept.ZZSTATUS_BALD18 + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
+                    ret[4] = Integer.valueOf(Rezept.ZZSTATUS_BALD18);
                 } else {
-                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), 0);
-                    SqlInfo.aktualisiereSaetze("verordn", "zzstatus='0'", "rez_nr='" + rez_nr + "' LIMIT 1");
-                    ret[4] = Integer.valueOf(0);
+                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Rezept.ZZSTATUS_BEFREIT);
+                    SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Rezept.ZZSTATUS_BEFREIT + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
+                    ret[4] = Integer.valueOf(Rezept.ZZSTATUS_BEFREIT);
                 }
                 ret[0] = Boolean.valueOf(false);
                 ret[1] = tage.size();
                 return ret.clone();
 
             }
-        } else if (unter18.equals("T") && (aktzzregel.equals("0"))) {
-            Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), 0);
+        } else if (unter18 && (aktzzregel == 0)) {
+            Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Rezept.ZZSTATUS_BEFREIT);
             ret[0] = Boolean.valueOf(false);
             ret[1] = tage.size();
-            ret[4] = Integer.valueOf(0);
+            ret[4] = Integer.valueOf(Rezept.ZZSTATUS_BEFREIT);
 
         }
         // AktuelleRezepte.aktRez.tabaktrez.validate();
@@ -173,6 +205,7 @@ public class ZuzahlTools {
     /********************************************************/
 
     public static Object[] unter18TestAllesSuchen(String rez_nr, boolean azTest, boolean jahrTest) {
+        // TODO: this method could be updated to use new Rezept-class, both to retrieve the Rezept and use the ZZStatus-ints
 
         Object[] ret = { new Boolean(false), Integer.valueOf(-1), Integer.valueOf(-1), Integer.valueOf(-1) };
         Vector<Vector<String>> vec = SqlInfo.holeFelder(
