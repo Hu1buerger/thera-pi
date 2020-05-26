@@ -2331,8 +2331,4 @@ public class Reha implements RehaEventListener {
         return componentListener;
     }
 
-    public Mandant mandant() {
-        return mandant;
-    }
-
 }
