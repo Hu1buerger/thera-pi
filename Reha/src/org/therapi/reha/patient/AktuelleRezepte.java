@@ -2151,11 +2151,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return null;
     }
 
-    // TODO: delete me once Rezepte have been sorted
+    // TODO: delete me once Rezepte have been sorted - ihhh! this is called ext. by RezeptGebuehren - the two methods hereafter simulate old way
     public void doVectorAktualisieren(int[] elemente, String[] werte) {
         for (int i = 0; i < elemente.length; i++) {
             Reha.instance.patpanel.vecaktrez.set(elemente[i], werte[i]);
         }
+    }
+    public void setMyRezBez(boolean status) {
+        this.rezAktuellesRezept.setRezBez(status);
+        
+    }
+    public void setMyZZStatus(int status) {
+        this.rezAktuellesRezept.setZZStatus(status);
     }
 
     // nimmt den Behandler aus der aktuell markierten Zeile und kopiert ihn auf alle
