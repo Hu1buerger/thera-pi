@@ -54,7 +54,7 @@ import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import hauptFenster.Reha;
 import oOorgTools.OOTools;
-import rezept.Rezept;
+import rezept.Zuzahlung;
 import systemEinstellungen.SystemConfig;
 
 public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
@@ -452,16 +452,16 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
 
                 }
                 try {
-                    Reha.instance.patpanel.rezAktRez.setZZStatus(Rezept.ZZSTATUS_OK);
+                    Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_OK);
                     // TODO: move this SQL statement to RezeptDto
                     String cmd2 = "update verordn set rez_geb='" + srgeb + "', "
-                            + "rez_bez='T', zzstatus='" + Rezept.ZZSTATUS_OK + "' where rez_nr='" + SystemConfig.hmAdrRDaten.get("<Rnummer>")
+                            + "rez_bez='T', zzstatus='" + Zuzahlung.ZZSTATUS_OK + "' where rez_nr='" + SystemConfig.hmAdrRDaten.get("<Rnummer>")
                             + "' LIMIT 1";
                     boolean allesok = SqlInfo.sqlAusfuehren(cmd2.toString());
                     // WDF??
                     this.aktuelleRezepte.doVectorAktualisieren(new int[] { 14, 39 }, new String[] { "T", "1" });
                     this.aktuelleRezepte.setMyRezBez(true);
-                    this.aktuelleRezepte.setMyZZStatus(Rezept.ZZSTATUS_OK);
+                    this.aktuelleRezepte.setMyZZStatus(Zuzahlung.ZZSTATUS_OK);
                     if (!allesok) {
                         JOptionPane.showMessageDialog(null,
                                 "Fehler-Nr. 2 beim einstellen der Rezeptgeb\u00fchr im Rezept\n\n"
@@ -499,7 +499,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
             }
             try {
-                AktuelleRezepte.setZuzahlImage(Rezept.ZZSTATUS_OK); // zuzahlok
+                AktuelleRezepte.setZuzahlImage(Zuzahlung.ZZSTATUS_OK); // zuzahlok
             } catch (Exception ex3) {
                 JOptionPane.showMessageDialog(null,
                         "Der Zuzahlungsstatus im Rezeptstamm konnte nicht korrekt gesetzt werden.\n+"

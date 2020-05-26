@@ -116,6 +116,7 @@ import rechteTools.Rechte;
 import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
+import rezept.Zuzahlung;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
 import stammDatenTools.ZuzahlTools;
@@ -2001,7 +2002,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     // TODO: A better way: trigger re-read dataset for rezNr
                     Reha.instance.patpanel.rezAktRez.setBefr(true);
                     Reha.instance.patpanel.rezAktRez.setRezBez(false);
-                    Reha.instance.patpanel.rezAktRez.setZZStatus(Rezept.ZZSTATUS_BEFREIT);
+                    Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_BEFREIT);
                     
                     SqlInfo.sqlAusfuehren("delete from kasse where rez_nr='" + xreznr + "' LIMIT 1");
                 }
@@ -2030,7 +2031,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     // TODO: A better way: trigger re-read dataset for rezNr
                     Reha.instance.patpanel.rezAktRez.setBefr(false);
                     Reha.instance.patpanel.rezAktRez.setRezBez(true);
-                    Reha.instance.patpanel.rezAktRez.setZZStatus(Rezept.ZZSTATUS_OK);
+                    Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_OK);
                 }
 
             }
@@ -2055,7 +2056,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     // TODO: A better way: trigger re-read dataset for rezNr
                     Reha.instance.patpanel.rezAktRez.setRezGeb(new Money("0.00"));
                     Reha.instance.patpanel.rezAktRez.setRezBez(false);
-                    Reha.instance.patpanel.rezAktRez.setZZStatus(Rezept.ZZSTATUS_NOTOK);
+                    Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_NOTOK);
                     
                     String xcmd = "update verordn set zzstatus='2', rez_geb='0.00',rez_bez='F' where rez_nr='" + xreznr
                             + "' LIMIT 1";
@@ -3051,7 +3052,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         // erst pruefen ob Zuzahlstatus = 0 (befreit) o. u18, wenn ja zurueck;
         // dann pruefen ob bereits bezahlt wenn ja fragen ob Kopie erstellt werden soll;
-        if (Reha.instance.patpanel.rezAktRez.getZZStatus() == Rezept.ZZSTATUS_BEFREIT) {
+        if (Reha.instance.patpanel.rezAktRez.getZZStatus() == Zuzahlung.ZZSTATUS_BEFREIT) {
             JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
             return;
         }
@@ -3514,7 +3515,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // vvv Pruefungen aus der Bar-Quittung auch hier !
             // if (currVO.getZzStat().equals(String.valueOf(ZZStat.ZUZAHLFREI))) {
             // TODO: switch the following to ZZStat enum?
-            if(rezCurrVO.getZZStatus() == Rezept.ZZSTATUS_BEFREIT) {
+            if(rezCurrVO.getZZStatus() == Zuzahlung.ZZSTATUS_BEFREIT) {
                 JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
                 return;
             }

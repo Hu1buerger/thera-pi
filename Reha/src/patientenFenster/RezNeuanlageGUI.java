@@ -67,6 +67,7 @@ import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
 import rezept.Rezeptnummer;
+import rezept.Zuzahlung;
 import stammDatenTools.RezTools;
 import systemEinstellungen.NummernKreis;
 import systemEinstellungen.SystemConfig;
@@ -2071,21 +2072,21 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             //// System.out.println("Speichern bestehendes Rezept -> Preisgruppe =
             //// "+jtf[cPREISGR].getText());
             Integer izuzahl = Integer.valueOf(jtf[cPREISGR].getText());
-            int szzstatus = Rezept.ZZSTATUS_NOTSET;
+            int szzstatus = Zuzahlung.ZZSTATUS_NOTSET;
 
             boolean unter18 = false;
             for (int i = 0; i < 1; i++) {
                 if (SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin)
                                                     .get(izuzahl - 1) <= 0) {
-                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                    szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                     break;
                 }
                 if (aktuelleDisziplin.equals("Reha")) {
-                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                    szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                     break;
                 }
                 if (aktuelleDisziplin.equals("Rsport") || aktuelleDisziplin.equals("Ftrain")) {
-                    szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                    szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                     break;
                 }
                 //// System.out.println("ZuzahlStatus = Zuzahlung (zunaechst) erforderlich, pruefe
@@ -2094,7 +2095,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                    .equals("T")) {
                     // System.out.println("aktuelles Jahr ZuzahlStatus = Patient ist befreit");
                     if (thisRezept.isRezBez()) {
-                        szzstatus = Rezept.ZZSTATUS_OK;
+                        szzstatus = Zuzahlung.ZZSTATUS_OK;
                     } else {
 
                         // if (RezTools.mitJahresWechsel(thisRezept.getRezDatum())) {
@@ -2118,10 +2119,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                                 DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(41)),
                                                 ersterTag) >= 0) {
                                             // Behandlung liegt nach befr_ab
-                                            szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                                            szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                                         } else {
                                             // Behandlung liegt vor befr_ab
-                                            szzstatus = Rezept.ZZSTATUS_NOTOK;
+                                            szzstatus = Zuzahlung.ZZSTATUS_NOTOK;
                                         }
                                     } catch (Exception ex) {
                                         JOptionPane.showMessageDialog(null,
@@ -2134,17 +2135,17 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                                             DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(41)),
                                             DatFunk.sHeute()) >= 0) {
                                         // Behandlung muss nach befr_ab liegen
-                                        szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                                        szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                                     } else {
                                         // Behandlung kann auch vor befr_ab liegen
-                                        szzstatus = Rezept.ZZSTATUS_NOTOK;
+                                        szzstatus = Zuzahlung.ZZSTATUS_NOTOK;
                                     }
                                 }
                             } else {
-                                szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                                szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                             }
                         } else {
-                            szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                            szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                         }
                     }
                     break;
@@ -2166,19 +2167,19 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         JOptionPane.showMessageDialog(null,
                                 "Achtung es sind noch " + (tage * -1) + " Tage bis zur Vollj\u00e4hrigkeit\n"
                                 + "Unter Umst\u00e4nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
-                        szzstatus = Rezept.ZZSTATUS_BALD18;
+                        szzstatus = Zuzahlung.ZZSTATUS_BALD18;
                     } else {
-                        szzstatus = Rezept.ZZSTATUS_BEFREIT;
+                        szzstatus = Zuzahlung.ZZSTATUS_BEFREIT;
                     }
                     unter18 = true;
                     break;
                 }
                 /**********************/
                 if (thisRezept.isRezBez() || (thisRezept.getRezGeb().isMoreThan(new Money("0.00")))) {
-                    szzstatus = Rezept.ZZSTATUS_OK;
+                    szzstatus = Zuzahlung.ZZSTATUS_OK;
                 } else {
                     // hier testen ob erster Behandlungstag bereits ab dem Befreiungszeitraum
-                    szzstatus = Rezept.ZZSTATUS_NOTOK;
+                    szzstatus = Zuzahlung.ZZSTATUS_NOTOK;
                 }
             }
             /******/

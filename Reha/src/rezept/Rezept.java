@@ -69,7 +69,7 @@ public class Rezept {
     String ktraeger;
     int kId = -1;
     
-    int zzStatus = ZZSTATUS_NOTSET;
+    int zzStatus = Zuzahlung.ZZSTATUS_NOTSET;
     int zzRegel = -1;
     
     LocalDate lastDate;
@@ -108,14 +108,6 @@ public class Rezept {
     String icd10_2;
     boolean pauschale;
 
-    // TODO: use some get-/set-RezToStatus-way, or at least enum
-    // TODO: seems like stammdatentools/ZuzahlTools also defines these (as enum)
-    public static final int ZZSTATUS_NOTSET = -1;
-    public static final int ZZSTATUS_BEFREIT = 0;
-    public static final int ZZSTATUS_OK = 1;
-    public static final int ZZSTATUS_NOTOK = 2;
-    public static final int ZZSTATUS_BALD18 = 3;
-    
     public static final int REZEPTART_ERSTVO = 0;
     public static final int REZEPTART_FOLGEVO = 1;
     public static final int REZEPTART_ADR = 2;
