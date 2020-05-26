@@ -2053,6 +2053,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             if (stest.equals(".  .")) {
                 stest = DatFunk.sHeute();
             }
+            // This ain't gonna work no more - neuePreisNachRezeptdatumOderStichtag now takes Rezept as param
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
                     String.valueOf(stest), false, Reha.instance.patpanel.vecaktrez);
             thisRezept.setRezeptDatum(DatFunk.sDatInSQL(stest));
