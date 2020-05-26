@@ -297,6 +297,7 @@ public class Rezept {
                              .toUpperCase();
     }
     
+    // TODO: this already has been implemented as getBehAnzahl(int idx) - remove one of the two
     /**
      * Return the Anzahl(derBehan)X where X is passed in int i
      * @param i - The index at which to retrieve ADB
@@ -521,7 +522,8 @@ public class Rezept {
             case 4:
                 return getBehAnzahl4();
             default:
-                logger.error("Invalid index for getBehAnzahl received. Only index 1-4 is currently implemented");
+                logger.error("Invalid index for getBehAnzahl received. "
+                             + "Only index 1-4 is currently implemented. Requested: " + idx);
                 return -1;
         }
     }
@@ -796,6 +798,27 @@ public class Rezept {
     }
 
     /**
+     * Gets 1 of the 4 Preise by index
+     * 
+     * @param idx Which field to get (preise[1-4])
+     */
+    public Money getPreis(int idx) {
+        switch (idx) {
+            case 1:
+                return getPreise1();
+            case 2:
+                return getPreise2();
+            case 3:
+                return getPreise3();
+            case 4:
+                return getPreise4();
+            default:
+                logger.error("Can only get Preise 1-4. You tried: " + idx);
+                return new Money("0");
+        }
+    }
+    
+    /**
      * Sets 1 of the 4 Preise by index to value
      * 
      * @param idx Which field to set (preise[1-4])
@@ -816,7 +839,7 @@ public class Rezept {
                 setPreise4(value);
                 break;
             default:
-                logger.error("Can only set Preise 1-4");
+                logger.error("Can only set Preise 1-4. You tried: " + idx);
         }
     }
 
@@ -1191,6 +1214,13 @@ public class Rezept {
      */
     public int getBerId() {
         return berId;
+    }
+
+    /**
+     * Set the berId
+     */
+    public void setBerId(int BerichtId) {
+        berId = BerichtId;
     }
 
     /**
