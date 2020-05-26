@@ -2054,8 +2054,9 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 stest = DatFunk.sHeute();
             }
             // This ain't gonna work no more - neuePreisNachRezeptdatumOderStichtag now takes Rezept as param
+            // used to get the vecaktrez to pass as param, now we need the Rezepte-class object
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
-                    String.valueOf(stest), false, Reha.instance.patpanel.vecaktrez);
+                    String.valueOf(stest), false, Reha.instance.patpanel.rezAktRez);
             thisRezept.setRezeptDatum(DatFunk.sDatInSQL(stest));
             setRezDatInTable(stest);
             String stest2 = chkLastBeginDat(stest, jtf[cBEGINDAT].getText()
