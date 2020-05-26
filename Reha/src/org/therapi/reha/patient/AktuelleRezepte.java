@@ -2024,6 +2024,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     SqlInfo.sqlAusfuehren(xcmd);
                     dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[1], currow, 1);
                     tabaktrez.validate();
+                    // TODO: delete me once Rezepte have been sorted
                     doVectorAktualisieren(new int[] { 12, 14, 39 }, new String[] { "F", "T", "1" }); // befr, rez_bez,
                                                                                                      // zzstatus
                                                                                                      // (zuzahlok)
@@ -2049,6 +2050,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 String xreznr;
                 if (currow >= 0) {
                     xreznr = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
+                    // TODO: delete me once Rezepte have been sorted
                     doVectorAktualisieren(new int[] { 13, 14, 39 }, new String[] { "0.00", "F", "2" }); // rez_geb,
                                                                                                         // rez_bez,zzstatus
                                                                                                         // (zuzahlnichtok)
@@ -2057,9 +2059,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     Reha.instance.patpanel.rezAktRez.setRezGeb(new Money("0.00"));
                     Reha.instance.patpanel.rezAktRez.setRezBez(false);
                     Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_NOTOK);
-                    
-                    String xcmd = "update verordn set zzstatus='2', rez_geb='0.00',rez_bez='F' where rez_nr='" + xreznr
-                            + "' LIMIT 1";
+                    // TODO: insert save-to-db
+                    String xcmd = "update verordn set zzstatus='" + Zuzahlung.ZZSTATUS_NOTOK + "', rez_geb='0.00',rez_bez='F' "
+                                                                                      + "where rez_nr='" + xreznr + "' LIMIT 1";
                     SqlInfo.sqlAusfuehren(xcmd);
 
                     if (SystemConfig.useStornieren) {

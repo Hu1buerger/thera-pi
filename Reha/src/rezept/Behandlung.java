@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
+import java.util.LinkedList;
 import java.util.Objects;
 
 public class Behandlung implements Comparable<Behandlung> {
@@ -71,5 +72,14 @@ public class Behandlung implements Comparable<Behandlung> {
 
     public List<String> erbrachteHeilmittel() {
         return heilmittel;
+    }
+
+     static List<Behandlung> ofDbString(String termine){
+        List<Behandlung> liste = new LinkedList<>();
+        String[] zeilen = termine.split("\n");
+        for (String fromDB : zeilen) {
+            liste.add(new Behandlung(fromDB));
+        }
+        return liste;
     }
 }
