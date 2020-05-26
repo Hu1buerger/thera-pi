@@ -2158,12 +2158,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             Reha.instance.patpanel.vecaktrez.set(elemente[i], werte[i]);
         }
     }
-    public void setMyRezBez(boolean status) {
-        this.rezAktuellesRezept.setRezBez(status);
-        
+    public void setAktuellesRezeptBezahlt(boolean status) {
+        Reha.instance.patpanel.rezAktRez.setRezBez(status);
     }
-    public void setMyZZStatus(int status) {
-        this.rezAktuellesRezept.setZZStatus(status);
+    public void setAktRezZZStatus(int status) {
+        Reha.instance.patpanel.rezAktRez.setZZStatus(status);
     }
 
     // nimmt den Behandler aus der aktuell markierten Zeile und kopiert ihn auf alle

@@ -460,8 +460,8 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                     boolean allesok = SqlInfo.sqlAusfuehren(cmd2.toString());
                     // WDF??
                     this.aktuelleRezepte.doVectorAktualisieren(new int[] { 14, 39 }, new String[] { "T", "1" });
-                    this.aktuelleRezepte.setMyRezBez(true);
-                    this.aktuelleRezepte.setMyZZStatus(Zuzahlung.ZZSTATUS_OK);
+                    this.aktuelleRezepte.setAktuellesRezeptBezahlt(true);
+                    this.aktuelleRezepte.setAktRezZZStatus(Zuzahlung.ZZSTATUS_OK);
                     if (!allesok) {
                         JOptionPane.showMessageDialog(null,
                                 "Fehler-Nr. 2 beim einstellen der Rezeptgeb\u00fchr im Rezept\n\n"
