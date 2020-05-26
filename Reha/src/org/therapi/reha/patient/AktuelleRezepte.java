@@ -3548,7 +3548,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             logger.debug("Vec: hmKurz=" + hmKurz);
             String sAktAnzBehandlg = currVO.getAnzBehS(i);
             logger.debug("Rez: hmKurz=" + sAktAnzBehandlg);
-            int aktAnzBehandlg = rezCurrVO.getAnzahlBehandlungen(i);
+            int aktAnzBehandlg = rezCurrVO.getBehAnzahl(i);
             logger.debug("Vec: hmKurz=" + aktAnzBehandlg);
             if ((hmKurz != null) && hmKurz.length() > 0) {
                 behandl += ((behandl.length() > 0) ? ", " : "") + aktAnzBehandlg + " * " + hmKurz;
