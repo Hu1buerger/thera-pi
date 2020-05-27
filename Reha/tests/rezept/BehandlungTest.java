@@ -7,6 +7,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import specs.ContractException;
+
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 
@@ -16,7 +18,7 @@ public class BehandlungTest {
 
     @Test
     public void nullDateThrowsIAE() throws Exception {
-        thrown.expect(IllegalArgumentException.class);
+        thrown.expect(ContractException.class);
         thrown.expectMessage("Date musst not be null");
 
         new Behandlung(null, null, null, null);
