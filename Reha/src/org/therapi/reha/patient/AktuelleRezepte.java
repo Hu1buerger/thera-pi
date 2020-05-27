@@ -613,7 +613,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     public void setzeRezeptPanelAufNull(boolean aufnull) {
-        // TODO: adjust to btnXXXX
+        // DONE adjust to btnXXXX
         if (aufnull) {
             if (aktPanel.equals("vollPanel")) {
                 wechselPanel.remove(vollPanel);
@@ -2582,7 +2582,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // This is an empty stub:
             doAbschliessen();
             rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), true);
-            // TODO: remove me once Rezepteumbau has been completed
+            // TODO: delete me once Rezepteumbau has been completed
             String xcmd = "update verordn set abschluss='T' where id='" + Reha.instance.patpanel.vecaktrez.get(35)
                     + "' LIMIT 1";
             // SqlInfo.sqlAusfuehren(xcmd);
@@ -2603,7 +2603,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 ikkass = "";
                 ikkost = "";
             }
-            // TODO: lots of removes once Rezepteumbau has been completed
+            // TODO: delete me lots of once Rezepteumbau has been completed
             kname = Reha.instance.patpanel.vecaktrez.get(36);
             logger.debug("Vec: kname=" +kname);
             kname = Reha.instance.patpanel.rezAktRez.getKTraegerName();
