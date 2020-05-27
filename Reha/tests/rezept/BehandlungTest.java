@@ -25,7 +25,7 @@ public class BehandlungTest {
     @Test
     public void contructorfromdbstring() throws Exception {
         Behandlung t = new Behandlung("13.03.2019@kollege@weißnich@54105@2019-03-13");
-        Behandlung exp = new Behandlung(LocalDate.of(2019, 3, 13), "kollege", "weißnich", "54105");
+        Behandlung exp = new Behandlung(LocalDate.of(2019, 3, 13), "kollege", "weißnich", "54105",LocalDate.of(2019, 3, 13));
         assertEquals(exp, t);
     }
 
