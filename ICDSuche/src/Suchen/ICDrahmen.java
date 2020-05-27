@@ -25,7 +25,7 @@ public class ICDrahmen implements Runnable {
         new Logging("icd");
         IK ik;
         if (args.length > 0) {
-            ik = new IK(args[0]);
+            ik = new IK(args[1]);
         } else {
             ik = new IK("123456789");
         }
