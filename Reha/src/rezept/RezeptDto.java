@@ -68,7 +68,7 @@ public class RezeptDto {
         return retrieveList(sql);
     }
 
-    public void updateRezeptTermine(String Id, String TerminListe) {
+    public void updateRezeptTermine(int Id, String TerminListe) {
         String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
         updateDataset(sql);

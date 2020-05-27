@@ -1446,9 +1446,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
         SystemConfig.hmAdrRDaten.put("<Ranzahltage>", Integer.toString(reihen));
         // TODO: Change to Rezept-DTO
-        SqlInfo.aktualisiereSatz("verordn", "termine='" + sb.toString() + "'",
-                "id='" + (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'");
-        String rezId = (String) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
+        // SqlInfo.aktualisiereSatz("verordn", "termine='" + sb.toString() + "'", "id='"
+        //          + (int) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID) + "'");
+        int rezId = (int) tabaktrez.getValueAt(tabaktrez.getSelectedRow(), MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
         rDto.updateRezeptTermine(rezId, sb.toString());
         
         // TODO: Remove me once Rezepte has been sorted
