@@ -62,10 +62,10 @@ public class RezeptDto {
         return retrieveList(sql);
     }
     
-    public List<Rezept> getHistorischeRezepteByPatNr(int patientID) {
+    public Optional<List<Rezept>> getHistorischeRezepteByPatNr(int patientID) {
         String sql = selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "'";
 
-        return retrieveList(sql);
+        return Optional.ofNullable(retrieveList(sql));
     }
     
     public void updateRezeptTermine(String Id, String TerminListe) {
@@ -204,10 +204,10 @@ public class RezeptDto {
         rez.angelegtVon = rs.getString("ANGELEGTVON");
         rez.barcodeform = rs.getInt("BARCODEFORM");
         rez.dauer = rs.getString("DAUER");
-        rez.pos1 = rs.getString("POS1").trim ();
-        rez.pos2 = rs.getString("POS2").trim ();
-        rez.pos3 = rs.getString("POS3").trim ();
-        rez.pos4 = rs.getString("POS4").trim ();
+        rez.pos1 = rs.getString("POS1"); // .trim() barfs on NULL?
+        rez.pos2 = rs.getString("POS2");
+        rez.pos3 = rs.getString("POS3");
+        rez.pos4 = rs.getString("POS4");
         rez.frequenz = rs.getString("FREQUENZ");
         rez.lastEditor = rs.getString("LASTEDIT");
         rez.berId = rs.getInt("BERID");
