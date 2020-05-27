@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.LinkedList;
 import java.util.Objects;
 
+import CommonTools.DateTimeFormatters;
+import specs.Contracts;
+
 public class Behandlung implements Comparable<Behandlung> {
     LocalDate datum;
     String kollege;
@@ -14,8 +17,8 @@ public class Behandlung implements Comparable<Behandlung> {
     /** Mehrere mit kommata getrennt. */
     List<String> heilmittel;
     LocalDate erfassungsDatum;
-    private DateTimeFormatter format = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-    private DateTimeFormatter sqlFormat = DateTimeFormatter.ofPattern("yyyyy-MM-dd");
+    private DateTimeFormatter format = DateTimeFormatters.ddMMYYYYmitPunkt;
+    private DateTimeFormatter sqlFormat = DateTimeFormatters.yyyyMMddmitBindestrich;
 
     Behandlung(String fromDB) {
         String[] parts = fromDB.split("@");
@@ -27,16 +30,20 @@ public class Behandlung implements Comparable<Behandlung> {
         erfassungsDatum = LocalDate.parse(parts[4],sqlFormat);
     }
 
-    public Behandlung(LocalDate of, String kollege, String string2, String heilmittel) {
-        if (of == null) {
-            throw new IllegalArgumentException("Date musst not be null");
-        }
+    public Behandlung(LocalDate of, String kollege, String unterbrechungsgrund, String heilmittel) {
+        this(of,kollege,unterbrechungsgrund,heilmittel,LocalDate.now());
+
+    }
+
+    public Behandlung(LocalDate of, String kollege, String unterbrechungsgrund, String heilmittel, LocalDate erfasstAm) {
+        Contracts.require(of != null,"Date musst not be null");
+
         datum = of;
         this.kollege = kollege;
-        unterbrechungsbegruendung = string2;
+        unterbrechungsbegruendung = unterbrechungsgrund;
         this.heilmittel = Arrays.asList(heilmittel.replace(" ", "")
                                                   .split(","));
-        erfassungsDatum = LocalDate.now();
+        erfassungsDatum = erfasstAm;
     }
 
     @Override

@@ -20,16 +20,16 @@ public class RezeptDto {
     private static final Logger logger = LoggerFactory.getLogger(RezeptDto.class);
     private static final String aktRezDB = "verordn";
     private static final String rezDBLZA = "lza";
-    private static final String SelectAllSql = "select * from " + aktRezDB 
+    private static final String SelectAllSql = "select * from " + aktRezDB
                                                 + " union select * from " + rezDBLZA + " order by rez_nr;";
     private static final String selectAllFromRezDBWhere = "SELECT * from " + aktRezDB + " WHERE ";
     private static final String selectAllFromLzaDBWhere = "SELECT * from " + rezDBLZA + " WHERE ";
-    
+
 
     public RezeptDto(IK Ik) {
         ik = Ik;
     }
-    
+
     List<Rezept> all() {
         String sql = SelectAllSql;
         return retrieveList(sql);
@@ -47,7 +47,7 @@ public class RezeptDto {
 
         return Optional.ofNullable(rezept);
     }
-    
+
     public Optional<Rezept> byRezeptId(int rezeptId) {
         String sql = selectAllFromRezDBWhere + "ID = '" + rezeptId + "'"
                 + "UNION " + selectAllFromLzaDBWhere + "ID = '" + rezeptId + "';";
@@ -62,34 +62,34 @@ public class RezeptDto {
         return retrieveList(sql);
     }
     
-    public Optional<List<Rezept>> getHistorischeRezepteByPatNr(int patientID) {
+    public List<Rezept> getHistorischeRezepteByPatNr(int patientID) {
         String sql = selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "'";
 
-        return Optional.ofNullable(retrieveList(sql));
+        return retrieveList(sql);
     }
-    
+
     public void updateRezeptTermine(String Id, String TerminListe) {
         String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
-    
+
     public void rezeptAbschluss(int Id, boolean status) {
         String sql = "UPDATE " + aktRezDB + " SET abschluss='" + ( status ? "T" : "F")
                     + "' WHERE id='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
-    
+
     public Rezept juengstesRezeptVonPatientInDiszi (String patIntern, String diszi) {
         // Suche neuestes Rezept inkl. der Disziplin
-        
+
         String sql = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + patIntern + " AND rez_nr like '" + diszi
                 + "%'" + " union " + "SELECT * FROM `verordn` WHERE `PAT_INTERN` = " + patIntern
                 + " AND rez_nr like '" + diszi + "%'" + " ORDER BY rez_datum desc LIMIT 1";
         return  retrieveFirst(sql);
 
     }
-    
+
     private void updateDataset(String sql) {
         Connection conn;
         try {
@@ -204,10 +204,10 @@ public class RezeptDto {
         rez.angelegtVon = rs.getString("ANGELEGTVON");
         rez.barcodeform = rs.getInt("BARCODEFORM");
         rez.dauer = rs.getString("DAUER");
-        rez.pos1 = rs.getString("POS1"); // .trim() barfs on NULL?
-        rez.pos2 = rs.getString("POS2");
-        rez.pos3 = rs.getString("POS3");
-        rez.pos4 = rs.getString("POS4");
+        rez.pos1 = Optional.ofNullable( rs.getString("POS1")).orElse("");
+        rez.pos2 = Optional.ofNullable( rs.getString("POS2")).orElse("");
+        rez.pos3 = Optional.ofNullable( rs.getString("POS3")).orElse("");
+        rez.pos4 = Optional.ofNullable( rs.getString("POS4")).orElse("");
         rez.frequenz = rs.getString("FREQUENZ");
         rez.lastEditor = rs.getString("LASTEDIT");
         rez.berId = rs.getInt("BERID");
@@ -216,7 +216,7 @@ public class RezeptDto {
         rez.lastEdDate = rs.getDate("LASTEDDATE") == null ? null
                 : rs.getDate("LASTEDDATE")
                     .toLocalDate();
-        rez.farbcode = Integer.parseInt(rs.getString("FARBCODE"));
+        rez.farbcode =  parseFarbcodeFromDBToint(rs);
         rez.rsplit = rs.getString("RSPLIT");
         rez.jahrfrei = rs.getString("JAHRFREI");
         rez.unter18 = "T".equals(Optional.ofNullable(rs.getString("UNTER18"))
@@ -240,7 +240,15 @@ public class RezeptDto {
 
         return rez;
     }
-    
+
+    private int parseFarbcodeFromDBToint(ResultSet rs) throws SQLException {
+        try {
+            return Integer.parseInt(rs.getString("FARBCODE"));
+        }catch (Exception e){
+            return -1;
+        }
+    }
+
     public void rezeptInDBSpeichern(Rezept rez) {
         String sql = "update " + rezDBLZA + " set "
                 + "REZ_NR='" + rez.getRezNr() + "', "
