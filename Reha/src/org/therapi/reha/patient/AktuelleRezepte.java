@@ -1878,12 +1878,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     return;
                 }
                 String reznr = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
-                String rezid = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
+                int rezid = (int) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID);
                 int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie das Rezept " + reznr + " wirklich l\u00f6schen?",
                         "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                 if (frage == JOptionPane.NO_OPTION) {
                     return;
                 }
+                // TODO: Move these sql-statement to RezeptDto:
                 String sqlcmd = "delete from verordn where id='" + rezid + "'";
                 SqlInfo.sqlAusfuehren(sqlcmd);
                 sqlcmd = "delete from fertige where id='" + rezid + "'";
