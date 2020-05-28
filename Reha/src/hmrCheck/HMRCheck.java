@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 // import com.sun.media.jfxmedia.logging.Logger;
 
 import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
 import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
 import commonData.Rezeptvector;
@@ -134,8 +135,8 @@ public class HMRCheck {
         reznummer = rezTmpRezept.getRezNr();
         unter18 = rezTmpRezept.isUnter18();
 //        rezdatum = DatFunk.sDatInDeutsch(rezTmpRezept.getRezDatum());
-        rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
-        letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+        letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         if (reznummer.equals("")) {
             neurezept = true;
         }
@@ -451,9 +452,9 @@ public class HMRCheck {
     }
 
     public static LocalDate hmrLetztesDatum(LocalDate startDatum, int differenz, boolean samstagistwerktag) {
-        String startDat = startDatum.format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        String startDat = startDatum.format(DateTimeFormatters.ddMMYYYYmitPunkt);
         String result = hmrLetztesDatum(startDat, differenz, samstagistwerktag);
-        return LocalDate.parse(result, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        return LocalDate.parse(result, DateTimeFormatters.ddMMYYYYmitPunkt);
     }
     
     public static String hmrLetztesDatum(String startdatum, int differenz, boolean samstagistwerktag) {
