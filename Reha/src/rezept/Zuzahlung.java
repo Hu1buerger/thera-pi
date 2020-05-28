@@ -1,5 +1,8 @@
 package rezept;
 
+import stammDatenTools.ZuzahlTools;
+import systemEinstellungen.SystemConfig;
+
 public interface Zuzahlung {
 
     // TODO: use some get-/set-RezToStatus-way, or at least enum
@@ -14,6 +17,13 @@ public interface Zuzahlung {
      *  ZUZAHLNOTSET -> icon "kleinehilfe"
      *  
      *  The icons are then resolved via icons.ini
+     *  
+     *  Also, in PatientHauptLogic.java, this is used:
+     *              ZuzahlTools.setZzIcons(); // soll peu-a-peu 'die da' ersetzen:
+     *              patientHauptPanel.imgzuzahl[0] = SystemConfig.hmSysIcons.get("zuzahlfrei");
+     *              patientHauptPanel.imgzuzahl[1] = SystemConfig.hmSysIcons.get("zuzahlok");
+     *              patientHauptPanel.imgzuzahl[2] = SystemConfig.hmSysIcons.get("zuzahlnichtok");
+     *              patientHauptPanel.imgzuzahl[3] = SystemConfig.hmSysIcons.get("kleinehilfe");
      */
     int ZZSTATUS_NOTSET = -1;
     int ZZSTATUS_BEFREIT = 0;
