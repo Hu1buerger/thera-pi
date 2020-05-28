@@ -44,6 +44,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.Colors;
 import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
 import CommonTools.JCompTools;
 import CommonTools.JRtaCheckBox;
 import CommonTools.JRtaComboBox;
@@ -937,7 +938,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         int row = getselectedRow();
         if (row >= 0) {
             AktuelleRezepte.tabaktrez.getModel()
-                                     .setValueAt(datum.format(DateTimeFormatter.ofPattern("dd.MM.yyyy")), row, 4);
+                                     .setValueAt(datum.format(DateTimeFormatters.ddMMYYYYmitPunkt), row, 4);
         }
     }
 
@@ -1994,7 +1995,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 stest = DatFunk.sHeute();
                 rezDat = LocalDate.now();
             } else {
-                rezDat = LocalDate.parse(jtf[cREZDAT].getText().trim(), DateTimeFormatter.ofPattern("d.M.yyyy"));
+                rezDat = LocalDate.parse(jtf[cREZDAT].getText().trim(), DateTimeFormatters.dMYYYYmitPunkt);
             }
             
             // TODO: This needs to handle a Rezept as param:
