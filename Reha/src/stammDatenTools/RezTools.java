@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
@@ -1331,7 +1332,7 @@ public class RezTools {
         SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
         SystemConfig.hmAdrRDaten.put("<Rpatid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getPatIntern()));
         SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                            .format(DateTimeFormatters.ddMMYYYYmitPunkt));
         SystemConfig.hmAdrRDaten.put("<Rpauschale>", dfx.format(rezgeb));
 
         for (i = 0; i < 4; i++) {
