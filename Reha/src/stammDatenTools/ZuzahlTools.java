@@ -30,7 +30,7 @@ public class ZuzahlTools {
         ZUZAHLFREI,
         ZUZAHLOK,
         ZUZAHLNICHTOK,
-        ZUZAHLRGR,
+        ZUZAHLRGR,      // Rez is in rgaffaktura
         ZUZAHLNOTSET
     }
 
@@ -349,7 +349,7 @@ public class ZuzahlTools {
      * liefert Icon passend zum (ZZStat-)Key
      *
      * @param Zuzahlstatus
-     * @return das zugeh\u00f6rige Icon
+     * @return das zugehoerige Icon
      *
      * @author McM
      */
@@ -374,7 +374,7 @@ public class ZuzahlTools {
             iconKey = ZZStat.ZUZAHLOK;
             break;
         case 2:
-            if (existsRGR(rezNr)) { // Pr\u00fcfen, ob RGR existiert. Falls ja, Icon entspr. setzen!
+            if (existsRGR(rezNr)) { // Pruefen, ob RGR existiert. Falls ja, Icon entspr. setzen!
                 iconKey = ZZStat.ZUZAHLRGR;
             } else {
                 iconKey = ZZStat.ZUZAHLNICHTOK;
@@ -387,7 +387,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Pr\u00fcfung, ob es zum Rezept bereits eine RG-Rechnung gibt
+     * Pruefung, ob es zum Rezept bereits eine RG-Rechnung gibt
      *
      * @param String Rezeptnummer
      * @return true/false
@@ -421,7 +421,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Vorhandensein der RG-Rechnung zu einem Rezept best\u00e4tigen
+     * Vorhandensein der RG-Rechnung zu einem Rezept bestaetigen
      *
      * @param xreznr
      * @return OK-String (enth\u00e4lt HTML-Tags!)
@@ -437,7 +437,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Pr\u00fcfung, ob eine RG-Rechnung bar bezahlt wurde
+     * Pruefung, ob eine RG-Rechnung bar bezahlt wurde
      *
      * @param xreznr
      * @return true/false
@@ -454,7 +454,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Pr\u00fcfung, ob die Zuzahlung f\u00fcr ein Rezept bar bezahlt wurde
+     * Pruefung, ob die Zuzahlung fuer ein Rezept bar bezahlt wurde
      *
      * @param xreznr
      * @return true/false
@@ -474,7 +474,7 @@ public class ZuzahlTools {
     }
 
     /**
-     * Pr\u00fcfung, ob die Zuzahlung f\u00fcr ein Rezept kassiert oder eine RGR erstellt
+     * Pruefung, ob die Zuzahlung fuer ein Rezept kassiert oder eine RGR erstellt
      * wurde
      *
      * @param xreznr
