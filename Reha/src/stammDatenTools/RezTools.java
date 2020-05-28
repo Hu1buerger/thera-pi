@@ -1417,7 +1417,7 @@ public class RezTools {
                     SystemConfig.hmAdrRDaten.put("<Rid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getId()));
                     SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
                     SystemConfig.hmAdrRDaten.put("<Rdatum>",Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                            .format(DateTimeFormatters.ddMMYYYYmitPunkt));
                     SystemConfig.hmAdrRDaten.put("<Rdiagnose>", Reha.instance.patpanel.rezAktRez.getDiagnose());
 
                     BigDecimal dummyproz = null;
@@ -1501,7 +1501,7 @@ public class RezTools {
         SystemConfig.hmAdrRDaten.put("<Rid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getId()));
         SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
         SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                            .format(DateTimeFormatters.ddMMYYYYmitPunkt));
         SystemConfig.hmAdrRDaten.put("<Rpatid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getPatIntern()));
         SystemConfig.hmAdrRDaten.put("<Rpauschale>", "0,00");
         for (int i = 0; i < 5; i++) {
@@ -1552,7 +1552,7 @@ public class RezTools {
         logger.debug("Rez: xpreisgr=" + xpreisgr);
         String xrezdatum = DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2));
         logger.debug("Vec: xrezdatum=" + xrezdatum);
-        xrezdatum = Reha.instance.patpanel.rezAktRez.getRezDatum().format(DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+        xrezdatum = Reha.instance.patpanel.rezAktRez.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         logger.debug("Rez: xrezdatum=" + xrezdatum);
         boolean neuerpreis = neuePreisNachRezeptdatumOderStichtag(xdiszi, xpreisgr, xrezdatum, false,
                 Reha.instance.patpanel.rezAktRez);
@@ -1569,7 +1569,7 @@ public class RezTools {
         SystemConfig.hmAdrRDaten.put("<Rid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getId()));
         SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
         SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+                                                                            .format(DateTimeFormatters.yyyyMMddmitBindestrich));
         for (i = 0; i < 4; i++) {
          // TODO: delete me once Rezepte have been sorted
             gesanzahl[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 3));
@@ -1622,7 +1622,7 @@ public class RezTools {
         SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
         SystemConfig.hmAdrRDaten.put("<Rpatid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getPatIntern()));
         SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                            .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                            .format(DateTimeFormatters.ddMMYYYYmitPunkt));
         SystemConfig.hmAdrRDaten.put("<Rpauschale>", dfx.format(rezgeb));
 
         for (i = 0; i < 4; i++) {
@@ -2527,7 +2527,7 @@ public class RezTools {
             SystemConfig.hmAdrRDaten.put("<Rid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getId()));
             SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
             SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                        .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                        .format(DateTimeFormatters.ddMMYYYYmitPunkt));
             SystemConfig.hmAdrRDaten.put("<Rdiagnose>", Reha.instance.patpanel.rezAktRez.getDiagnose());
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -2540,7 +2540,7 @@ public class RezTools {
             SystemConfig.hmAdrRDaten.put("<Rid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getId()));
             SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
             SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
-                                                                        .format(DateTimeFormatter.ofPattern("dd.MM.yyyy")));
+                                                                        .format(DateTimeFormatters.ddMMYYYYmitPunkt));
             // for (int i = 3; i < 7; i++) {
             for (int i = 1; i < 5; i++) {
                 if (Reha.instance.patpanel.rezAktRez.getBehAnzahl(i) != 0) {
