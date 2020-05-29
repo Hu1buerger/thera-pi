@@ -155,7 +155,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private JButton btnTools;
     private JButton btnArztBericht;
     private JButton btnPrint;
-    public List<JButton> allUsedTBButtons;
+    private List<JButton> allUsedTBButtons;
     // public JButton[] aktrbut = { null, null, null, null, null, null, null, null, null };
     public boolean suchePatUeberRez = false;
     public String rezAngezeigt = "";
@@ -956,7 +956,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                     + "DATE_FORMAT(lastdate,'%d.%m.%Y') AS datum,"
                                     + "abschluss,pat_intern,indikatschl,id,termine",
                             "pat_intern='" + xpatint + "' ORDER BY rez_datum", Arrays.asList(new String[] {}));
-                    int anz = vec.size();
+                    int anz = listAktuelleRez.size();
                     for (int i = 0; i < anz; i++) {
                         if (i == 0) {
                             dtblm.setRowCount(0);
