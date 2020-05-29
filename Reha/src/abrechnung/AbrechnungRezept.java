@@ -1114,9 +1114,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         String nohb = hbpos + hbmitpos + wgpauschpos + wgkmpos;
         for (int i = 0; i < vec_pospos.size(); i++) {
             if (!nohb.contains(vec_pospos.get(i))) {
-                taxWerte.put("<t" + taxpos + ">", vec_pospos.get(i));
-                taxWerte.put("<t" + (taxpos + 1) + ">", Integer.toString(vec_posanzahl.get(i)));
-                taxpos += 2;
+                if (taxpos < 10) { // max. 3 HM fuer Ausdruck
+                    taxWerte.put("<t" + taxpos + ">", vec_pospos.get(i));
+                    taxWerte.put("<t" + (taxpos + 1) + ">", Integer.toString(vec_posanzahl.get(i)));
+                    taxpos += 2;
+                }
             } else if (hbpos.equals(vec_pospos.get(i))) {
                 taxWerte.put("<t13>", hbpos);
                 taxWerte.put("<t14>", Integer.toString(hbanzahl));
@@ -1132,7 +1134,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 taxWerte.put("<t12>", Integer.toString(wgkmstrecke));
             }
         }
-        taxWerte.put("<t18>", aktRezNum.getText());
+        taxWerte.put("<t18>", aktRezNum.getText()); // <t17> waere Rechnungsnummer
 
         try {
             String bcform = SqlInfo.holeEinzelFeld(

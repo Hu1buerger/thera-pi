@@ -646,12 +646,19 @@ public class KassenPanel extends JXPanel implements PropertyChangeListener, Tabl
     public void kasseLoeschen() {
         int row = kassentbl.getSelectedRow();
         if (row >= 0) {
+            String kid = (String) kassentbl.getValueAt(row, 7);
+            boolean locked = isInUse(kid);
+            if (locked) {
+                String msg = "\nDiese Kasse wird in Verordnungen verwendet.\n"
+                        + "Löschen ist daher nicht erlaubt!";
+                JOptionPane.showMessageDialog(null, msg);
+                return;
+            }
             int frage = JOptionPane.showConfirmDialog(null, "Wollen Sie diese Krankenkasse wirklich löschen??",
                     "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
             if (frage == JOptionPane.NO_OPTION) {
                 return;
             }
-            String kid = (String) kassentbl.getValueAt(row, 7);
             new ExUndHop().setzeStatement("delete from kass_adr where id='" + kid + "'");
             int model = kassentbl.convertRowIndexToModel(row);
             ktblm.removeRow(model);
@@ -665,6 +672,29 @@ public class KassenPanel extends JXPanel implements PropertyChangeListener, Tabl
             suchen.requestFocus();
         }
 
+    }
+
+    /*
+     * auf Referenzen der Kasse testen in verordn, lza, kass_adr
+     */
+    private boolean isInUse(String kassenId) {
+        String ikKasse = SqlInfo.holeEinzelFeld("select ik_kasse from kass_adr where id=" + kassenId);
+        if (ikKasse.isEmpty()) {
+            return false;
+        }
+        String chkCmd = "(SELECT id FROM kass_adr WHERE ik_physika='" + ikKasse + "' "
+                + "OR ik_nutzer='" + ikKasse + "' "
+                + "OR ik_kostent='" + ikKasse + "' "
+                + "OR ik_kvkarte='" + ikKasse + "' "
+                + "OR ik_papier='" + ikKasse + "') "
+                + "UNION (SELECT kid FROM verordn WHERE kid=" + kassenId + ")"
+                + "UNION (SELECT kid FROM lza WHERE kid=" + kassenId + ")"
+                + "LIMIT 1";
+        String referenz = SqlInfo.holeEinzelFeld(chkCmd);
+        if (referenz.isEmpty()) {
+            return false;
+        }
+        return true;
     }
 
     public void holeText() {

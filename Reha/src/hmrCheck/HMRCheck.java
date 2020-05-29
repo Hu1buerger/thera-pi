@@ -578,6 +578,8 @@ public class HMRCheck {
 
                             currRezVoArt = testvec.get(i)
                                                   .get(REZEPTART);
+                            gesamt = Integer.parseInt(testvec.get(i)
+                                                             .get(ANZAHL));
                         }
                         int currIdx = getDiagGrpIdx(testvec.get(i)
                                                            .get(INDIKATSCHL));
@@ -590,12 +592,12 @@ public class HMRCheck {
                         // erst prüfen ob zwischen letzter Behandlung des alten Rezeptes und dem ersten
                         // Termin der neuen VO 12 Wochen Therapiepause lagen,
                         // sofern ja -> nicht summieren (muesste dann Erstverordnung sein)
-                            idxVorg = i + 1;
-                            aktanzahl = Integer.parseInt(testvec.get(i)
+                        idxVorg = i + 1;
+                        if (idxVorg < testvec.size()) {
+                            aktanzahl = Integer.parseInt(testvec.get(idxVorg)
                                                                 .get(ANZAHL));
-                        if (idxVorg <= testvec.size()) {
-                                startdatum_neu = DatFunk.sDatInDeutsch(testvec.get(i)
-                                                                              .get(REZ_DATUM)); // McM: dito
+                            startdatum_neu = DatFunk.sDatInDeutsch(testvec.get(i)
+                                                                          .get(REZ_DATUM)); 
                             while ((idxVorg < testvec.size()) && (testvec.get(idxVorg)
                                                                          .get(TERMINE)
                                                                          .length() == 0)) { // falls keine Termine
@@ -622,14 +624,7 @@ public class HMRCheck {
                                 idxVorg++; // jetzt Index auf Vorgänger setzen
                             }
 
-                            if (idxVorg >= testvec.size()) {
-                                if (chkIsErstVO(currRezVoArt)) {
-                                    return true;
-                                } else {
-                                    return shouldBeErstVO(currRezVoArt, "<br>Keine zu " + reznummer
-                                            + "  gehörige<b><font color='#ff0000'> Erstverordnung </font></b>gefunden!<br>");
-                                }
-                            } else if (testvec.get(idxVorg)
+                            if (testvec.get(idxVorg)
                                               .get(TERMINE)
                                               .length() == 0) {
                                 // Vorgänger enthält (auch) keine Behandlungen
@@ -677,8 +672,12 @@ public class HMRCheck {
                             }
 
                             i = --idxVorg; // Index anpassen, falls Neurezept oder Rezepte uebersprungen wurden
+                        } else if (chkIsErstVO(currRezVoArt)) {
+                            return true;
+                        } else {
+                            return shouldBeErstVO(currRezVoArt, "<br>Keine zu " + reznummer
+                                    + "  gehörige<b><font color='#ff0000'> Erstverordnung </font></b>gefunden!<br>");
                         }
-
                     }
                 }
             }
