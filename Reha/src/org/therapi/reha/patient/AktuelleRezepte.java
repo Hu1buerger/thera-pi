@@ -2592,7 +2592,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             Reha.instance.patpanel.rezAktRez.setAbschluss(true);
             // TODO: move the following SQL-Stmt into some Dto-class
             Vector<Vector<String>> kdat = SqlInfo.holeFelder("select ik_kasse,ik_kostent from kass_adr where id='"
-                    + Reha.instance.patpanel.vecaktrez.get(37) + "' LIMIT 1");
+                    + Reha.instance.patpanel.rezAktRez.getkId() + "' LIMIT 1");
             String ikkass = "", ikkost = "", kname = "", rnr = "", patintS = "";
             int patint = -1;
             if (kdat.size() > 0) {
