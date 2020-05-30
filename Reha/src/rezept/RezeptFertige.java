@@ -26,26 +26,24 @@ public class RezeptFertige {
 
     private static final Logger logger = LoggerFactory.getLogger(RezeptFertige.class);
 
-    private IK ikKTraeger;
-    private IK ikKasse;
-    private String kassenName;
-    private String rezNr;
+    private IK ikKTraeger = IK.INVALIDIK;
+    private IK ikKasse = IK.INVALIDIK;
+    private String kassenName = "";
+    private String rezNr = "";
     private int patientIntern;
-    private String rezklasse;
+    private String rezklasse = "";
     private core.Disziplin Disziplin; // TODO: change to disziplin-class/type
     private String idktraeger; // FIXME: This is dead meat in DB
-    private String edifact;
-    private boolean ediok;
+    private String edifact = "";
+    private boolean ediok = false;
     private int id;
 
     private static IK ik;
 
     public RezeptFertige() {
-        setDefaults();
     }
 
     public RezeptFertige(Rezept rez, IK Ik) {
-        setDefaults();
         ik = Ik;
         this.rezNr = rez.getRezNr();
         this.Disziplin = rez.disziplin; // TODO: no getter yet / type-cast
@@ -53,7 +51,6 @@ public class RezeptFertige {
     }
 
     public RezeptFertige(IK Ik) {
-        setDefaults();
         ik = Ik;
     }
     
@@ -87,18 +84,6 @@ public class RezeptFertige {
 
         rez.setAbschluss(false);
         rfDto.deleteById(rez.getId());
-    }
-
-    private void setDefaults() {
-        // Lets give 'em buggers some defaults:
-        ikKTraeger = IK.INVALIDIK;
-        ikKasse = IK.INVALIDIK;
-        kassenName = "";
-        rezNr = "";
-        rezklasse = "";
-        // idktraeger = "";
-        edifact = "";
-        ediok = false;
     }
 
     public IK getIkKTraeger() {
