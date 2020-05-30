@@ -41,17 +41,11 @@ public class RezeptFertige {
     private static IK ik;
 
     public RezeptFertige() {
-        // Lets give 'em buggers some defaults:
-        kassenName = "";
-        rezNr = "";
-        rezklasse = "";
-        // idktraeger = "";
-        edifact = "";
-        ediok = false;
-
+        setDefaults();
     }
 
     public RezeptFertige(Rezept rez, IK Ik) {
+        setDefaults();
         ik = Ik;
         this.rezNr = rez.getRezNr();
         this.Disziplin = rez.disziplin; // TODO: no getter yet / type-cast
@@ -59,9 +53,10 @@ public class RezeptFertige {
     }
 
     public RezeptFertige(IK Ik) {
+        setDefaults();
         ik = Ik;
     }
-
+    
     public void RezeptErledigt(Rezept rez) {
         KrankenkasseAdrDto kkDto = new KrankenkasseAdrDto(ik);
         RezeptDto rDto = new RezeptDto(ik);
@@ -94,26 +89,16 @@ public class RezeptFertige {
         rfDto.deleteById(rez.getId());
     }
 
-    /*
-     * String cmd = "insert into fertige set ikktraeger='" + ikkost + "',
-     * ikkasse='" + ikkass + "', " + " name1='" + kname + "', rez_nr='" + rnr + "',
-     * pat_intern='" + patint + "', rezklasse='" + rnr.substring(0, 2) + "'";
-     * 
-     * Vector<Vector<String>> kdat =
-     * SqlInfo.holeFelder("select ik_kasse,ik_kostent from kass_adr where id='" +
-     * Reha.instance.patpanel.rezAktRez.getkId() + "' LIMIT 1"); ikkass =
-     * kdat.get(0).get(0); // kass_adr.ik_kasse ikkost = kdat.get(0).get(1); //
-     * kass_adr.ik_kostent
-     */
-
-    public static void main(String[] args) {
-        logger.debug("arg0= " + args[0]);
-        logger.debug("arg1= " + args[1]);
-        ik = new IK(args[0]);
-        String Id = args[1];
-        KrankenkasseAdrDto kkadrDto = new KrankenkasseAdrDto(ik);
-        Optional<KrankenkasseAdr> kkadr = kkadrDto.getIKsById(Integer.valueOf(Id));
-        // logger.debug("Got: " + kkadr.toString());
+    private void setDefaults() {
+        // Lets give 'em buggers some defaults:
+        ikKTraeger = IK.INVALIDIK;
+        ikKasse = IK.INVALIDIK;
+        kassenName = "";
+        rezNr = "";
+        rezklasse = "";
+        // idktraeger = "";
+        edifact = "";
+        ediok = false;
     }
 
     public IK getIkKTraeger() {
