@@ -1,6 +1,18 @@
 package rezept;
 
-public class krankenkasseAdr {
+import mandant.IK;
+
+/**
+ * Class implementing the KrankenkasseAdr object
+ * 
+ * Originally designed to do "RezeptAbschluss" which needed some of these fields copied into a different table.
+ * It will need
+ * - a new home
+ * - new methods 
+ *      - some other stuff I currently can't think of
+ *      
+ */
+public class KrankenkasseAdr {
 
     String kuerzel;
     String PREISGRUPPE;
@@ -17,12 +29,12 @@ public class krankenkasseAdr {
     String MATCHCODE;
     String KMEMO;
     String RECHNUNG;
-    int ikKasse;            // Attention! this does NOT match type in DB
-    String IK_PHYSIKA;
-    String IK_NUTZER;
-    int ikKostenTraeger;    // Attention! this does NOT match type in DB
-    String IK_KVKARTE;
-    String IK_PAPIER;
+    IK ikKasse;
+    IK IK_PHYSIKA;
+    IK IK_NUTZER;
+    IK ikKostenTraeger;
+    IK IK_KVKARTE;
+    IK IK_PAPIER;
     String EMAIL1;
     String EMAIL2;
     String EMAIL3;
@@ -37,7 +49,7 @@ public class krankenkasseAdr {
     String pgrs;
     String pgft;
     
-    public krankenkasseAdr() {
+    public KrankenkasseAdr() {
     }
     
     @Override
@@ -173,51 +185,51 @@ public class krankenkasseAdr {
         RECHNUNG = rECHNUNG;
     }
 
-    public int getIkKasse() {
+    public IK getIkKasse() {
         return ikKasse;
     }
 
-    public void setIkKasse(int iK_KASSE) {
+    public void setIkKasse(IK iK_KASSE) {
         ikKasse = iK_KASSE;
     }
 
-    public String getIK_PHYSIKA() {
+    public IK getIK_PHYSIKA() {
         return IK_PHYSIKA;
     }
 
-    public void setIK_PHYSIKA(String iK_PHYSIKA) {
+    public void setIK_PHYSIKA(IK iK_PHYSIKA) {
         IK_PHYSIKA = iK_PHYSIKA;
     }
 
-    public String getIK_NUTZER() {
+    public IK getIK_NUTZER() {
         return IK_NUTZER;
     }
 
-    public void setIK_NUTZER(String iK_NUTZER) {
+    public void setIK_NUTZER(IK iK_NUTZER) {
         IK_NUTZER = iK_NUTZER;
     }
 
-    public int getIkKostenTraeger() {
+    public IK getIkKostenTraeger() {
         return ikKostenTraeger;
     }
 
-    public void setIkKostenTraeger(int iK_KOSTENT) {
+    public void setIkKostenTraeger(IK iK_KOSTENT) {
         ikKostenTraeger = iK_KOSTENT;
     }
 
-    public String getIK_KVKARTE() {
+    public IK getIK_KVKARTE() {
         return IK_KVKARTE;
     }
 
-    public void setIK_KVKARTE(String iK_KVKARTE) {
+    public void setIK_KVKARTE(IK iK_KVKARTE) {
         IK_KVKARTE = iK_KVKARTE;
     }
 
-    public String getIK_PAPIER() {
+    public IK getIK_PAPIER() {
         return IK_PAPIER;
     }
 
-    public void setIK_PAPIER(String iK_PAPIER) {
+    public void setIK_PAPIER(IK iK_PAPIER) {
         IK_PAPIER = iK_PAPIER;
     }
 

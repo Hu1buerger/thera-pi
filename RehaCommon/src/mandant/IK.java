@@ -54,6 +54,13 @@ import org.slf4j.LoggerFactory;
  * Quelle :arge-ik.de
  **/
 public class IK {
+    public static final IK INVALIDIK = new IK("INVALID") {
+        @Override
+                    public boolean isValid() {
+                        
+                        return false;
+                    }
+    };
     private static final Pattern IK_FORMAT = Pattern.compile("\\d{9}");
     private final String ik_ziffern;
     private final String wellFormed;
@@ -64,6 +71,7 @@ public class IK {
      * @param ik ein 9-stelliger String der ausschliesslich aus Ziffern besteht.
      */
     public IK(String ik) {
+        
         if (!IK_FORMAT.matcher(ik)
                       .matches()) {
             logger.error(ik + " is not a valid IK");
