@@ -7,7 +7,6 @@ import org.junit.Test;
 
 public class IKConstructorTest {
 
-
     @Test
     public final void anyNineDigitPasses() throws Exception {
         new IK("000000000");
@@ -22,6 +21,11 @@ public class IKConstructorTest {
         assertFalse(new IK("123456789").isValid());
         assertTrue(new IK("510841109").isValid());
         assertFalse(new IK("510814109").isValid());
+    }
+
+    @Test
+    public void testName() throws Exception {
+        assertFalse(IK.INVALIDIK.isValid());
     }
 
 }
