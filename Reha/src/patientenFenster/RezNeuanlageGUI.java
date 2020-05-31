@@ -293,7 +293,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             JOptionPane.showMessageDialog(null,
                     "Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
             logger.error("Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
-            logger.error( RezNeuanlage.makeStacktraceToString(ex));
+            // logger.error( RezNeuanlage.makeStacktraceToString(ex));
         }
 
     }
@@ -2286,19 +2286,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         } else {
             return new String[] { "0.00", "" };
         }
-    }
-
-    public static String makeStacktraceToString(Exception ex) {
-        String string = "";
-        try {
-            StackTraceElement[] se = ex.getStackTrace();
-            for (int i = 0; i < se.length; i++) {
-                string = string + se[i].toString() + "\n";
-            }
-        } catch (Exception ex2) {
-
-        }
-        return string;
     }
 
     private void doAbbrechen() {
