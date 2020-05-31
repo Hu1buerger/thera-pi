@@ -15,246 +15,233 @@ import mandant.IK;
 public class KrankenkasseAdr {
 
     String kuerzel;
-    String PREISGRUPPE;
-    String kassen_nam1;
-    String kassen_nam2;
-    String STRASSE;
-    String PLZ;
-    String ORT;
-    String POSTFACH;
-    String FAX;
-    String TELEFON;
-    String IK_NUM;
-    String KV_NUMMER;
-    String MATCHCODE;
-    String KMEMO;
-    String RECHNUNG;
+    String preisgruppe;
+    String kassenNam1;
+    String kassenNam2;
+    String strasse;
+    String plz;
+    String ort;
+    String postfach;
+    String fax;
+    String telefon;
+    String ikNum;
+    String kvNummer;
+    String matchcode;
+    String kMemo;
+    String rechnung;
     IK ikKasse;
-    IK IK_PHYSIKA;
-    IK IK_NUTZER;
-    IK ikKostenTraeger;
-    IK IK_KVKARTE;
-    IK IK_PAPIER;
-    String EMAIL1;
-    String EMAIL2;
-    String EMAIL3;
+    IK ikPhysika;
+    IK ikNutzer;
+    IK ikKostent;
+    IK ikKvKarte;
+    IK ikPapier;
+    String email1;
+    String email2;
+    String email3;
     int id;
-    boolean HMRABRECHNUNG;
-    String PGKG;
-    String PGMA;
-    String PGER;
-    String PGLO;
-    String PGRH;
-    String PGPO;
-    String pgrs;
-    String pgft;
+    boolean hmrabrechnung;
+    String pgKg;
+    String pgMa;
+    String pgEr;
+    String pgLo;
+    String pgRh;
+    String pgPo;
+    String pgRs;
+    String pgFt;
     
     public KrankenkasseAdr() {
     }
-    
-    @Override
-    public String toString() {
-        return "krankenkasseAdr [kuerzel=" + kuerzel + ", PREISGRUPPE=" + PREISGRUPPE + ", kassen_nam1=" + kassen_nam1
-                + ", kassen_nam2=" + kassen_nam2 + ", STRASSE=" + STRASSE + ", PLZ=" + PLZ + ", ORT=" + ORT
-                + ", POSTFACH=" + POSTFACH + ", FAX=" + FAX + ", TELEFON=" + TELEFON + ", IK_NUM=" + IK_NUM
-                + ", KV_NUMMER=" + KV_NUMMER + ", MATCHCODE=" + MATCHCODE + ", KMEMO=" + KMEMO + ", RECHNUNG="
-                + RECHNUNG + ", IK_KASSE=" + ikKasse + ", IK_PHYSIKA=" + IK_PHYSIKA + ", IK_NUTZER=" + IK_NUTZER
-                + ", IK_KOSTENT=" + ikKostenTraeger + ", IK_KVKARTE=" + IK_KVKARTE + ", IK_PAPIER=" + IK_PAPIER + ", EMAIL1="
-                + EMAIL1 + ", EMAIL2=" + EMAIL2 + ", EMAIL3=" + EMAIL3 + ", id=" + id + ", HMRABRECHNUNG="
-                + HMRABRECHNUNG + ", PGKG=" + PGKG + ", PGMA=" + PGMA + ", PGER=" + PGER + ", PGLO=" + PGLO + ", PGRH="
-                + PGRH + ", PGPO=" + PGPO + ", pgrs=" + pgrs + ", pgft=" + pgft + "]";
-    }
 
-    public String getKKuezel() {
+    public String getKuerzel() {
         return kuerzel;
     }
 
-    public void setKuerzel(String kUERZEL) {
-        kuerzel = kUERZEL;
+    public void setKuerzel(String kuerzel) {
+        this.kuerzel = kuerzel;
     }
 
-    public String getPREISGRUPPE() {
-        return PREISGRUPPE;
+    public String getPreisgruppe() {
+        return preisgruppe;
     }
 
-    public void setPREISGRUPPE(String pREISGRUPPE) {
-        PREISGRUPPE = pREISGRUPPE;
+    public void setPreisgruppe(String preisgruppe) {
+        this.preisgruppe = preisgruppe;
     }
 
-    public String getKassen_nam1() {
-        return kassen_nam1;
+    public String getKassenNam1() {
+        return kassenNam1;
     }
 
-    public void setKassen_nam1(String kassen_nam1) {
-        this.kassen_nam1 = kassen_nam1;
+    public void setKassenNam1(String kassenNam1) {
+        this.kassenNam1 = kassenNam1;
     }
 
-    public String getKassen_nam2() {
-        return kassen_nam2;
+    public String getKassenNam2() {
+        return kassenNam2;
     }
 
-    public void setKassen_nam2(String kassen_nam2) {
-        this.kassen_nam2 = kassen_nam2;
+    public void setKassenNam2(String kassenNam2) {
+        this.kassenNam2 = kassenNam2;
     }
 
-    public String getSTRASSE() {
-        return STRASSE;
+    public String getStrasse() {
+        return strasse;
     }
 
-    public void setSTRASSE(String sTRASSE) {
-        STRASSE = sTRASSE;
+    public void setStrasse(String strasse) {
+        this.strasse = strasse;
     }
 
-    public String getPLZ() {
-        return PLZ;
+    public String getPlz() {
+        return plz;
     }
 
-    public void setPLZ(String pLZ) {
-        PLZ = pLZ;
+    public void setPlz(String plz) {
+        this.plz = plz;
     }
 
-    public String getORT() {
-        return ORT;
+    public String getOrt() {
+        return ort;
     }
 
-    public void setORT(String oRT) {
-        ORT = oRT;
+    public void setOrt(String ort) {
+        this.ort = ort;
     }
 
-    public String getPOSTFACH() {
-        return POSTFACH;
+    public String getPostfach() {
+        return postfach;
     }
 
-    public void setPOSTFACH(String pOSTFACH) {
-        POSTFACH = pOSTFACH;
+    public void setPostfach(String postfach) {
+        this.postfach = postfach;
     }
 
-    public String getFAX() {
-        return FAX;
+    public String getFax() {
+        return fax;
     }
 
-    public void setFAX(String fAX) {
-        FAX = fAX;
+    public void setFax(String fax) {
+        this.fax = fax;
     }
 
-    public String getTELEFON() {
-        return TELEFON;
+    public String getTelefon() {
+        return telefon;
     }
 
-    public void setTELEFON(String tELEFON) {
-        TELEFON = tELEFON;
+    public void setTelefon(String telefon) {
+        this.telefon = telefon;
     }
 
-    public String getIK_NUM() {
-        return IK_NUM;
+    public String getIkNum() {
+        return ikNum;
     }
 
-    public void setIK_NUM(String iK_NUM) {
-        IK_NUM = iK_NUM;
+    public void setIkNum(String ikNum) {
+        this.ikNum = ikNum;
     }
 
-    public String getKV_NUMMER() {
-        return KV_NUMMER;
+    public String getKvNummer() {
+        return kvNummer;
     }
 
-    public void setKV_NUMMER(String kV_NUMMER) {
-        KV_NUMMER = kV_NUMMER;
+    public void setKvNummer(String kvNummer) {
+        this.kvNummer = kvNummer;
     }
 
-    public String getMATCHCODE() {
-        return MATCHCODE;
+    public String getMatchcode() {
+        return matchcode;
     }
 
-    public void setMATCHCODE(String mATCHCODE) {
-        MATCHCODE = mATCHCODE;
+    public void setMatchcode(String matchcode) {
+        this.matchcode = matchcode;
     }
 
-    public String getKMEMO() {
-        return KMEMO;
+    public String getKMemo() {
+        return kMemo;
     }
 
-    public void setKMEMO(String kMEMO) {
-        KMEMO = kMEMO;
+    public void setKMemo(String kMemo) {
+        this.kMemo = kMemo;
     }
 
-    public String getRECHNUNG() {
-        return RECHNUNG;
+    public String getRechnung() {
+        return rechnung;
     }
 
-    public void setRECHNUNG(String rECHNUNG) {
-        RECHNUNG = rECHNUNG;
+    public void setRechnung(String rechnung) {
+        this.rechnung = rechnung;
     }
 
     public IK getIkKasse() {
         return ikKasse;
     }
 
-    public void setIkKasse(IK iK_KASSE) {
-        ikKasse = iK_KASSE;
+    public void setIkKasse(IK ikKasse) {
+        this.ikKasse = ikKasse;
     }
 
-    public IK getIK_PHYSIKA() {
-        return IK_PHYSIKA;
+    public IK getIkPhysika() {
+        return ikPhysika;
     }
 
-    public void setIK_PHYSIKA(IK iK_PHYSIKA) {
-        IK_PHYSIKA = iK_PHYSIKA;
+    public void setIkPhysika(IK ikPhysika) {
+        this.ikPhysika = ikPhysika;
     }
 
-    public IK getIK_NUTZER() {
-        return IK_NUTZER;
+    public IK getIkNutzer() {
+        return ikNutzer;
     }
 
-    public void setIK_NUTZER(IK iK_NUTZER) {
-        IK_NUTZER = iK_NUTZER;
+    public void setIkNutzer(IK ikNutzer) {
+        this.ikNutzer = ikNutzer;
     }
 
     public IK getIkKostenTraeger() {
-        return ikKostenTraeger;
+        return ikKostent;
     }
 
-    public void setIkKostenTraeger(IK iK_KOSTENT) {
-        ikKostenTraeger = iK_KOSTENT;
+    public void setIkKostenTraeger(IK ikKostent) {
+        this.ikKostent = ikKostent;
     }
 
-    public IK getIK_KVKARTE() {
-        return IK_KVKARTE;
+    public IK getIkKvKarte() {
+        return ikKvKarte;
     }
 
-    public void setIK_KVKARTE(IK iK_KVKARTE) {
-        IK_KVKARTE = iK_KVKARTE;
+    public void setIkKvKarte(IK ikKvKarte) {
+        this.ikKvKarte = ikKvKarte;
     }
 
-    public IK getIK_PAPIER() {
-        return IK_PAPIER;
+    public IK getIkPapier() {
+        return ikPapier;
     }
 
-    public void setIK_PAPIER(IK iK_PAPIER) {
-        IK_PAPIER = iK_PAPIER;
+    public void setIkPapier(IK ikPapier) {
+        this.ikPapier = ikPapier;
     }
 
-    public String getEMAIL1() {
-        return EMAIL1;
+    public String getEmail1() {
+        return email1;
     }
 
-    public void setEMAIL1(String eMAIL1) {
-        EMAIL1 = eMAIL1;
+    public void setEmail1(String email1) {
+        this.email1 = email1;
     }
 
-    public String getEMAIL2() {
-        return EMAIL2;
+    public String getEmail2() {
+        return email2;
     }
 
-    public void setEMAIL2(String eMAIL2) {
-        EMAIL2 = eMAIL2;
+    public void setEmail2(String email2) {
+        this.email2 = email2;
     }
 
-    public String getEMAIL3() {
-        return EMAIL3;
+    public String getEmail3() {
+        return email3;
     }
 
-    public void setEMAIL3(String eMAIL3) {
-        EMAIL3 = eMAIL3;
+    public void setEmail3(String email3) {
+        this.email3 = email3;
     }
 
     public int getId() {
@@ -265,76 +252,82 @@ public class KrankenkasseAdr {
         this.id = id;
     }
 
-    public boolean isHMRABRECHNUNG() {
-        return HMRABRECHNUNG;
+    public boolean isHmrAbrechnung() {
+        return hmrabrechnung;
+    }
+    
+    public String getHmrAbrechnung() {
+        return ( isHmrAbrechnung() ? "T" : "F");
     }
 
-    public void setHMRABRECHNUNG(boolean hMRABRECHNUNG) {
-        HMRABRECHNUNG = hMRABRECHNUNG;
+    public void setHmrAbrechnung(boolean hmrabrechnung) {
+        this.hmrabrechnung = hmrabrechnung;
     }
 
-    public String getPGKG() {
-        return PGKG;
+    public String getPgKg() {
+        return pgKg;
     }
 
-    public void setPGKG(String pGKG) {
-        PGKG = pGKG;
+    public void setPgKg(String pgKg) {
+        this.pgKg = pgKg;
     }
 
-    public String getPGMA() {
-        return PGMA;
+    public String getPgMa() {
+        return pgMa;
     }
 
-    public void setPGMA(String pGMA) {
-        PGMA = pGMA;
+    public void setPgMa(String pgMa) {
+        this.pgMa = pgMa;
     }
 
-    public String getPGER() {
-        return PGER;
+    public String getPgEr() {
+        return pgEr;
     }
 
-    public void setPGER(String pGER) {
-        PGER = pGER;
+    public void setPgEr(String pgEr) {
+        this.pgEr = pgEr;
     }
 
-    public String getPGLO() {
-        return PGLO;
+    public String getPgLo() {
+        return pgLo;
     }
 
-    public void setPGLO(String pGLO) {
-        PGLO = pGLO;
+    public void setPgLo(String pgLo) {
+        this.pgLo = pgLo;
     }
 
-    public String getPGRH() {
-        return PGRH;
+    public String getPgRh() {
+        return pgRh;
     }
 
-    public void setPGRH(String pGRH) {
-        PGRH = pGRH;
+    public void setPgRh(String pgRh) {
+        this.pgRh = pgRh;
     }
 
-    public String getPGPO() {
-        return PGPO;
+    public String getPgPo() {
+        return pgPo;
     }
 
-    public void setPGPO(String pGPO) {
-        PGPO = pGPO;
+    public void setPgPo(String pgPo) {
+        this.pgPo = pgPo;
     }
 
-    public String getPgrs() {
-        return pgrs;
+    public String getPgRs() {
+        return pgRs;
     }
 
-    public void setPgrs(String pgrs) {
-        this.pgrs = pgrs;
+    public void setPgRs(String pgRs) {
+        this.pgRs = pgRs;
     }
 
-    public String getPgft() {
-        return pgft;
+    public String getPgFt() {
+        return pgFt;
     }
 
-    public void setPgft(String pgft) {
-        this.pgft = pgft;
+    public void setPgFt(String pgFt) {
+        this.pgFt = pgFt;
     }
+    
+
     
 }
