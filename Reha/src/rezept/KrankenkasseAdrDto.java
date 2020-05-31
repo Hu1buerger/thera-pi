@@ -175,28 +175,28 @@ public class KrankenkasseAdrDto {
                     ret.setHmrAbrechnung(rs.getString(field).trim().equals("T") ? true : false);
                     break;
                 case "PGKG":
-                    ret.setPgKg(rs.getString(field));
+                    ret.setPgKg(rs.getInt(field));
                     break;
                 case "PGMA":
-                    ret.setPgMa(rs.getString(field));
+                    ret.setPgMa(rs.getInt(field));
                     break;
                 case "PGER":
-                    ret.setPgEr(rs.getString(field));
+                    ret.setPgEr(rs.getInt(field));
                     break;
                 case "PGLO":
-                    ret.setPgLo(rs.getString(field));
+                    ret.setPgLo(rs.getInt(field));
                     break;
                 case "PGRH":
-                    ret.setPgRh(rs.getString(field));
+                    ret.setPgRh(rs.getInt(field));
                     break;
                 case "PGPO":
-                    ret.setPgPo(rs.getString(field));
+                    ret.setPgPo(rs.getInt(field));
                     break;
                 case "PGRS":
-                    ret.setPgRs(rs.getString(field));
+                    ret.setPgRs(rs.getInt(field));
                     break;
                 case "PGFT":
-                    ret.setPgFt(rs.getString(field));
+                    ret.setPgFt(rs.getInt(field));
                     break;
                 default:
                     logger.error("Unhandled field in KKassenAdr found: " + meta.getColumnLabel(o) + " at pos: " + o);

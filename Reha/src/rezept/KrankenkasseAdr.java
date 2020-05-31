@@ -40,14 +40,14 @@ public class KrankenkasseAdr {
     String email3;
     int id;
     boolean hmrabrechnung;
-    String pgKg;
-    String pgMa;
-    String pgEr;
-    String pgLo;
-    String pgRh;
-    String pgPo;
-    String pgRs;
-    String pgFt;
+    int pgKg;
+    int pgMa;
+    int pgEr;
+    int pgLo;
+    int pgRh;
+    int pgPo;
+    int pgRs;
+    int pgFt;
     
     public KrankenkasseAdr() {
     }
@@ -264,67 +264,67 @@ public class KrankenkasseAdr {
         this.hmrabrechnung = hmrabrechnung;
     }
 
-    public String getPgKg() {
+    public int getPgKg() {
         return pgKg;
     }
 
-    public void setPgKg(String pgKg) {
+    public void setPgKg(int pgKg) {
         this.pgKg = pgKg;
     }
 
-    public String getPgMa() {
+    public int getPgMa() {
         return pgMa;
     }
 
-    public void setPgMa(String pgMa) {
+    public void setPgMa(int pgMa) {
         this.pgMa = pgMa;
     }
 
-    public String getPgEr() {
+    public int getPgEr() {
         return pgEr;
     }
 
-    public void setPgEr(String pgEr) {
+    public void setPgEr(int pgEr) {
         this.pgEr = pgEr;
     }
 
-    public String getPgLo() {
+    public int getPgLo() {
         return pgLo;
     }
 
-    public void setPgLo(String pgLo) {
+    public void setPgLo(int pgLo) {
         this.pgLo = pgLo;
     }
 
-    public String getPgRh() {
+    public int getPgRh() {
         return pgRh;
     }
 
-    public void setPgRh(String pgRh) {
+    public void setPgRh(int pgRh) {
         this.pgRh = pgRh;
     }
 
-    public String getPgPo() {
+    public int getPgPo() {
         return pgPo;
     }
 
-    public void setPgPo(String pgPo) {
+    public void setPgPo(int pgPo) {
         this.pgPo = pgPo;
     }
 
-    public String getPgRs() {
+    public int getPgRs() {
         return pgRs;
     }
 
-    public void setPgRs(String pgRs) {
+    public void setPgRs(int pgRs) {
         this.pgRs = pgRs;
     }
 
-    public String getPgFt() {
+    public int getPgFt() {
         return pgFt;
     }
 
-    public void setPgFt(String pgFt) {
+    public void setPgFt(int pgFt) {
         this.pgFt = pgFt;
     }
     
