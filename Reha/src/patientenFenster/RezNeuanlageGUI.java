@@ -1741,21 +1741,20 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     private void holePreisGruppe(int idKtraeger) {
         try {
-            Vector<Vector<String>> vec = null;
             KrankenkasseAdrDto kkaDto = new KrankenkasseAdrDto(mand.ik());
             Optional<KrankenkasseAdr> kka = kkaDto.getAllePreisgruppenFelderById(idKtraeger, SystemConfig.mitRs);
             if (kka.isPresent()) {
-                preisgruppen[0] = kka.get().getPgKg();
-                preisgruppen[1] = kka.get().getPgMa();
-                preisgruppen[2] = kka.get().getPgEr();
-                preisgruppen[3] = kka.get().getPgLo();
-                preisgruppen[4] = kka.get().getPgRh();
-                preisgruppen[5] = kka.get().getPgPo();
+                preisgruppen[0] = kka.get().getPgKg() - 1;
+                preisgruppen[1] = kka.get().getPgMa() - 1;
+                preisgruppen[2] = kka.get().getPgEr() - 1;
+                preisgruppen[3] = kka.get().getPgLo() - 1;
+                preisgruppen[4] = kka.get().getPgRh() - 1;
+                preisgruppen[5] = kka.get().getPgPo() - 1;
                 if (SystemConfig.mitRs) {
-                    preisgruppen[6] = kka.get().getPgRs();
-                    preisgruppen[7] = kka.get().getPgFt();
+                    preisgruppen[6] = kka.get().getPgRs() - 1;
+                    preisgruppen[7] = kka.get().getPgFt() - 1;
                 }
-                preisgruppe = kka.get().getPreisgruppe();
+                preisgruppe = kka.get().getPreisgruppe() - 1;
                 jtf[cPREISGR].setText(String.valueOf(kka.get().getPreisgruppe()));
             } else {
                 logger.error("Returned Preislisten were empty");
@@ -1764,6 +1763,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
             // TODO: delete the following once Rezepte have been sorted
+            Vector<Vector<String>> vec = null;
             if (SystemConfig.mitRs) {
                 vec = SqlInfo.holeFelder(
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='"
