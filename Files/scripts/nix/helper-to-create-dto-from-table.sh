@@ -131,6 +131,7 @@ function saveToDB() {
                 fi
 		firstUp="${allups:0:1}${alldowns:1}"
 		echo -ne "+ \"${allups}='\" + fertiges.get"${firstUp}"() + \"',\"\n"
+		let o++
 	done
 	cat << -EOT
         try {
