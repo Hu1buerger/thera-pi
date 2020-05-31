@@ -75,7 +75,7 @@ public class KrankenkasseAdrDto {
         try {
             for(int o=1;o<=meta.getColumnCount();o++) {
                 String field = meta.getColumnLabel(o).toUpperCase();
-                logger.debug("Checking: " + field + " in " + o);
+                // logger.debug("Checking: " + field + " in " + o);
                 switch (field) {
                 case "KUERZEL":
                     ret.setKuerzel(rs.getString(field));
