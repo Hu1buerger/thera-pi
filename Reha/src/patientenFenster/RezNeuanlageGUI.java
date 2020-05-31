@@ -1755,8 +1755,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                     preisgruppen[6] = kka.get().getPgRs();
                     preisgruppen[7] = kka.get().getPgFt();
                 }
-                preisgruppe = Integer.valueOf(kka.get().getPreisgruppe());
-                jtf[cPREISGR].setText(kka.get().getPreisgruppe());
+                preisgruppe = kka.get().getPreisgruppe();
+                jtf[cPREISGR].setText(String.valueOf(kka.get().getPreisgruppe()));
             } else {
                 logger.error("Returned Preislisten were empty");
                 JOptionPane.showMessageDialog(null,
