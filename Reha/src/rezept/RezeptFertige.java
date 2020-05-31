@@ -10,6 +10,8 @@ package rezept;
 
 import java.util.Optional;
 
+import javax.swing.JOptionPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,28 +39,31 @@ public class RezeptFertige {
     private String edifact = "";
     private boolean ediok = false;
     private int id;
+    private Rezept rez;
 
     private static IK ik;
 
     public RezeptFertige() {
     }
 
-    public RezeptFertige(Rezept rez, IK Ik) {
+    public RezeptFertige(Rezept Rez, IK Ik) {
         ik = Ik;
-        this.rezNr = rez.getRezNr();
-        this.Disziplin = rez.disziplin; // TODO: no getter yet / type-cast
-        this.patientIntern = rez.getPatIntern();
+        rez = Rez;
     }
 
     public RezeptFertige(IK Ik) {
         ik = Ik;
     }
     
-    public void RezeptErledigt(Rezept rez) {
+    public boolean RezeptErledigt() {
         KrankenkasseAdrDto kkDto = new KrankenkasseAdrDto(ik);
         RezeptDto rDto = new RezeptDto(ik);
         RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
         Optional<KrankenkasseAdr> kka = kkDto.getIKsById(rez.getkId());
+        if ( rez == null || rez.getId() == 0 ) {
+            logger.error("Need a Rezept to operate on - class not initialized with Rezept?");
+            return false;
+        }
         if (kka.isPresent()) {
 
             ikKTraeger = kka.get()
@@ -66,24 +71,29 @@ public class RezeptFertige {
             ikKasse = kka.get()
                          .getIkKasse();
         } else {
-            logger.error("keine Krankenkasse gefunden fuer " + rez.getkId());
+            logger.error("keine Krankenkasse gefunden fuer " + rez.getkId() + " im Rezept: " + rez.getRezNr());
+            return false;
         }
-        ;
+        
         kassenName = rez.getKTraegerName();
         rezNr = rez.getRezNr();
         patientIntern = rez.getPatIntern();
         Disziplin = rez.disziplin; // TODO: no getter yet / type-cast
-        rez.setAbschluss(true); // Will this changed info make it's way back to the caller?
+        rez.setAbschluss(true); // Do we want to pass this back?
         rfDto.saveToDB(this);
-        rDto.rezeptInDBSpeichern(rez);
-
+        // rDto.rezeptInDBSpeichern(rez);
+        rDto.rezeptAbschluss(rez.getId(), true);
+        
+        return true;
     }
 
     public void RezeptRevive(Rezept rez) {
         RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
+        RezeptDto rDto = new RezeptDto(ik);
 
         rez.setAbschluss(false);
         rfDto.deleteById(rez.getId());
+        rDto.rezeptAbschluss(rez.getId(), false);
     }
 
     public IK getIkKTraeger() {

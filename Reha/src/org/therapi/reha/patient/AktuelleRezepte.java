@@ -116,6 +116,8 @@ import rechteTools.Rechte;
 import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
+import rezept.RezeptFertige;
+import rezept.RezeptFertigeDto;
 import rezept.Zuzahlung;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
@@ -2580,9 +2582,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // Icon Rezepstatus -> abgeschlossen:
             dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[1], currow,
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
-            // This is an empty stub:
-            doAbschliessen();
-            rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), true);
+            doAbschliessen(Reha.instance.patpanel.rezAktRez);
             // TODO: delete me once Rezepteumbau has been completed
             String xcmd = "update verordn set abschluss='T' where id='" + Reha.instance.patpanel.vecaktrez.get(35)
                     + "' LIMIT 1";
@@ -2907,7 +2907,16 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
 
-    private void doAbschliessen() {
+    private void doAbschliessen(Rezept rez) {
+        // RezeptFertigeDto rfDto = new RezeptFertigeDto(mandant.ik());
+        RezeptFertige rf = new RezeptFertige(rez, mandant.ik());
+        
+        if (!rf.RezeptErledigt()) {
+            logger.error("Konnte Rezept nicht abschliesen");
+            JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten\n"
+                    + "Konnte Rezept\n" + rez.getRezNr().toString() + "\n"
+                    + "nicht abschliessen\n");
+        };
 
     }
 
