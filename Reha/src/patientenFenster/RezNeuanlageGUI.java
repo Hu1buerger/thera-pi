@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
@@ -64,6 +65,8 @@ import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
 import mandant.Mandant;
 import rechteTools.Rechte;
+import rezept.KrankenkasseAdr;
+import rezept.KrankenkasseAdrDto;
 import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
@@ -1739,7 +1742,28 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
     private void holePreisGruppe(int idKtraeger) {
         try {
             Vector<Vector<String>> vec = null;
-            // TODO: move the following SQL statements to rezepteDto
+            KrankenkasseAdrDto kkaDto = new KrankenkasseAdrDto(mand.ik());
+            Optional<KrankenkasseAdr> kka = kkaDto.getAllePreisgruppenFelderById(idKtraeger, SystemConfig.mitRs);
+            if (kka.isPresent()) {
+                preisgruppen[0] = Integer.valueOf(kka.get().getPgKg());
+                preisgruppen[1] = Integer.valueOf(kka.get().getPgMa());
+                preisgruppen[2] = Integer.valueOf(kka.get().getPgEr());
+                preisgruppen[3] = Integer.valueOf(kka.get().getPgLo());
+                preisgruppen[4] = Integer.valueOf(kka.get().getPgRh());
+                preisgruppen[5] = Integer.valueOf(kka.get().getPgPo());
+                if (SystemConfig.mitRs) {
+                    preisgruppen[6] = Integer.valueOf(kka.get().getPgRs());
+                    preisgruppen[7] = Integer.valueOf(kka.get().getPgFt());
+                }
+                preisgruppe = Integer.valueOf(kka.get().getPreisgruppe());
+                jtf[cPREISGR].setText(kka.get().getPreisgruppe());
+            } else {
+                logger.error("Returned Preislisten were empty");
+                JOptionPane.showMessageDialog(null,
+                        "Achtung - kann Preisgruppe nicht ermitteln - "
+                        + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
+            }
+            // TODO: delete the following once Rezepte have been sorted
             if (SystemConfig.mitRs) {
                 vec = SqlInfo.holeFelder(
                         "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo,pgrs,pgft from kass_adr where id='"
@@ -1761,11 +1785,13 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 jtf[cPREISGR].setText(vec.get(0)
                                                   .get(0));
             } else {
+                logger.error("Returned Preislisten-Vec was empty");
                 JOptionPane.showMessageDialog(null,
                         "Achtung - kann Preisgruppe nicht ermitteln - "
                         + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
         } catch (Exception ex) {
+            logger.error("Exception caught whilst trying to get Preisliste", ex);
             JOptionPane.showMessageDialog(null,
                     "Achtung - kann Preisgruppe nicht ermitteln -"
                     + " Rezept kann sp\u00e4ter nicht abgerechnet werden!\n"
@@ -1998,10 +2024,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                 rezDat = LocalDate.parse(jtf[cREZDAT].getText().trim(), DateTimeFormatters.dMYYYYmitPunkt);
             }
             
-            // TODO: This needs to handle a Rezept as param:
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
                     String.valueOf(stest), false, Reha.instance.patpanel.rezAktRez);
-            // TODO: sort format of RezDatum upon String
             thisRezept.setRezDatum(rezDat);
             setRezDatInTable(stest);
             LocalDate stest2 = RezeptFensterTools.chkLastBeginDat(rezDat, jtf[cBEGINDAT].getText()
@@ -2017,8 +2041,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             if (thisRezept.isHausBesuch()) {
                 String anzHB = String.valueOf(thisRezept.getAnzahlHb());
                 if (!anzHB.equals(jtf[cANZ1].getText())) {
-                    int frage = JOptionPane.showConfirmDialog(null, "Achtung!\n\nDie Anzahl Hausbesuche = " + anzHB
-                            + "\n" + "Die Anzahl des ersten Heilmittels = " + jtf[cANZ1].getText() + "\n\n"
+                    int frage = JOptionPane.showConfirmDialog(null, "Achtung!\n\n"
+                            + "Die Anzahl Hausbesuche = " + anzHB + "\n" 
+                            + "Die Anzahl des ersten Heilmittels = " + jtf[cANZ1].getText() + "\n\n"
                             + "Soll die Anzahl Hausbesuche ebenfalls auf " + jtf[cANZ1].getText() + " gesetzt werden?",
                             "Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                     if (frage == JOptionPane.YES_OPTION) {

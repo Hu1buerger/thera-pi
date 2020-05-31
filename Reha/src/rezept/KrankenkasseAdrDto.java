@@ -13,14 +13,14 @@ import mandant.IK;
 import sql.DatenquellenFactory;
 
 /**
- * Helper class to do DB related tasks on the table "krankenkasseAdr"
+ * Helper class to do DB related tasks on the table "kass_Adr" (KrankenkasseAdr?)
  * 
  * Originally designed to do "RezeptAbschluss" which needed some of these fields copied into a different table.
  * It will need
  * - a new home
  * - new methods 
- *      - retrieve full dataset
- *      - save current okbject to DB
+ *      - retrieve full dataset         DONE
+ *      - save current okbject to DB    DONE
  *      - some other stuff I currently can't think of
  *      
  */
@@ -51,6 +51,25 @@ public class KrankenkasseAdrDto {
     
     public Optional<KrankenkasseAdr> getById(int id) {
         String sql = selectAllWhere + "id='" + id + "'";
+        return retrieveFirst(sql);
+    }
+    
+    /**
+     * This will return a KrankenkasseAdr which only has the Preisgruppen fields set
+     * It takes a boolean to indicate whether the Reha-PGs should be included
+     * 
+     * @param id    Int - the ID of the KK
+     * @param mitRs Bool - do you also want the Reha-PGs?
+     * 
+     * @return      Optional - if result present will be a KrankenkasseAdr with PGs set
+     */
+    public Optional<KrankenkasseAdr> getAllePreisgruppenFelderById(int id, boolean mitRs) {
+        String sql = "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo";
+        if (mitRs) {
+            sql.concat(",pgrs,pgft");
+        }
+        sql.concat(" from " + dbName + " where id='" + id + "'");
+ 
         return retrieveFirst(sql);
     }
     
