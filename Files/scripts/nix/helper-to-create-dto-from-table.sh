@@ -17,6 +17,7 @@ DEBUG=1
 # - copy your version of the member-defs to a text-file and re-run this script with the param -ff TEXTFILEYOUCREATED
 # - copy & paste the resulting 2 sections to the Dto-class
 #
+# - have Eclipse create all getter/setter from the members you pasted above
 # - check the Dto-class reads the correct data-type from DB (rs.getString vs rs.getInt etc)
 # - re-check the dataTypes for consistancy
 
