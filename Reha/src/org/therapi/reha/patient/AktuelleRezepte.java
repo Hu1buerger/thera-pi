@@ -2627,14 +2627,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             // bereits abgeschlossen muss geoeffnet werden
             dtblm.setValueAt(Reha.instance.patpanel.imgrezstatus[0], currow, 
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
-            doAufschliessen();
             // TODO: delete me once Rezepteumbau has been completed
             String xcmd = "update verordn set abschluss='F' where id='" + Reha.instance.patpanel.vecaktrez.get(35)
                     + "' LIMIT 1";
             // TODO: delete me once RezepteUmbau has been completed
             Reha.instance.patpanel.vecaktrez.set(62, "F");
-            Reha.instance.patpanel.rezAktRez.setAbschluss(false);
-            rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), false);
+            doAufschliessen(Reha.instance.patpanel.rezAktRez);
+            // Reha.instance.patpanel.rezAktRez.setAbschluss(false);
+            // rDto.rezeptAbschluss(Reha.instance.patpanel.rezAktRez.getId(), false);
             // SqlInfo.sqlAusfuehren(xcmd);
             // TODO: delete me once RezepteUmbau has been completed
             String rnr = Reha.instance.patpanel.vecaktrez.get(1);
@@ -2920,7 +2920,15 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
 
-    private void doAufschliessen() {
+    private void doAufschliessen(Rezept rez) {
+        RezeptFertige rf = new RezeptFertige(rez, mandant.ik());
+        
+        if (!rf.RezeptRevive(rez)) {
+            logger.error("Konnte Rezept nicht aufschliesen");
+            JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten\n"
+                    + "Konnte Rezept\n" + rez.getRezNr().toString() + "\n"
+                    + "nicht aufschliessen\n");
+        };
 
     }
 

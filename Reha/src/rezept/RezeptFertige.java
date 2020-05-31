@@ -61,7 +61,7 @@ public class RezeptFertige {
         RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
         Optional<KrankenkasseAdr> kka = kkDto.getIKsById(rez.getkId());
         if ( rez == null || rez.getId() == 0 ) {
-            logger.error("Need a Rezept to operate on - class not initialized with Rezept?");
+            logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
             return false;
         }
         if (kka.isPresent()) {
@@ -87,13 +87,22 @@ public class RezeptFertige {
         return true;
     }
 
-    public void RezeptRevive(Rezept rez) {
+    public boolean RezeptRevive(Rezept rez) {
         RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
         RezeptDto rDto = new RezeptDto(ik);
 
+        if ( rez == null || rez.getId() == 0 ) {
+            logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
+            return false;
+        }
         rez.setAbschluss(false);
-        rfDto.deleteById(rez.getId());
+        if (!rfDto.deleteByRezNr(rez.getRezNr())) {
+            logger.error("Problems deleting entry in fertige");
+            return false;
+        };
         rDto.rezeptAbschluss(rez.getId(), false);
+        
+        return true;
     }
 
     public IK getIkKTraeger() {

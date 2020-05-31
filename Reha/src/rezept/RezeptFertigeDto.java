@@ -28,6 +28,12 @@ public class RezeptFertigeDto {
         return retrieveFirst(sql);
     }
     
+    public RezeptFertige getByRezId(int rezId) {
+        String sql = selectAllWhere + "ID='" + rezId + "'";
+        
+        return retrieveFirst(sql);
+    }
+    
     public void saveToDB(RezeptFertige fertiges) {
         String sql = "insert into " + dbName + " set "
                 + "IKKTRAEGER='" + fertiges.getIkKTraeger() + "',"
@@ -47,24 +53,56 @@ public class RezeptFertigeDto {
         }
     }
     
-    public void deleteById(int id) {
+    public boolean deleteById(int id) {
+        if ( id == 0) {
+            logger.error("Need proper data to operate on");
+            return false;
+        }
         String sql="delete from " + dbName + " where id='" + id + "'";
         try {
             Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
             boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
             logger.error("Could not Delete fertiges Rezept ID=" + id + " from Database", e);
+            return false;
         }
+        return true;
     }
-    
-    public void delete( RezeptFertige fertiges) {
-        String sql="delete from " + dbName + " where id='" + fertiges.getId() + "'";
+
+    public boolean deleteByRezNr(String rezNr) {
+        if ( rezNr.isEmpty()) {
+            logger.error("Need proper data to operate on");
+            return false;
+        }
+        String sql="delete from " + dbName + " where REZ_NR='" + rezNr + "'";
         try {
             Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
             boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
-            logger.error("Could not delete Rezept " + fertiges , e);
+            logger.error("Could not Delete fertiges Rezept ID=" + rezNr + " from Database", e);
+            return false;
         }
+        return true;
+    }
+
+    
+    public boolean delete( RezeptFertige fertiges) {
+        int rfId = fertiges.getId();
+        if ( rfId == 0) {
+            logger.error("Need proper data to operate on");
+            return false;
+        }
+        String sql="delete from " + dbName + " where id='" + rfId + "'";
+        try {
+            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = conn.createStatement().execute(sql);
+            // TODO: check if we actually did delete 1 element from DB
+            // if (!rs) { logger.debug("Updatecount= " + gimme };
+        } catch (SQLException e) {
+            logger.error("Could not delete Rezept " + fertiges , e);
+            return false;
+        }
+        return true;
     }
 
     private RezeptFertige retrieveFirst(String sql) {
