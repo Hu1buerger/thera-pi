@@ -15,7 +15,7 @@ import mandant.IK;
 public class KrankenkasseAdr {
 
     String kuerzel;
-    String preisgruppe;
+    int preisgruppe;
     String kassenNam1;
     String kassenNam2;
     String strasse;
@@ -60,11 +60,11 @@ public class KrankenkasseAdr {
         this.kuerzel = kuerzel;
     }
 
-    public String getPreisgruppe() {
+    public int getPreisgruppe() {
         return preisgruppe;
     }
 
-    public void setPreisgruppe(String preisgruppe) {
+    public void setPreisgruppe(int preisgruppe) {
         this.preisgruppe = preisgruppe;
     }
 

@@ -1745,15 +1745,15 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             KrankenkasseAdrDto kkaDto = new KrankenkasseAdrDto(mand.ik());
             Optional<KrankenkasseAdr> kka = kkaDto.getAllePreisgruppenFelderById(idKtraeger, SystemConfig.mitRs);
             if (kka.isPresent()) {
-                preisgruppen[0] = Integer.valueOf(kka.get().getPgKg());
-                preisgruppen[1] = Integer.valueOf(kka.get().getPgMa());
-                preisgruppen[2] = Integer.valueOf(kka.get().getPgEr());
-                preisgruppen[3] = Integer.valueOf(kka.get().getPgLo());
-                preisgruppen[4] = Integer.valueOf(kka.get().getPgRh());
-                preisgruppen[5] = Integer.valueOf(kka.get().getPgPo());
+                preisgruppen[0] = kka.get().getPgKg();
+                preisgruppen[1] = kka.get().getPgMa();
+                preisgruppen[2] = kka.get().getPgEr();
+                preisgruppen[3] = kka.get().getPgLo();
+                preisgruppen[4] = kka.get().getPgRh();
+                preisgruppen[5] = kka.get().getPgPo();
                 if (SystemConfig.mitRs) {
-                    preisgruppen[6] = Integer.valueOf(kka.get().getPgRs());
-                    preisgruppen[7] = Integer.valueOf(kka.get().getPgFt());
+                    preisgruppen[6] = kka.get().getPgRs();
+                    preisgruppen[7] = kka.get().getPgFt();
                 }
                 preisgruppe = Integer.valueOf(kka.get().getPreisgruppe());
                 jtf[cPREISGR].setText(kka.get().getPreisgruppe());

@@ -100,7 +100,7 @@ public class KrankenkasseAdrDto {
                     ret.setKuerzel(rs.getString(field));
                     break;
                 case "PREISGRUPPE":
-                    ret.setPreisgruppe(rs.getString(field));
+                    ret.setPreisgruppe(rs.getInt(field));
                     break;
                 case "KASSEN_NAM1":
                     ret.setKassenNam1(rs.getString(field));
