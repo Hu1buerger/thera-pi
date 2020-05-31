@@ -156,8 +156,14 @@ function varsInConstructor() {
 		elif [[ $type =~ "enum('T'," ]]
 		then
 			echo -ne "boolean "
-		else
+		elif [[ $type =~ "date" ]]
+		then
+			echo -ne "LocalDate "
+		elif [[ $type =~ "int" ]]
+		then
 			echo -ne "int "
+		else
+			echo -ne "String "
 		fi
 		[ $DEBUG -gt 1 ] && echo "DEBUG type=\"$type\""
 		echo "$( toLower $field );"
