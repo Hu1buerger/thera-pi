@@ -1790,6 +1790,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
                         "Achtung - kann Preisgruppe nicht ermitteln - "
                         + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
+            // Deleteme END
         } catch (Exception ex) {
             logger.error("Exception caught whilst trying to get Preisliste", ex);
             JOptionPane.showMessageDialog(null,
