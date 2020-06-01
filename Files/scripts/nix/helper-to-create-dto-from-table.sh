@@ -61,11 +61,33 @@ function toLower() {
 	echo "${1}" |tr '[:upper:]' '[:lower:]'
 }
 
+function guessType() {
+	idx=$1
+	type="${types[$idx]}"
+        if [[ $type =~ "char" ]] || [[ $type =~ "text" ]]
+        then
+                echo -ne "String"
+        elif [[ $type =~ "enum('T'," ]]
+        then
+                echo -ne "boolean"
+        elif [[ $type =~ "date" ]] || [[ $type =~ "LocalDate" ]]
+        then
+                echo -ne "LocalDate"
+        elif [[ $type =~ "int" ]]
+        then
+                echo -ne "int"
+        else
+                echo -ne "String"
+        fi
+        [ $DEBUG -gt 1 ] && echo "DEBUG type=\"$type\""
+
+}
+
 function setFieldsInClass() {
-	o=0
+	local o=0
 	cat << -EOT
-    private RezeptFertige ofResultset(ResultSet rs) {
-        RezeptFertige ret = new RezeptFertige();
+    private $className ofResultset(ResultSet rs) {
+        $className ret = new $className();
         
         ResultSetMetaData meta;
         try {
@@ -77,12 +99,13 @@ function setFieldsInClass() {
         try {
             for(int o=1;o<=meta.getColumnCount();o++) {
                 String field = meta.getColumnLabel(o).toUpperCase();
-                logger.debug("Checking: " + field + " in " + o);
+                // logger.debug("Checking: " + field + " in " + o);
                 switch (field) {
 
 -EOT
 	for field in $fields
 	do
+		type="$(guessType $o)"
 		if [ $_fromFile -eq 0 ]
 		then
 			allups="$(toUpper $field )"
@@ -91,10 +114,16 @@ function setFieldsInClass() {
 			allups="$( toUpper ${fieldsDB[$o]} )"
 			alldowns="$field"
 		fi
-		firstUp="${allups:0:1}${alldowns:1}"
+		if [[ "${field:1:1}" =~ [[:lower:]] ]]
+		then
+			firstUp="${allups:0:1}${alldowns:1}"
+		else
+			firstUp="${field}"
+		fi
 		[ $DEBUG -gt 1 ] && echo "DEBUG: allups=\"$allups\""
 		[ $DEBUG -gt 1 ] && echo "DEBUG: firstUp=\"$firstUp\""
-		echo -ne "case \"$allups\":\n    ret.set${firstUp}(rs.getString(field));\n    break;\n"
+		[ $DEBUG -gt 1 ] && echo "DEBUG: type=\"${type}\""
+		echo -ne "case \"$allups\":\n    ret.set${firstUp}(rs.get${type}(field));\n    break;\n"
 		let o++
 	done
 	cat << -EOT
@@ -104,41 +133,50 @@ function setFieldsInClass() {
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
-            logger.error("Couldn't retrieve dataset in fertige Rezepte");
+            logger.error("Couldn't retrieve dataset in $className");
             logger.error("Error: " + e.getLocalizedMessage());
-            e.printStackTrace();
         }
         
         return ret;
+        }
 -EOT
 }
 
 function saveToDB() {
-	o=0
+	local o=0
 	cat << -EOT
-    public void saveToDB(RezeptFertige fertiges) {
+    public void saveToDB($className dataset) {
         String sql = "insert into " + dbName + " set "
 -EOT
 	for field in $fields
 	do
 		if [ $_fromFile -eq 0 ]
-                then
-                        allups="$(toUpper $field )"
-                        alldowns="$(toLower $field )"
-                else
-                        allups="$( toUpper ${fieldsDB[$o]} )"
-                        alldowns="$field"
-                fi
-		firstUp="${allups:0:1}${alldowns:1}"
-		echo -ne "+ \"${allups}='\" + fertiges.get"${firstUp}"() + \"',\"\n"
+        then
+            allups="$(toUpper $field )"
+            alldowns="$(toLower $field )"
+			firstUp="${allups:0:1}${alldowns:1}"
+        else
+        	allups="$( toUpper ${fieldsDB[$o]} )"
+        	if [[ "${field:1:1}" =~ [[:upper:]] ]]
+        	then
+        		firstUp="$field"
+        	else
+                firstUp="$( toUpper ${field:0:1} )${field:1}"
+            fi
+        fi
+		
+		echo -ne "+ \"${allups}='\" + dataset.get${firstUp}() + \"'"
+		[ $o -lt $(( ${#types[@]} - 1 )) ] && echo -ne ","
+		echo -ne "\"\n"
 		let o++
 	done
+	echo ";"
 	cat << -EOT
         try {
             Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
             boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
-            logger.error("Could not save fertiges Rezept " + fertiges.toString() + " to Database", e);
+            logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table $table", e);
         }
     }
 -EOT
@@ -148,25 +186,8 @@ function varsInConstructor() {
 	o=0
 	for field in $fields
 	do
-		type="${types[$o]}"
+		echo "$( guessType $o) $( toLower $field );"
 		let o++
-		if [[ $type =~ "char" ]] || [[ $type =~ "text" ]]
-		then
-			echo -ne "String "
-		elif [[ $type =~ "enum('T'," ]]
-		then
-			echo -ne "boolean "
-		elif [[ $type =~ "date" ]]
-		then
-			echo -ne "LocalDate "
-		elif [[ $type =~ "int" ]]
-		then
-			echo -ne "int "
-		else
-			echo -ne "String "
-		fi
-		[ $DEBUG -gt 1 ] && echo "DEBUG type=\"$type\""
-		echo "$( toLower $field );"
 	done
 }
 
@@ -177,12 +198,14 @@ then
 	[ $DEBUG -gt 0 ] && echo "DEBUG: fields: \"$fields\""
 else
 	types=( $( function first() { echo $1; }; cat $_file| while read line;do echo $( first $line );done ) )
-	fields="$( function scnd() { echo ${2/;/} ; }; cat $_file| while read line;do echo $( scnd $line );done )"
+	fields="$( function scnd() { echo "${2/;/}" ; }; cat $_file| while read line;do echo $( scnd $line );done )"
 	fieldsDB=($( $mysqlcmd -t -e "show fields from $table" |cut -d'|' -f2 | grep -v '+----' ))
 	[ $DEBUG -gt 1 ] && echo "Types: ${types[@]} and 1st: ${types[1]}" 
 	[ $DEBUG -gt 0 ] && echo "Fields: \"$fields\""
+	[ $DEBUG -gt 0 ] && echo "DB-Fields: \"${fieldsDB[@]}\""
 fi
 
+className="$( echo $( toUpper ${table:0:1} )${table:1})"
 echo "Paste the following as \"ofResultSet\" method in Dto-class:"
 echo "----------SNIP----------"
 echo ""
