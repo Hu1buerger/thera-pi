@@ -66,9 +66,9 @@ public class KrankenkasseAdrDto {
     public Optional<KrankenkasseAdr> getAllePreisgruppenFelderById(int id, boolean mitRs) {
         String sql = "select preisgruppe,pgkg,pgma,pger,pglo,pgrh,pgpo";
         if (mitRs) {
-            sql.concat(",pgrs,pgft");
+            sql = sql.concat(",pgrs,pgft");
         }
-        sql.concat(" from " + dbName + " where id='" + id + "'");
+        sql = sql.concat(" from " + dbName + " where id='" + id + "'");
  
         return retrieveFirst(sql);
     }
@@ -84,6 +84,7 @@ public class KrankenkasseAdrDto {
             }
         } catch (SQLException e) {
             logger.error("Could not retrieve KrankenkasseAdr from Database", e);
+            logger.error("SQL-Statement was: \"" + sql + "\"");
         }
         return Optional.ofNullable(kkAdr);
     }
