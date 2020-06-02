@@ -19,6 +19,7 @@ public class IKConstructorTest {
     @Test
     public void verify() throws Exception {
         assertFalse(new IK("123456789").isValid());
+        assertTrue(new IK("123456780").isValid());
         assertTrue(new IK("510841109").isValid());
         assertFalse(new IK("510814109").isValid());
     }
