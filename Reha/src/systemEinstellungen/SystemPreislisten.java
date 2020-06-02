@@ -86,9 +86,32 @@ public class SystemPreislisten {
 
         Disziplin diszi = Disziplin.ofMedium(disziplin);
 
+        /*
+         * The old problem preis1 = vec.get(0)...
+         * Q&D Solution - fill vec[0] with a dummy you NEVER(!!) use and iterate via 
+         *   for(i=1; i <= limit; i++){ val=vec.get(i) }
+         *   whilst the rest of code gets the right member via val=vec.get(indexIwant);
+         * To do that, you pull the Vector decl. out of the switch, and add a dummy-entry
+         * 
+         * Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
+         * preise.add(dummyPreis());
+         * switch (diszi) {
+         *   for(int i = 1; i <= tarife; i++) {
+         *      ....
+         * 
+         * Wasted (a bit) of memory, since you always cart this unused vec[0] around.
+         * You could add a NULL-String at the most inner Vec[0] and whenever your code explodes, you'll know you got Vec[0]
+         *  (assuming you don't also put a NULL-String from the DB-Query-Result somewhere...)
+         * 
+         * Anyhows - a
+         * Better Solution:
+         * create a proper class with getter/setter that will handle the indexing issue, so
+         * that code that translates to 
+         */
+        
+        
         switch (diszi) {
         case KG: {
-
             Vector<Vector<Vector<String>>> preise = new Vector<Vector<Vector<String>>>();
             for (int i = 0; i < tarife; i++) {
                 Vector<Vector<String>> preisliste = SqlInfo.holeFelder(
@@ -359,17 +382,17 @@ public class SystemPreislisten {
         intdummy.clear();
         hbdummy.clear();
         hbdummy_1.clear();
-        hmFristen.clear();
+        hmFristen.clear();  // again?
         odummy.clear();
 
-        hmPreisGruppen.clear();
-        hmPreisBereich.clear();
-        hmZuzahlRegeln.clear();
-        hmHMRAbrechnung.clear();
-        hmNeuePreiseAb.clear();
-        hmNeuePreiseRegel.clear();
-        hmHBRegeln.clear();
-        hmBerichtRegeln.clear();
+        hmPreisGruppen.clear();     // again?
+        hmPreisBereich.clear();     // again?
+        hmZuzahlRegeln.clear();     // again?
+        hmHMRAbrechnung.clear();    // again?
+        hmNeuePreiseAb.clear();     // again?
+        hmNeuePreiseRegel.clear();  // again?
+        hmHBRegeln.clear();         // again?
+        hmBerichtRegeln.clear();    // again?
 
         dummy.trimToSize();
         intdummy.trimToSize();
@@ -378,6 +401,7 @@ public class SystemPreislisten {
 
     }
 
+    // 0-refs:
     class Sortiere {
         Vector<Vector<String>> vector = null;
 
@@ -492,4 +516,38 @@ public class SystemPreislisten {
     }
 
     /*********************************/
+
+ /*
+  *  Some people like dummies, so here we go:   
+  *
+    
+    private static Vector<Vector<String>> dummyPreis() {
+        Vector<Vector<String>> pDummy = new Vector<Vector<String>>();
+        Vector<String> dataSet = new Vector<String>();
+        
+        String LEISTUNG = "Dummy";
+        String KUERZEL = "DUMMY";
+        dataSet.add(LEISTUNG);
+        dataSet.add(KUERZEL);
+        for (int i=1;i<=8;i++) {
+            String T_POS  = "0";
+            String T_AKT  = "0.00";
+            String T_ALT  = "0.00";
+            String T_PROZ = "0";
+            dataSet.add(T_POS);
+            dataSet.add(T_AKT);
+            dataSet.add(T_ALT);
+            dataSet.add(T_PROZ);
+        }
+        String ZUZAHL = "F";
+        String ID = "0";
+        dataSet.add(ZUZAHL);
+        dataSet.add(ID);
+        pDummy.add(dataSet);
+        
+        return pDummy;
+    }
+    
+    */
 }
+
