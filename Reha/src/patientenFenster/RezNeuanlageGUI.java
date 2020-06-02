@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -157,7 +158,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder, Combo-
     // und Check-Boxen
-    Vector<Object> originale = new Vector<Object>();
+    // Vector<Object> originale = new Vector<Object>();
+    private int hashOfFormVals = 0;
 
     public JRtaCheckBox[] jcb = { null, null, null, null, null };
     // Lemmi 20101231: Harte Index-Zahlen fuer "jcb" durch sprechende Konstanten
@@ -400,6 +402,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     public JXPanel getButtonPanel() {
         JXPanel jpan = JCompTools.getEmptyJXPanel();
+        // RezNeuanlageAL aListener = new RezNeuanlageAL(this);
         jpan.addKeyListener(this);
         jpan.setOpaque(false);
         FormLayout lay = new FormLayout(
@@ -425,6 +428,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
         abbrechen = new JButton("abbrechen");
         abbrechen.setActionCommand("abbrechen");
+        // abbrechen.addActionListener(aListener);
         abbrechen.addActionListener(this);
         abbrechen.addKeyListener(this);
         abbrechen.setMnemonic(KeyEvent.VK_A);
@@ -435,8 +439,47 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     /********************************************/
 
+    
+    /**
+     * Generate a hashcode of a set of values in the hope of detecting changes.
+     * TODO: This should take a component(Panel/Frame/...) and iterate over its (editable)
+     *       components (JTextfields/-areas,JCombos,...)
+     *       
+     * @return  The computed HashCode as int
+     */
+    private int hashFormVals() {
+        List<Object> vals = new ArrayList<Object>();
+        
+        // Alle Text-Eingabefelder
+        for (int i = 0; i < jtf.length; i++) {
+            // String strText = jtf[i].getText();
+            vals.add(jtf[i].getText());
+        }
+        
+        // Das Feld mit "Aerztliche Diagnose"
+        vals.add(jta.getText());
+        
+        // alle ComboBoxen
+        for (int i = 0; i < jcmb.length; i++) {
+            vals.add(jcmb[i].getSelectedIndex()); // Art d. Verordn. etc.
+        }
+
+        // alle CheckBoxen
+        for (int i = 0; i < jcb.length; i++) {
+            vals.add((jcb[i].isSelected())); //
+        }
+        /* Use the following if you can't figure out why the hashcodes don't match..
+        for (int i=0; i < vals.size(); i++) {
+            logger.debug("Object @ " + i + " is " + String.valueOf(vals.get(i)));
+        }
+        */
+        logger.debug("Set of vals have a hashcode of " + vals.hashCode());
+        return vals.hashCode();
+    }
+    
+/*    
     // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
-    // ACHTUNG: Die Reihenfolge der Abfragen mu\u00df in SaveChangeStatus() und
+    // ACHTUNG: Die Reihenfolge der Abfragen muss in SaveChangeStatus() und
     // HasChanged() exakt identisch sein !
     private void SaveChangeStatus() {
         int i;
@@ -494,7 +537,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
         return false;
     }
-
+*/
+    
     // Lemmi 20101231: Standard-Abfrage nach Pruefung, ob sich Eintraege geaendert haben
     // fragt nach, ob wirklich ungesichert abgebrochen werden soll !
     public int askForCancelUsaved() {
@@ -904,7 +948,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         }
 
         // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
-        SaveChangeStatus();
+        hashOfFormVals = hashFormVals();
+        // SaveChangeStatus();
 
         return jscr;
     }
@@ -1048,6 +1093,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }.execute();
             return;
         }
+ 
         if (e.getActionCommand()
              .equals("hmrcheck")) {
             new SwingWorker<Void, Void>() {
@@ -1902,7 +1948,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         // test = StringTools.NullTest(rezMyRezept.getArzt());
         jtf[cARZT].setText(verordnenderArzt.getNNameLanr()); // arzt - LANR
         // test = StringTools.NullTest(rezMyRezept.getArztId());
-        jtf[cARZTID].setText(rezMyRezept.getArzt()); // arztid
+        jtf[cARZTID].setText(String.valueOf(rezMyRezept.getArztId())); // arztid
         // test = StringTools.NullTest(rezMyRezept.getRezeptDatum());
         // if (!test.equals("")) {
             jtf[cREZDAT].setText(DatFunk.sDatInDeutsch(rezMyRezept.getRezDatum().toString()));
@@ -2314,7 +2360,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         }
     }
 
-    private void doAbbrechen() {
+    void doAbbrechen() {
         // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
         // des geaenderten Rezept-Dialoges
         /* 
@@ -2328,7 +2374,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
          */
         // Lemmi 20110116: Gerne auch mit Steuer-Parameter
         if ((Boolean) SystemConfig.hmRezeptDlgIni.get("RezAendAbbruchWarn")) {
-            if (HasChanged() && askForCancelUsaved() == JOptionPane.NO_OPTION)
+            if ( hashOfFormVals != hashFormVals() && askForCancelUsaved() == JOptionPane.NO_OPTION)
+            // if (HasChanged() && askForCancelUsaved() == JOptionPane.NO_OPTION)
                 return;
         }
 
