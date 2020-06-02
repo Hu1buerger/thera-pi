@@ -158,7 +158,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder, Combo-
     // und Check-Boxen
-    // Vector<Object> originale = new Vector<Object>();
     private int hashOfFormVals = 0;
 
     public JRtaCheckBox[] jcb = { null, null, null, null, null };
@@ -476,68 +475,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         logger.debug("Set of vals have a hashcode of " + vals.hashCode());
         return vals.hashCode();
     }
-    
-/*    
-    // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
-    // ACHTUNG: Die Reihenfolge der Abfragen muss in SaveChangeStatus() und
-    // HasChanged() exakt identisch sein !
-    private void SaveChangeStatus() {
-        int i;
-        originale.clear(); // vorherige Merkung wegwerfen
-
-        // Alle Text-Eingabefelder
-        for (i = 0; i < jtf.length; i++) {
-            // String strText = jtf[i].getText();
-            originale.add(jtf[i].getText());
-        }
-
-        // Das Feld mit "Aerztliche Diagnose"
-        originale.add(jta.getText());
-
-        // alle ComboBoxen
-        for (i = 0; i < jcmb.length; i++) {
-            originale.add(jcmb[i].getSelectedIndex()); // Art d. Verordn. etc.
-        }
-
-        // alle CheckBoxen
-        for (i = 0; i < jcb.length; i++) {
-            originale.add((jcb[i].isSelected())); //
-        }
-    }
-
-    // Lemmi 20101231: prueft, ob sich Eintraege geaendert haben
-    // ACHTUNG: Die Reihenfolge der Abfragen muss in SaveChangeStatus() und
-    // HasChanged() exakt identisch sein !
-    public Boolean HasChanged() {
-        int i, idx = 0;
-
-        // Alle Text-Eingabefelder
-        for (i = 0; i < jtf.length; i++) {
-            if (!jtf[i].getText()
-                       .equals(originale.get(idx++)))
-                return true;
-        }
-
-        // Das Feld mit "Aerztliche Diagnose"
-        if (!jta.getText()
-                .equals(originale.get(idx++))) // Aerztliche Diagnose
-            return true;
-
-        // alle ComboBoxen
-        for (i = 0; i < jcmb.length; i++) { // ComboBoxen
-            if (jcmb[i].getSelectedIndex() != (Integer) originale.get(idx++)) // Art d. Verordn. etc.
-                return true;
-        }
-
-        // alle CheckBoxen
-        for (i = 0; i < jcb.length; i++) { // CheckBoxen
-            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begruendung ausser der Regel vorhanden ? .....
-                return true;
-        }
-
-        return false;
-    }
-*/
     
     // Lemmi 20101231: Standard-Abfrage nach Pruefung, ob sich Eintraege geaendert haben
     // fragt nach, ob wirklich ungesichert abgebrochen werden soll !
@@ -949,7 +886,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
         // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
         hashOfFormVals = hashFormVals();
-        // SaveChangeStatus();
 
         return jscr;
     }
