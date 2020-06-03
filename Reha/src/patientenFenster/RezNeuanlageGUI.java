@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
@@ -79,7 +80,7 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import systemTools.ListenerTools;
 
-public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListener, FocusListener, RehaTPEventListener {
+public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusListener, RehaTPEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RezNeuanlageGUI.class);
     
@@ -257,7 +258,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             rtp = new RehaTPEventClass();
             rtp.addRehaTPEventListener(this);
 
-            addKeyListener(this);
+            addKeyListener(new RezNeuanlageGUIKL());
 
             setLayout(new BorderLayout());
             setOpaque(true);
@@ -401,8 +402,8 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     public JXPanel getButtonPanel() {
         JXPanel jpan = JCompTools.getEmptyJXPanel();
-        // RezNeuanlageAL aListener = new RezNeuanlageAL(this);
-        jpan.addKeyListener(this);
+        RezNeuanlageAL aListener = new RezNeuanlageAL(this);
+        jpan.addKeyListener(new RezNeuanlageGUIKL());
         jpan.setOpaque(false);
         FormLayout lay = new FormLayout(
                 // 1 2 3 4 5 6 7
@@ -414,22 +415,22 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         speichern = new JButton("speichern");
         speichern.setActionCommand("speichern");
         speichern.addActionListener(this);
-        speichern.addKeyListener(this);
+        speichern.addKeyListener(new RezNeuanlageGUIKL());
         speichern.setMnemonic(KeyEvent.VK_S);
         jpan.add(speichern, cc.xy(2, 2));
 
         hmrcheck = new JButton("HMR-Check");
         hmrcheck.setActionCommand("hmrcheck");
         hmrcheck.addActionListener(this);
-        hmrcheck.addKeyListener(this);
+        hmrcheck.addKeyListener(new RezNeuanlageGUIKL());
         hmrcheck.setMnemonic(KeyEvent.VK_H);
         jpan.add(hmrcheck, cc.xy(4, 2));
 
         abbrechen = new JButton("abbrechen");
         abbrechen.setActionCommand("abbrechen");
-        // abbrechen.addActionListener(aListener);
-        abbrechen.addActionListener(this);
-        abbrechen.addKeyListener(this);
+        abbrechen.addActionListener(aListener);
+        // abbrechen.addActionListener(this);
+        abbrechen.addKeyListener(new RezNeuanlageGUIKL());
         abbrechen.setMnemonic(KeyEvent.VK_A);
         jpan.add(abbrechen, cc.xy(6, 2));
 
@@ -603,7 +604,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             });
 
             jtf[cKTRAEG].setName("ktraeger");
-            jtf[cKTRAEG].addKeyListener(this);
+            jtf[cKTRAEG].addKeyListener(new RezNeuanlageGUIKL());
             allowShortCut(jtf[cKTRAEG], "ktraeger");
             jpan.add(kassenLab, cc.xy(1, 7));
             jpan.add(jtf[cKTRAEG], cc.xy(3, 7));
@@ -634,7 +635,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             });
 
             jtf[cARZT].setName("arzt");
-            jtf[cARZT].addKeyListener(this);
+            jtf[cARZT].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(arztLab, cc.xy(5, 7));
             jpan.add(jtf[cARZT], cc.xy(7, 7));
 
@@ -706,7 +707,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             jcb[cTBANGEF] = new JRtaCheckBox("angefordert");
             jcb[cTBANGEF].setOpaque(false);
             jpan.addLabel("Therapiebericht", cc.xy(1, 15));
-            jcb[cTBANGEF].addKeyListener(this);
+            jcb[cTBANGEF].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jcb[cTBANGEF], cc.xy(3, 15));
 
             jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
@@ -726,7 +727,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
             jtf[cANZ1].setName("anzahl1");
             jtf[cANZ1].addFocusListener(this);
-            jtf[cANZ1].addKeyListener(this);
+            jtf[cANZ1].addKeyListener(new RezNeuanlageGUIKL());
             jpan.addLabel("Anzahl / Heilmittel 1", cc.xy(1, 19));
             eingabeVerordn1 = jpan.add(jtf[cANZ1], cc.xy(3, 19));
             jcmb[cLEIST1] = new JRtaComboBox();
@@ -736,7 +737,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             jpan.add(jcmb[cLEIST1], cc.xyw(5, 19, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 2", cc.xy(1, 21));
-            jtf[cANZ2].addKeyListener(this);
+            jtf[cANZ2].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jtf[cANZ2], cc.xy(3, 21));
             jcmb[cLEIST2] = new JRtaComboBox();
             jcmb[cLEIST2].setActionCommand("leistung2");
@@ -745,7 +746,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             jpan.add(jcmb[cLEIST2], cc.xyw(5, 21, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 3", cc.xy(1, 23));
-            jtf[cANZ3].addKeyListener(this);
+            jtf[cANZ3].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jtf[cANZ3], cc.xy(3, 23));
             jcmb[cLEIST3] = new JRtaComboBox();
             jcmb[cLEIST3].setActionCommand("leistung3");
@@ -754,7 +755,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             jpan.add(jcmb[cLEIST3], cc.xyw(5, 23, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 4", cc.xy(1, 25));
-            jtf[cANZ4].addKeyListener(this);
+            jtf[cANZ4].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jtf[cANZ4], cc.xy(3, 25));
             jcmb[cLEIST4] = new JRtaComboBox();
             jcmb[cLEIST4].setActionCommand("leistung4");
@@ -764,17 +765,17 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
             jpan.addSeparator("Durchf\u00fchrungsbestimmungen", cc.xyw(1, 27, 7));
 
-            jtf[cFREQ].addKeyListener(this);
+            jtf[cFREQ].addKeyListener(new RezNeuanlageGUIKL());
             jpan.addLabel("Behandlungsfrequenz", cc.xy(1, 29));
             eingabeBehFrequ = jpan.add(jtf[cFREQ], cc.xy(3, 29));
 
             jpan.addLabel("Dauer der Behandl. in Min.", cc.xy(5, 29));
-            jtf[cDAUER].addKeyListener(this);
+            jtf[cDAUER].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jtf[cDAUER], cc.xy(7, 29));
 
             jpan.addLabel("Indikationsschl\u00fcssel", cc.xy(1, 31));
             jcmb[cINDI] = new JRtaComboBox();
-            jcmb[cINDI].addKeyListener(this);
+            jcmb[cINDI].addKeyListener(new RezNeuanlageGUIKL());
             allowShortCut(jcmb[cINDI],"Indikationsschluessel");
             jpan.add(jcmb[cINDI], cc.xy(3, 31));
 
@@ -783,18 +784,18 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
             jpan.addLabel("Barcode-Format", cc.xy(5, 31));
             jcmb[cBARCOD] = new JRtaComboBox(SystemConfig.rezBarCodName);
-            jcmb[cBARCOD].addKeyListener(this);
+            jcmb[cBARCOD].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jcmb[cBARCOD], cc.xy(7, 31));
 
             jpan.addLabel("FarbCode im TK", cc.xy(1, 33));
             jcmb[cFARBCOD] = new JRtaComboBox();
-            jcmb[cFARBCOD].addKeyListener(this);
+            jcmb[cFARBCOD].addKeyListener(new RezNeuanlageGUIKL());
             macheFarbcodes();
 
             jpan.add(jcmb[cFARBCOD], cc.xy(3, 33));
 
             jpan.addLabel("Angelegt von", cc.xy(5, 33));
-            jtf[cANGEL].addKeyListener(this);
+            jtf[cANGEL].addKeyListener(new RezNeuanlageGUIKL());
             jpan.add(jtf[cANGEL], cc.xy(7, 33));
 
             jpan.addSeparator("ICD-10 Codes", cc.xyw(1, 35, 7));
@@ -892,7 +893,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
 
     private void allowShortCut(Component thisComponent, String name) {
         thisComponent.setName(name);
-        thisComponent.addKeyListener(this);
+        thisComponent.addKeyListener(new RezNeuanlageGUIKL());
         thisComponent.addFocusListener(this);
     }
 
@@ -1018,7 +1019,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             });
             return;
         }
-        if (e.getActionCommand()
+/*        if (e.getActionCommand()
              .equals("abbrechen")) {
             new SwingWorker<Void, Void>() {
                 @Override
@@ -1029,7 +1030,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
             }.execute();
             return;
         }
- 
+*/ 
         if (e.getActionCommand()
              .equals("hmrcheck")) {
             new SwingWorker<Void, Void>() {
@@ -1540,41 +1541,39 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, KeyListe
         return;
     }
 
-    @Override
-    public void keyPressed(KeyEvent arg0) {
-        if (arg0.getKeyChar() == '?' && ((JComponent) arg0.getSource()).getName()
-                                                                       .equals("arzt")) {
-            String[] suchkrit = new String[] { jtf[cARZT].getText()
-                                                         .replace("?", ""),
-                    jtf[cARZTID].getText() };
-            jtf[cARZT].setText(String.valueOf(suchkrit[0]));
-            arztAuswahl(suchkrit);
+    class RezNeuanlageGUIKL extends KeyAdapter{
+        @Override
+        public void keyPressed(KeyEvent arg0) {
+            if (arg0.getKeyChar() == '?' && ((JComponent) arg0.getSource()).getName()
+                                                                           .equals("arzt")) {
+                String[] suchkrit = new String[] { jtf[cARZT].getText()
+                                                             .replace("?", ""),
+                        jtf[cARZTID].getText() };
+                jtf[cARZT].setText(String.valueOf(suchkrit[0]));
+                arztAuswahl(suchkrit);
+            }
+            if (arg0.getKeyChar() == '?' && ((JComponent) arg0.getSource()).getName()
+                                                                           .equals("ktraeger")) {
+                String[] suchkrit = new String[] { jtf[cKTRAEG].getText()
+                                                               .replace("?", ""),
+                        jtf[cKASID].getText() };
+                jtf[cKTRAEG].setText(suchkrit[0]);
+                kassenAuswahl(suchkrit);
+            }
+            if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                doAbbrechen();
+            }
+            if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
+                ctrlIsPressed = true;
+            }
         }
-        if (arg0.getKeyChar() == '?' && ((JComponent) arg0.getSource()).getName()
-                                                                       .equals("ktraeger")) {
-            String[] suchkrit = new String[] { jtf[cKTRAEG].getText()
-                                                           .replace("?", ""),
-                    jtf[cKASID].getText() };
-            jtf[cKTRAEG].setText(suchkrit[0]);
-            kassenAuswahl(suchkrit);
+    
+        @Override
+        public void keyReleased(KeyEvent arg0) {
+            if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
+                ctrlIsPressed = false;
+            }
         }
-        if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            doAbbrechen();
-        }
-        if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
-            ctrlIsPressed = true;
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent arg0) {
-        if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
-            ctrlIsPressed = false;
-        }
-    }
-
-    @Override
-    public void keyTyped(KeyEvent arg0) {
     }
 
     @Override
