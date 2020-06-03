@@ -428,8 +428,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
 
         abbrechen = new JButton("abbrechen");
         abbrechen.setActionCommand("abbrechen");
-        abbrechen.addActionListener(e -> doAbbrechen());
-        // abbrechen.addActionListener(this);
+        abbrechen.addActionListener(e -> actionAbbrechen());
         abbrechen.addKeyListener(new KeyLauscher());
         abbrechen.setMnemonic(KeyEvent.VK_A);
         jpan.add(abbrechen, cc.xy(6, 2));
@@ -652,7 +651,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jcmb[cVERORD] = new JRtaComboBox(
                     new String[] { "Erstverordnung", "Folgeverordnung", "au\u00dferhalb des Regelfalles" });
             jcmb[cVERORD].setActionCommand("verordnungsart");
-            jcmb[cVERORD].addActionListener(this);
+            jcmb[cVERORD].addActionListener(e -> actionVerordnungsArt());
             allowShortCut(jcmb[cVERORD], "selArtDerVerordn");
             jpan.addLabel("Art d. Verordn.", cc.xy(1, 11));
             eingabeVerordnArt = jpan.add(jcmb[cVERORD], cc.xy(3, 11));
@@ -963,17 +962,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             return;
         }
         /*********************/
-        if (e.getActionCommand()
-             .equals("verordnungsart") && klassenReady) {
-            if (jcmb[cVERORD].getSelectedIndex() == 2) {
-                jcb[cBEGRADR].setEnabled(true);
-                testeGenehmigung(jtf[cKASID].getText());
-            } else {
-                jcb[cBEGRADR].setSelected(false);
-                jcb[cBEGRADR].setEnabled(false);
-            }
+/*        if (e.getActionCommand()
+             .equals("verordnungsart")) {
+            actionVerordnungsArt();
             return;
         }
+ */
         /*********************/
         if (e.getActionCommand()
              .equals("speichern")) {
@@ -1561,7 +1555,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                 kassenAuswahl(suchkrit);
             }
             if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                doAbbrechen();
+                actionAbbrechen();
             }
             if (arg0.getKeyCode() == KeyEvent.VK_CONTROL) {
                 ctrlIsPressed = true;
@@ -2314,7 +2308,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         }
     }
 
-    void doAbbrechen() {
+    void actionAbbrechen() {
         // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
         // des geaenderten Rezept-Dialoges
         /* 
@@ -2333,7 +2327,6 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             public void run() {
                 if ((Boolean) SystemConfig.hmRezeptDlgIni.get("RezAendAbbruchWarn")) {
                     if ( hashOfFormVals != hashFormVals() && askForCancelUsaved() == JOptionPane.NO_OPTION)
-                    // if (HasChanged() && askForCancelUsaved() == JOptionPane.NO_OPTION)
                         return;
                 }
                 aufraeumen();
@@ -2341,14 +2334,22 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                 }
             });
     }
-
-    private void fensterSchliessen() {
-        ((JXDialog) this.getParent()
-                        .getParent()
-                        .getParent()
-                        .getParent()
-                        .getParent()).dispose();
+    
+    /**
+     *
+     */
+    private void actionVerordnungsArt() {
+        if (!klassenReady)
+            return;
+        if (jcmb[cVERORD].getSelectedIndex() == 2) {
+            jcb[cBEGRADR].setEnabled(true);
+            testeGenehmigung(jtf[cKASID].getText());
+        } else {
+            jcb[cBEGRADR].setSelected(false);
+            jcb[cBEGRADR].setEnabled(false);
+        }
     }
+
     
     @Override
     public void rehaTPEventOccurred(RehaTPEvent evt) {
