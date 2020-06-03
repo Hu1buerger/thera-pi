@@ -78,7 +78,7 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import systemTools.ListenerTools;
 
-public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusListener, RehaTPEventListener {
+public class RezNeuanlageGUI extends JXPanel implements FocusListener, RehaTPEventListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RezNeuanlageGUI.class);
     
@@ -301,7 +301,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             }
 
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
             logger.error("Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
             // logger.error( RezNeuanlage.makeStacktraceToString(ex));
@@ -338,7 +338,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Fehler bei Farbcodes erstellen\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(popupDialog, "Fehler bei Farbcodes erstellen\n" + ex.getMessage());
         }
 
     }
@@ -367,7 +367,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                                 + "Gehen Sie im Patientenstamm auf ->\u00c4ndern/Editieren<- und ordnen Sie verwertaber Daten zu!";
                     }
                     if (beenden) {
-                        JOptionPane.showMessageDialog(null, meldung);
+                        JOptionPane.showMessageDialog(popupDialog, meldung);
                         aufraeumen();
                         ((JXDialog) getParent().getParent()
                                                .getParent()
@@ -420,14 +420,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         jpan.setLayout(lay);
         speichern = new JButton("speichern");
         speichern.setActionCommand("speichern");
-        speichern.addActionListener(this);
+        speichern.addActionListener(e -> actionSpeichern());
         speichern.addKeyListener(new KeyLauscher());
         speichern.setMnemonic(KeyEvent.VK_S);
         jpan.add(speichern, cc.xy(2, 2));
 
         hmrcheck = new JButton("HMR-Check");
         hmrcheck.setActionCommand("hmrcheck");
-        hmrcheck.addActionListener(this);
+        hmrcheck.addActionListener(e -> actionHmrCheck());
         hmrcheck.addKeyListener(new KeyLauscher());
         hmrcheck.setMnemonic(KeyEvent.VK_H);
         jpan.add(hmrcheck, cc.xy(4, 2));
@@ -562,7 +562,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jpan.addLabel("Rezeptklasse ausw\u00e4hlen", cc.xy(1, 3));
             jpan.add(jcmb[cRKLASSE], cc.xyw(3, 3, 5));
             jcmb[cRKLASSE].setActionCommand("rezeptklasse");
-            jcmb[cRKLASSE].addActionListener(this);
+            jcmb[cRKLASSE].addActionListener(e -> actionRezeptklasse());
             allowShortCut(jcmb[cRKLASSE], "RezeptClass");
             /********************/
 
@@ -672,7 +672,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jcb[cHAUSB] = new JRtaCheckBox("Ja / Nein");
             jcb[cHAUSB].setOpaque(false);
             jcb[cHAUSB].setActionCommand("Hausbesuche");
-            jcb[cHAUSB].addActionListener(this);
+            jcb[cHAUSB].addActionListener(e -> actionHausbesuche());
             allowShortCut(jcb[cHAUSB], "hbCheck");
             jpan.addLabel("Hausbesuch", cc.xy(1, 13));
             jpan.add(jcb[cHAUSB], cc.xy(3, 13));
@@ -737,7 +737,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             eingabeVerordn1 = jpan.add(jtf[cANZ1], cc.xy(3, 19));
             jcmb[cLEIST1] = new JRtaComboBox();
             jcmb[cLEIST1].setActionCommand("leistung1");
-            jcmb[cLEIST1].addActionListener(this);
+            jcmb[cLEIST1].addActionListener(e -> actionLeistung(e));
             allowShortCut(jcmb[cLEIST1], "leistung1");
             jpan.add(jcmb[cLEIST1], cc.xyw(5, 19, 3));
 
@@ -746,7 +746,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jpan.add(jtf[cANZ2], cc.xy(3, 21));
             jcmb[cLEIST2] = new JRtaComboBox();
             jcmb[cLEIST2].setActionCommand("leistung2");
-            jcmb[cLEIST2].addActionListener(this);
+            jcmb[cLEIST2].addActionListener(e -> actionLeistung(e));
             allowShortCut(jcmb[cLEIST2], "leistung2");
             jpan.add(jcmb[cLEIST2], cc.xyw(5, 21, 3));
 
@@ -755,7 +755,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jpan.add(jtf[cANZ3], cc.xy(3, 23));
             jcmb[cLEIST3] = new JRtaComboBox();
             jcmb[cLEIST3].setActionCommand("leistung3");
-            jcmb[cLEIST3].addActionListener(this);
+            jcmb[cLEIST3].addActionListener(e -> actionLeistung(e));
             allowShortCut(jcmb[cLEIST3], "leistung3");
             jpan.add(jcmb[cLEIST3], cc.xyw(5, 23, 3));
 
@@ -765,7 +765,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             jcmb[cLEIST4] = new JRtaComboBox();
             jcmb[cLEIST4].setActionCommand("leistung4");
             jcmb[cLEIST4].setName("leistung4");
-            jcmb[cLEIST4].addActionListener(this);
+            jcmb[cLEIST4].addActionListener(e -> actionLeistung(e));
             jpan.add(jcmb[cLEIST4], cc.xyw(5, 25, 3));
 
             jpan.addSeparator("Durchf\u00fchrungsbestimmungen", cc.xyw(1, 27, 7));
@@ -887,7 +887,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             logger.error("Could not create Rezeptfenster");
             logger.error(ex.getLocalizedMessage());
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Fehler in der Erstellung des Rezeptfensters\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(popupDialog, "Fehler in der Erstellung des Rezeptfensters\n" + ex.getMessage());
         }
 
         // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
@@ -955,186 +955,39 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         return this;
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand()
-             .equals("rezeptklasse") && klassenReady) {
-            this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
-                                              .toString()
-                                              .trim(),
-                    preisgruppen[getPgIndex()]);
-            this.fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
+    /**
+     * 
+     */
+    private void actionRezeptklasse() {
+        if (!klassenReady)
+            return;
+        this.ladePreisliste(jcmb[cRKLASSE].getSelectedItem()
+                                          .toString()
+                                          .trim(),
+                preisgruppen[getPgIndex()]);
+        this.fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
+    }
 
+    /**
+     * @param e
+     */
+    private void actionLeistung(ActionEvent e) {
+        if (!initReady)
+            return;
+//        int lang = e.getActionCommand().length();
+        String test = (String) ((JRtaComboBox) e.getSource()).getSelectedItem();
+        if (test == null) {
             return;
         }
-        /*********************/
-/*        if (e.getActionCommand()
-             .equals("verordnungsart")) {
-            actionVerordnungsArt();
-            return;
-        }
- */
-        /*********************/
-        if (e.getActionCommand()
-             .equals("speichern")) {
-            SwingUtilities.invokeLater(new Runnable() {
-                public void run() {
-                    try {
-                        if (!anzahlTest()) {
-                            return;
-                        }
-                        if (!komplettTest()) {
-                            return;
-                        }
-                        if (getInstance().neu) {
-                            if (!neuDateTest()) {
-                                return;
-                            }
-                            copyFormToRez1stTime(rezMyRezept);
-                            // TODO: clean up neue-RezNr holen
-                            Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
-                            if (tmpDiszi != Disziplin.INV) {
-                                NummernKreis tmpRZN = new NummernKreis(mand.ik());
-                                rezMyRezept.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
-                                                                                                .rezeptNummer());
-                            } else {
-                                logger.error("Couldn't find valid Disziplin to base new RezNr on");
-                            }
-                            // What's this ?? - better create a call-refresh or something...
-                            Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rezMyRezept.getRezNr());
-                        } else {
-                            copyFormToRez(rezMyRezept);
-                        }
-                        closeDialog();
-                        aufraeumen();
-                        // ?? automat. HMR-Check ??
-                        RezeptDto rDto = new RezeptDto(mand.ik());
-                        rDto.rezeptInDBSpeichern(rezMyRezept);
-                        
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-
-                }
-            });
-            return;
-        }
-/*        if (e.getActionCommand()
-             .equals("abbrechen")) {
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    doAbbrechen();
-                    return null;
-                }
-            }.execute();
-            return;
-        }
-*/ 
-        if (e.getActionCommand()
-             .equals("hmrcheck")) {
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        boolean icd10falsch = false;
-                        int welcherIcd = 0;
-                        if (jtf[cICD10].getText()
-                                       .trim()
-                                       .length() > 0) {
-                            String suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10].getText());
-                            if (SqlInfo.holeEinzelFeld(
-                                    "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                       .equals("")) {
-                                icd10falsch = true;
-                                welcherIcd = 1;
-                            }
-                            if (jtf[cICD10_2].getText()
-                                             .trim()
-                                             .length() > 0) {
-                                suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10_2].getText());
-                                if (SqlInfo.holeEinzelFeld(
-                                        "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                           .equals("")) {
-                                    icd10falsch = true;
-                                    welcherIcd = 2;
-                                }
-                            }
-                        } else {
-                            if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
-                                                                 .get(preisgruppen[getPgIndex()]) == 1) {
-                                hmrcheck.setEnabled(true);
-                                JOptionPane.showMessageDialog(null,
-                                        "<html><b><font color='#ff0000'>Kein ICD-10 Code angegeben!</font></b></html>");
-
-                            }
-                        }
-                        doHmrCheck(icd10falsch, welcherIcd);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    return null;
-                }
-            }.execute();
-            return;
-        }
-
-        if (e.getActionCommand()
-             .equals("Hausbesuche")) {
-            if (jcb[cHAUSB].isSelected()) {
-                // Hausbesuch gewaehlt
-                if (Reha.instance.patpanel.patDaten.get(44)
-                                                   .equals("T")) {
-                    if (this.preisgruppe != 1 && (getPgIndex() <= 1)) {
-                        jcb[cVOLLHB].setEnabled(true);
-                    }
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            jcb[cHAUSB].requestFocusInWindow();
-                        }
-                    });
-                } else {
-                    jcb[cVOLLHB].setEnabled(false);
-                    jcb[cVOLLHB].setSelected(true);
-                    SwingUtilities.invokeLater(new Runnable() {
-                        public void run() {
-                            jcb[cHAUSB].requestFocusInWindow();
-                        }
-                    });
-                }
-            } else {
-                // Hausbesuch abgewaehlt
-                jcb[cVOLLHB].setEnabled(false);
-                jcb[cVOLLHB].setSelected(false);
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        jcb[cHAUSB].requestFocusInWindow();
-                    }
-                });
+        if (!test.equals("./.")) {
+            String id = (String) ((JRtaComboBox) e.getSource()).getValue();
+            Double preis = holePreisDouble(id, preisgruppe);
+            if (preis <= 0.0) {
+                JOptionPane.showMessageDialog(popupDialog,
+                        "Diese Position ist f\u00fcr die gew\u00e4hlte Preisgruppe ung\u00fcltig\n"
+                        + "Bitte weisen Sie in der Preislisten-Bearbeitung der Position ein K\u00fcrzel zu");
+                ((JRtaComboBox) e.getSource()).setSelectedIndex(0);
             }
-            return;
-        }
-
-        /*********************/
-        if (e.getActionCommand()
-             .contains("leistung") && initReady) {
-            int lang = e.getActionCommand()
-                        .length();
-            String test = (String) ((JRtaComboBox) e.getSource()).getSelectedItem();
-            if (test == null) {
-                return;
-            }
-            if (!test.equals("./.")) {
-                String id = (String) ((JRtaComboBox) e.getSource()).getValue();
-                Double preis = holePreisDouble(id, preisgruppe);
-                if (preis <= 0.0) {
-                    JOptionPane.showMessageDialog(null,
-                            "Diese Position ist f\u00fcr die gew\u00e4hlte Preisgruppe ung\u00fcltig\n"
-                            + "Bitte weisen Sie in der Preislisten-Bearbeitung der Position ein K\u00fcrzel zu");
-                    ((JRtaComboBox) e.getSource()).setSelectedIndex(0);
-                }
-            }
-            return;
         }
     }
 
@@ -1152,10 +1005,10 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                                 + " besteht auf eine <br>"
                                 + "<b>Genehmigung f\u00fcr Verordnungen au\u00dferhalb des Regelfalles"
                                 + "</b><br><br></html>";
-                        JOptionPane.showMessageDialog(null, meldung);
+                        JOptionPane.showMessageDialog(popupDialog, meldung);
                     }
                 } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null,
+                    JOptionPane.showMessageDialog(popupDialog,
                             "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpa\u00dft.\n"
                             + "Fehlt zuf\u00e4llig die Tabelle adrgenehmigung?");
                     ex.printStackTrace();
@@ -1192,7 +1045,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                                 + "Bitte geben Sie die Heilmittel so ein da\u00df das Heilmittel mit der"
                                 + " gr\u00f6\u00dften Anzahl oben steht\n"
                                 + "und dann (bezogen auf die Anzahl) in absteigender Reihgenfolge nach unten";
-                        JOptionPane.showMessageDialog(null, cmd);
+                        JOptionPane.showMessageDialog(popupDialog, cmd);
                         return false;
                     }
                 }
@@ -1208,7 +1061,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         long dattest = DatFunk.TageDifferenz(DatFunk.sHeute(), jtf[cREZDAT].getText()
                                                                            .trim());
         if ((dattest <= -364) || (dattest >= 364)) {
-            int frage = JOptionPane.showConfirmDialog(null,
+            int frage = JOptionPane.showConfirmDialog(popupDialog,
                     "<html><b>Das Rezeptdatum ist etwas kritisch....<br><br><font color='#ff0000'> " + "Rezeptdatum = "
                             + jtf[cREZDAT].getText()
                                           .trim()
@@ -1231,14 +1084,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
                                              .get(preisgruppen[getPgIndex()]) == 0) {
             this.hmrcheck.setEnabled(true);
-            JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostentr\u00e4ger nicht erforderlich");
+            JOptionPane.showMessageDialog(popupDialog, "HMR-Check ist bei diesem Kostentr\u00e4ger nicht erforderlich");
             return;
         }
         // System.out.println(SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[jcmb[cRKLASSE].getSelectedIndex()]));
         int itest = 0; // jcmb[cLEIST1].getSelectedIndex();
         String indi = (String) jcmb[cINDI].getSelectedItem();
         if (indi.equals("") || indi.contains("kein IndiSchl.")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "<html><b>Kein Indikationsschl\u00fcssel angegeben.<br>"
                     + "Die Angaben sind <font color='#ff0000'>nicht</font> gem\u00e4\u00df "
                     + "den g\u00fcltigen Heilmittelrichtlinien!</b></html>");
@@ -1260,11 +1113,11 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cREZDAT].getText()
                         .trim()
                         .equals(".  .")) {
-            JOptionPane.showMessageDialog(null, "Rezeptdatum nicht korrekt angegeben HMR-Check nicht m\u00f6glich");
+            JOptionPane.showMessageDialog(popupDialog, "Rezeptdatum nicht korrekt angegeben HMR-Check nicht m\u00f6glich");
             return;
         }
         if (icd10falsch) {
-            int frage = JOptionPane.showConfirmDialog(null,
+            int frage = JOptionPane.showConfirmDialog(popupDialog,
                     "<html><b>Der eingetragene " + Integer.toString(welcher)
                             + ". ICD-10-Code ist falsch: <font color='#ff0000'>" + (welcher == 1 ? jtf[cICD10].getText()
                                                                                                               .trim()
@@ -1329,14 +1182,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             copyFormToRez1stTime(rezTmpRezept);
             boolean checkok = new HMRCheck(rezTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
             if (checkok) {
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(popupDialog,
                         "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> "
                         + "den geltenden Heilmittelrichtlinien</b></html>");
             } else {
                 logger.error("Rez not HMR-conform");
             }
         } else {
-            JOptionPane.showMessageDialog(null, "Keine Behandlungspositionen angegeben, "
+            JOptionPane.showMessageDialog(popupDialog, "Keine Behandlungspositionen angegeben, "
                                                 + "HMR-Check nicht m\u00f6glich!!!");
         }
 
@@ -1346,7 +1199,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cREZDAT].getText()
                         .trim()
                         .equals(".  .")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Ohne ein g\u00fcltiges 'Rezeptdatum' kann ein Rezept nicht abgespeichert werden.");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -1359,7 +1212,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cKTRAEG].getText()
                         .trim()
                         .equals("")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Ohne die Angabe 'Kostentr\u00e4ger' kann ein Rezept nicht abgespeichert werden.");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -1371,7 +1224,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cARZT].getText()
                       .trim()
                       .equals("")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Ohne die Angabe 'verordn. Arzt' kann ein Rezept nicht abgespeichert werden.");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -1383,7 +1236,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cDAUER].getText()
                        .trim()
                        .equals("")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Ohne die Angabe 'Behandlungsdauer' kann ein Rezept nicht abgespeichert werden.");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -1395,7 +1248,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         if (jtf[cANGEL].getText()
                        .trim()
                        .equals("")) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Ohne die Angabe 'Angelegt von' kann ein Rezept nicht abgespeichert werden.");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -1409,7 +1262,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             if (jtf[cFREQ].getText()
                           .trim()
                           .equals("")) {
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(popupDialog,
                         "Ohne Angabe der 'Behandlungsfrequenz' kann ein GKV-Rezept nicht abgespeichert werden.");
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
@@ -1504,7 +1357,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Fehler bei f\u00fcller Inikat.schl\u00fcssel\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(popupDialog, "Fehler bei f\u00fcller Inikat.schl\u00fcssel\n" + ex.getMessage());
 
         }
 
@@ -1514,13 +1367,13 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
     public void ladePreise(String[] artdbeh) {
         try {
             if (preisvec.size() <= 0) {
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(popupDialog,
                         "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\n"
                         + "Rezept kann nicht angelegt werden");
                 return;
             }
         } catch (Exception ex) {
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "In der erforderlichen Preisliste sind noch keine Preise vorhanden!\n"
                     + "Rezept kann nicht angelegt werden");
             return;
@@ -1697,7 +1550,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             }
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Fehler beim Speichern der Arztliste!\n"
                         + "Bitte notieren Sie Patient, Rezeptnummer und den Arzt den Sie der\n"
                         + "Arztliste hinzuf\u00fcgen wollten und informieren Sie umgehend den Administrator.\n"
@@ -1723,7 +1576,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                     String meldung = "Achtung - kann Preisgruppe nicht ermitteln!\n"
                             + "Das bedeutet diese Rezept kann sp\u00e4ter nicht abgerechnet werden!\n\n"
                             + "Und bedenken Sie bitte Ihr K\u00fcrzel wird dauerhaft diesem Rezept zugeordnet....";
-                    JOptionPane.showMessageDialog(null, meldung);
+                    JOptionPane.showMessageDialog(popupDialog, meldung);
                 } else {
                     holePreisGruppe(Integer.parseInt(jtf[cKASID].getText()
                                                .trim()));
@@ -1758,7 +1611,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                 jtf[cPREISGR].setText(String.valueOf(kka.get().getPreisgruppe()));
             } else {
                 logger.error("Returned Preislisten were empty");
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(popupDialog,
                         "Achtung - kann Preisgruppe nicht ermitteln - "
                         + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
@@ -1786,14 +1639,14 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                                                   .get(0));
             } else {
                 logger.error("Returned Preislisten-Vec was empty");
-                JOptionPane.showMessageDialog(null,
+                JOptionPane.showMessageDialog(popupDialog,
                         "Achtung - kann Preisgruppe nicht ermitteln - "
                         + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
             }
             // Deleteme END
         } catch (Exception ex) {
             logger.error("Exception caught whilst trying to get Preisliste", ex);
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Achtung - kann Preisgruppe nicht ermitteln -"
                     + " Rezept kann sp\u00e4ter nicht abgerechnet werden!\n"
                     + "Untersuchen Sie die Krankenkasse im Kassenstamm un weisen "
@@ -1807,7 +1660,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
      */
     private void initRezeptAll(Rezept thisRezept) {
         if (!thisRezept.isKidSet() ) { // eher ein Fall fuer check/speichern!
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Achtung - kann Preisgruppe nicht ermitteln - "
                     + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
         }
@@ -1962,7 +1815,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             holePreisGruppe(Integer.parseInt(
                                 jtf[cKASID].getText().trim()));
         } else {
-            JOptionPane.showMessageDialog(null, "Ermittlung der Preisgruppen erforderlich");
+            JOptionPane.showMessageDialog(popupDialog, "Ermittlung der Preisgruppen erforderlich");
         }
 
         jtf[cHEIMBEW].setText(Reha.instance.patpanel.patDaten.get(44)); // heimbewohn
@@ -2042,7 +1895,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             if (thisRezept.isHausBesuch()) {
                 String anzHB = String.valueOf(thisRezept.getAnzahlHb());
                 if (!anzHB.equals(jtf[cANZ1].getText())) {
-                    int frage = JOptionPane.showConfirmDialog(null, "Achtung!\n\n"
+                    int frage = JOptionPane.showConfirmDialog(popupDialog, "Achtung!\n\n"
                             + "Die Anzahl Hausbesuche = " + anzHB + "\n" 
                             + "Die Anzahl des ersten Heilmittels = " + jtf[cANZ1].getText() + "\n\n"
                             + "Soll die Anzahl Hausbesuche ebenfalls auf " + jtf[cANZ1].getText() + " gesetzt werden?",
@@ -2152,7 +2005,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                                             szzstatus = Zuzahlung.ZZSTATUS_NOTOK;
                                         }
                                     } catch (Exception ex) {
-                                        JOptionPane.showMessageDialog(null,
+                                        JOptionPane.showMessageDialog(popupDialog,
                                                 "Fehler:\nBefreit ab, im Patientenstamm nicht oder falsch eingetragen");
                                     }
 
@@ -2191,7 +2044,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                     // System.out.println("Geburtstag = "+gebtag);
 
                     if (tage < 0 && tage >= -45) {
-                        JOptionPane.showMessageDialog(null,
+                        JOptionPane.showMessageDialog(popupDialog,
                                 "Achtung es sind noch " + (tage * -1) + " Tage bis zur Vollj\u00e4hrigkeit\n"
                                 + "Unter Umst\u00e4nden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
                         szzstatus = Zuzahlung.ZZSTATUS_BALD18;
@@ -2216,7 +2069,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
             if (!lzv[0].isEmpty()) {
                 if (!jta.getText()
                         .contains(lzv[0])) {
-                    int frage = JOptionPane.showConfirmDialog(null,
+                    int frage = JOptionPane.showConfirmDialog(popupDialog,
                             "F\u00fcr den Patient ist eine Langfristverordnung eingetragen die diese "
                             + "Verordnung noch nicht einschlie\u00dft.\n\n"
                             + lzv[1] + "\n\nWollen Sie diesen Eintrag dieser Verordnung zuweisen?",
@@ -2254,7 +2107,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         } catch (Exception ex) {
             ex.printStackTrace();
             setCursor(Cursors.normalCursor);
-            JOptionPane.showMessageDialog(null,
+            JOptionPane.showMessageDialog(popupDialog,
                     "Fehler beim Abspeichern dieses Rezeptes.\n"
                             + "Bitte notieren Sie den Namen des Patienten und die Rezeptnummer\n"
                             + "und informieren Sie umgehend den Administrator");
@@ -2314,6 +2167,54 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         }
     }
 
+    /**
+     * Will do various sanity checks on the Rezept,<BR/>
+     *  if they pass, a new "RezeptNummer" will be acquired<BR/>
+     *  and the resulting Rezept stored in the database<BR/>
+     */
+    private void actionSpeichern() {
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    if (!anzahlTest()) {
+                        return;
+                    }
+                    if (!komplettTest()) {
+                        return;
+                    }
+                    if (getInstance().neu) {
+                        if (!neuDateTest()) {
+                            return;
+                        }
+                        copyFormToRez1stTime(rezMyRezept);
+                        // TODO: clean up neue-RezNr holen
+                        Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
+                        if (tmpDiszi != Disziplin.INV) {
+                            NummernKreis tmpRZN = new NummernKreis(mand.ik());
+                            rezMyRezept.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
+                                                                                            .rezeptNummer());
+                        } else {
+                            logger.error("Couldn't find valid Disziplin to base new RezNr on");
+                        }
+                        // What's this ?? - better create a call-refresh or something...
+                        Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rezMyRezept.getRezNr());
+                    } else {
+                        copyFormToRez(rezMyRezept);
+                    }
+                    closeDialog();
+                    aufraeumen();
+                    // ?? automat. HMR-Check ??
+                    RezeptDto rDto = new RezeptDto(mand.ik());
+                    rDto.rezeptInDBSpeichern(rezMyRezept);
+                    
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+            }
+        });
+    }
+
     void actionAbbrechen() {
         // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
         // des geaenderten Rezept-Dialoges
@@ -2356,7 +2257,93 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         }
     }
 
-    
+    /**
+     * 
+     */
+    private void actionHmrCheck() {
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    boolean icd10falsch = false;
+                    int welcherIcd = 0;
+                    if (jtf[cICD10].getText()
+                                   .trim()
+                                   .length() > 0) {
+                        String suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10].getText());
+                        if (SqlInfo.holeEinzelFeld(
+                                "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
+                                   .equals("")) {
+                            icd10falsch = true;
+                            welcherIcd = 1;
+                        }
+                        if (jtf[cICD10_2].getText()
+                                         .trim()
+                                         .length() > 0) {
+                            suchenach = RezeptFensterTools.macheIcdString(jtf[cICD10_2].getText());
+                            if (SqlInfo.holeEinzelFeld(
+                                    "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
+                                       .equals("")) {
+                                icd10falsch = true;
+                                welcherIcd = 2;
+                            }
+                        }
+                    } else {
+                        if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
+                                                             .get(preisgruppen[getPgIndex()]) == 1) {
+                            hmrcheck.setEnabled(true);
+                            JOptionPane.showMessageDialog(popupDialog,
+                                    "<html><b><font color='#ff0000'>Kein ICD-10 Code angegeben!</font></b></html>");
+
+                        }
+                    }
+                    doHmrCheck(icd10falsch, welcherIcd);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                return null;
+            }
+        }.execute();
+    }
+
+    /**
+     * 
+     */
+    private void actionHausbesuche() {
+        if (jcb[cHAUSB].isSelected()) {
+            // Hausbesuch gewaehlt
+            if (Reha.instance.patpanel.patDaten.get(44)
+                                               .equals("T")) {
+                if (this.preisgruppe != 1 && (getPgIndex() <= 1)) {
+                    jcb[cVOLLHB].setEnabled(true);
+                }
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        jcb[cHAUSB].requestFocusInWindow();
+                    }
+                });
+            } else {
+                jcb[cVOLLHB].setEnabled(false);
+                jcb[cVOLLHB].setSelected(true);
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        jcb[cHAUSB].requestFocusInWindow();
+                    }
+                });
+            }
+        } else {
+            // Hausbesuch abgewaehlt
+            jcb[cVOLLHB].setEnabled(false);
+            jcb[cVOLLHB].setSelected(false);
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    jcb[cHAUSB].requestFocusInWindow();
+                }
+            });
+        }
+    }
+
+
     @Override
     public void rehaTPEventOccurred(RehaTPEvent evt) {
         try {
@@ -2369,7 +2356,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
                 }
             }
         } catch (NullPointerException ne) {
-            JOptionPane.showMessageDialog(null, "Fehler beim abh\u00e4ngen des Listeners Rezept-Neuanlage\n"
+            JOptionPane.showMessageDialog(popupDialog, "Fehler beim abh\u00e4ngen des Listeners Rezept-Neuanlage\n"
                     + "Bitte informieren Sie den Administrator \u00fcber diese Fehlermeldung");
         }
     }
