@@ -11,22 +11,20 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
-import java.util.regex.Pattern;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -190,6 +188,9 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
     public JButton abbrechen = null;
     public JButton hmrcheck = null;
 
+    // A Q&D to fix 'hiding popup windows' (on Mac?)
+    private final JDialog popupDialog = new JDialog();
+    
     public boolean neu = false;
 
     public Vector<String> vec = null; // Lemmi Doku: Das bekommt den 'vecaktrez' aus dem rufenden Programm
@@ -243,7 +244,12 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
         try {
             this.neu = neu;
             this.rez = rez; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
-            
+            /**
+             * A Q&D to fix 'hiding popup windows' (on Mac?)
+             * Just use it in e.g. showOptionDialog as "parent" to get the message to front
+             * JOptionPane.showOptionDialog(popupDialog, ...) instead of NULL - or sort out "default" :D
+             */
+            popupDialog.setAlwaysOnTop(true);
             rezMyRezept = new Rezept(rez);
             verordnenderArzt = new ArztVec();
             // TODO: sets the classmember in Rezeptvector-class for later operations
@@ -480,7 +486,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
     // fragt nach, ob wirklich ungesichert abgebrochen werden soll !
     public int askForCancelUsaved() {
         String[] strOptions = { "ja", "nein" }; // Defaultwert auf "nein" gesetzt !
-        return JOptionPane.showOptionDialog(null,
+        return JOptionPane.showOptionDialog(popupDialog,
                 "Es wurden Rezept-Angaben ge\u00e4ndert!\nWollen sie die \u00c4nderung(en) wirklich verwerfen?",
                 "Angaben wurden ge\u00e4ndert", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, strOptions,
                 strOptions[1]);
@@ -1874,7 +1880,7 @@ public class RezNeuanlageGUI extends JXPanel implements ActionListener, FocusLis
 
     private int askForKeepCurrent(String kasseInVO, String kassePatStamm) {
         String[] strOptions = { "Kasse der VO beibehalten", "Kasse aus Patientendaten verwenden" };
-        return JOptionPane.showOptionDialog(null,
+        return JOptionPane.showOptionDialog(popupDialog,
                 "<html><b>Das Rezept enth\u00e4lt eine andere Kasse als die Stammdaten des Patienten: </b>\n"
                         + "\n     Kasse im kopierten Rezept:      " + kasseInVO + "\n     Kasse in den Patientendaten:  "
                         + kassePatStamm + "\n",
