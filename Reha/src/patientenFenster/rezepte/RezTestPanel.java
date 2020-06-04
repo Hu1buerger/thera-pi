@@ -1,4 +1,4 @@
-package patientenFenster;
+package patientenFenster.rezepte;
 
 import java.awt.Color;
 import java.awt.event.ActionEvent;

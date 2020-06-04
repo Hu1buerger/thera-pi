@@ -117,7 +117,7 @@ import jxTableTools.MyTableComboBox;
 import oOorgTools.OOTools;
 import patientenFenster.KassenAuswahl;
 import patientenFenster.PatUndVOsuchen;
-import patientenFenster.RezNeuanlage;
+import patientenFenster.rezepte.RezNeuanlage;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;

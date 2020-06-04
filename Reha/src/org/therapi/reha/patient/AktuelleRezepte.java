@@ -106,12 +106,12 @@ import krankenKasse.KassenFormulare;
 import mandant.Mandant;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
-import patientenFenster.RezNeuanlage;
-import patientenFenster.RezNeuanlageGUI;
-import patientenFenster.RezTest;
-import patientenFenster.RezTestPanel;
-import patientenFenster.RezeptGebuehren;
-import patientenFenster.RezeptVorlage;
+import patientenFenster.rezepte.RezNeuanlage;
+import patientenFenster.rezepte.RezNeuanlageGUI;
+import patientenFenster.rezepte.RezTest;
+import patientenFenster.rezepte.RezTestPanel;
+import patientenFenster.rezepte.RezeptGebuehren;
+import patientenFenster.rezepte.RezeptVorlage;
 import rechteTools.Rechte;
 import rezept.Money;
 import rezept.Rezept;
@@ -295,39 +295,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 });
             }
         }.start();
-
-    }
-    
-    public void formulareAuswerten() {
-        int row = tabaktrez.getSelectedRow();
-        if (row >= 0) {
-            iformular = -1;
-            KassenFormulare kf = new KassenFormulare(Reha.getThisFrame(), titel, formularid);
-            Point pt = btnPrint.getLocationOnScreen();
-            kf.setLocation(pt.x - 100, pt.y + 32);
-            kf.setModal(true);
-            kf.setVisible(true);
-            if (!formularid.getText()
-                           .equals("")) {
-                iformular = Integer.valueOf(formularid.getText());
-            }
-            kf = null;
-            if (iformular >= 0) {
-                new SwingWorker<Void, Void>() {
-
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        RezTools.constructRawHMap();
-                        OOTools.starteStandardFormular(Path.Instance.getProghome() + "vorlagen/" + Reha.getAktIK() + "/"
-                                + formular.get(iformular), null);
-                        return null;
-                    }
-                }.execute();
-
-            }
-        } else {
-            iformular = -1;
-        }
 
     }
     
@@ -732,6 +699,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     public JToolBar getTerminToolbar() {
+        ActionsTermine alt = new ActionsTermine();
         JToolBar jtb = new JToolBar();
         jtb.setOpaque(false);
         jtb.setRollover(true);
@@ -741,21 +709,21 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         JButton jbut = new JButton();
         jbut.setIcon(SystemConfig.hmSysIcons.get("neu"));
         jbut.setToolTipText("Neuen Termin eintragen");
-        jbut.setActionCommand("terminplus");
-        jbut.addActionListener(e -> actionTerminPlus());
+//        jbut.setActionCommand("terminplus");
+        jbut.addActionListener(e -> alt.actionTerminPlus());
         jtb.add(jbut);
         jbut = new JButton();
         jbut.setIcon(SystemConfig.hmSysIcons.get("delete"));
         jbut.setToolTipText("Termin l\u00f6schen");
-        jbut.setActionCommand("terminminus");
-        jbut.addActionListener(e -> actionTerminMinus());
+//        jbut.setActionCommand("terminminus");
+        jbut.addActionListener(e -> alt.actionTerminMinus());
         jtb.add(jbut);
         jtb.addSeparator(new Dimension(40, 0));
         jbut = new JButton();
         jbut.setIcon(SystemConfig.hmSysIcons.get("sort"));
 
-        jbut.setActionCommand("terminsortieren");
-        jbut.addActionListener(e -> actionTermineSortieren());
+//        jbut.setActionCommand("terminsortieren");
+        jbut.addActionListener(e -> alt.actionTermineSortieren());
         jbut.setToolTipText("Termine nach Datum sortieren");
         jtb.add(jbut);
         return jtb;
@@ -1821,24 +1789,76 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     /**
-     * 
+     * nimmt den Behandler aus der aktuell markierten Zeile und kopiert ihn auf alle
+     * leeren Behandlerfelder
      */
     private void actionBehandlerKopieren() {
-        doBehandlerKopieren();
+        if (this.tabaktterm.getRowCount() <= 0) {
+            return;
+        }
+
+        // aktuell gewaehlte Zeile finden - mit Sicherung, wenn keine angewaehlt worden
+        // ist !
+        int iPos = tabaktterm.getSelectedRow();
+        if (iPos < 0 || iPos >= tabaktterm.getRowCount())
+            return;
+
+        // Behandler aus aktuell angewaehler Zeile holen
+        String strBehandler = tabaktterm.getStringAt(tabaktterm.getSelectedRow(), 1);
+        if (!strBehandler.isEmpty()) {
+            for (int i = 0; i < tabaktterm.getRowCount(); i++) {
+                if (tabaktterm.getStringAt(i, 1)
+                              .isEmpty()) // nur wenn der Behandler leer ist eintragen.
+                    tabaktterm.setValueAt(strBehandler, i, 1);
+            }
+            termineSpeichern();
+        }
     }
 
     /**
      * 
      */
     private void actionAngleichenBehandlungen() {
-        doAngleichenBehandlungen();
+        if (this.tabaktterm.getRowCount() <= 0) {
+            return;
+        }
+        Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
+        dtermm.setRowCount(0);
+        // TODO: check after change to Rezepte-class
+        for (int i = 0; i < vec.size(); i++) {
+            // POS1(48)-4(51):
+            vec.get(i)
+               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos2()
+                                                          .equals("") ? ""
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos2())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos3()
+                                                          .equals("") ? ""
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos3())
+                       + (Reha.instance.patpanel.rezAktRez.getHMPos4()
+                                                          .trim()
+                                                          .equals("") ? ""
+                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos4()));
+            dtermm.addRow(vec.get(i));
+        }
+        termineSpeichern();
     }
 
     /**
      * 
      */
     private void actionDeleteBehandlungen() {
-        doDeleteBehandlungen();
+        if (this.tabaktterm.getRowCount() <= 0) {
+            return;
+        }
+        Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
+        dtermm.setRowCount(0);
+        for (int i = 0; i < vec.size(); i++) {
+            vec.get(i)
+               .set(3, "");
+            dtermm.addRow(vec.get(i));
+        }
+        termineSpeichern();
     }
 
     /**
@@ -1859,7 +1879,35 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
      * 
      */
     private void actionRezeptBrief() {
-        formulareAuswerten();
+        int row = tabaktrez.getSelectedRow();
+        if (row >= 0) {
+            iformular = -1;
+            KassenFormulare kf = new KassenFormulare(Reha.getThisFrame(), titel, formularid);
+            Point pt = btnPrint.getLocationOnScreen();
+            kf.setLocation(pt.x - 100, pt.y + 32);
+            kf.setModal(true);
+            kf.setVisible(true);
+            if (!formularid.getText()
+                           .equals("")) {
+                iformular = Integer.valueOf(formularid.getText());
+            }
+            kf = null;
+            if (iformular >= 0) {
+                new SwingWorker<Void, Void>() {
+
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        RezTools.constructRawHMap();
+                        OOTools.starteStandardFormular(Path.Instance.getProghome() + "vorlagen/" + Reha.getAktIK() + "/"
+                                + formular.get(iformular), null);
+                        return null;
+                    }
+                }.execute();
+
+            }
+        } else {
+            iformular = -1;
+        }
     }
 
     /**
@@ -2190,135 +2238,137 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             kopierModus = REZEPTKOPIERE_HISTORIENREZEPT;
         neuanlageRezept(true, "", kopierModus);
     }
-
-    /**
-     * 
-     */
-    private void actionTermineSortieren() {
-        if (rezGeschlossenMitWarnung()) {
-            return;
-        }
-        int row = tabaktterm.getRowCount();
-        if (row > 1) {
-
-            Vector<Vector<String>> vec = (Vector<Vector<String>>) dtermm.getDataVector()
-                                                                        .clone();
-
-            Comparator<Vector<String>> comparator = new Comparator<Vector<String>>() {
-                @Override
-                public int compare(Vector<String> o1, Vector<String> o2) {
-                    String s1 = o1.get(4);
-                    String s2 = o2.get(4);
-                    return s1.compareTo(s2);
-                }
-            };
-            Collections.sort(vec, comparator);
-            dtermm.setRowCount(0);
-            for (int y = 0; y < vec.size(); y++) {
-                dtermm.addRow(vec.get(y));
+    
+    private class ActionsTermine {
+        /**
+         * 
+         */
+        private void actionTermineSortieren() {
+            if (rezGeschlossenMitWarnung()) {
+                return;
             }
-            tabaktterm.validate();
-            new Thread() {
-                @Override
-                public void run() {
-                    termineSpeichern();
-                    fuelleTage();
+            int row = tabaktterm.getRowCount();
+            if (row > 1) {
+    
+                Vector<Vector<String>> vec = (Vector<Vector<String>>) dtermm.getDataVector()
+                                                                            .clone();
+    
+                Comparator<Vector<String>> comparator = new Comparator<Vector<String>>() {
+                    @Override
+                    public int compare(Vector<String> o1, Vector<String> o2) {
+                        String s1 = o1.get(4);
+                        String s2 = o2.get(4);
+                        return s1.compareTo(s2);
+                    }
+                };
+                Collections.sort(vec, comparator);
+                dtermm.setRowCount(0);
+                for (int y = 0; y < vec.size(); y++) {
+                    dtermm.addRow(vec.get(y));
                 }
-            }.start();
-        }
-    }
-
-    /**
-     * 
-     */
-    private void actionTerminMinus() {
-        if (rezGeschlossenMitWarnung()) {
-            return;
-        }
-        int row = tabaktterm.getSelectedRow();
-        if (row >= 0) {
-            dtermm.removeRow(row);
-            tabaktterm.validate();
-            if (tabaktterm.getRowCount() > 0) {
-                tabaktterm.setRowSelectionInterval(tabaktterm.getRowCount() - 1, tabaktterm.getRowCount() - 1);
+                tabaktterm.validate();
+                new Thread() {
+                    @Override
+                    public void run() {
+                        termineSpeichern();
+                        fuelleTage();
+                    }
+                }.start();
             }
-            anzahlTermine.setText("Anzahl Termine: " + tabaktterm.getRowCount());
-
-            new Thread() {
-                @Override
-                public void run() {
+        }
+    
+        /**
+         * 
+         */
+        private void actionTerminMinus() {
+            if (rezGeschlossenMitWarnung()) {
+                return;
+            }
+            int row = tabaktterm.getSelectedRow();
+            if (row >= 0) {
+                dtermm.removeRow(row);
+                tabaktterm.validate();
+                if (tabaktterm.getRowCount() > 0) {
+                    tabaktterm.setRowSelectionInterval(tabaktterm.getRowCount() - 1, tabaktterm.getRowCount() - 1);
+                }
+                anzahlTermine.setText("Anzahl Termine: " + tabaktterm.getRowCount());
+    
+                new Thread() {
+                    @Override
+                    public void run() {
+                        termineSpeichern();
+                        starteTests();
+                    }
+                }.start();
+    
+            }
+        }
+    
+        private void actionTerminPlus() {
+            if (rezGeschlossenMitWarnung()) {
+                return;
+            }
+            try {
+                // TODO: delete me once Rezepte has been sorted
+                Object[] objTerm;
+                objTerm = RezTools.BehandlungenAnalysieren(Reha.instance.patpanel.vecaktrez.get(1), false,
+                        false, false, null, null, null, DatFunk.sHeute()); // hier noch ein Point Object uebergeben
+                logger.debug("Vec: objTerm = " + objTerm);
+                objTerm = RezTools.BehandlungenAnalysieren(Reha.instance.patpanel.rezAktRez.getRezNr(), false,
+                        false, false, null, null, null, DatFunk.sHeute()); // hier noch ein Point Object uebergeben
+                logger.debug("Rez: objTerm = " + objTerm);
+    
+                if (objTerm == null) {
+                    return;
+                }
+    
+                if ((Integer) objTerm[1] == RezTools.REZEPT_IST_BEREITS_VOLL) {
+                    logger.debug("Rezept ist bereits voll");
+                } else if ((Integer) objTerm[1] == RezTools.REZEPT_ABBRUCH) {
+                    logger.debug("Rezept ist abgebrochen");
+                    return;
+                } else {
+                    Vector<String> vec = new Vector<String>();
+                    vec.add(DatFunk.sHeute());
+                    vec.add("");
+                    vec.add("");
+                    vec.add(((String) objTerm[0]).split("@")[3]);
+                    dtermm.addRow((Vector<String>) vec.clone());
                     termineSpeichern();
                     starteTests();
-                }
-            }.start();
-
-        }
-    }
-
-    private void actionTerminPlus() {
-        if (rezGeschlossenMitWarnung()) {
-            return;
-        }
-        try {
-            // TODO: delete me once Rezepte has been sorted
-            Object[] objTerm;
-            objTerm = RezTools.BehandlungenAnalysieren(Reha.instance.patpanel.vecaktrez.get(1), false,
-                    false, false, null, null, null, DatFunk.sHeute()); // hier noch ein Point Object uebergeben
-            logger.debug("Vec: objTerm = " + objTerm);
-            objTerm = RezTools.BehandlungenAnalysieren(Reha.instance.patpanel.rezAktRez.getRezNr(), false,
-                    false, false, null, null, null, DatFunk.sHeute()); // hier noch ein Point Object uebergeben
-            logger.debug("Rez: objTerm = " + objTerm);
-
-            if (objTerm == null) {
-                return;
-            }
-
-            if ((Integer) objTerm[1] == RezTools.REZEPT_IST_BEREITS_VOLL) {
-                logger.debug("Rezept ist bereits voll");
-            } else if ((Integer) objTerm[1] == RezTools.REZEPT_ABBRUCH) {
-                logger.debug("Rezept ist abgebrochen");
-                return;
-            } else {
-                Vector<String> vec = new Vector<String>();
-                vec.add(DatFunk.sHeute());
-                vec.add("");
-                vec.add("");
-                vec.add(((String) objTerm[0]).split("@")[3]);
-                dtermm.addRow((Vector<String>) vec.clone());
-                termineSpeichern();
-                starteTests();
-                if ((Integer) objTerm[1] == RezTools.REZEPT_IST_JETZ_VOLL) {
-                    try {
-                        // TODO: adjusted to Rezepte-class - check if ok
-                        RezTools.fuelleVolleTabelle((Reha.instance.patpanel.rezAktRez.getRezNr()), Reha.aktUser);
-                    } catch (Exception ex) {
-                        logger.debug("Fehler beim Aufruf von 'fuelleVolleTabelle'");
-                        JOptionPane.showMessageDialog(null, "Fehler beim Aufruf von 'fuelleVolleTabelle'");
+                    if ((Integer) objTerm[1] == RezTools.REZEPT_IST_JETZ_VOLL) {
+                        try {
+                            // TODO: adjusted to Rezepte-class - check if ok
+                            RezTools.fuelleVolleTabelle((Reha.instance.patpanel.rezAktRez.getRezNr()), Reha.aktUser);
+                        } catch (Exception ex) {
+                            logger.debug("Fehler beim Aufruf von 'fuelleVolleTabelle'");
+                            JOptionPane.showMessageDialog(null, "Fehler beim Aufruf von 'fuelleVolleTabelle'");
+                        }
                     }
                 }
-            }
-            tabaktterm.validate();
-            int tanzahl = tabaktterm.getRowCount();
-            anzahlTermine.setText("Anzahl Terimine: " + Integer.toString(tanzahl));
-            if (tanzahl > 0) {
-                tabaktterm.setRowSelectionInterval(tanzahl - 1, tanzahl - 1);
-            }
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    tabaktterm.scrollRowToVisible(tabaktterm.getRowCount());
+                tabaktterm.validate();
+                int tanzahl = tabaktterm.getRowCount();
+                anzahlTermine.setText("Anzahl Terimine: " + Integer.toString(tanzahl));
+                if (tanzahl > 0) {
+                    tabaktterm.setRowSelectionInterval(tanzahl - 1, tanzahl - 1);
                 }
-
-            });
-            tabaktterm.validate();
-            tabaktterm.repaint();
-            return;
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-
-    }
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        tabaktterm.scrollRowToVisible(tabaktterm.getRowCount());
+                    }
     
+                });
+                tabaktterm.validate();
+                tabaktterm.repaint();
+                return;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+    
+        }
+    }
+
     public static String getActiveRezNr() {
         int row = AktuelleRezepte.tabaktrez.getSelectedRow();
         if (row >= 0) {
@@ -2339,73 +2389,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
     public void setAktRezZZStatus(int status) {
         Reha.instance.patpanel.rezAktRez.setZZStatus(status);
-    }
-
-    // nimmt den Behandler aus der aktuell markierten Zeile und kopiert ihn auf alle
-    // leeren Behandlerfelder
-    private void doBehandlerKopieren() {
-        if (this.tabaktterm.getRowCount() <= 0) {
-            return;
-        }
-
-        // aktuell gew\u00e4hlte Zeile finden - mit Sicherung, wenn keine angewaehlt worden
-        // ist !
-        int iPos = tabaktterm.getSelectedRow();
-        if (iPos < 0 || iPos >= tabaktterm.getRowCount())
-            return;
-
-        // Behandler aus aktuell angewaehler Zeile holen
-        String strBehandler = tabaktterm.getStringAt(tabaktterm.getSelectedRow(), 1);
-        if (!strBehandler.isEmpty()) {
-            for (int i = 0; i < tabaktterm.getRowCount(); i++) {
-                if (tabaktterm.getStringAt(i, 1)
-                              .isEmpty()) // nur wenn der Behandler leer ist eintragen.
-                    tabaktterm.setValueAt(strBehandler, i, 1);
-            }
-            termineSpeichern();
-        }
-    }
-
-    private void doDeleteBehandlungen() {
-        if (this.tabaktterm.getRowCount() <= 0) {
-            return;
-        }
-        Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
-        dtermm.setRowCount(0);
-        for (int i = 0; i < vec.size(); i++) {
-            vec.get(i)
-               .set(3, "");
-            dtermm.addRow(vec.get(i));
-        }
-        termineSpeichern();
-
-    }
-
-    private void doAngleichenBehandlungen() {
-        if (this.tabaktterm.getRowCount() <= 0) {
-            return;
-        }
-        Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
-        dtermm.setRowCount(0);
-        // TODO: check after change to Rezepte-class
-        for (int i = 0; i < vec.size(); i++) {
-            // POS1(48)-4(51):
-            vec.get(i)
-               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos2()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos2())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos3()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos3())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos4()
-                                                          .trim()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos4()));
-            dtermm.addRow(vec.get(i));
-        }
-        termineSpeichern();
-
     }
 
     private void rezeptAbschliessen() {

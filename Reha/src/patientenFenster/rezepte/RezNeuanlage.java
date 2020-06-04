@@ -1,4 +1,4 @@
-package patientenFenster;
+package patientenFenster.rezepte;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -60,6 +60,8 @@ import gui.Cursors;
 import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
 import mandant.Mandant;
+import patientenFenster.ArztAuswahl;
+import patientenFenster.KassenAuswahl;
 import rechteTools.Rechte;
 import rezept.Rezept;
 import stammDatenTools.RezTools;

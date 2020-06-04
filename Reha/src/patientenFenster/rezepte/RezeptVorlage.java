@@ -1,4 +1,4 @@
-package patientenFenster;
+package patientenFenster.rezepte;
 // Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
 
 // dazu neue Klasse mit Auswahlfenster angelegt !
@@ -25,6 +25,8 @@ import javax.swing.JPanel;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -36,10 +38,12 @@ import dialoge.RehaSmartDialog;
 import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import hauptFenster.Reha;
+import rezept.Rezept;
 import systemEinstellungen.SystemConfig;
 
 public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
     private static final long serialVersionUID = 1L;
+    private static final Logger logger = LoggerFactory.getLogger(RezeptVorlage.class);
 
     JRtaRadioButton[] rbDiszi = { null, null, null, null };
     ButtonGroup bgroup = new ButtonGroup();
@@ -53,6 +57,8 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
     public String strSelectedDiszi = "";
     Vector<String> vecDiszi = new Vector<String>();
     public Vector<String> vecResult = new Vector<String>();
+    Rezept rezResult = new Rezept();
+    
     public boolean bHasSelfDisposed = false;
     
     private int patIntern;
@@ -148,9 +154,9 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
         try {
             stmt = Reha.instance.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_UPDATABLE);
         } catch (SQLException e) {
-
-            e.printStackTrace();
+            logger.debug("SQL statement \"" + stmt + "\" failed with " + e.getLocalizedMessage());
         }
+        
         try {
             rs = stmt.executeQuery(sstmt);
 
@@ -161,17 +167,15 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
             else if (strMode.equals("vorlage")) { // das schaut konkrete Rezepte an
                 vecResult.clear();
                 ResultSetMetaData rsMetaData = rs.getMetaData();
-                int numberOfColumns = rsMetaData.getColumnCount() + 1;
+                int numberOfColumns = rsMetaData.getColumnCount();
                 while (rs.next())
-                    for (int i = 1; i < numberOfColumns; i++) {
+                    for (int i = 1; i <= numberOfColumns; i++) {
                         vecResult.add((rs.getString(i) == null ? "" : rs.getString(i)));
                     }
             }
 
-        } catch (SQLException ev) {
-            System.out.println("SQLException: " + ev.getMessage());
-            System.out.println("SQLState: " + ev.getSQLState());
-            System.out.println("VendorError: " + ev.getErrorCode());
+        } catch (SQLException e) {
+            logger.debug("SQL statement \"" + stmt + "\" failed with " + e.getLocalizedMessage());
         } finally {
             if (rs != null) {
                 try {
