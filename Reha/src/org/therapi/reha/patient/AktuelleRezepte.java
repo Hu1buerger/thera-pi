@@ -108,6 +108,7 @@ import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
 import patientenFenster.rezepte.RezNeuanlage;
 import patientenFenster.rezepte.RezNeuanlageGUI;
+import patientenFenster.rezepte.RezNeuanlagePreDisziCheck;
 import patientenFenster.rezepte.RezTest;
 import patientenFenster.rezepte.RezTestPanel;
 import patientenFenster.rezepte.RezeptGebuehren;
@@ -189,15 +190,15 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     InfoDialogTerminInfo infoDlg = null;
     String sRezNumNeu = "";
-    private Mandant mandant;
+    private Mandant mand;
     private Connection connection;
 
     public AktuelleRezepte(PatientHauptPanel eltern, Connection connection) {
         
         this.connection = connection;
-        mandant = Reha.instance.mandant();
+        mand = Reha.instance.mandant();
         
-        rDto = new RezeptDto(mandant.ik());
+        rDto = new RezeptDto(mand.ik());
 
         setOpaque(false);
         setBorder(null);
@@ -3063,7 +3064,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     private void doAbschliessen(Rezept rez) {
         // RezeptFertigeDto rfDto = new RezeptFertigeDto(mandant.ik());
-        RezeptFertige rf = new RezeptFertige(rez, mandant.ik());
+        RezeptFertige rf = new RezeptFertige(rez, mand.ik());
         
         if (!rf.RezeptErledigt()) {
             logger.error("Konnte Rezept nicht abschliesen");
@@ -3075,7 +3076,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     private void doAufschliessen(Rezept rez) {
-        RezeptFertige rf = new RezeptFertige(rez, mandant.ik());
+        RezeptFertige rf = new RezeptFertige(rez, mand.ik());
         
         if (!rf.RezeptRevive(rez)) {
             logger.error("Konnte Rezept nicht aufschliesen");
@@ -3400,19 +3401,38 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     
                     // TODO: This whole block assumes "Rezept" is a vector - checks for size and alike
                     //   need to be sorted to new Rezept-class
-                    Vector<String> vecKopierVorlage = vecNeuesRezeptVonKopie(kopierModus);
-                    
-                    // TODO: This needs to take Rezept rez as param & use (deep?) copy
-                    RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecKopierVorlage.clone(), lneu);
+                    // Vector<String> vecKopierVorlage = vecNeuesRezeptVonKopie(kopierModus);
+                    Rezept rezKopierVorlage = rezNeuesRezeptVonKopie(kopierModus);
+                    if (rezKopierVorlage.getPatIntern() == 0) { /**
+                                                                * TODO: getRezNr() has trouble with empty Rezept...
+                                                                * TODO: ganzes Rezept kann nicht NULL sein, aber Bausteine darin
+                                                                * z.Bsp. RezNr...
+                                                                *  If user pressed "Abbrechen" in Pre-Diszi-Selection dialog,
+                                                                *  we have no Rezept-Data
+                                                                *   - do we want to proceed with "Rezept Anlegen", 
+                                                                *     or cancel the whole operation?
+                                                                *  I.e. why would user press 'cancel' in Diszi-selection?
+                                                                *     Wrong patient? Then get out all the way...
+                                                                *  Get out completely seems the most sensible, since
+                                                                *    - if we had a choice on Diszis, and cancel the choice,
+                                                                *      the following Rezept-Neuanlage will expect vals
+                                                                *       in e.g. Diszi, RezNr we can't deliver - better let
+                                                                *       go via "proper" new Rezept path...
+                                                                */
+                        logger.error("Null-Rezept abgefangen. Bitte neu...");
+                        return;
+                    }
+                    RezNeuanlageGUI rezNeuAn = new RezNeuanlageGUI(new Rezept(rezKopierVorlage), lneu);
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(rezNeuAn);
-                    if (vecKopierVorlage.size() < 1)
+                    // TODO: If above leads to exit, we won't need NULL check here anymore...
+                    if (rezKopierVorlage.getRezNr() == null || rezKopierVorlage.getRezNr().isEmpty())
                         neuRez.getSmartTitledPanel()
                               .setTitle("Rezept Neuanlage");
                     else // Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
                          // Rezept-Neuanlage
                         neuRez.getSmartTitledPanel()
-                              .setTitle("Rezept Neuanlage als Kopie von <-- " + vecKopierVorlage.get(1));
+                              .setTitle("Rezept Neuanlage als Kopie von <-- " + rezKopierVorlage.getRezNr() + " -->");
 
 
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geoeffnet:
@@ -3499,12 +3519,44 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
 
+    /**
+     * Erstelle ein neues Rezept aufgrund einer Kopie (e.Rez.) aus entweder<BR/>
+     *   - letztem Rezept<BR/>
+     *   - ausgewaehltem Rezept<BR/>
+     *   - der Historie<BR/>
+     *   
+     * @param kopierModus
+     */
     private Rezept rezNeuesRezeptVonKopie(int kopierModus) {
+
         Rezept vorlage = new Rezept();
         
         switch (kopierModus) {
             case REZEPTKOPIERE_LETZTES:
+                String rezNrToCopy = "";
+                RezNeuanlagePreDisziCheck preAnlangeDisziWahl = new RezNeuanlagePreDisziCheck(
+                        btnNeu.getLocationOnScreen(),
+                        Reha.instance.patpanel.rezAktRez.getPatIntern(),
+                        mand);
+                // Sollte der Patient nur 1 Diszi bei uns in Anspruch genommen haben, so
+                //  kriegen wir hier die zu kopierende RezNr:
+                rezNrToCopy = preAnlangeDisziWahl.findeDieRezNrZumKopieren();
+                // Ansonsten muss der Nutzer waehlen von welcher Diszi er denn das letzte Rezept
+                //   kopieren moechte:
+                if ( rezNrToCopy.isEmpty() && !preAnlangeDisziWahl.hasSelected()) {
+                    preAnlangeDisziWahl.setModal(true);
+                    preAnlangeDisziWahl.toFront();
+                    preAnlangeDisziWahl.setVisible(true);
+                    rezNrToCopy = preAnlangeDisziWahl.getRezNr();
+                }
+                logger.debug("RezNr.: " + rezNrToCopy);
+                if (preAnlangeDisziWahl.isDisplayable() )
+                                preAnlangeDisziWahl.dispose();
+                vorlage = rDto.byRezeptNr(rezNrToCopy).orElse(new Rezept());  
+                logger.debug("Vorlage is now: " + vorlage.toString());
                 break;
+            default:
+                logger.error("Rez - Kopiermodus " + kopierModus + " nicht implementiert.");
         }
         
         return vorlage;
@@ -3524,9 +3576,31 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         // Rezept-Neuanlage
         Vector<String> vecRezVorlage = new Vector<String>();
         String rezToCopy = null;
+        String rezNrToCopy = "";
         switch (kopierModus) {
-            case REZEPTKOPIERE_LETZTES: 
-                RezeptVorlage vorlage = new RezeptVorlage(btnNeu.getLocationOnScreen(), Reha.instance.patpanel.rezAktRez.getPatIntern());
+            case REZEPTKOPIERE_LETZTES:
+                RezNeuanlagePreDisziCheck myCheck = new RezNeuanlagePreDisziCheck(
+                                                            btnNeu.getLocationOnScreen(),
+                                                            Reha.instance.patpanel.rezAktRez.getPatIntern(),
+                                                            mand);
+                rezNrToCopy = myCheck.findeDieRezNrZumKopieren();
+                logger.debug("Has found: " + myCheck.hasSelected());
+                logger.debug("Found so far: " + myCheck.getRezNr());
+                logger.debug("And received: " + rezNrToCopy);
+                if ( rezNrToCopy.isEmpty() && !myCheck.hasSelected()) {
+                    myCheck.setModal(true);
+                    myCheck.toFront();
+                    myCheck.setVisible(true);
+                    rezNrToCopy = myCheck.getRezNr();
+                    logger.debug("Has found: " + myCheck.hasSelected());
+                    logger.debug("And found so far: " + myCheck.getRezNr());                
+                }
+                if (myCheck.isDisplayable() )
+                    myCheck.dispose();
+
+                RezeptVorlage vorlage = new RezeptVorlage(
+                                            btnNeu.getLocationOnScreen(),
+                                            Reha.instance.patpanel.rezAktRez.getPatIntern());
                 if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
                                                  // bereits selbst disposed !
                     vorlage.setModal(true);

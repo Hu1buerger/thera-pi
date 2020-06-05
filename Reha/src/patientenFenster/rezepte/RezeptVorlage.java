@@ -345,10 +345,11 @@ public class RezeptVorlage extends RehaSmartDialog implements ActionListener {
 
 }
 
+/*
 class RezeptVorlageHintergrund extends JXPanel {
     /**
      *
-     */
+     * /
     private static final long serialVersionUID = 1L;
     ImageIcon hgicon;
     int icx, icy;
@@ -359,3 +360,4 @@ class RezeptVorlageHintergrund extends JXPanel {
         super();
     }
 }
+*/

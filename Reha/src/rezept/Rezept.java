@@ -335,6 +335,7 @@ public class Rezept {
      * @return the rezNr
      */
     public String getRezNr() {
+        // TODO: Nasty things happen here if Diszi is invalid (or NULL!)
         return rezNr.rezeptNummer();
     }
 

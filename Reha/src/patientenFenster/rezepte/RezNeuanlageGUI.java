@@ -252,13 +252,15 @@ public class RezNeuanlageGUI extends JXPanel implements FocusListener, RehaTPEve
              * JOptionPane.showOptionDialog(popupDialog, ...) instead of NULL - or sort out "default" :D
              */
             popupDialog.setAlwaysOnTop(true);
+            logger.debug("From Rez: " + rez.toString());
             rezMyRezept = new Rezept(rez);
             verordnenderArzt = new ArztVec();
             // TODO: sets the classmember in Rezeptvector-class for later operations
             diszis = new Disziplinen();
 
             // TODO: old code also checked vec-size 0-length - can we safely omit it?
-            if (this.neu) {
+            // No - currently if old-vec was NULL, now RezNr. and other members may be NULL
+            if (this.neu && (! "".equals(rez.getRezNr()))) {
                 aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
             }
 
