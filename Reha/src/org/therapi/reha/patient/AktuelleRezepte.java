@@ -3420,6 +3420,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                 *       go via "proper" new Rezept path...
                                                                 */
                         logger.error("Null-Rezept abgefangen. Bitte neu...");
+                        neuDlgOffen = false;
                         return;
                     }
                     RezNeuanlageGUI rezNeuAn = new RezNeuanlageGUI(new Rezept(rezKopierVorlage), lneu);
