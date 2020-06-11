@@ -111,6 +111,7 @@ import patientenFenster.rezepte.RezNeuanlageGUI;
 import patientenFenster.rezepte.RezNeuanlagePreDisziCheck;
 import patientenFenster.rezepte.RezTest;
 import patientenFenster.rezepte.RezTestPanel;
+import patientenFenster.rezepte.RezeptEditorGUI;
 import patientenFenster.rezepte.RezeptGebuehren;
 import patientenFenster.rezepte.RezeptVorlage;
 import rechteTools.Rechte;
@@ -1962,7 +1963,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                      * McM: stellt in Tabelle rgaffaktura 'storno_' vor Rechnungsnummer u. haengt 'S'
                      * an Rezeptnummer an, dadurch wird record bei der Suche nach
                      * Rechnungs-/Rezeptnummer nicht mehr gefunden <roffen> wird nicht 0 gesetzt,
-                     * falls schon eine Teilzahlung gebucht wurde o.\u00e4. - in OP taucht er deshalb
+                     * falls schon eine Teilzahlung gebucht wurde o.ae. - in OP taucht er deshalb
                      * noch auf
                      */
                     xcmd = "UPDATE rgaffaktura SET rnr=CONCAT('storno_',rnr), reznr=CONCAT(reznr,'S') where reznr='"
@@ -3397,37 +3398,44 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 neuRez.getSmartTitledPanel()
                       .setPreferredSize(new Dimension(490, 800));
                 neuRez.setPinPanel(pinPanel);
+                   
                 if (lneu) {
-                    
-                    // TODO: This whole block assumes "Rezept" is a vector - checks for size and alike
-                    //   need to be sorted to new Rezept-class
-                    // Vector<String> vecKopierVorlage = vecNeuesRezeptVonKopie(kopierModus);
-                    Rezept rezKopierVorlage = rezNeuesRezeptVonKopie(kopierModus);
-                    if (rezKopierVorlage.getPatIntern() == 0) { /**
-                                                                * TODO: getRezNr() has trouble with empty Rezept...
-                                                                * TODO: ganzes Rezept kann nicht NULL sein, aber Bausteine darin
-                                                                * z.Bsp. RezNr...
-                                                                *  If user pressed "Abbrechen" in Pre-Diszi-Selection dialog,
-                                                                *  we have no Rezept-Data
-                                                                *   - do we want to proceed with "Rezept Anlegen", 
-                                                                *     or cancel the whole operation?
-                                                                *  I.e. why would user press 'cancel' in Diszi-selection?
-                                                                *     Wrong patient? Then get out all the way...
-                                                                *  Get out completely seems the most sensible, since
-                                                                *    - if we had a choice on Diszis, and cancel the choice,
-                                                                *      the following Rezept-Neuanlage will expect vals
-                                                                *       in e.g. Diszi, RezNr we can't deliver - better let
-                                                                *       go via "proper" new Rezept path...
-                                                                */
-                        logger.error("Null-Rezept abgefangen. Bitte neu...");
-                        neuDlgOffen = false;
-                        return;
+                    Rezept rezKopierVorlage;
+                    if ( kopierModus == REZEPTKOPIERE_NIX) {
+                        // echte NeuAnlage
+                        rezKopierVorlage = new Rezept();
+                    } else {
+                        // TODO: This whole block assumes "Rezept" is a vector - checks for size and alike
+                        //   need to be sorted to new Rezept-class
+                        // Vector<String> vecKopierVorlage = vecNeuesRezeptVonKopie(kopierModus);
+                        rezKopierVorlage = rezNeuesRezeptVonKopie(kopierModus);
+                        if (rezKopierVorlage.getPatIntern() == 0) { /**
+                                                                    * TODO: getRezNr() has trouble with empty Rezept...
+                                                                    * TODO: ganzes Rezept kann nicht NULL sein, aber Bausteine darin
+                                                                    * z.Bsp. RezNr...
+                                                                    *  If user pressed "Abbrechen" in Pre-Diszi-Selection dialog,
+                                                                    *  we have no Rezept-Data
+                                                                    *   - do we want to proceed with "Rezept Anlegen", 
+                                                                    *     or cancel the whole operation?
+                                                                    *  I.e. why would user press 'cancel' in Diszi-selection?
+                                                                    *     Wrong patient? Then get out all the way...
+                                                                    *  Get out completely seems the most sensible, since
+                                                                    *    - if we had a choice on Diszis, and cancel the choice,
+                                                                    *      the following Rezept-Neuanlage will expect vals
+                                                                    *       in e.g. Diszi, RezNr we can't deliver - better let
+                                                                    *       go via "proper" new Rezept path...
+                                                                    */
+                            logger.error("Null-Rezept abgefangen. Bitte neu...");
+                            neuDlgOffen = false;
+                            return;
+                        }
                     }
-                    RezNeuanlageGUI rezNeuAn = new RezNeuanlageGUI(new Rezept(rezKopierVorlage), lneu);
+                    // This used to pass a copy to RezNeuanlageGUI - lets see if we still need to do that...
+                    RezNeuanlageGUI rezNeuAn = new RezNeuanlageGUI(rezKopierVorlage, lneu);
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(rezNeuAn);
                     // TODO: If above leads to exit, we won't need NULL check here anymore...
-                    if (rezKopierVorlage.getRezNr() == null || rezKopierVorlage.getRezNr().isEmpty())
+                    if (rezKopierVorlage.getPatIntern() == 0) // A Q&D until we get RezNr == NULL sorted
                         neuRez.getSmartTitledPanel()
                               .setTitle("Rezept Neuanlage");
                     else // Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
@@ -3439,7 +3447,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geoeffnet:
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(
-                                  new RezNeuanlageGUI(Reha.instance.patpanel.rezAktRez, lneu));
+                                  new RezeptEditorGUI(Reha.instance.patpanel.rezAktRez, lneu, mand));
                     
                     neuRez.getSmartTitledPanel()
                           .setTitle("editieren Rezept ---> " + Reha.instance.patpanel.rezAktRez.getRezNr());
@@ -3531,10 +3539,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private Rezept rezNeuesRezeptVonKopie(int kopierModus) {
 
         Rezept vorlage = new Rezept();
+        String rezNrToCopy = "";
         
         switch (kopierModus) {
             case REZEPTKOPIERE_LETZTES:
-                String rezNrToCopy = "";
                 RezNeuanlagePreDisziCheck preAnlangeDisziWahl = new RezNeuanlagePreDisziCheck(
                         btnNeu.getLocationOnScreen(),
                         Reha.instance.patpanel.rezAktRez.getPatIntern(),
@@ -3556,6 +3564,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 vorlage = rDto.byRezeptNr(rezNrToCopy).orElse(new Rezept());  
                 logger.debug("Vorlage is now: " + vorlage.toString());
                 break;
+            case REZEPTKOPIERE_GEWAEHLTES:           // Vorschlag von J. Steinhilber integriert: Kopiere
+                                                     // das angewaehlte Rezept
+                rezNrToCopy = AktuelleRezepte.getActiveRezNr();
+                vorlage = rDto.byRezeptNr(rezNrToCopy).orElse(new Rezept());
+                break;
+                
+            case REZEPTKOPIERE_HISTORIENREZEPT:
+                
+                rezNrToCopy = null;
+                if ((rezNrToCopy = Historie.getActiveRezNr()) != null) {
+                    vorlage = rDto.getHistorischesRezeptByRezNr(rezNrToCopy).orElse(new Rezept());
+    
+                } else {
+                    JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgew\u00e4hlt");
+                }
+                break;
+
             default:
                 logger.error("Rez - Kopiermodus " + kopierModus + " nicht implementiert.");
         }
