@@ -3431,7 +3431,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         }
                     }
                     // This used to pass a copy to RezNeuanlageGUI - lets see if we still need to do that...
-                    RezNeuanlageGUI rezNeuAn = new RezNeuanlageGUI(rezKopierVorlage, lneu);
+                    RezeptEditorGUI rezNeuAn = new RezeptEditorGUI(rezKopierVorlage, lneu, mand);
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(rezNeuAn);
                     // TODO: If above leads to exit, we won't need NULL check here anymore...

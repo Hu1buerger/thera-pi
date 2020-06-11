@@ -202,9 +202,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
 
             // TODO: old code also checked vec-size 0-length - can we safely omit it?
             // No - currently if old-vec was NULL, now RezNr. and other members may be NULL
-            if (this.neu) {
+            logger.debug("Blubb");
+            logger.debug("RezNr in constr. is " + rez.getRezNr());
+            if (this.neu && rez.getRezNr() != null) {
                 aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
             }
+            logger.debug("Diszi now: " + aktuelleDisziplin);
 
             setName("RezeptNeuanlage");
             rtp = new RehaTPEventClass();
@@ -251,10 +254,10 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             hashOfFormVals = rez.hashCode();
 
         } catch (Exception ex) {
+            logger.error("Fehler im Konstruktor RezeptEditorGUI: " + ex.getLocalizedMessage());
+            logger.error( RezNeuanlage.makeStacktraceToString(ex));
             JOptionPane.showMessageDialog(popupDialog,
                     "Fehler im Konstruktor RezeptEditor: " + ex.getLocalizedMessage());
-            logger.error("Fehler im Konstruktor RezeptEditorGUI: " + ex.getLocalizedMessage());
-            // logger.error( RezNeuanlage.makeStacktraceToString(ex));
         }
     }
 

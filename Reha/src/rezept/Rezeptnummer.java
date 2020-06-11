@@ -5,6 +5,9 @@ package rezept;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import core.Disziplin;
 
 /**
@@ -12,6 +15,8 @@ import core.Disziplin;
  * 
  */
 public class Rezeptnummer {
+    
+    private static final Logger logger = LoggerFactory.getLogger(Rezeptnummer.class);
     
     private Disziplin disziplin;
     private int rezeptZiffern;
@@ -56,7 +61,10 @@ public class Rezeptnummer {
     }
     
     public String rezeptNummer() {
+        logger.debug("Diszi=" + disziplin + " and rezZiffern=" + rezeptZiffern);
         // TODO: if diszi == (COMMON || INV) => boing!
+        if ( disziplin == null || disziplin == Disziplin.INV)
+            return null;
         return disziplin + Integer.toString(rezeptZiffern);
     }
     @Override

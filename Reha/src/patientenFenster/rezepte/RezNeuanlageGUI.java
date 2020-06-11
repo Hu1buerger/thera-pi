@@ -260,7 +260,7 @@ public class RezNeuanlageGUI extends JXPanel implements FocusListener, RehaTPEve
 
             // TODO: old code also checked vec-size 0-length - can we safely omit it?
             // No - currently if old-vec was NULL, now RezNr. and other members may be NULL
-            if (this.neu && (! "".equals(rez.getRezNr()))) {
+            if (this.neu) {
                 aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
             }
 
@@ -306,8 +306,8 @@ public class RezNeuanlageGUI extends JXPanel implements FocusListener, RehaTPEve
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(popupDialog,
-                    "Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
-            logger.error("Fehler im Konstruktor RezNeuanlage: " + ex.getLocalizedMessage());
+                    "Fehler im Konstruktor RezeptEditor: " + ex.getLocalizedMessage());
+            logger.error("Fehler im Konstruktor RezeptEditorGUI: " + ex.getLocalizedMessage());
             // logger.error( RezNeuanlage.makeStacktraceToString(ex));
         }
 
