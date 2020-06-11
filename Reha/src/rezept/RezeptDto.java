@@ -68,6 +68,13 @@ public class RezeptDto {
         return retrieveList(sql);
     }
 
+    public Optional<Rezept> getHistorischesRezeptByRezNr(String rezNr) {
+        String sql = selectAllFromLzaDBWhere + "REZ_NR = '" + rezNr + "'";
+        Rezept rezept = retrieveFirst(sql);
+
+        return Optional.ofNullable(rezept);
+    }
+
     public void updateRezeptTermine(int Id, String TerminListe) {
         String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
@@ -250,7 +257,7 @@ public class RezeptDto {
     }
 
     public void rezeptInDBSpeichern(Rezept rez) {
-        String sql = "update " + rezDBLZA + " set "
+        String sql = "update " + aktRezDB + " set "
                 + "REZ_NR='" + rez.getRezNr() + "', "
                 + "ID='" + rez.getId() + "', "
                 + "REZEPTART='" + rez.getRezeptArt() + "', "
@@ -279,7 +286,7 @@ public class RezeptDto {
                 + "DATUM='" + rez.getErfassungsDatum() + "', "
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
-                + "VERAENDERD='" + rez.getVeraenderd() + "', "
+                + "VERAENDERD=" + (rez.getVeraenderd() == null ? "NULL" : "'" + rez.getVeraenderd() + "'" ) + ", "
                 + "VERAENDERA='" + rez.getVeraendera() + "', "
                 + "LOGFREI1='" + rez.getLogfrei1() + "', "
                 + "LOGFREI2='" + rez.getLogfrei2() + "', "
