@@ -1,5 +1,7 @@
 package rezept;
 
+import java.util.Objects;
+
 import mandant.IK;
 
 /**
@@ -326,6 +328,38 @@ public class KrankenkasseAdr {
 
     public void setPgFt(int pgFt) {
         this.pgFt = pgFt;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(email1, email2, email3, fax, hmrabrechnung, id, ikKasse, ikKostent, ikKvKarte, ikNum,
+                ikNutzer, ikPapier, ikPhysika, kMemo, kassenNam1, kassenNam2, kuerzel, kvNummer, matchcode, ort, pgEr,
+                pgFt, pgKg, pgLo, pgMa, pgPo, pgRh, pgRs, plz, postfach, preisgruppe, rechnung, strasse, telefon);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        KrankenkasseAdr other = (KrankenkasseAdr) obj;
+        return Objects.equals(email1, other.email1) && Objects.equals(email2, other.email2)
+                && Objects.equals(email3, other.email3) && Objects.equals(fax, other.fax)
+                && hmrabrechnung == other.hmrabrechnung && id == other.id && Objects.equals(ikKasse, other.ikKasse)
+                && Objects.equals(ikKostent, other.ikKostent) && Objects.equals(ikKvKarte, other.ikKvKarte)
+                && Objects.equals(ikNum, other.ikNum) && Objects.equals(ikNutzer, other.ikNutzer)
+                && Objects.equals(ikPapier, other.ikPapier) && Objects.equals(ikPhysika, other.ikPhysika)
+                && Objects.equals(kMemo, other.kMemo) && Objects.equals(kassenNam1, other.kassenNam1)
+                && Objects.equals(kassenNam2, other.kassenNam2) && Objects.equals(kuerzel, other.kuerzel)
+                && Objects.equals(kvNummer, other.kvNummer) && Objects.equals(matchcode, other.matchcode)
+                && Objects.equals(ort, other.ort) && pgEr == other.pgEr && pgFt == other.pgFt && pgKg == other.pgKg
+                && pgLo == other.pgLo && pgMa == other.pgMa && pgPo == other.pgPo && pgRh == other.pgRh
+                && pgRs == other.pgRs && Objects.equals(plz, other.plz) && Objects.equals(postfach, other.postfach)
+                && preisgruppe == other.preisgruppe && Objects.equals(rechnung, other.rechnung)
+                && Objects.equals(strasse, other.strasse) && Objects.equals(telefon, other.telefon);
     }
     
 
