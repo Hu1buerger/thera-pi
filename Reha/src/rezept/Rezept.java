@@ -42,7 +42,7 @@ public class Rezept {
 
     String arzt;
     int arztId;
-    String arztBetriebsnummer;
+    int arztBetriebsnummer;
     String aerzte;
 
     Money preise1;
@@ -217,7 +217,7 @@ public class Rezept {
                 + anzahl1 + ", anzahl2=" + anzahl2 + ", anzahl3=" + anzahl3 + ", anzahl4=" + anzahl4 + ", anzahlkm="
                 + anzahlKM + ", art_dbeh1=" + artDerBeh1 + ", art_dbeh2=" + artDerBeh2 + ", art_dbeh3=" + artDerBeh3
                 + ", art_dbeh4=" + artDerBeh4 + ", befr=" + befr + ", rezGeb=" + rezGeb + ", rezBez=" + rezBez
-                + ", arzt=" + arzt + ", arztid=" + arztId + "arztBetriebsnummer=" + arztBetriebsnummer + ", aerzte=" + aerzte + ", preise1=" + preise1 + ", preise2="
+                + ", arzt=" + arzt + ", arztid=" + arztId + ", arztBetriebsnummer=" + arztBetriebsnummer + ", aerzte=" + aerzte + ", preise1=" + preise1 + ", preise2="
                 + preise2 + ", preise3=" + preise3 + ", preise4=" + preise4 + ", erfassungsDatum=" + erfassungsDatum + ", diagnose="
                 + diagnose + ", heimbewohn=" + heimbewohn + ", veraenderd=" + veraenderd + ", veraendera=" + veraendera
                 + ", rezeptart=" + rezeptArt + ", logfrei1=" + logfrei1 + ", logfrei2=" + logfrei2 + ", numfrei1="
@@ -710,11 +710,11 @@ public class Rezept {
         return aerzte;
     }
 
-    public String getArztBetriebsnummer() {
+    public int getArztBetriebsnummer() {
         return arztBetriebsnummer;
     }
     
-    public void setArztBetriebsnummer(String aBN) {
+    public void setArztBetriebsnummer(int aBN) {
         arztBetriebsnummer = aBN;
     }
     
