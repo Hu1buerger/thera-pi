@@ -143,7 +143,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private JLabel labKassen;
     private JLabel labArzt;
     private JLabel labArztLANr;
-    private JLabel labArztChanged;
+    private JLabel labArztChanged;      // Wird beim Einlesen eines Rez. festgestellt,
+                                        //  das der Arzt im Rez != verordnArzt.getNachname() ist, wird das hierrueber dem Benutzer
+                                        //  kenntlich gemacht.
     
     private Mandant mand = null;
     private Rezept rez;
@@ -245,7 +247,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                     }
                 }
             }
-            logger.debug("Will hash this: " + rez.toString() + " and get: " + rez.hashCode());
+            // logger.debug("Will hash this: " + rez.toString() + " and get: " + rez.hashCode());
             hashOfFormVals = rez.hashCode();
 
         } catch (Exception ex) {
@@ -322,7 +324,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private JScrollPane getDatenPanel() { //Xs: 1             2     3      4     5                   6     7      8
         FormLayout lay = new FormLayout("right:max(80dlu;p), 4dlu, 60dlu, 5dlu, right:max(60dlu;p), 4dlu, 60dlu, right:5dlu",
              // Ys: 1. 2. 3. 4.     5. 6     7 8      9 10    11  12    13 14    15 16    17   18   19  20   21 22    23 24    25
-                "p, 5dlu, p, 5dlu,  p, 7dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, "
+                "p, 5dlu, p, 5dlu,  p, 10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, "
                         +
                         // 26  27  28    29 30    31  32    33   34    35  36    37 38   39 40    41    42
                         "10dlu, p, 10dlu, p, 2dlu, p, 2dlu,  p,  10dlu, p, 10dlu, p,10dlu,p,10dlu,30dlu,2dlu");
@@ -498,7 +500,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                 }
             });
             labArztChanged = new JLabel("");
-            labArztChanged.setToolTipText("Der Eintrag hat sich geaendert.");
+            labArztChanged.setToolTipText("Der Eintrag hat sich nicht geaendert.");
             labArztChanged.setVisible(false);
 
             jtfARZT.setName("arzt");
@@ -765,12 +767,11 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         } catch (Exception ex) {
             logger.error("Could not create Rezeptfenster");
             logger.error(ex.getLocalizedMessage());
-            ex.printStackTrace();
             JOptionPane.showMessageDialog(popupDialog, "Fehler in der Erstellung des Rezeptfensters\n" + ex.getMessage());
         }
 
         // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
-        logger.debug("Will hash this: " + rez.toString() + " to " + rez.hashCode());
+        // logger.debug("Will hash this: " + rez.toString() + " to " + rez.hashCode());
         hashOfFormVals = rez.hashCode();
 
         return jscr;
@@ -825,6 +826,8 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             labArztChanged.setText("!");
             labArztChanged.setVisible(true);
             labArztChanged.setToolTipText("Alter Wert: " + rez.getArzt());
+            logger.info("Das \"Arzt\"-Feld wird bei Speicherung überschrieben. Alter Wert: " + rez.getArzt() 
+                                                                            + " neuer Wert: " + verordnenderArzt.getNName());
         } else {
             labArztChanged.setText("");
             labArztChanged.setVisible(false);
@@ -942,19 +945,10 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
  
             thisRezept.setKTraegerName(jtfKTRAEG.getText());
             thisRezept.setkId(Integer.parseInt(jtfKASID.getText()));
-            // Only do this when Rez -> Form...
-            // String[] arzt = (jtfARZT.getText()).split(" - ");
-            // thisRezept.setArzt(arzt[0]);   // LANR wieder ausblenden
-            /**
-             * Bummer, my Rezepte seem to have arzt.getNName.toUpper + " - " + arzt.getLANR
-             *   but the code I find only seems to want to store arzt.getNName in the Rezept...
-             *
-             */
-            // TODO: sort out what really needs to go in here...
-            String tmpArzt = (jtfARZT.getText().split(" - "))[0].trim();
-            logger.debug("Setting Arzt to " + tmpArzt);
-            thisRezept.setArzt(tmpArzt);
             
+            // TODO: sort out what really needs to go in here...
+            // If we already have 'verordnenderArzt, we actually should use that...
+            thisRezept.setArzt((jtfARZT.getText().split(" - "))[0].trim());     // Correct "old" "Arzt - LANR" entries
             thisRezept.setArztId(Integer.parseInt(jtfARZTID.getText()));
  
             stest = jtfREZDAT.getText()
@@ -1925,11 +1919,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                    if (!anzahlTest()) {
                        return;
                    }
-                   logger.debug("Anzahl-Test ok");
                    if (!komplettTest()) {
                        return;
                    }
-                   logger.debug("Komplett-Test ok");
                    if (getInstance().neu) {
                        if (!neuDateTest()) {
                            return;
@@ -1954,7 +1946,6 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                    }
                    closeDialog();
                    aufraeumen();
-                   logger.debug("Will save Rez: " + rez.toString());
                    // ?? automat. HMR-Check ??
                    RezeptDto rDto = new RezeptDto(mand.ik());
                    rDto.rezeptInDBSpeichern(rez);
@@ -1992,8 +1983,8 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        tmpRez = new Rezept(rez);
                    }
                    copyFormToRez1stTime(tmpRez);
-                   logger.debug("Will hash this: " + tmpRez.toString());
-                   logger.debug("And got: " + tmpRez.hashCode() + " whilst old val was: " + hashOfFormVals );
+                   // logger.debug("Will hash this: " + tmpRez.toString());
+                   // logger.debug("And got: " + tmpRez.hashCode() + " whilst old val was: " + hashOfFormVals );
                    if ( hashOfFormVals != tmpRez.hashCode() && askForCancelUsaved() == JOptionPane.NO_OPTION)
                        return;
                }
