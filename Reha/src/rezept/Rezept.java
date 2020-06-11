@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Vector;
 import java.util.function.BiConsumer;
 
@@ -53,8 +54,8 @@ public class Rezept {
     String diagnose;
     
     boolean heimbewohn;
-    LocalDate veraenderd;
-    int veraendera;
+    LocalDate veraenderd;   // suspected dead meat
+    int veraendera;         // suspected dead meat
     boolean logfrei1;
     boolean logfrei2;
     int numfrei1;
@@ -329,7 +330,6 @@ public class Rezept {
      *  2. getField() - will return a String repr. of the bool in the form of "T"/"F"
      *  3. setField() - set field via bool
      */
-    
     
     /**
      * @return the rezNr
@@ -1648,5 +1648,67 @@ public class Rezept {
             return "F";
     }
 
-    
+    /**
+     *  I took lastEdDate and lastEditor out of hashcode, since this would always lead to a changed
+     *   Rezept on check "Do we have changes we want to save before abort" - I would suggest using equals if those vals
+     *   should be included or, rename this meth & create new default
+     *  Also removed veraendera & veraenderd since apparently they ain't being used
+     */
+    @Override
+    public int hashCode() {
+        return Objects.hash(abschluss, aerzte, angelegtVon, anzahl1, anzahl2, anzahl3, anzahl4, anzahlHb, anzahlKM,
+                artDerBeh1, artDerBeh2, artDerBeh3, artDerBeh4, arzt, arztBericht, arztId, barcodeform, befr,
+                begruendADR, berId, charfrei1, charfrei2, dauer, diagnose, disziplin, erfassungsDatum, farbcode,
+                frequenz, hausbes, hbVoll, heimbewohn, icd10, icd10_2, id, indikatSchl, isToBeInserted, jahrfrei, kId,
+                ktraeger, kuerzel1, kuerzel2, kuerzel3, kuerzel4, kuerzel5, kuerzel6, lastDate,
+                logfrei1, logfrei2, numfrei1, numfrei2, patId, patIntern, pauschale, pos1, pos2, pos3, pos4, preise1,
+                preise2, preise3, preise4, preisgruppe, rezBez, rezDatum, rezGeb, rezNr, rezeptArt, rsplit, termine,
+                unter18, zzRegel, zzStatus);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        Rezept other = (Rezept) obj;
+        return abschluss == other.abschluss && Objects.equals(aerzte, other.aerzte)
+                && Objects.equals(angelegtVon, other.angelegtVon) && anzahl1 == other.anzahl1
+                && anzahl2 == other.anzahl2 && anzahl3 == other.anzahl3 && anzahl4 == other.anzahl4
+                && anzahlHb == other.anzahlHb && Objects.equals(anzahlKM, other.anzahlKM)
+                && artDerBeh1 == other.artDerBeh1 && artDerBeh2 == other.artDerBeh2 && artDerBeh3 == other.artDerBeh3
+                && artDerBeh4 == other.artDerBeh4 && Objects.equals(arzt, other.arzt)
+                && arztBericht == other.arztBericht && arztId == other.arztId && barcodeform == other.barcodeform
+                && befr == other.befr && begruendADR == other.begruendADR && berId == other.berId
+                && Objects.equals(charfrei1, other.charfrei1) && Objects.equals(charfrei2, other.charfrei2)
+                && Objects.equals(dauer, other.dauer) && Objects.equals(diagnose, other.diagnose)
+                && disziplin == other.disziplin && Objects.equals(erfassungsDatum, other.erfassungsDatum)
+                && farbcode == other.farbcode && Objects.equals(frequenz, other.frequenz) && hausbes == other.hausbes
+                && hbVoll == other.hbVoll && heimbewohn == other.heimbewohn && Objects.equals(icd10, other.icd10)
+                && Objects.equals(icd10_2, other.icd10_2) && id == other.id
+                && Objects.equals(indikatSchl, other.indikatSchl) && isToBeInserted == other.isToBeInserted
+                && Objects.equals(jahrfrei, other.jahrfrei) && kId == other.kId
+                && Objects.equals(ktraeger, other.ktraeger) && Objects.equals(kuerzel1, other.kuerzel1)
+                && Objects.equals(kuerzel2, other.kuerzel2) && Objects.equals(kuerzel3, other.kuerzel3)
+                && Objects.equals(kuerzel4, other.kuerzel4) && Objects.equals(kuerzel5, other.kuerzel5)
+                && Objects.equals(kuerzel6, other.kuerzel6) && Objects.equals(lastDate, other.lastDate)
+                && Objects.equals(lastEdDate, other.lastEdDate) && Objects.equals(lastEditor, other.lastEditor)
+                && logfrei1 == other.logfrei1 && logfrei2 == other.logfrei2 && numfrei1 == other.numfrei1
+                && numfrei2 == other.numfrei2 && patId == other.patId && patIntern == other.patIntern
+                && pauschale == other.pauschale && Objects.equals(pos1, other.pos1) && Objects.equals(pos2, other.pos2)
+                && Objects.equals(pos3, other.pos3) && Objects.equals(pos4, other.pos4)
+                && Objects.equals(preise1, other.preise1) && Objects.equals(preise2, other.preise2)
+                && Objects.equals(preise3, other.preise3) && Objects.equals(preise4, other.preise4)
+                && preisgruppe == other.preisgruppe && rezBez == other.rezBez
+                && Objects.equals(rezDatum, other.rezDatum) && Objects.equals(rezGeb, other.rezGeb)
+                && Objects.equals(rezNr, other.rezNr) && rezeptArt == other.rezeptArt
+                && Objects.equals(rsplit, other.rsplit) && Objects.equals(termine, other.termine)
+                && unter18 == other.unter18 && veraendera == other.veraendera
+                && Objects.equals(veraenderd, other.veraenderd) && zzRegel == other.zzRegel
+                && zzStatus == other.zzStatus;
+    }
+
 }
