@@ -1656,6 +1656,10 @@ public class Rezept {
         else
             return "F";
     }
+    
+    public void setPauschale(boolean pausch) {
+        pauschale = pausch;
+    }
 
     /**
      *  I took lastEdDate and lastEditor out of hashcode, since this would always lead to a changed
