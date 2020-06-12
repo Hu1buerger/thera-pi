@@ -52,11 +52,14 @@ import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
 import core.Disziplin;
+import environment.LadeProg;
+import environment.Path;
 import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import events.RehaTPEventListener;
 import gui.Cursors;
 import hauptFenster.Reha;
+import hmrCheck.HMRCheck;
 import mandant.Mandant;
 import patientenFenster.ArztAuswahl;
 import patientenFenster.KassenAuswahl;
@@ -158,12 +161,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private Component eingabeICD = null;
     private Component eingabeDiag = null;
     private RehaTPEventClass rtp = null;
-    // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder, Combo-
-    // und Check-Boxen
-    private int hashOfFormVals = 0;
+    
+    private int hashOfFormVals = 0;                         // Used to determine changes & alert upon abort
     private int preisgruppe = -1;
     
     // Copied from orig - should be replace/depr.
+    private Rezept rezTmpRezept = null;
     private boolean neu = false;
     private final JDialog popupDialog = new JDialog();
     private ArztVec verordnenderArzt = null;
@@ -194,7 +197,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
              */
             popupDialog.setAlwaysOnTop(true);
             logger.debug("From Rez: " + rez.toString());
-            // rezMyRezept = new Rezept(rez);
+            // rez = new Rezept(rez);
             verordnenderArzt = new ArztVec();
             // TODO: sets the classmember in Rezeptvector-class for later operations
             diszis = new Disziplinen();
@@ -930,9 +933,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
      * @param thisRezept
      */
     private void copyFormToRez1stTime(Rezept thisRezept) {
-        // TODO: this method needs properly adjusting to Rezept-class
-        logger.debug("AnzahlHB = \"" + jtfANZ1.getText() + "\".");
-        thisRezept.setAnzahlHb(Integer.parseInt(jtfANZ1.getText().trim().isEmpty() ? "0" : jtfANZ1.getText().trim()));
+        logger.debug("AnzahlHM1 = \"" + jtfANZ1.getText() + "\".");
+        // TODO: Why? This will be set in copyFormToRez anyhow...
+        thisRezept.setBehAnzahl1(Integer.parseInt(jtfANZ1.getText().trim().isEmpty() ? "0" : jtfANZ1.getText().trim()));
         copyFormToRez(thisRezept, true);
     }
 
@@ -947,7 +950,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private void copyFormToRez(Rezept thisRezept, boolean withSanity) {
      // TODO: this method needs properly adjusting to Rezept-class
         try {
+            logger.debug("Sanity check: " + withSanity);
             if (withSanity && !komplettTest()) {
+                logger.error("Komplettest nicht bestanden...");
                 return;
             }
             setCursor(Cursors.wartenCursor);
@@ -956,11 +961,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
  
             thisRezept.setKTraegerName(jtfKTRAEG.getText());
             thisRezept.setkId(Integer.parseInt(jtfKASID.getText()));
-            
+            logger.debug("Set KTraeger-Infos");
             // TODO: sort out what really needs to go in here...
             // If we already have 'verordnenderArzt, we actually should use that...
             thisRezept.setArzt((jtfARZT.getText().split(" - "))[0].trim());     // Correct "old" "Arzt - LANR" entries
             thisRezept.setArztId(Integer.parseInt(jtfARZTID.getText()));
+            logger.debug("Set Arzt-Infos");
  
             stest = jtfREZDAT.getText()
                                 .trim();
@@ -1456,8 +1462,8 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                 return;
             }
             if (componentName.equals("icd10")) {
-                String text = jtfICD10.getText();
-                jtfICD10.setText(RezeptFensterTools.chkIcdFormat(text));
+                String text = jtfICD10_1.getText();
+                jtfICD10_1.setText(RezeptFensterTools.chkIcdFormat(text));
                 if (ctrlIsPressed & jumpForward) {
                     eingabeDiag.requestFocusInWindow();
                 }
@@ -1927,7 +1933,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                     JOptionPane.showMessageDialog(popupDialog,
                             "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpa\u00dft.\n"
                             + "Fehlt zuf\u00e4llig die Tabelle adrgenehmigung?");
-                    ex.printStackTrace();
+                    logger.error("Fehler in testeGenehmigung: " + ex.getLocalizedMessage());
                 }
                 return null;
             }
@@ -1959,6 +1965,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        copyFormToRez1stTime(rez);
                        // TODO: clean up neue-RezNr holen
                        Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
+                       logger.debug("tmpDiszi=" + tmpDiszi.toString());
                        if (tmpDiszi != Disziplin.INV) {
                            NummernKreis tmpRZN = new NummernKreis(mand.ik());
                            rez.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
@@ -1980,7 +1987,11 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                    rDto.rezeptInDBSpeichern(rez);
                    
                } catch (Exception ex) {
-                   ex.printStackTrace();
+                   logger.error("Couldn't save Rezept due to: " + ex.getLocalizedMessage());
+                   String fehlerMeldung="<html><b>Achtung!</b><br>Fehler! Konnte Rezept (wahrscheinlich) nicht speichern!<BR/>"
+                                       + "Disziplin: " + Disziplin.valueOf(rezKlasse) + "<BR/>"
+                                       + "RezeptNummer: " + rez.getRezNr() + "<br><br></html>";
+                   JOptionPane.showMessageDialog(popupDialog, fehlerMeldung);
                }
 
            }
@@ -2024,22 +2035,22 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                closeDialog();
                }
            });
-   }
+    }
    
     /**
      *
      */
     private void actionVerordnungsArt() {
-       if (!klassenReady)
-           return;
-       if (jcmbVERORD.getSelectedIndex() == 2) {
-           jcbBEGRADR.setEnabled(true);
-           testeGenehmigung(jtfKASID.getText());
-       } else {
-           jcbBEGRADR.setSelected(false);
-           jcbBEGRADR.setEnabled(false);
-       }
-   }
+        if (!klassenReady)
+            return;
+        if (jcmbVERORD.getSelectedIndex() == 2) {
+            jcbBEGRADR.setEnabled(true);
+            testeGenehmigung(jtfKASID.getText());
+        } else {
+            jcbBEGRADR.setSelected(false);
+            jcbBEGRADR.setEnabled(false);
+        }
+    }
 
     /**
      * 
@@ -2051,28 +2062,21 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                try {
                    boolean icd10falsch = false;
                    int welcherIcd = 0;
-                   if (jtfICD10_1.getText()
-                                  .trim()
-                                  .length() > 0) {
-                       String suchenach = RezeptFensterTools.macheIcdString(jtfICD10_1.getText());
-                       if (SqlInfo.holeEinzelFeld(
-                               "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                  .equals("")) {
+                   String pruefIcd10Text = jtfICD10_1.getText().trim();
+                   if ( pruefIcd10Text.length() > 0) {
+                       if (!pruefeObIcd10GefundenWerdenKann(pruefIcd10Text)) {
                            icd10falsch = true;
                            welcherIcd = 1;
                        }
-                       if (jtfICD10_2.getText()
-                                        .trim()
-                                        .length() > 0) {
-                           suchenach = RezeptFensterTools.macheIcdString(jtfICD10_2.getText());
-                           if (SqlInfo.holeEinzelFeld(
-                                   "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                      .equals("")) {
+                       pruefIcd10Text = jtfICD10_2.getText().trim();
+                       if (pruefIcd10Text.length() > 0) {
+                           if (!pruefeObIcd10GefundenWerdenKann(pruefIcd10Text)) {
                                icd10falsch = true;
                                welcherIcd = 2;
                            }
                        }
-                   } else {
+                   } else {                                                             // min. der 1.ICD10 Code muss
+                                                                                        // vorhanden sein
                        if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
                                                             .get(preisgruppen[getPgIndex()]) == 1) {
                            hmrcheck.setEnabled(true);
@@ -2082,15 +2086,16 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        }
                    }
                    // Lets get the rest up and running first:
-                   // doHmrCheck(icd10falsch, welcherIcd);
-                   logger.debug("This should test HMR with ICD10 Stuff");
+                   if (hmrPreChecks())
+                       doHmrCheck();
+                   
                } catch (Exception ex) {
-                   ex.printStackTrace();
+                   logger.error("Problems in actionDoHMR-Check: " + ex.getLocalizedMessage());;
                }
                return null;
            }
        }.execute();
-   }
+    }
 
     /**
      * 
@@ -2127,7 +2132,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                }
            });
        }
-   }
+    }
 
     /**
      * @param e
@@ -2213,7 +2218,186 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         return Reha.instance.patpanel.aktRezept.tabaktrez.getSelectedRow();
     }
 
+    /**
+     * Do some preliminary HMR-Checks to make sure we actually have enough data to do a HMR-Check
+     * 
+     * @return True if all checks pass - false otherwise
+     */
+    private boolean hmrPreChecks() {
+        if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[getPgIndex()]) == 0) {
+            this.hmrcheck.setEnabled(true);
+            JOptionPane.showMessageDialog(popupDialog, "HMR-Check ist bei diesem Kostentr\u00e4ger nicht erforderlich");
+            return false;
+        }
+        logger.debug("Need to do HMR-Check with this KT");
+        String indi = (String) jcmbINDI.getSelectedItem();
+        if (indi.isEmpty() || indi.contains("kein IndiSchl.")) {
+            JOptionPane.showMessageDialog(popupDialog,
+                    "<html><b>Kein Indikationsschl\u00fcssel angegeben.<br>"
+                    + "Die Angaben sind <font color='#ff0000'>nicht</font> gem\u00e4\u00df "
+                    + "den g\u00fcltigen Heilmittelrichtlinien!</b></html>");
+            logger.error("Indi-Schluessel \"" + indi + "\" ist Muell.");
+            return false;
+        }
+        if (jtfREZDAT.getText().trim()
+                .equals(".  .")) {
+            JOptionPane.showMessageDialog(popupDialog, "Rezeptdatum nicht korrekt angegeben HMR-Check nicht m\u00f6glich");
+            logger.error("Rezdatum: \"" + jtfREZDAT.getText().trim() + "\" kann nicht verwertet werden.");
+            return false;
+        }
+        
+        boolean icd10falsch = false;
+        int welcherIcd = 0;
+        String pruefIcd10Text = jtfICD10_1.getText().trim();
+        if ( pruefIcd10Text.length() > 0) {
+            if (!pruefeObIcd10GefundenWerdenKann(pruefIcd10Text)) {
+                icd10falsch = true;
+                welcherIcd = 1;
+            }
+            pruefIcd10Text = jtfICD10_2.getText().trim();
+            if (pruefIcd10Text.length() > 0) {
+                if (!pruefeObIcd10GefundenWerdenKann(pruefIcd10Text)) {
+                    if (!icd10falsch)
+                        icd10falsch = true;
+                    welcherIcd = 2;
+                }
+            }
+        } else {                                                         // min. der 1. ICD10 Code muss
+                                                                         // vorhanden sein, wenn f. akt. Diszi die pg==1
+            if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
+                                                 .get(preisgruppen[getPgIndex()]) == 1) {
+                hmrcheck.setEnabled(true);
+                JOptionPane.showMessageDialog(popupDialog,
+                        "<html><b><font color='#ff0000'>Kein ICD-10 Code angegeben!</font></b></html>");
+                icd10falsch = true;
+            }
+        }
+        if (icd10falsch) {
+            logger.debug("Fehlerhafte ICD10 Codes entdeckt: " + welcherIcd + ". ICD10-Tool starten?");
+            waehleIcd10(welcherIcd);
+            return false;
+        }
+        logger.debug("Pre-HMR-Checks went fine");
+        return true;
+    }
     
+    private boolean pruefeObIcd10GefundenWerdenKann(String icd10) {
+        String suchenach = RezeptFensterTools.macheIcdString(icd10);
+        if (SqlInfo.holeEinzelFeld(
+                "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
+                   .isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+    
+    private void waehleIcd10(int welcherIcd) {
+        int frage = JOptionPane.showConfirmDialog(popupDialog,
+                "<html><b>Der eingetragene " + Integer.toString(welcherIcd)
+                        + ". ICD-10-Code ist falsch: <font color='#ff0000'>" + (welcherIcd == 1 ? jtfICD10_1.getText()
+                                                                                                          .trim()
+                                : jtfICD10_2.getText()
+                                               .trim())
+                        + "</font></b><br>" + "HMR-Check nicht m\u00f6glich!<br><br>"
+                        + "Wollen Sie jetzt das ICD-10-Tool starten?<br>"
+                        + "(Auch nach einer Korrektur muss der HMR-Check erneut ausgef\u00fchrt werden)<br></html>",
+                "falscher ICD-10", JOptionPane.YES_NO_OPTION);
+        if (frage == JOptionPane.YES_OPTION) {
+            new LadeProg(Path.Instance.getProghome() 
+                    + "ICDSuche.jar" + " " 
+                    + Path.Instance.getProghome() + " "
+                    + mand.ikDigitString());
+        }
+        if (welcherIcd == 1) {
+            jtfICD10_1.setText("");
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    jtfICD10_1.requestFocusInWindow();
+                }
+            });
+        } else if (welcherIcd == 2) {
+            jtfICD10_2.setText("");
+            SwingUtilities.invokeLater(new Runnable() {
+                public void run() {
+                    jtfICD10_2.requestFocusInWindow();
+                }
+            });
+
+        }
+    }
+    
+    private void doHmrCheck() {
+        
+        // System.out.println(SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[jcmb[cRKLASSE].getSelectedIndex()]));
+        int itest = 0; // jcmb[cLEIST1].getSelectedIndex();
+        String indi = (String) jcmbINDI.getSelectedItem();
+        
+        indi = indi.replace(" ", "");
+        List<Integer> anzahlen = new ArrayList<Integer>();
+        List<String> hmPositionen = new ArrayList<String>();
+        
+        JRtaComboBox[] leistungenToTest = new JRtaComboBox[]{ jcmbLEIST1, jcmbLEIST2, jcmbLEIST3, jcmbLEIST4};
+        JRtaTextField[] anzahlenToAdd = new JRtaTextField[] {jtfANZ1, jtfANZ2, jtfANZ3, jtfANZ4};
+        for (int i = 0; i < 4; i++) { // Lemmi Doku: Nacheinander alle 4 Leistungen abfragen und Anzahlen addieren
+            itest = leistungenToTest[i].getSelectedIndex();
+            if (itest > 0) {
+                anzahlen.add(Integer.parseInt(anzahlenToAdd[i].getText()));
+                hmPositionen.add(preisvec.get(itest - 1).get(2));
+            }
+        }
+
+        if (hmPositionen.size() > 0) {
+            logger.debug("HMPos not empty");
+            String letztbeginn = jtfBEGINDAT.getText()
+                                               .trim();
+            if (letztbeginn.equals(".  .")) {
+                logger.debug("Letztmgl. Behandlungsbeg. leer...");
+                // Preisgruppe holen
+                int pg = Integer.parseInt(jtfPREISGR.getText()) - 1;
+                // Frist zwischen Rezeptdatum und erster Behandlung
+                int frist = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktuelleDisziplin)
+                                                                              .get(0)).get(pg);
+                // Kalendertage
+                if ((Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktuelleDisziplin)
+                                                                      .get(1)).get(pg)) {
+                    letztbeginn = DatFunk.sDatPlusTage(jtfREZDAT.getText()
+                                                                   .trim(),
+                            frist);
+                    logger.debug("LetztBegin in somewhere is " + letztbeginn);
+                } else { // Werktage
+                    boolean mitsamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktuelleDisziplin)
+                                                                                           .get(4)).get(pg);
+                    letztbeginn = HMRCheck.hmrLetztesDatum(jtfREZDAT.getText()
+                                                                       .trim(),
+                            (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktuelleDisziplin)
+                                                                              .get(0)).get(pg),
+                            mitsamstag);
+                    logger.debug("LetztBegin in somewhere else is " + letztbeginn);
+                }
+            }
+            // TODO: The following block could be sorted properly
+            rezTmpRezept = new Rezept();
+            if (getInstance().neu) {
+                rezTmpRezept = initRezeptNeu();
+            } else {
+                rezTmpRezept = new Rezept(rez);
+            }
+            copyFormToRez1stTime(rezTmpRezept);
+            boolean checkok = new HMRCheck(rezTmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
+            if (checkok) {
+                JOptionPane.showMessageDialog(popupDialog,
+                        "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> "
+                        + "den geltenden Heilmittelrichtlinien</b></html>");
+            } else {
+                logger.error("Rez not HMR-conform");
+            }
+        } else {
+            JOptionPane.showMessageDialog(popupDialog, "Keine Behandlungspositionen angegeben, "
+                                                + "HMR-Check nicht m\u00f6glich!!!");
+        }
+
+    }
+
     
     private final class Icd10Listener extends MouseAdapter {
         @Override

@@ -137,8 +137,10 @@ public class HMRCheck {
 //        rezdatum = DatFunk.sDatInDeutsch(rezTmpRezept.getRezDatum());
         rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
-        if (reznummer.equals("")) {
+        if (reznummer == null || reznummer.isEmpty()) {
+            logger.debug("Neues Rezept fuer HMR-Check");
             neurezept = true;
+            reznummer = "";                             // Q&D to stop the following check from barfing...
         }
         fehlertext = new FehlerTxt();
     }
@@ -176,7 +178,7 @@ public class HMRCheck {
                 }
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(null,
-                        "Fehler bei der Men genermittlung Podologie-Rezept und Erstverordnung!");
+                        "Fehler bei der Mengenermittlung Podologie-Rezept und Erstverordnung!");
                 return false;
             }
         }

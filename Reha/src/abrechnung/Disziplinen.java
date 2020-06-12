@@ -158,6 +158,10 @@ public class Disziplinen {
         return this.cmbDisziActive;
     }
 
+    /**
+     * Liefert die in der ComboBox gewaehlte Diszi als ganzen String (? Ergotherapi-Rezept ?)
+     * @return
+     */
     public String getCurrDisziFromActRK() {
         return cmbDisziActive.getSelectedItem()
                              .toString();

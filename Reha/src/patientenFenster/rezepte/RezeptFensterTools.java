@@ -2,11 +2,25 @@ package patientenFenster.rezepte;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+
+import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
+import CommonTools.JRtaComboBox;
+import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
+import abrechnung.Disziplinen;
+import environment.LadeProg;
+import environment.Path;
 import hmrCheck.HMRCheck;
+import mandant.Mandant;
+import rezept.Rezept;
 import systemEinstellungen.SystemPreislisten;
 
 public final class RezeptFensterTools {
@@ -37,7 +51,7 @@ public final class RezeptFensterTools {
                         mitsamstag);
             }
         } else {
-            spaetestAnfang =  LocalDate.parse(lastDat, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            spaetestAnfang =  LocalDate.parse(lastDat, DateTimeFormatters.ddMMYYYYmitPunkt);
         }
         return spaetestAnfang;
     }
