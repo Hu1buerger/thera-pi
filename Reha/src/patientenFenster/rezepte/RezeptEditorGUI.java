@@ -79,7 +79,6 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private static final Logger logger = LoggerFactory.getLogger(RezeptEditorGUI.class);
     
     // Keep:
-    private JRtaTextField jtfRezId; // Will we need this?
     private JRtaTextField jtfKTRAEG;
     private JRtaTextField jtfARZT;
     private JRtaTextField jtfREZDAT;
@@ -202,13 +201,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
 
             // TODO: old code also checked vec-size 0-length - can we safely omit it?
             // No - currently if old-vec was NULL, now RezNr. and other members may be NULL
-            logger.debug("Blubb");
             logger.debug("RezNr in constr. is " + rez.getRezNr());
             if (this.neu && rez.getRezNr() != null) {
+                logger.debug("Setting diszi to " + RezTools.getDisziplinFromRezNr(rez.getRezNr()));
                 aktuelleDisziplin = RezTools.getDisziplinFromRezNr(rez.getRezNr()); 
             }
-            logger.debug("Diszi now: " + aktuelleDisziplin);
-
+            
             setName("RezeptNeuanlage");
             rtp = new RehaTPEventClass();
             rtp.addRehaTPEventListener(this);
@@ -250,12 +248,14 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                     }
                 }
             }
-            // logger.debug("Will hash this: " + rez.toString() + " and get: " + rez.hashCode());
+            logger.debug("Will hash this: " + rez.toString() + " and get: " + rez.hashCode());
+            // Lets assume we have copied the rez-content to the form, if we now copy the form back
+            // to the rez, we should have all fields initialized...
+            copyFormToRez(rez, false);
             hashOfFormVals = rez.hashCode();
 
         } catch (Exception ex) {
             logger.error("Fehler im Konstruktor RezeptEditorGUI: " + ex.getLocalizedMessage());
-            logger.error( RezNeuanlage.makeStacktraceToString(ex));
             JOptionPane.showMessageDialog(popupDialog,
                     "Fehler im Konstruktor RezeptEditor: " + ex.getLocalizedMessage());
         }
@@ -713,16 +713,16 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             jscr.getVerticalScrollBar()
                 .setUnitIncrement(15);
 
-            if (this.neu) {
+            if (neu) {
                 // TODO: find a better replacement for isEmpty-check
                 // if (rez.isEmpty()) {
                 if (rez.getPreisGruppe() == -1) {
                     logger.debug("Rezept was determinded to be empty");
-                    initRezeptNeu(rez); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
-                    this.holePreisGruppe(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68)
+                    rez = initRezeptNeu(); // McM:hier myRezept mit Pat-Daten, PG, ... initialisieren
+                    holePreisGruppe(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68)
                                                                         .trim())); // setzt jtfPREISGR u.
                                                                                   // this.preisgruppe
-                    this.ladePreisliste(jcmbRKLASSE.getSelectedItem()
+                    ladePreisliste(jcmbRKLASSE.getSelectedItem()
                                                       .toString()
                                                       .trim(),
                             preisgruppen[getPgIndex()]); // fuellt jcmb[cLEIST1..4] u.
@@ -749,11 +749,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                         }
                         jcmbINDI.setSelectedItem(rez.getIndikatSchl());
                     } catch (Exception ex) {
-                        ex.printStackTrace();
+                        logger.debug("Trouble in editing (a copied?) Rezept - " + ex.getLocalizedMessage());
                     }
 
                 }
             } else {
+                logger.debug("Rezept didn't have new-bool set...");
                 this.holePreisGruppe(rez.getkId());
                 this.ladePreisliste(jcmbRKLASSE.getSelectedItem()
                                                   .toString()
@@ -841,13 +842,13 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         // test = StringTools.NullTest(rez.getArztId());
         jtfARZTID.setText(String.valueOf(rez.getArztId())); // arztid
         // test = StringTools.NullTest(rez.getRezeptDatum());
-        // if (!test.equals("")) {
-            jtfREZDAT.setText(DatFunk.sDatInDeutsch(rez.getRezDatum().toString()));
-        // }
+        if (rez.getRezDatum() != null ) {
+            jtfREZDAT.setText(rez.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt));
+        }
         // test = StringTools.NullTest(rez.getLastdate());
-        // if (!test.equals("")) {
-            jtfBEGINDAT.setText(DatFunk.sDatInDeutsch(rez.getLastDate().toString()));
-        // }
+        if (rez.getLastDate() != null) {
+            jtfBEGINDAT.setText(rez.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt));
+        }
         int itest = rez.getRezeptArt();
         if (itest >= 0) {
             jcmbVERORD.setSelectedIndex(itest);
@@ -858,6 +859,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         jcbVOLLHB.setSelected(rez.isHbVoll());
 
         jcbTBANGEF.setSelected(rez.isArztBericht());
+        
+        jcbHygienePausch.setSelected(rez.usePauschale());
+
         jtfANZ1.setText(Integer.toString(rez.getBehAnzahl1()));
         jtfANZ2.setText(Integer.toString(rez.getBehAnzahl2()));
         jtfANZ3.setText(Integer.toString(rez.getBehAnzahl3()));
@@ -926,20 +930,24 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
      * @param thisRezept
      */
     private void copyFormToRez1stTime(Rezept thisRezept) {
-       // TODO: this method needs properly adjusting to Rezept-class
-       thisRezept.setAnzahlHb(Integer.parseInt(jtfANZ1.getText()));
-       copyFormToRez(thisRezept);
+        // TODO: this method needs properly adjusting to Rezept-class
+        logger.debug("AnzahlHB = \"" + jtfANZ1.getText() + "\".");
+        thisRezept.setAnzahlHb(Integer.parseInt(jtfANZ1.getText().trim().isEmpty() ? "0" : jtfANZ1.getText().trim()));
+        copyFormToRez(thisRezept, true);
     }
 
     /***********
     *
     * laedt die Daten aus den Dialog-Feldern des Rezepts in die Rezept-Instanz
-    * @param thisRezept
+    *  und prueft dabei gewisse Mindestanforderungen und ergaenzt ggf. Felder
+    *  
+    * @param thisRezept will be filled with the data
+    * @param withSanity If true do some sanity-checks & fill in some data
     */
-    private void copyFormToRez(Rezept thisRezept) {
+    private void copyFormToRez(Rezept thisRezept, boolean withSanity) {
      // TODO: this method needs properly adjusting to Rezept-class
         try {
-            if (!komplettTest()) {
+            if (withSanity && !komplettTest()) {
                 return;
             }
             setCursor(Cursors.wartenCursor);
@@ -966,15 +974,16 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
                     String.valueOf(stest), false, Reha.instance.patpanel.rezAktRez);
-            thisRezept.setRezDatum(rezDat);
-            setRezDatInTable(stest);
-            LocalDate stest2 = RezeptFensterTools.chkLastBeginDat(rezDat, jtfBEGINDAT.getText()
-                                                                 .trim(),
-                    jtfPREISGR.getText(), aktuelleDisziplin);
-            setLastDatInTable(stest2);
-            thisRezept.setLastDate(stest2);
-            thisRezept.setLastEdDate(LocalDate.now());
-            thisRezept.setLastEditor(Reha.aktUser);
+            if (withSanity) {
+                    thisRezept.setRezDatum(rezDat);
+                    setRezDatInTable(stest);
+                    LocalDate stest2 = RezeptFensterTools.chkLastBeginDat(rezDat, jtfBEGINDAT.getText().trim(),
+                                                                                   jtfPREISGR.getText(), aktuelleDisziplin);
+                    setLastDatInTable(stest2);
+                    thisRezept.setLastDate(stest2);
+                    thisRezept.setLastEdDate(LocalDate.now());
+                    thisRezept.setLastEditor(Reha.aktUser);
+            }
             thisRezept.setRezeptArt(jcmbVERORD.getSelectedIndex());
             thisRezept.setBegruendADR(jcbBEGRADR.isSelected());
             thisRezept.setHausBesuch(jcbHAUSB.isSelected());
@@ -1024,6 +1033,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             if (jcmbINDI.getSelectedIndex() > 0) {
                 thisRezept.setIndikatSchl((String) jcmbINDI.getSelectedItem());
             } else {
+                // should this really be stored in DB - wouldn't an empty or null be better?
                 thisRezept.setIndikatSchl("kein IndiSchl.");
             }
  
@@ -1174,6 +1184,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             thisRezept.setJahrfrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
                                                                               // (?) (nicht editierbar -> kann in's
                                                                               // 'initRezeptAll')
+            thisRezept.setPauschale(jcbHygienePausch.isSelected() ? true : false);
             // Why is this a text-field?
             thisRezept.setHeimbewohn("T".equals(jtfHEIMBEW.getText())); // dito
             
@@ -1201,6 +1212,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                     "Fehler beim Abspeichern dieses Rezeptes.\n"
                             + "Bitte notieren Sie den Namen des Patienten und die Rezeptnummer\n"
                             + "und informieren Sie umgehend den Administrator");
+            logger.error("Problems copying contents of form to Rezept-Object");
         }
     }
 
@@ -1228,25 +1240,27 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     * initialisiert ein Rezept mit Daten, die immer gesetzt werden muessen
     */
     private void initRezeptAll(Rezept thisRezept) {
-       if (!thisRezept.isKidSet() ) { // eher ein Fall fuer check/speichern!
-           JOptionPane.showMessageDialog(popupDialog,
-                   "Achtung - kann Preisgruppe nicht ermitteln - "
-                   + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
-       }
-
-       if (SystemConfig.AngelegtVonUser) {
-           thisRezept.setAngelegtVon(Reha.aktUser);
-       } else {
-           thisRezept.setAngelegtVon("");
-       }
-       thisRezept.setErfassungsDatum(LocalDate.now());
-
-       thisRezept.setLastEditor(Reha.aktUser);
-       thisRezept.setLastEdDate(LocalDate.now());
-
-       thisRezept.setHeimbewohn("T".equals(Reha.instance.patpanel.patDaten.get(44))); // koennte sich geaendert haben
-       thisRezept.setBefr("T".equals(Reha.instance.patpanel.patDaten.get(30))); // dito
-       thisRezept.setRezBez(false); // kann noch nicht bezahlt sein (Rezeptgebuehr)
+        logger.debug("In init-(4)all");
+        if (!thisRezept.isKidSet() ) { // eher ein Fall fuer check/speichern!
+            JOptionPane.showMessageDialog(popupDialog,
+                    "Achtung - kann Preisgruppe nicht ermitteln - "
+                    + "Rezept kann sp\u00e4ter nicht abgerechnet werden!");
+            logger.error("Could not get Preisgruppe Rez will be invalid");
+        }
+ 
+        if (SystemConfig.AngelegtVonUser) {
+            thisRezept.setAngelegtVon(Reha.aktUser);
+        } else {
+            thisRezept.setAngelegtVon("");
+        }
+        thisRezept.setErfassungsDatum(LocalDate.now());
+ 
+        thisRezept.setLastEditor(Reha.aktUser);
+        thisRezept.setLastEdDate(LocalDate.now());
+ 
+        thisRezept.setHeimbewohn("T".equals(Reha.instance.patpanel.patDaten.get(44))); // koennte sich geaendert haben
+        thisRezept.setBefr("T".equals(Reha.instance.patpanel.patDaten.get(30))); // dito
+        thisRezept.setRezBez(false); // kann noch nicht bezahlt sein (Rezeptgebuehr)
 
     }
 
@@ -1254,20 +1268,30 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     *
     * initialisiert ein leeres Rezept mit Daten aus dem aktuellen Patienten
     */
-    private void initRezeptNeu(Rezept thisRezept) {
-       thisRezept = new Rezept();
+    private Rezept initRezeptNeu() {
+       Rezept thisRezept = new Rezept();
 
+       logger.debug("Created empty Rez");
        thisRezept.setKTraegerName(Reha.instance.patpanel.patDaten.get(13)); // Kasse
        thisRezept.setkId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(68))); // id des Kassen-record
 
        initRezeptAll(thisRezept);
 
-       thisRezept.setArzt(Reha.instance.patpanel.patDaten.get(25)); // Hausarzt als default
        thisRezept.setArztId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(67)));
-       // TODO: check - do I need to filter the "tausender-trennzeichen"?
-       thisRezept.setAnzahlKM(new BigDecimal(Reha.instance.patpanel.patDaten.get(48).replace(".", "")));
+       verordnenderArzt = new ArztVec();
+       verordnenderArzt.init(thisRezept.getArztId());
+       // thisRezept.setArzt(Reha.instance.patpanel.patDaten.get(25)); // Hausarzt als default
+       thisRezept.setArzt(verordnenderArzt.getNName());
+       // logger.debug("Hausarzt assumed");
+       // TODO: check - AnzahlKM is a String in DB - what values/format can we expect here?
+       // logger.debug("Want to set KM as \"" + Reha.instance.patpanel.patDaten.get(48).replace(".", "") + "\"");
+       thisRezept.setAnzahlKM(new BigDecimal(
+               Reha.instance.patpanel.patDaten.get(48).replace(".", "").isEmpty() ? 
+                       "0.00" 
+                       : Reha.instance.patpanel.patDaten.get(48).replace(".", "")));
        thisRezept.setPatId(Integer.parseInt(Reha.instance.patpanel.patDaten.get(66)));
        thisRezept.setPatIntern(Integer.parseInt(Reha.instance.patpanel.patDaten.get(29)));
+       return thisRezept;
        // Barcode
     }
 
@@ -1578,6 +1602,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         try {
             String[] artdbeh = null;
             if (!this.neu && jcmbLEIST1.getItemCount() > 0) {
+                logger.debug("Not new & itemCount > 0");
                 artdbeh = new String[] { String.valueOf(jcmbLEIST1.getValueAt(1)),
                         String.valueOf(jcmbLEIST2.getValueAt(1)), String.valueOf(jcmbLEIST3.getValueAt(1)),
                         String.valueOf(jcmbLEIST4.getValueAt(1)) };
@@ -1619,6 +1644,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                 }
             }
         } catch (Exception ex) {
+            logger.error("Ladepreisliste went bust: " + ex.getLocalizedMessage());
             ex.printStackTrace();
         }
 
@@ -1944,7 +1970,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rez.getRezNr());
                    } else {
                        logger.debug("Not-neu copyForm2Rez");
-                       copyFormToRez(rez);
+                       copyFormToRez(rez, true);
                        logger.debug("Rez is now: " + rez.toString());
                    }
                    closeDialog();
@@ -1980,13 +2006,16 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
            public void run() {
                if ((Boolean) SystemConfig.hmRezeptDlgIni.get("RezAendAbbruchWarn")) {
                    Rezept tmpRez;
+                   /*
                    if (neu) {
                        tmpRez = new Rezept();
                    } else {
                        tmpRez = new Rezept(rez);
                    }
-                   copyFormToRez1stTime(tmpRez);
-                   // logger.debug("Will hash this: " + tmpRez.toString());
+                   */
+                   tmpRez = new Rezept(rez);
+                   copyFormToRez(tmpRez, false);
+                   logger.debug("Will hash this: " + tmpRez.toString());
                    // logger.debug("And got: " + tmpRez.hashCode() + " whilst old val was: " + hashOfFormVals );
                    if ( hashOfFormVals != tmpRez.hashCode() && askForCancelUsaved() == JOptionPane.NO_OPTION)
                        return;

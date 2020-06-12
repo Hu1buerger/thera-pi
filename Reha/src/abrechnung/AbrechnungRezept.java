@@ -117,7 +117,7 @@ import jxTableTools.MyTableComboBox;
 import oOorgTools.OOTools;
 import patientenFenster.KassenAuswahl;
 import patientenFenster.PatUndVOsuchen;
-import patientenFenster.rezepte.RezNeuanlage;
+import patientenFenster.rezepte.RezeptFensterTools;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
@@ -4519,7 +4519,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         // String[] genehmigung = RezNeuanlage.holeLFV("diagnose", "verordn",
         // "rez_nr",aktRezept.getRezNb() ,
         // aktRezept.getVecVec_rez().get(0).get(1).substring(0,2).toUpperCase());
-        String[] genehmigung = RezNeuanlage.holeLFV("diagnose", "verordn", "rez_nr", aktRezept.getRezNb(),
+        String[] genehmigung = RezeptFensterTools.holeLFV("diagnose", "verordn", "rez_nr", aktRezept.getRezNb(),
                 aktRezept.getRezClass());
         String[] skz = { "", "", "", "", "", "", "" };
         if (disziplinGruppe.equals("61") || disziplinGruppe.equals("62")) {

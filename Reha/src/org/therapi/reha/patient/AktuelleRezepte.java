@@ -1,7 +1,6 @@
 package org.therapi.reha.patient;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.MouseInfo;
@@ -87,7 +86,6 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
-import core.Disziplin;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -106,20 +104,19 @@ import krankenKasse.KassenFormulare;
 import mandant.Mandant;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
-import patientenFenster.rezepte.RezNeuanlage;
-import patientenFenster.rezepte.RezNeuanlageGUI;
+// import patientenFenster.rezepte.RezNeuanlage;
 import patientenFenster.rezepte.RezNeuanlagePreDisziCheck;
 import patientenFenster.rezepte.RezTest;
 import patientenFenster.rezepte.RezTestPanel;
 import patientenFenster.rezepte.RezeptEditorGUI;
 import patientenFenster.rezepte.RezeptGebuehren;
 import patientenFenster.rezepte.RezeptVorlage;
+import patientenFenster.rezepte.RezeptFensterTools;
 import rechteTools.Rechte;
 import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
 import rezept.RezeptFertige;
-import rezept.RezeptFertigeDto;
 import rezept.Zuzahlung;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
@@ -2601,7 +2598,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                 .length() > 0) {
                 // fuer die Suche alles entfernen das nicht in der icd10-Tabelle aufgefuehrt sein
                 // kann
-                String suchenach = RezNeuanlage.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10());
+                String suchenach = RezeptFensterTools.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10());
                 // TODO: put following SQL statement in some Dto-class
                 if (SqlInfo.holeEinzelFeld("select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
                            .equals("")) {
@@ -2622,7 +2619,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 if (Reha.instance.patpanel.rezAktRez.getIcd10_2()
                                                     .trim()
                                                     .length() > 0) {
-                    suchenach = RezNeuanlage.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10_2());
+                    suchenach = RezeptFensterTools.macheIcdString(Reha.instance.patpanel.rezAktRez.getIcd10_2());
                     if (SqlInfo.holeEinzelFeld(
                             "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
                                .equals("")) {

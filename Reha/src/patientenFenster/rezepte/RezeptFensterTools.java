@@ -9,7 +9,7 @@ import CommonTools.SqlInfo;
 import hmrCheck.HMRCheck;
 import systemEinstellungen.SystemPreislisten;
 
-final class RezeptFensterTools {
+public final class RezeptFensterTools {
     
     private RezeptFensterTools() {
         // don't try this...
@@ -46,7 +46,7 @@ final class RezeptFensterTools {
     *
     * Test, ob eine Langfristverordnung vorliegt
     */
-   static String[] holeLFV(String hole_feld, String db, String where_feld, String suchen, String voart) {
+   public static String[] holeLFV(String hole_feld, String db, String where_feld, String suchen, String voart) {
        String cmd = "select " + hole_feld + " from " + db + " where " + where_feld + "='" + suchen + "' LIMIT 1";
        String anamnese = SqlInfo.holeEinzelFeld(cmd);
        String[] retstring = { "", "" };
@@ -71,7 +71,7 @@ final class RezeptFensterTools {
        return retstring;
    }
 
-   static String macheIcdString(String string) {
+   public static String macheIcdString(String string) {
        String String1 = string.trim()
                               .substring(0, 1)
                               .toUpperCase();
