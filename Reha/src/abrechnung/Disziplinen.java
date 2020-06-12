@@ -3,10 +3,15 @@ package abrechnung;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import CommonTools.JRtaComboBox;
 import systemEinstellungen.SystemConfig;
 
 public class Disziplinen {
+    private static final Logger logger = LoggerFactory.getLogger(Disziplinen.class);
+    
     private String[] typeOfVerordnung;
     private ArrayList<String> diszis;
     private String[] rezeptKlassen;
@@ -85,7 +90,7 @@ public class Disziplinen {
         if (diszis.size() >= cmbDiszi.getSelectedIndex()) {
             return diszis.get(cmbDiszi.getSelectedIndex());
         } else {
-            System.out.println("getCurrDiszi err: size " + diszis.size() + " vs idx " + cmbDiszi.getSelectedIndex());
+            logger.error("getCurrDiszi err: size " + diszis.size() + " vs idx " + cmbDiszi.getSelectedIndex());
             return diszis.get(0); // use default ("Physio")
         }
     }
@@ -105,7 +110,7 @@ public class Disziplinen {
         if (rezeptKlassen.length >= cmbDiszi.getSelectedIndex()) {
             return rezeptKlassen[cmbDiszi.getSelectedIndex()];
         } else {
-            System.out.println("getCurrDiszi err: size " + diszis.size() + " vs idx " + cmbDiszi.getSelectedIndex());
+            logger.error("getCurrDiszi err: size " + diszis.size() + " vs idx " + cmbDiszi.getSelectedIndex());
             return rezeptKlassen[0]; // use default ("KG")
         }
     }
@@ -200,17 +205,23 @@ public class Disziplinen {
                 return diszis.get(i);
             }
         }
-        System.out.println("getDiszi err: not found: " + typeOfVO + " set " + diszis.get(0) + " as default");
+        logger.error("getDiszi err: not found: " + typeOfVO + " set " + diszis.get(0) + " as default");
         return diszis.get(0); // use default ("Physio")
     }
 
+    /**
+     * Liefert die Rezept-Klasse in Form von z.Bsp. "ER" bei uebergebener VerordnungsTyp z.Bsp. "Ergotherapie-Rezept"
+     * 
+     * @param typeOfVO - Verordnungstyp wie etwa "Ergotherapie-Rezept"
+     * @return Kurzform - wie etwa "ER"
+     */
     public String getRezClass(String typeOfVO) {
         for (int i = 0; i < listTypeOfVO.size(); i++) {
             if (typeOfVO.equalsIgnoreCase(listTypeOfVO.get(i))) {
                 return rezeptKlassen[i];
             }
         }
-        System.out.println("getRezClass err: not found: " + typeOfVO + " set " + rezeptKlassen[0] + " as default");
+        logger.error("getRezClass err: not found: " + typeOfVO + " set " + rezeptKlassen[0] + " as default");
         return rezeptKlassen[0]; // use default ("KG")
     }
 
