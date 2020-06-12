@@ -1984,7 +1984,12 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                    aufraeumen();
                    // ?? automat. HMR-Check ??
                    RezeptDto rDto = new RezeptDto(mand.ik());
-                   rDto.rezeptInDBSpeichern(rez);
+                   if (!rDto.rezeptInDBSpeichern(rez)) {
+                       String fehlerMeldung="<html><b>Achtung!</b><br>Fehler! Konnte Rezept (wahrscheinlich) nicht speichern!<BR/>"
+                               + "Disziplin: " + Disziplin.valueOf(rezKlasse) + "<BR/>"
+                               + "RezeptNummer: " + rez.getRezNr() + "<br><br></html>";
+                       JOptionPane.showMessageDialog(popupDialog, fehlerMeldung);
+                   };
                    
                } catch (Exception ex) {
                    logger.error("Couldn't save Rezept due to: " + ex.getLocalizedMessage());
