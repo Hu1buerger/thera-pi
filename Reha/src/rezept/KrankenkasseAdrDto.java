@@ -272,4 +272,8 @@ public class KrankenkasseAdrDto {
         return temp;
     }
     
+    private String quoteNonNull(Object val) {
+        return (val == null ? "NULL" : "'" + val + "'");
+    }
+
 }
