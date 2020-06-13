@@ -123,7 +123,25 @@ function setFieldsInClass() {
 		[ $DEBUG -gt 1 ] && echo "DEBUG: allups=\"$allups\""
 		[ $DEBUG -gt 1 ] && echo "DEBUG: firstUp=\"$firstUp\""
 		[ $DEBUG -gt 1 ] && echo "DEBUG: type=\"${type}\""
-		echo -ne "case \"$allups\":\n    ret.set${firstUp}(rs.get${type}(field));\n    break;\n"
+		_line="case \"$allups\":\n    ret.set${firstUp}"
+		case "${type}" in
+			int)
+				_line="${_line}(rs.getInt(field));"
+				;;
+			LocalDate)
+				_line="${_line}(rs.getDate(field) == null ? null : rs.getDate(field).toLocalDate());"
+				;;
+			boolean)
+				_line="${_line}(rs.getBoolean(field));"
+				;;
+			String)
+				_line="${_line}(rs.getString(field));"
+				;;
+			*)
+				_line="${_line}(rs.get${type}(field));"
+				;;
+		esac
+		echo -ne "${_line}\n    break;\n"
 		let o++
 	done
 	cat << -EOT
@@ -165,7 +183,31 @@ function saveToDB() {
             fi
         fi
 		
-		echo -ne "+ \"${allups}='\" + dataset.get${firstUp}() + \"'"
+		# echo -ne "+ \"${allups}='\" + dataset.get${firstUp}() + \"'"
+		_line="+ \"${allups}="
+		case "${types[$o]}" in
+			int)
+				_line="${_line}\" + dataset.get${firstUp}() + \""
+				;;
+			String)
+				_line="${_line}\" + quoteNonNull(dataset.get${firstUp}()) + \""
+				;;
+			LocalDate)
+				_line="${_line}\" + quoteNonNull(dataset.get${firstUp}()) + \""
+				;;
+			boolean)
+			# Two versions avail:
+			# The latter will use only the default getter/setter created via Eclipse
+			# The first will use the getBOOLMEMBER() that returns the bool as "T"/"F" String
+			#  (created by this script
+				_line="${_line}'\" + dataset.get${firstUp}() + \"'"
+#				_line="${_line}\" + (dataset.is${firstUp}() ? \"'T'\" : \"'F'\") + \""
+				;;
+			*)
+				_line="${_line}'\" + dataset.get${firstUp}() + \"'"
+				;;
+		esac
+		echo -ne ${_line}
 		[ $o -lt $(( ${#types[@]} - 1 )) ] && echo -ne ","
 		echo -ne "\"\n"
 		let o++
@@ -176,20 +218,73 @@ function saveToDB() {
             Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
             boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
-            logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table $table", e);
+            logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table " + dbName + ".", e);
         }
+    }
+    
+    private String quoteNonNull(Object val) {
+        return (val == null ? "NULL" : "'" + val + "'");
     }
 -EOT
 }
 
 function varsInConstructor() {
-	o=0
+	local o=0
 	for field in $fields
 	do
 		echo "$( guessType $o) $( toLower $field );"
 		let o++
 	done
 }
+
+function extraBools() {
+	local o=0
+	for field in ${fields}
+	do
+		[ $DEBUG -gt 1 ] && echo "DEBUG: check type: ${types[$o]} with o=$o"
+		if [ "A${types[$o]}" != "Aboolean" ]
+		then
+			let o++
+			continue
+		fi
+		_upper="$( toUpper ${field:0:1})${field:1}"
+		cat << -EOT
+	public String get${_upper}() {
+		return (is${_upper}() ? "T" : "F" ); 
+	}	
+-EOT
+		let o++
+	done
+
+}
+
+function dtoHeader() {
+	cat << -EOT
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import mandant.IK;
+import sql.DatenquellenFactory;
+	
+public class ${className}Dto {
+    private static final Logger logger = LoggerFactory.getLogger(${className}Dto.class);
+    
+    private String dbName="${table}";
+    private IK ik;
+    
+    public ${className}Dto(IK Ik) {
+        ik = Ik;
+    }
+
+}
+    
+-EOT
+}
+
 
 if [ $_fromFile -eq 0 ]
 then
@@ -206,6 +301,13 @@ else
 fi
 
 className="$( echo $( toUpper ${table:0:1} )${table:1})"
+echo "Paste the following as Dto-class:"
+echo "----------SNIP----------"
+echo ""
+dtoHeader
+echo ""
+echo "----------SNIP----------"
+echo ""
 echo "Paste the following as \"ofResultSet\" method in Dto-class:"
 echo "----------SNIP----------"
 echo ""
@@ -217,6 +319,13 @@ echo "And paste the following as saveToDB method in Dto-class: "
 echo "----------SNIP----------"
 echo ""
 saveToDB
+echo ""
+echo "----------SNIP----------"
+echo ""
+echo "And paste the following as extra getter/setter in class: "
+echo "----------SNIP----------"
+echo ""
+extraBools
 echo ""
 echo "----------SNIP----------"
 echo ""
