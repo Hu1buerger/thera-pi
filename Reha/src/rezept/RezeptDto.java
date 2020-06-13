@@ -97,6 +97,12 @@ public class RezeptDto {
 
     }
 
+    /**
+     * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
+     * SQL statements can be e.g. <BR/>"update verordn set termine='' where rez_nr='ER1'"<BR/>
+     * In theory even <BR/>"alter table ..."<BR/> should be possible...<BR/>
+     * @param sql - the SQL statement as String
+     */
     private void updateDataset(String sql) {
         Connection conn;
         try {
@@ -143,6 +149,13 @@ public class RezeptDto {
         }
     }
 
+    /**
+     * Transfers a resultset into a Rezept-Object & returns it
+     * 
+     * @param rs - the ResultSet from a db-query containing 1 Rezept
+     * @return a Rezept-Object populated with data from the Resultset
+     * @throws SQLException
+     */
     private Rezept ofResultset(ResultSet rs) throws SQLException {
         Rezept rez = new Rezept();
         rez.patIntern = rs.getInt("PAT_INTERN");
@@ -256,8 +269,55 @@ public class RezeptDto {
         }
     }
 
-    public void rezeptInDBSpeichern(Rezept rez) {
-        String sql = "update " + aktRezDB + " set "
+    /**
+     * Will (try) to save a Rezept to the verordn-table. Will check whether Rezept(-Nr) already exists and if so, update
+     *   otherwise insert.
+     *   
+     * @param rez - the Rezept to save
+     * 
+     * @return true if no error detected otherwise false
+     */
+    public boolean rezeptInDBSpeichern(Rezept rez) {
+        String sql="select id from " + aktRezDB + " where REZ_NR='" + rez.getRezNr() + "'";
+        boolean isNew = false;
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection()) {
+            ResultSet rs = conn.createStatement()
+                    .executeQuery(sql);
+            if (rs.next()) {
+                isNew = false;
+                logger.debug("Rezept will " + rez.getRezNr() + " be updated");
+            } else {
+                isNew = true;
+                logger.debug("Rezept will " + rez.getRezNr() + " be added.");
+            }
+            if (isNew) {
+                sql="insert into " + aktRezDB + " ";
+            } else {
+                sql="update " + aktRezDB + " ";
+            }
+            sql = sql.concat(createFullDataset(rez));
+            if (!isNew)
+                sql = sql.concat(" WHERE REZ_NR='" + rez.getRezNr() + "' LIMIT 1");
+            updateDataset(sql);
+        } catch (SQLException e) {
+            logger.error("Could not save Rezept " + rez.getRezNr() + " to Database", e);
+            return false;
+        }
+        return true;
+        
+    }
+    
+    /**
+     * This will simply return a string setting all fields for an entry in verordn.
+     * The data to be set is taken from a Rezept-Object.
+     * 
+     * @param rez - the Rezept who's values shall be used to create the set statement
+     * 
+     * @return a String containing all fields with the values from the Rezept
+     */
+    private String createFullDataset(Rezept rez) {
+        String sql = "set "
                 + "REZ_NR='" + rez.getRezNr() + "', "
                 + "ID='" + rez.getId() + "', "
                 + "REZEPTART='" + rez.getRezeptArt() + "', "
@@ -278,7 +338,7 @@ public class RezeptDto {
                 + "REZ_BEZ='" + rez.getRezBez() + "', "
                 + "ARZT='" + rez.getArzt() + "', "
                 + "ARZTID='" + rez.getArztId() + "', "
-                + "AERZTE='" + rez.getAerzte() + "', "
+                + "AERZTE=" + dequoteNull(rez.getAerzte()) + ", "
                 + "PREISE1='" + rez.getPreise1() + "', "
                 + "PREISE2='" + rez.getPreise2() + "', "
                 + "PREISE3='" + rez.getPreise3() + "', "
@@ -286,15 +346,16 @@ public class RezeptDto {
                 + "DATUM='" + rez.getErfassungsDatum() + "', "
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
-                + "VERAENDERD=" + (rez.getVeraenderd() == null ? "NULL" : "'" + rez.getVeraenderd() + "'" ) + ", "
+//                + "VERAENDERD=" + rez.getVeraenderd() == null ? "NULL" : "'" + rez.getVeraenderd() + "'" ) + ", "
+                + "VERAENDERD=" + dequoteNull(rez.getVeraenderd()) + ", "
                 + "VERAENDERA='" + rez.getVeraendera() + "', "
                 + "LOGFREI1='" + rez.getLogfrei1() + "', "
                 + "LOGFREI2='" + rez.getLogfrei2() + "', "
                 + "NUMFREI1='" + rez.getNumfrei1() + "', "
                 + "NUMFREI2='" + rez.getNumfrei2() + "', "
-                + "CHARFREI1='" + rez.getCharfrei1() + "', "
-                + "CHARFREI2='" + rez.getCharfrei2() + "', "
-                + "TERMINE='" + rez.getTermine() + "', "
+                + "CHARFREI1=" + dequoteNull(rez.getCharfrei1()) + ", "
+                + "CHARFREI2=" + dequoteNull(rez.getCharfrei2()) + ", "
+                + "TERMINE=" + dequoteNull(rez.getTermine()) + ", "
                 + "KTRAEGER='" + rez.getKTraegerName() + "', "
                 + "KID='" + rez.getkId() + "', "
                 + "ZZSTATUS='" + rez.getZZStatus() + "', "
@@ -316,7 +377,7 @@ public class RezeptDto {
                 + "BERID='" + rez.getBerId() + "', "
                 + "ARZTBERICHT='" + rez.getArztBericht() + "', "
                 + "FARBCODE='" + rez.getFarbcode() + "', "
-                + "RSPLIT='" + rez.getRSplit() + "', "
+                + "RSPLIT=" + dequoteNull(rez.getRSplit()) + ", "
                 + "JAHRFREI='" + rez.getJahrfrei() + "', "
                 + "UNTER18='" + rez.getUnter18() + "', "
                 + "HBVOLL='" + rez.getHbVoll() + "', "
@@ -327,14 +388,26 @@ public class RezeptDto {
                 + "KUERZEL2='" + rez.getHMKuerzel2() + "', "
                 + "KUERZEL3='" + rez.getHMKuerzel3() + "', "
                 + "KUERZEL4='" + rez.getHMKuerzel4() + "', "
-                + "KUERZEL5='" + rez.getHMKuerzel5() + "', "
-                + "KUERZEL6='" + rez.getHMKuerzel6() + "', "
+                + "KUERZEL5=" + dequoteNull(rez.getHMKuerzel5()) + ", "
+                + "KUERZEL6=" + dequoteNull(rez.getHMKuerzel6()) + ", "
                 + "ICD10='" + rez.getIcd10() + "', "
                 + "ICD10_2='" + rez.getIcd10_2() + "', "
-                + "PAUSCHALE='" + rez.getPauschale() + "' "
-         + "WHERE id='" + rez.getId() + "' LIMIT 1";
-        updateDataset(sql);
+                + "PAUSCHALE='" + rez.getPauschale() + "' ";
+        return sql;
         // logger.debug("Ran SQL command: ");
         // logger.debug(sql);
+    }
+    
+    /**
+     * Little helper, since for the DB val='null' != val=NULL.
+     * Should val==null be true, we return a string containing simply NULL,
+     * otherwise we put val in single-quotes to tell DB it can treat val as string.
+     * 
+     * @param val
+     * 
+     * @return
+     */
+    private String dequoteNull(Object val) {
+        return (val == null ? "NULL" : "'" + val + "'");
     }
 }
