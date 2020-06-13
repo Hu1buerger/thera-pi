@@ -866,8 +866,12 @@ public class Rezept {
     /**
      * @return the veraenderd
      */
-    public LocalDate getVeraenderd() {
+    public LocalDate getVeraenderD() {
         return veraenderd;
+    }
+    
+    public void setVeraenderD(LocalDate date) {
+        veraenderd = date;
     }
 
     /**
