@@ -1965,7 +1965,6 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        copyFormToRez1stTime(rez);
                        // TODO: clean up neue-RezNr holen
                        Disziplin tmpDiszi = Disziplin.valueOf(rezKlasse);
-                       logger.debug("tmpDiszi=" + tmpDiszi.toString());
                        if (tmpDiszi != Disziplin.INV) {
                            NummernKreis tmpRZN = new NummernKreis(mand.ik());
                            rez.setRezNr(new Rezeptnummer(tmpDiszi, tmpRZN.nextNumber(tmpDiszi))
@@ -1976,9 +1975,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                        // What's this ?? - better create a call-refresh or something...
                        Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rez.getRezNr());
                    } else {
-                       logger.debug("Not-neu copyForm2Rez");
                        copyFormToRez(rez, true);
-                       logger.debug("Rez is now: " + rez.toString());
                    }
                    closeDialog();
                    aufraeumen();
