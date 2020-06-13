@@ -338,7 +338,7 @@ public class RezeptDto {
                 + "REZ_BEZ='" + rez.getRezBez() + "', "
                 + "ARZT='" + rez.getArzt() + "', "
                 + "ARZTID='" + rez.getArztId() + "', "
-                + "AERZTE=" + dequoteNull(rez.getAerzte()) + ", "
+                + "AERZTE=" + quoteNonNull(rez.getAerzte()) + ", "
                 + "PREISE1='" + rez.getPreise1() + "', "
                 + "PREISE2='" + rez.getPreise2() + "', "
                 + "PREISE3='" + rez.getPreise3() + "', "
@@ -347,15 +347,15 @@ public class RezeptDto {
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
 //                + "VERAENDERD=" + rez.getVeraenderd() == null ? "NULL" : "'" + rez.getVeraenderd() + "'" ) + ", "
-                + "VERAENDERD=" + dequoteNull(rez.getVeraenderd()) + ", "
+                + "VERAENDERD=" + quoteNonNull(rez.getVeraenderD()) + ", "
                 + "VERAENDERA='" + rez.getVeraendera() + "', "
                 + "LOGFREI1='" + rez.getLogfrei1() + "', "
                 + "LOGFREI2='" + rez.getLogfrei2() + "', "
                 + "NUMFREI1='" + rez.getNumfrei1() + "', "
                 + "NUMFREI2='" + rez.getNumfrei2() + "', "
-                + "CHARFREI1=" + dequoteNull(rez.getCharfrei1()) + ", "
-                + "CHARFREI2=" + dequoteNull(rez.getCharfrei2()) + ", "
-                + "TERMINE=" + dequoteNull(rez.getTermine()) + ", "
+                + "CHARFREI1=" + quoteNonNull(rez.getCharfrei1()) + ", "
+                + "CHARFREI2=" + quoteNonNull(rez.getCharfrei2()) + ", "
+                + "TERMINE=" + quoteNonNull(rez.getTermine()) + ", "
                 + "KTRAEGER='" + rez.getKTraegerName() + "', "
                 + "KID='" + rez.getkId() + "', "
                 + "ZZSTATUS='" + rez.getZZStatus() + "', "
@@ -377,7 +377,7 @@ public class RezeptDto {
                 + "BERID='" + rez.getBerId() + "', "
                 + "ARZTBERICHT='" + rez.getArztBericht() + "', "
                 + "FARBCODE='" + rez.getFarbcode() + "', "
-                + "RSPLIT=" + dequoteNull(rez.getRSplit()) + ", "
+                + "RSPLIT=" + quoteNonNull(rez.getRSplit()) + ", "
                 + "JAHRFREI='" + rez.getJahrfrei() + "', "
                 + "UNTER18='" + rez.getUnter18() + "', "
                 + "HBVOLL='" + rez.getHbVoll() + "', "
@@ -388,8 +388,8 @@ public class RezeptDto {
                 + "KUERZEL2='" + rez.getHMKuerzel2() + "', "
                 + "KUERZEL3='" + rez.getHMKuerzel3() + "', "
                 + "KUERZEL4='" + rez.getHMKuerzel4() + "', "
-                + "KUERZEL5=" + dequoteNull(rez.getHMKuerzel5()) + ", "
-                + "KUERZEL6=" + dequoteNull(rez.getHMKuerzel6()) + ", "
+                + "KUERZEL5=" + quoteNonNull(rez.getHMKuerzel5()) + ", "
+                + "KUERZEL6=" + quoteNonNull(rez.getHMKuerzel6()) + ", "
                 + "ICD10='" + rez.getIcd10() + "', "
                 + "ICD10_2='" + rez.getIcd10_2() + "', "
                 + "PAUSCHALE='" + rez.getPauschale() + "' ";
@@ -407,7 +407,7 @@ public class RezeptDto {
      * 
      * @return
      */
-    private String dequoteNull(Object val) {
+    private String quoteNonNull(Object val) {
         return (val == null ? "NULL" : "'" + val + "'");
     }
 }
