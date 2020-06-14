@@ -472,7 +472,7 @@ public class RezeptDto {
     }
     
     //@Visible for Testing
-    int countAktuelleRezepte() {
+    int countAlleEintraege() {
         String sql="select count(id) from " + aktRezDB;
         int anzahl = 0;
         try (Connection conn = new DatenquellenFactory(ik.digitString())

@@ -35,15 +35,15 @@ public class RezeptDtoTest {
     
     @Test
     public void rezAvailable() {
-        assertTrue(rezDto.countAktuelleRezepte() > 0);
+        assertTrue(rezDto.countAlleEintraege() > 0);
     }
     
     @Test
     public void saveEmptyRezept() {
         Rezept rez = new Rezept();
-        int anzRezB4Test = rezDto.countAktuelleRezepte();
+        int anzRezB4Test = rezDto.countAlleEintraege();
         assertFalse(rezDto.rezeptInDBSpeichern(rez));
-        assertTrue(anzRezB4Test == rezDto.countAktuelleRezepte());
+        assertTrue(anzRezB4Test == rezDto.countAlleEintraege());
     }
 
 }

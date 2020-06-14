@@ -20,8 +20,9 @@ import sql.DatenquellenFactory;
  * - a new home
  * - new methods 
  *      - retrieve full dataset         DONE
- *      - save current okbject to DB    DONE
+ *      - save current object to DB     DONE
  *      - some other stuff I currently can't think of
+ *          - save as update or insert-into DONE
  *      
  */
 public class KrankenkasseAdrDto {
@@ -29,6 +30,8 @@ public class KrankenkasseAdrDto {
     
     private IK ik;
     private static final String dbName = "kass_adr";
+    // FIXME: set the following value to something like "REZ_NR" or whatever makes the most sense...
+    private static final String mainIdentifier="IK_KASSE";  // In this case, maybe ID would actually work as well...
     private static final String selectAllWhere = "select * from " + dbName + " where ";
     
     public KrankenkasseAdrDto(IK Ik) {
@@ -71,6 +74,25 @@ public class KrankenkasseAdrDto {
         sql = sql.concat(" from " + dbName + " where id='" + id + "'");
  
         return retrieveFirst(sql);
+    }
+    
+    /**
+     * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
+     * SQL statements can be e.g. <BR/>"update verordn set termine='' where rez_nr='ER1'"<BR/>
+     * In theory even <BR/>"alter table ..."<BR/> should be possible...<BR/>
+     * @param sql - the SQL statement as String
+     */
+    private void updateDataset(String sql) {
+        Connection conn;
+        try {
+            conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = conn.createStatement().execute(sql);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            logger.error("In updateDataset:");
+            logger.error(e.getLocalizedMessage());
+            logger.error("SQL-Statement was: '" + sql + "'");
+        }
     }
     
     private Optional<KrankenkasseAdr> retrieveFirst(String sql) {
@@ -210,48 +232,90 @@ public class KrankenkasseAdrDto {
         return ret;
     }
 
-    public void saveToDB(KrankenkasseAdr kka) {
-        String sql = "insert into " + dbName + " set "
-            + "KUERZEL='" + kka.getKuerzel() + "',"
-            + "PREISGRUPPE='" + kka.getPreisgruppe() + "',"
-            + "KASSEN_NAM1='" + kka.getKassenNam1() + "',"
-            + "KASSEN_NAM2='" + kka.getKassenNam2() + "',"
-            + "STRASSE='" + kka.getStrasse() + "',"
-            + "PLZ='" + kka.getPlz() + "',"
-            + "ORT='" + kka.getOrt() + "',"
-            + "POSTFACH='" + kka.getPostfach() + "',"
-            + "FAX='" + kka.getFax() + "',"
-            + "TELEFON='" + kka.getTelefon() + "',"
-            + "IK_NUM='" + kka.getIkNum() + "',"
-            + "KV_NUMMER='" + kka.getKvNummer() + "',"
-            + "MATCHCODE='" + kka.getMatchcode() + "',"
-            + "KMEMO='" + kka.getKMemo() + "',"
-            + "RECHNUNG='" + kka.getRechnung() + "',"
-            + "IK_KASSE='" + kka.getIkKasse() + "',"
-            + "IK_PHYSIKA='" + kka.getIkPhysika() + "',"
-            + "IK_NUTZER='" + kka.getIkNutzer() + "',"
-            + "IK_KOSTENT='" + kka.getIkKostenTraeger() + "',"
-            + "IK_KVKARTE='" + kka.getIkKvKarte() + "',"
-            + "IK_PAPIER='" + kka.getIkPapier() + "',"
-            + "EMAIL1='" + kka.getEmail1() + "',"
-            + "EMAIL2='" + kka.getEmail2() + "',"
-            + "EMAIL3='" + kka.getEmail3() + "',"
-            + "ID='" + kka.getId() + "',"
-            + "HMRABRECHNUNG='" + kka.getHmrAbrechnung() + "',"
-            + "PGKG='" + kka.getPgKg() + "',"
-            + "PGMA='" + kka.getPgMa() + "',"
-            + "PGER='" + kka.getPgEr() + "',"
-            + "PGLO='" + kka.getPgLo() + "',"
-            + "PGRH='" + kka.getPgRh() + "',"
-            + "PGPO='" + kka.getPgPo() + "',"
-            + "PGRS='" + kka.getPgRs() + "',"
-            + "PGFT='" + kka.getPgFt() + "'";
-        try {
-            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
-            boolean rs = conn.createStatement().execute(sql);
+    public boolean saveToDB(KrankenkasseAdr dataset) {
+        // FIXME: set appropriate getter to match mainIdentifier
+        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.getIkKasse().digitString() + "'";
+        boolean isNew = false;
+        
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection()) {
+            // FIXME: set appropriate getter to match mainIdentifier
+            if ( dataset.getIkKasse() != null && dataset.getIkKasse().isValid()) {
+            
+                ResultSet rs = conn.createStatement()
+                        .executeQuery(sql);
+                if (rs.next()) {
+                    isNew = false;
+                    // FIXME: set appropriate getter to match mainIdentifier
+                    logger.debug("Kass_adr will " + dataset.getIkKasse() + " be updated");
+                } else {
+                    isNew = true;
+                    // FIXME: set appropriate getter to match mainIdentifier
+                    logger.debug("Kass_adr will " + dataset.getIkKasse() + " be added.");
+                }
+            } else {
+                logger.error("Given " + mainIdentifier + " was empty or Null - this shouldn't happen - get " + mainIdentifier + " before saving it");
+                return false;
+            }
+            if (isNew) {
+                sql="insert into " + dbName + " ";
+            } else {
+                sql="update " + dbName + " ";
+            }
+            sql = sql.concat(createFullDataset(dataset));
+            if (!isNew)
+                // FIXME: set appropriate getter to match mainIdentifier
+                sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.getIkKasse().digitString() + "' LIMIT 1");
+            updateDataset(sql);
         } catch (SQLException e) {
-            logger.error("Could not save Krankenkasse Adresse " + kka.toString() + " to Database", e);
+            // FIXME: set appropriate getter to match mainIdentifier
+            logger.error("Could not save Kass_adr " + dataset.getIkKasse() + " to Database", e);
+            logger.error("SQL-Statement: " + sql);
+            return false;
         }
+        return true;
+
+    }
+        
+    private String createFullDataset(KrankenkasseAdr dataset) {
+        String sql = "set "
+                    + "KUERZEL=" + quoteNonNull(dataset.getKuerzel()) + ","
+                    + "PREISGRUPPE=" + dataset.getPreisgruppe() + ","
+                    + "KASSEN_NAM1=" + quoteNonNull(dataset.getKassenNam1()) + ","
+                    + "KASSEN_NAM2=" + quoteNonNull(dataset.getKassenNam2()) + ","
+                    + "STRASSE=" + quoteNonNull(dataset.getStrasse()) + ","
+                    + "PLZ=" + quoteNonNull(dataset.getPlz()) + ","
+                    + "ORT=" + quoteNonNull(dataset.getOrt()) + ","
+                    + "POSTFACH=" + quoteNonNull(dataset.getPostfach()) + ","
+                    + "FAX=" + quoteNonNull(dataset.getFax()) + ","
+                    + "TELEFON=" + quoteNonNull(dataset.getTelefon()) + ","
+                    + "IK_NUM=" + quoteNonNull(dataset.getIkNum()) + ","
+                    + "KV_NUMMER=" + quoteNonNull(dataset.getKvNummer()) + ","
+                    + "MATCHCODE=" + quoteNonNull(dataset.getMatchcode()) + ","
+                    + "KMEMO=" + quoteNonNull(dataset.getKMemo()) + ","
+                    + "RECHNUNG=" + quoteNonNull(dataset.getRechnung()) + ","
+                    + "IK_KASSE=" + quoteNonNull(dataset.getIkKasse().digitString()) + ","
+                    + "IK_PHYSIKA=" + quoteNonNull(dataset.getIkPhysika().digitString()) + ","
+                    + "IK_NUTZER=" + quoteNonNull(dataset.getIkNutzer().digitString()) + ","
+                    + "IK_KOSTENT=" + quoteNonNull(dataset.getIkKostenTraeger().digitString()) + ","
+                    + "IK_KVKARTE=" + quoteNonNull(dataset.getIkKvKarte().digitString()) + ","
+                    + "IK_PAPIER=" + quoteNonNull(dataset.getIkPapier().digitString()) + ","
+                    + "EMAIL1=" + quoteNonNull(dataset.getEmail1()) + ","
+                    + "EMAIL2=" + quoteNonNull(dataset.getEmail2()) + ","
+                    + "EMAIL3=" + quoteNonNull(dataset.getEmail3()) + ","
+                    + "HMRABRECHNUNG=" + quoteNonNull(dataset.getHmrAbrechnung()) + ","   // DB wants this field non-null
+                                                                                          //  so, we shouldn't need to put
+                                                                                          // an unquoted null - but if we
+                                                                                          // do ntl, we'll have a fail-fast
+                    + "PGKG=" + quoteNonNull(dataset.getPgKg()) + ","     // These are all int in class, but String in
+                    + "PGMA=" + quoteNonNull(dataset.getPgMa()) + ","     // DB - we'll quote them to store them as
+                    + "PGER=" + quoteNonNull(dataset.getPgEr()) + ","     // strings....
+                    + "PGLO=" + quoteNonNull(dataset.getPgLo()) + ","
+                    + "PGRH=" + quoteNonNull(dataset.getPgRh()) + ","
+                    + "PGPO=" + quoteNonNull(dataset.getPgPo()) + ","
+                    + "PGRS=" + quoteNonNull(dataset.getPgRs()) + ","
+                    + "PGFT=" + quoteNonNull(dataset.getPgFt()) ;
+        return sql;
     }
     
     /**
@@ -276,4 +340,23 @@ public class KrankenkasseAdrDto {
         return (val == null ? "NULL" : "'" + val + "'");
     }
 
+    //@Visible for Testing
+    int countAlleEintraege() {
+        String sql="select count(id) from " + dbName;
+        int anzahl = 0;
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection();
+
+            ResultSet rs = conn.createStatement()
+                                                .executeQuery(sql)) {
+                if (rs.next()) {
+                    anzahl = rs.getInt(1);
+                }
+        } catch (SQLException e) {
+            logger.error("could not count entries in Database " + dbName, e);
+        }
+        
+        return anzahl;
+    }
+    
 }

@@ -286,6 +286,25 @@ EOT
     private String quoteNonNull(Object val) {
         return (val == null ? "NULL" : "'" + val + "'");
     }
+    
+    //@Visible for Testing
+    int countAlleEintraege() {
+        String sql="select count(id) from " + dbName;
+        int anzahl = 0;
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection();
+
+            ResultSet rs = conn.createStatement()
+                                                .executeQuery(sql)) {
+                if (rs.next()) {
+                    anzahl = rs.getInt(1);
+                }
+        } catch (SQLException e) {
+            logger.error("could not count entries in Database " + dbName, e);
+        }
+        
+        return anzahl;
+    }
 EOT
 }
 
