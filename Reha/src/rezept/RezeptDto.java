@@ -115,8 +115,8 @@ public class RezeptDto {
      * @param TerminListe
      */
     public void updateRezeptTermine(int Id, String TerminListe) {
-        String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
-                    + "' WHERE id ='" + Id + "' LIMIT 1";
+        String sql = "UPDATE " + aktRezDB + " SET termine=" + quoteNonNull(TerminListe)
+                    + " WHERE id ='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
 
@@ -376,7 +376,8 @@ public class RezeptDto {
     private String createFullDataset(Rezept rez) {
         String sql = "set "
                 + "REZ_NR='" + rez.getRezNr() + "', "
-                + "ID='" + rez.getId() + "', "
+ //               + "ID='" + rez.getId() + "', "                  // Do we really want this? on insert it should create one,
+                                                                //   on update it shouldn't change...
                 + "REZEPTART='" + rez.getRezeptArt() + "', "
                 + "REZ_DATUM='" + rez.getRezDatum() + "', "
                 + "PAT_INTERN='" + rez.getPatIntern() + "', "
