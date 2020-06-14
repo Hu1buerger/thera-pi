@@ -51,7 +51,7 @@ ci_test:
   script:
     - apt-get -y install mariadb-client
     - cat Files/sql/AlleTabellen.sql | mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi
-    - for sqlFile in Files/tests/resources/sql/*.sql;do cat "${sqlFile}" |mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi ;done
+    - for sqlFile in Files/tests/resources/sql/*.sql;do echo "Importing ${sqlFile}"; cat "${sqlFile}" |mysql -u $MYSQL_USER -h mariadb --password="$MYSQL_PASSWORD" therapi ;done
     - cd Build
     - ant JUnits
   artifacts:
