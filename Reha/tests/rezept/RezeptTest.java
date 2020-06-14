@@ -49,6 +49,7 @@ public class RezeptTest {
         //      - would we still like them to be same?)
         assertTrue(rez.equals(new Rezept(rez)));
         assertTrue(rez.hashCode() == (new Rezept(rez)).hashCode());
+        assertFalse(rez.equals(new Rezept()));
     }
     
     /**
