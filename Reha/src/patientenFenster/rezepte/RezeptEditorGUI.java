@@ -146,9 +146,8 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private JLabel labArzt;
     private JLabel labArztLANr;
     private JLabel labArztChanged;      // Wird beim Einlesen eines Rez. festgestellt,
-                                        //  das der Arzt im Rez != verordnArzt.getNachname() ist, wird das hierrueber dem Benutzer
-                                        //  kenntlich gemacht.
-    
+                                        //  das der Arzt im Rez != verordnArzt.getNachname() ist,
+                                        //  wird das hierrueber dem Benutzer kenntlich gemacht.
     private Mandant mand = null;
     private Rezept rez;
     
