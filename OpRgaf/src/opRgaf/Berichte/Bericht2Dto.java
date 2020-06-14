@@ -15,12 +15,34 @@ public class Bericht2Dto {
     private static final Logger logger = LoggerFactory.getLogger(Bericht2Dto.class);
     
     private static final String dbName="bericht2";
+    // FIXME: set the following value to something like "REZ_NR" or whatever makes the most sense...
+    private static final String mainIdentifier="BNR";
     private IK ik;
     
     public Bericht2Dto(IK Ik) {
         ik = Ik;
     }
 
+    /**
+     * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
+     * SQL statements can be e.g. <BR/>"update verordn set termine='' where rez_nr='ER1'"<BR/>
+     * In theory even <BR/>"alter table ..."<BR/> should be possible...<BR/>
+     * @param sql - the SQL statement as String
+     */
+    private void updateDataset(String sql) {
+        Connection conn;
+        try {
+            conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = conn.createStatement().execute(sql);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            logger.error("In updateDataset:");
+            logger.error(e.getLocalizedMessage());
+            logger.error("SQL-Statement was: '" + sql + "'");
+        }
+    }
+
+    
     private Bericht2 ofResultset(ResultSet rs) {
         Bericht2 ret = new Bericht2();
         
@@ -36,6 +58,7 @@ public class Bericht2Dto {
                 String field = meta.getColumnLabel(o).toUpperCase();
                 // logger.debug("Checking: " + field + " in " + o);
                 switch (field) {
+
                     case "PAT_INTERN":
                         ret.setPatIntern(rs.getString(field));
                         break;
@@ -487,13 +510,13 @@ public class Bericht2Dto {
                         ret.setTaz25(rs.getString(field));
                         break;
                     case "LSEITE1":
-                        ret.setLseite1(rs.getString(field) == null ? null : "T".equals(rs.getString(field)));
+                        ret.setLseite1("T".equals(rs.getString(field)));
                         break;
                     case "LSEITE3":
-                        ret.setLseite3(rs.getString(field) == null ? null : "T".equals(rs.getString(field)));
+                        ret.setLseite3("T".equals(rs.getString(field)));
                         break;
                     case "LSEITE4":
-                        ret.setLseite4(rs.getString(field) == null ? null : "T".equals(rs.getString(field)));
+                        ret.setLseite4("T".equals(rs.getString(field)));
                         break;
                     case "AIGR":
                         ret.setAigr(rs.getString(field));
@@ -522,8 +545,8 @@ public class Bericht2Dto {
                     case "DIAG6":
                         ret.setDiag6(rs.getString(field));
                         break;
-                default:
-                    logger.error("Unhandled field in " + dbName + " found: " + meta.getColumnLabel(o) + " at pos: " + o);
+                    default:
+                        logger.error("Unhandled field in " + dbName + " found: " + meta.getColumnLabel(o) + " at pos: " + o);
                 };
             }
         } catch (SQLException e) {
@@ -535,175 +558,211 @@ public class Bericht2Dto {
         return ret;
     }
 
-    public void saveToDB(Bericht2 dataset) {
-        String sql = "insert into " + dbName + " set "
-                        + "PAT_INTERN=" + quoteNonNull(dataset.getPatIntern()) + ","
-                        + "BERICHTID=" + dataset.getBerichtId() + ","
-                        + "VNUMMER=" + quoteNonNull(dataset.getvNummer()) + ","
-                        + "NAMEVOR=" + quoteNonNull(dataset.getNameVor()) + ","
-                        + "GEBOREN=" + quoteNonNull(dataset.getGeboren()) + ","
-                        + "STRASSE=" + quoteNonNull(dataset.getStrasse()) + ","
-                        + "PLZ=" + quoteNonNull(dataset.getPlz()) + ","
-                        + "ORT=" + quoteNonNull(dataset.getOrt()) + ","
-                        + "VNAMEVO=" + quoteNonNull(dataset.getvNameVo()) + ","
-                        + "MSNR=" + quoteNonNull(dataset.getMsnr()) + ","
-                        + "BNR=" + quoteNonNull(dataset.getBnr()) + ","
-                        + "AUFDAT1=" + quoteNonNull(dataset.getAufDat1()) + ","
-                        + "ENTDAT1=" + quoteNonNull(dataset.getEntDat1()) + ","
-                        + "AUFDAT2=" + quoteNonNull(dataset.getAufDat2()) + ","
-                        + "ENTDAT2=" + quoteNonNull(dataset.getEntDat2()) + ","
-                        + "AUFDAT3=" + quoteNonNull(dataset.getAufDat3()) + ","
-                        + "ENTDAT3=" + quoteNonNull(dataset.getEntDat3()) + ","
-                        + "ENTFORM=" + quoteNonNull(dataset.getEntform()) + ","
-                        + "ARBFAE=" + quoteNonNull(dataset.getArbfae()) + ","
-                        + "DIAG1=" + quoteNonNull(dataset.getDiag1()) + ","
-                        + "F_74=" + quoteNonNull(dataset.getF74()) + ","
-                        + "F_79=" + quoteNonNull(dataset.getF79()) + ","
-                        + "F_80=" + quoteNonNull(dataset.getF80()) + ","
-                        + "F_81=" + quoteNonNull(dataset.getF81()) + ","
-                        + "DIAG2=" + quoteNonNull(dataset.getDiag2()) + ","
-                        + "F_82=" + quoteNonNull(dataset.getF82()) + ","
-                        + "F_87=" + quoteNonNull(dataset.getF87()) + ","
-                        + "F_88=" + quoteNonNull(dataset.getF88()) + ","
-                        + "F_89=" + quoteNonNull(dataset.getF89()) + ","
-                        + "DIAG3=" + quoteNonNull(dataset.getDiag3()) + ","
-                        + "F_90=" + quoteNonNull(dataset.getF90()) + ","
-                        + "F_95=" + quoteNonNull(dataset.getF95()) + ","
-                        + "F_96=" + quoteNonNull(dataset.getF96()) + ","
-                        + "F_97=" + quoteNonNull(dataset.getF97()) + ","
-                        + "DIAG4=" + quoteNonNull(dataset.getDiag4()) + ","
-                        + "F_98=" + quoteNonNull(dataset.getF98()) + ","
-                        + "F_103=" + quoteNonNull(dataset.getF103()) + ","
-                        + "F_104=" + quoteNonNull(dataset.getF104()) + ","
-                        + "F_105=" + quoteNonNull(dataset.getF105()) + ","
-                        + "DIAG5=" + quoteNonNull(dataset.getDiag5()) + ","
-                        + "F_106=" + quoteNonNull(dataset.getF106()) + ","
-                        + "F_111=" + quoteNonNull(dataset.getF111()) + ","
-                        + "F_112=" + quoteNonNull(dataset.getF112()) + ","
-                        + "F_113=" + quoteNonNull(dataset.getF113()) + ","
-                        + "F_114=" + quoteNonNull(dataset.getF114()) + ","
-                        + "F_117=" + quoteNonNull(dataset.getF117()) + ","
-                        + "F_120=" + quoteNonNull(dataset.getF120()) + ","
-                        + "F_123=" + quoteNonNull(dataset.getF123()) + ","
-                        + "F_124=" + quoteNonNull(dataset.getF124()) + ","
-                        + "F_125=" + quoteNonNull(dataset.getF125()) + ","
-                        + "F_126=" + quoteNonNull(dataset.getF126()) + ","
-                        + "F_127=" + quoteNonNull(dataset.getF127()) + ","
-                        + "F_128=" + quoteNonNull(dataset.getF128()) + ","
-                        + "F_129=" + quoteNonNull(dataset.getF129()) + ","
-                        + "F_130=" + quoteNonNull(dataset.getF130()) + ","
-                        + "F_131=" + quoteNonNull(dataset.getF131()) + ","
-                        + "F_132=" + quoteNonNull(dataset.getF132()) + ","
-                        + "F_133=" + quoteNonNull(dataset.getF133()) + ","
-                        + "F_134=" + quoteNonNull(dataset.getF134()) + ","
-                        + "F_135=" + quoteNonNull(dataset.getF135()) + ","
-                        + "F_136=" + quoteNonNull(dataset.getF136()) + ","
-                        + "F_137=" + quoteNonNull(dataset.getF137()) + ","
-                        + "F_138=" + quoteNonNull(dataset.getF138()) + ","
-                        + "F_139=" + quoteNonNull(dataset.getF139()) + ","
-                        + "F_140=" + quoteNonNull(dataset.getF140()) + ","
-                        + "F_141=" + quoteNonNull(dataset.getF141()) + ","
-                        + "ERLAEUT=" + quoteNonNull(dataset.getErlaeut()) + ","
-                        + "LMEDIKAT=" + quoteNonNull(dataset.getLmedikat()) + ","
-                        + "TAET=" + quoteNonNull(dataset.getTaet()) + ","
-                        + "BKS=" + quoteNonNull(dataset.getBks()) + ","
-                        + "F_153=" + quoteNonNull(dataset.getF153()) + ","
-                        + "F_154=" + quoteNonNull(dataset.getF154()) + ","
-                        + "F_156=" + quoteNonNull(dataset.getF156()) + ","
-                        + "F_157=" + quoteNonNull(dataset.getF157()) + ","
-                        + "F_158=" + quoteNonNull(dataset.getF158()) + ","
-                        + "F_159=" + quoteNonNull(dataset.getF159()) + ","
-                        + "F_160=" + quoteNonNull(dataset.getF160()) + ","
-                        + "F_161=" + quoteNonNull(dataset.getF161()) + ","
-                        + "F_162=" + quoteNonNull(dataset.getF162()) + ","
-                        + "F_163=" + quoteNonNull(dataset.getF163()) + ","
-                        + "F_164=" + quoteNonNull(dataset.getF164()) + ","
-                        + "F_165=" + quoteNonNull(dataset.getF165()) + ","
-                        + "F_166=" + quoteNonNull(dataset.getF166()) + ","
-                        + "F_167=" + quoteNonNull(dataset.getF167()) + ","
-                        + "F_168=" + quoteNonNull(dataset.getF168()) + ","
-                        + "F_169=" + quoteNonNull(dataset.getF169()) + ","
-                        + "F_170=" + quoteNonNull(dataset.getF170()) + ","
-                        + "F_171=" + quoteNonNull(dataset.getF171()) + ","
-                        + "F_172=" + quoteNonNull(dataset.getF172()) + ","
-                        + "F_173=" + quoteNonNull(dataset.getF173()) + ","
-                        + "F_174=" + quoteNonNull(dataset.getF174()) + ","
-                        + "F_175=" + quoteNonNull(dataset.getF175()) + ","
-                        + "F_176=" + quoteNonNull(dataset.getF176()) + ","
-                        + "F_177=" + quoteNonNull(dataset.getF177()) + ","
-                        + "LEISTBI=" + quoteNonNull(dataset.getLeistbi()) + ","
-                        + "F_178=" + quoteNonNull(dataset.getF178()) + ","
-                        + "F_179=" + quoteNonNull(dataset.getF179()) + ","
-                        + "F_181=" + quoteNonNull(dataset.getF181()) + ","
-                        + "TERLEUT=" + quoteNonNull(dataset.getTerleut()) + ","
-                        + "FREITEXT=" + quoteNonNull(dataset.getFreitext()) + ","
-                        + "TMA1=" + dataset.getTma1() + ","
-                        + "TMA2=" + dataset.getTma2() + ","
-                        + "TMA3=" + dataset.getTma3() + ","
-                        + "TMA4=" + dataset.getTma4() + ","
-                        + "TMA5=" + dataset.getTma5() + ","
-                        + "TMA6=" + dataset.getTma6() + ","
-                        + "TMA7=" + dataset.getTma7() + ","
-                        + "TMA8=" + dataset.getTma8() + ","
-                        + "TMA9=" + dataset.getTma9() + ","
-                        + "TMA10=" + dataset.getTma10() + ","
-                        + "TMA11=" + dataset.getTma11() + ","
-                        + "TMA12=" + dataset.getTma12() + ","
-                        + "TMA13=" + dataset.getTma13() + ","
-                        + "TMA14=" + dataset.getTma14() + ","
-                        + "TMA15=" + dataset.getTma15() + ","
-                        + "TMA16=" + dataset.getTma16() + ","
-                        + "TMA17=" + dataset.getTma17() + ","
-                        + "TMA18=" + dataset.getTma18() + ","
-                        + "TMA19=" + dataset.getTma19() + ","
-                        + "TMA20=" + dataset.getTma20() + ","
-                        + "TMA21=" + dataset.getTma21() + ","
-                        + "TMA22=" + dataset.getTma22() + ","
-                        + "TMA23=" + dataset.getTma23() + ","
-                        + "TMA24=" + dataset.getTma24() + ","
-                        + "TMA25=" + dataset.getTma25() + ","
-                        + "TAZ1=" + quoteNonNull(dataset.getTaz1()) + ","
-                        + "TAZ2=" + quoteNonNull(dataset.getTaz2()) + ","
-                        + "TAZ3=" + quoteNonNull(dataset.getTaz3()) + ","
-                        + "TAZ4=" + quoteNonNull(dataset.getTaz4()) + ","
-                        + "TAZ5=" + quoteNonNull(dataset.getTaz5()) + ","
-                        + "TAZ6=" + quoteNonNull(dataset.getTaz6()) + ","
-                        + "TAZ7=" + quoteNonNull(dataset.getTaz7()) + ","
-                        + "TAZ8=" + quoteNonNull(dataset.getTaz8()) + ","
-                        + "TAZ9=" + quoteNonNull(dataset.getTaz9()) + ","
-                        + "TAZ10=" + quoteNonNull(dataset.getTaz10()) + ","
-                        + "TAZ11=" + quoteNonNull(dataset.getTaz11()) + ","
-                        + "TAZ12=" + quoteNonNull(dataset.getTaz12()) + ","
-                        + "TAZ13=" + quoteNonNull(dataset.getTaz13()) + ","
-                        + "TAZ14=" + quoteNonNull(dataset.getTaz14()) + ","
-                        + "TAZ15=" + quoteNonNull(dataset.getTaz15()) + ","
-                        + "TAZ16=" + quoteNonNull(dataset.getTaz16()) + ","
-                        + "TAZ17=" + quoteNonNull(dataset.getTaz17()) + ","
-                        + "TAZ18=" + quoteNonNull(dataset.getTaz18()) + ","
-                        + "TAZ19=" + quoteNonNull(dataset.getTaz19()) + ","
-                        + "TAZ20=" + quoteNonNull(dataset.getTaz20()) + ","
-                        + "TAZ21=" + quoteNonNull(dataset.getTaz21()) + ","
-                        + "TAZ22=" + quoteNonNull(dataset.getTaz22()) + ","
-                        + "TAZ23=" + quoteNonNull(dataset.getTaz23()) + ","
-                        + "TAZ24=" + quoteNonNull(dataset.getTaz24()) + ","
-                        + "TAZ25=" + quoteNonNull(dataset.getTaz25()) + ","
-                        + "LSEITE1=" + quoteNonNull(dataset.getLseite1()) + ","
-                        + "LSEITE3=" + quoteNonNull(dataset.getLseite3()) + ","
-                        + "LSEITE4=" + quoteNonNull(dataset.getLseite4()) + ","
-                        + "AIGR=" + quoteNonNull(dataset.getAigr()) + ","
-                        + "ABTEILUNG=" + quoteNonNull(dataset.getAbteilung()) + ","
-                        + "DMP=" + quoteNonNull(dataset.getDmp()) + ","
-                        + "UNTDAT=" + quoteNonNull(dataset.getUntDat()) + ","
-                        + "ARZT1=" + quoteNonNull(dataset.getArzt1()) + ","
-                        + "ARZT2=" + quoteNonNull(dataset.getArzt2()) + ","
-                        + "ARZT3=" + quoteNonNull(dataset.getArzt3()) + ","
-                        + "DIAG6=" + quoteNonNull(dataset.getDiag6());
-        try {
-            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
-            boolean rs = conn.createStatement().execute(sql);
+    public boolean saveToDB(Bericht2 dataset) {
+        // FIXME: set appropriate getter to match mainIdentifier
+        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.getBnr( ) + "'";
+        boolean isNew = false;
+        
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection()) {
+            if ( dataset.getBnr( ) != null && !dataset.getBnr().isEmpty()) {
+            
+                ResultSet rs = conn.createStatement( )
+                        .executeQuery(sql);
+                if (rs.next()) {
+                    isNew = false;
+                    logger.debug("Bericht2 will " + dataset.getBnr() + " be updated");
+                } else {
+                    isNew = true;
+                    logger.debug("Bericht2 will " + dataset.getBnr() + " be added.");
+                }
+            } else {
+                logger.error("Given " + mainIdentifier + " was empty or Null - this shouldn't happen - get " + mainIdentifier + " before saving it");
+                return false;
+            }
+            if (isNew) {
+                sql="insert into " + dbName + " ";
+            } else {
+                sql="update " + dbName + " ";
+            } // fi
+            sql = sql.concat(createFullDataset(dataset));
+            if (!isNew)
+                // FIXME: set appropriate getter to match mainIdentifier
+                sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.getBnr( ) + "' LIMIT 1");
+            updateDataset(sql);
         } catch (SQLException e) {
-            logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table " + dbName + ".", e);
+            // FIXME: set appropriate getter to match mainIdentifier
+            logger.error("Could not save Bericht2 " + dataset.getBnr( ) + " to Database", e);
+            return false;
         }
+        return true;
+
+    }
+        
+    private String createFullDataset(Bericht2 dataset) {
+        String sql = "set "
+                    + "PAT_INTERN=" + quoteNonNull(dataset.getPatIntern()) + ","
+                    + "BERICHTID=" + dataset.getBerichtId() + ","
+                    + "VNUMMER=" + quoteNonNull(dataset.getvNummer()) + ","
+                    + "NAMEVOR=" + quoteNonNull(dataset.getNameVor()) + ","
+                    + "GEBOREN=" + quoteNonNull(dataset.getGeboren()) + ","
+                    + "STRASSE=" + quoteNonNull(dataset.getStrasse()) + ","
+                    + "PLZ=" + quoteNonNull(dataset.getPlz()) + ","
+                    + "ORT=" + quoteNonNull(dataset.getOrt()) + ","
+                    + "VNAMEVO=" + quoteNonNull(dataset.getvNameVo()) + ","
+                    + "MSNR=" + quoteNonNull(dataset.getMsnr()) + ","
+                    + "BNR=" + quoteNonNull(dataset.getBnr()) + ","
+                    + "AUFDAT1=" + quoteNonNull(dataset.getAufDat1()) + ","
+                    + "ENTDAT1=" + quoteNonNull(dataset.getEntDat1()) + ","
+                    + "AUFDAT2=" + quoteNonNull(dataset.getAufDat2()) + ","
+                    + "ENTDAT2=" + quoteNonNull(dataset.getEntDat2()) + ","
+                    + "AUFDAT3=" + quoteNonNull(dataset.getAufDat3()) + ","
+                    + "ENTDAT3=" + quoteNonNull(dataset.getEntDat3()) + ","
+                    + "ENTFORM=" + quoteNonNull(dataset.getEntform()) + ","
+                    + "ARBFAE=" + quoteNonNull(dataset.getArbfae()) + ","
+                    + "DIAG1=" + quoteNonNull(dataset.getDiag1()) + ","
+                    + "F_74=" + quoteNonNull(dataset.getF74()) + ","
+                    + "F_79=" + quoteNonNull(dataset.getF79()) + ","
+                    + "F_80=" + quoteNonNull(dataset.getF80()) + ","
+                    + "F_81=" + quoteNonNull(dataset.getF81()) + ","
+                    + "DIAG2=" + quoteNonNull(dataset.getDiag2()) + ","
+                    + "F_82=" + quoteNonNull(dataset.getF82()) + ","
+                    + "F_87=" + quoteNonNull(dataset.getF87()) + ","
+                    + "F_88=" + quoteNonNull(dataset.getF88()) + ","
+                    + "F_89=" + quoteNonNull(dataset.getF89()) + ","
+                    + "DIAG3=" + quoteNonNull(dataset.getDiag3()) + ","
+                    + "F_90=" + quoteNonNull(dataset.getF90()) + ","
+                    + "F_95=" + quoteNonNull(dataset.getF95()) + ","
+                    + "F_96=" + quoteNonNull(dataset.getF96()) + ","
+                    + "F_97=" + quoteNonNull(dataset.getF97()) + ","
+                    + "DIAG4=" + quoteNonNull(dataset.getDiag4()) + ","
+                    + "F_98=" + quoteNonNull(dataset.getF98()) + ","
+                    + "F_103=" + quoteNonNull(dataset.getF103()) + ","
+                    + "F_104=" + quoteNonNull(dataset.getF104()) + ","
+                    + "F_105=" + quoteNonNull(dataset.getF105()) + ","
+                    + "DIAG5=" + quoteNonNull(dataset.getDiag5()) + ","
+                    + "F_106=" + quoteNonNull(dataset.getF106()) + ","
+                    + "F_111=" + quoteNonNull(dataset.getF111()) + ","
+                    + "F_112=" + quoteNonNull(dataset.getF112()) + ","
+                    + "F_113=" + quoteNonNull(dataset.getF113()) + ","
+                    + "F_114=" + quoteNonNull(dataset.getF114()) + ","
+                    + "F_117=" + quoteNonNull(dataset.getF117()) + ","
+                    + "F_120=" + quoteNonNull(dataset.getF120()) + ","
+                    + "F_123=" + quoteNonNull(dataset.getF123()) + ","
+                    + "F_124=" + quoteNonNull(dataset.getF124()) + ","
+                    + "F_125=" + quoteNonNull(dataset.getF125()) + ","
+                    + "F_126=" + quoteNonNull(dataset.getF126()) + ","
+                    + "F_127=" + quoteNonNull(dataset.getF127()) + ","
+                    + "F_128=" + quoteNonNull(dataset.getF128()) + ","
+                    + "F_129=" + quoteNonNull(dataset.getF129()) + ","
+                    + "F_130=" + quoteNonNull(dataset.getF130()) + ","
+                    + "F_131=" + quoteNonNull(dataset.getF131()) + ","
+                    + "F_132=" + quoteNonNull(dataset.getF132()) + ","
+                    + "F_133=" + quoteNonNull(dataset.getF133()) + ","
+                    + "F_134=" + quoteNonNull(dataset.getF134()) + ","
+                    + "F_135=" + quoteNonNull(dataset.getF135()) + ","
+                    + "F_136=" + quoteNonNull(dataset.getF136()) + ","
+                    + "F_137=" + quoteNonNull(dataset.getF137()) + ","
+                    + "F_138=" + quoteNonNull(dataset.getF138()) + ","
+                    + "F_139=" + quoteNonNull(dataset.getF139()) + ","
+                    + "F_140=" + quoteNonNull(dataset.getF140()) + ","
+                    + "F_141=" + quoteNonNull(dataset.getF141()) + ","
+                    + "ERLAEUT=" + quoteNonNull(dataset.getErlaeut()) + ","
+                    + "LMEDIKAT=" + quoteNonNull(dataset.getLmedikat()) + ","
+                    + "TAET=" + quoteNonNull(dataset.getTaet()) + ","
+                    + "BKS=" + quoteNonNull(dataset.getBks()) + ","
+                    + "F_153=" + quoteNonNull(dataset.getF153()) + ","
+                    + "F_154=" + quoteNonNull(dataset.getF154()) + ","
+                    + "F_156=" + quoteNonNull(dataset.getF156()) + ","
+                    + "F_157=" + quoteNonNull(dataset.getF157()) + ","
+                    + "F_158=" + quoteNonNull(dataset.getF158()) + ","
+                    + "F_159=" + quoteNonNull(dataset.getF159()) + ","
+                    + "F_160=" + quoteNonNull(dataset.getF160()) + ","
+                    + "F_161=" + quoteNonNull(dataset.getF161()) + ","
+                    + "F_162=" + quoteNonNull(dataset.getF162()) + ","
+                    + "F_163=" + quoteNonNull(dataset.getF163()) + ","
+                    + "F_164=" + quoteNonNull(dataset.getF164()) + ","
+                    + "F_165=" + quoteNonNull(dataset.getF165()) + ","
+                    + "F_166=" + quoteNonNull(dataset.getF166()) + ","
+                    + "F_167=" + quoteNonNull(dataset.getF167()) + ","
+                    + "F_168=" + quoteNonNull(dataset.getF168()) + ","
+                    + "F_169=" + quoteNonNull(dataset.getF169()) + ","
+                    + "F_170=" + quoteNonNull(dataset.getF170()) + ","
+                    + "F_171=" + quoteNonNull(dataset.getF171()) + ","
+                    + "F_172=" + quoteNonNull(dataset.getF172()) + ","
+                    + "F_173=" + quoteNonNull(dataset.getF173()) + ","
+                    + "F_174=" + quoteNonNull(dataset.getF174()) + ","
+                    + "F_175=" + quoteNonNull(dataset.getF175()) + ","
+                    + "F_176=" + quoteNonNull(dataset.getF176()) + ","
+                    + "F_177=" + quoteNonNull(dataset.getF177()) + ","
+                    + "LEISTBI=" + quoteNonNull(dataset.getLeistbi()) + ","
+                    + "F_178=" + quoteNonNull(dataset.getF178()) + ","
+                    + "F_179=" + quoteNonNull(dataset.getF179()) + ","
+                    + "F_181=" + quoteNonNull(dataset.getF181()) + ","
+                    + "TERLEUT=" + quoteNonNull(dataset.getTerleut()) + ","
+                    + "FREITEXT=" + quoteNonNull(dataset.getFreitext()) + ","
+                    + "TMA1=" + dataset.getTma1() + ","
+                    + "TMA2=" + dataset.getTma2() + ","
+                    + "TMA3=" + dataset.getTma3() + ","
+                    + "TMA4=" + dataset.getTma4() + ","
+                    + "TMA5=" + dataset.getTma5() + ","
+                    + "TMA6=" + dataset.getTma6() + ","
+                    + "TMA7=" + dataset.getTma7() + ","
+                    + "TMA8=" + dataset.getTma8() + ","
+                    + "TMA9=" + dataset.getTma9() + ","
+                    + "TMA10=" + dataset.getTma10() + ","
+                    + "TMA11=" + dataset.getTma11() + ","
+                    + "TMA12=" + dataset.getTma12() + ","
+                    + "TMA13=" + dataset.getTma13() + ","
+                    + "TMA14=" + dataset.getTma14() + ","
+                    + "TMA15=" + dataset.getTma15() + ","
+                    + "TMA16=" + dataset.getTma16() + ","
+                    + "TMA17=" + dataset.getTma17() + ","
+                    + "TMA18=" + dataset.getTma18() + ","
+                    + "TMA19=" + dataset.getTma19() + ","
+                    + "TMA20=" + dataset.getTma20() + ","
+                    + "TMA21=" + dataset.getTma21() + ","
+                    + "TMA22=" + dataset.getTma22() + ","
+                    + "TMA23=" + dataset.getTma23() + ","
+                    + "TMA24=" + dataset.getTma24() + ","
+                    + "TMA25=" + dataset.getTma25() + ","
+                    + "TAZ1=" + quoteNonNull(dataset.getTaz1()) + ","
+                    + "TAZ2=" + quoteNonNull(dataset.getTaz2()) + ","
+                    + "TAZ3=" + quoteNonNull(dataset.getTaz3()) + ","
+                    + "TAZ4=" + quoteNonNull(dataset.getTaz4()) + ","
+                    + "TAZ5=" + quoteNonNull(dataset.getTaz5()) + ","
+                    + "TAZ6=" + quoteNonNull(dataset.getTaz6()) + ","
+                    + "TAZ7=" + quoteNonNull(dataset.getTaz7()) + ","
+                    + "TAZ8=" + quoteNonNull(dataset.getTaz8()) + ","
+                    + "TAZ9=" + quoteNonNull(dataset.getTaz9()) + ","
+                    + "TAZ10=" + quoteNonNull(dataset.getTaz10()) + ","
+                    + "TAZ11=" + quoteNonNull(dataset.getTaz11()) + ","
+                    + "TAZ12=" + quoteNonNull(dataset.getTaz12()) + ","
+                    + "TAZ13=" + quoteNonNull(dataset.getTaz13()) + ","
+                    + "TAZ14=" + quoteNonNull(dataset.getTaz14()) + ","
+                    + "TAZ15=" + quoteNonNull(dataset.getTaz15()) + ","
+                    + "TAZ16=" + quoteNonNull(dataset.getTaz16()) + ","
+                    + "TAZ17=" + quoteNonNull(dataset.getTaz17()) + ","
+                    + "TAZ18=" + quoteNonNull(dataset.getTaz18()) + ","
+                    + "TAZ19=" + quoteNonNull(dataset.getTaz19()) + ","
+                    + "TAZ20=" + quoteNonNull(dataset.getTaz20()) + ","
+                    + "TAZ21=" + quoteNonNull(dataset.getTaz21()) + ","
+                    + "TAZ22=" + quoteNonNull(dataset.getTaz22()) + ","
+                    + "TAZ23=" + quoteNonNull(dataset.getTaz23()) + ","
+                    + "TAZ24=" + quoteNonNull(dataset.getTaz24()) + ","
+                    + "TAZ25=" + quoteNonNull(dataset.getTaz25()) + ","
+                    + "LSEITE1=" + quoteNonNull(dataset.getLseite1()) + ","
+                    + "LSEITE3=" + quoteNonNull(dataset.getLseite3()) + ","
+                    + "LSEITE4=" + quoteNonNull(dataset.getLseite4()) + ","
+                    + "AIGR=" + quoteNonNull(dataset.getAigr()) + ","
+                    + "ABTEILUNG=" + quoteNonNull(dataset.getAbteilung()) + ","
+                    + "DMP=" + quoteNonNull(dataset.getDmp()) + ","
+                    + "UNTDAT=" + quoteNonNull(dataset.getUntDat()) + ","
+                    + "ARZT1=" + quoteNonNull(dataset.getArzt1()) + ","
+                    + "ARZT2=" + quoteNonNull(dataset.getArzt2()) + ","
+                    + "ARZT3=" + quoteNonNull(dataset.getArzt3()) + ","
+                    + "DIAG6=" + quoteNonNull(dataset.getDiag6()) + "";
+        return sql;
     }
     
     private String quoteNonNull(Object val) {
@@ -711,4 +770,5 @@ public class Bericht2Dto {
     }
 
     
-}
+}    
+
