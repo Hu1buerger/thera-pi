@@ -164,8 +164,69 @@ function setFieldsInClass() {
 function saveToDB() {
 	local o=0
 	cat << -EOT
+	
+	/**
+     * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
+     * SQL statements can be e.g. <BR/>"update verordn set termine='' where rez_nr='ER1'"<BR/>
+     * In theory even <BR/>"alter table ..."<BR/> should be possible...<BR/>
+     * @param sql - the SQL statement as String
+     */
+    private void updateDataset(String sql) {
+        Connection conn;
+        try {
+            conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            boolean rs = conn.createStatement().execute(sql);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            logger.error("In updateDataset:");
+            logger.error(e.getLocalizedMessage());
+            logger.error("SQL-Statement was: '" + sql + "'");
+        }
+    }
+	
     public void saveToDB($className dataset) {
-        String sql = "insert into " + dbName + " set "
+    	// FIXME: set appropriate getter to match mainIdentifier
+        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.get${className}Nr( ) + "'";
+        boolean isNew = false;
+        
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection()) {
+            if ( dataset.getRezNr( ) != null && !dataset.getRezNr().isEmpty()) {  // fi
+            
+                ResultSet rs = conn.createStatement( )
+                        .executeQuery(sql);
+                if (rs.next()) { // fi
+                    isNew = false;
+                    logger.debug("${className} will " + dataset.getRezNr( ) + " be updated");
+                } else {
+                    isNew = true;
+                    logger.debug("${className} will " + dataset.getRezNr( ) + " be added.");
+                }
+            } else {
+                logger.error("Given " + mainIdentifier + " was empty or Null - this shouldn't happen - get " + mainIdentifier + " before saving it");
+                return false;
+            }
+            if (isNew) {
+                sql="insert into " + dbName + " ";
+            } else {
+                sql="update " + dbName + " ";
+            } // fi
+            sql = sql.concat(createFullDataset(dataset));
+            if (!isNew)
+            	// FIXME: set appropriate getter to match mainIdentifier
+                sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.get${className}Nr( ) + "' LIMIT 1"); // fi
+            updateDataset(sql);
+        } catch (SQLException e) {
+        	// FIXME: set appropriate getter to match mainIdentifier
+            logger.error("Could not save ${className} " + dataset.get${className}Nr( ) + " to Database", e);
+            return false;
+        }
+        return true;
+
+    }
+        
+    private String createFullDataset(${className} dataset) {
+    	String sql = "set "
 -EOT
 	for field in $fields
 	do
@@ -216,7 +277,7 @@ function saveToDB() {
 	echo ";"
 	cat << -EOT
         try {
-            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
+            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection( );
             boolean rs = conn.createStatement().execute(sql);
         } catch (SQLException e) {
             logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table " + dbName + ".", e);
@@ -276,6 +337,8 @@ public class ${className}Dto {
     private static final Logger logger = LoggerFactory.getLogger(${className}Dto.class);
     
     private static final String dbName="${table}";
+    // FIXME: set the following value to something like "REZ_NR" or whatever makes the most sense...
+    private static final String mainIdentifier="${table}_NR";
     private IK ik;
     
     public ${className}Dto(IK Ik) {
