@@ -7,6 +7,7 @@
 --
 -- Dumping data for table `kass_adr`
 --
+delete from kass_adr;
 
 LOCK TABLES `kass_adr` WRITE;
 /*!40000 ALTER TABLE `kass_adr` DISABLE KEYS */;
