@@ -85,7 +85,7 @@ function guessType() {
 
 function setFieldsInClass() {
 	local o=0
-	cat << -EOT
+	cat << EOT
     private $className ofResultset(ResultSet rs) {
         $className ret = new $className();
         
@@ -102,7 +102,7 @@ function setFieldsInClass() {
                 // logger.debug("Checking: " + field + " in " + o);
                 switch (field) {
 
--EOT
+EOT
 	for field in $fields
 	do
 		if [ $_fromFile -eq 0 ]
@@ -145,7 +145,7 @@ function setFieldsInClass() {
 		echo -ne "${_line}\n    break;\n"
 		let o++
 	done
-	cat << -EOT
+	cat << EOT
                 default:
                     logger.error("Unhandled field in " + dbName + " found: " + meta.getColumnLabel(o) + " at pos: " + o);
                 };
@@ -158,12 +158,12 @@ function setFieldsInClass() {
         
         return ret;
         }
--EOT
+EOT
 }
 
 function saveToDB() {
 	local o=0
-	cat << -EOT
+	cat << EOT
 	
 	/**
      * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
@@ -186,24 +186,24 @@ function saveToDB() {
 	
     public boolean saveToDB($className dataset) {
     	// FIXME: set appropriate getter to match mainIdentifier
-        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.get${className}Nr( ) + "'";
+        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.get${className}Nr() + "'";
         boolean isNew = false;
         
         try (Connection conn = new DatenquellenFactory(ik.digitString())
                 .createConnection()) {
             // FIXME: set appropriate getter to match mainIdentifier
-            if ( dataset.get${className}Nr( ) != null && !dataset.get${className}Nr().isEmpty()) {  // fi
+            if ( dataset.get${className}Nr() != null && !dataset.get${className}Nr().isEmpty()) {
             
-                ResultSet rs = conn.createStatement( )
+                ResultSet rs = conn.createStatement()
                         .executeQuery(sql);
-                if (rs.next()) { // fi
+                if (rs.next()) {
                     isNew = false;
                     // FIXME: set appropriate getter to match mainIdentifier
-                    logger.debug("${className} will " + dataset.get${className}Nr( ) + " be updated");
+                    logger.debug("${className} will " + dataset.get${className}Nr() + " be updated");
                 } else {
                     isNew = true;
                     // FIXME: set appropriate getter to match mainIdentifier
-                    logger.debug("${className} will " + dataset.get${className}Nr( ) + " be added.");
+                    logger.debug("${className} will " + dataset.get${className}Nr() + " be added.");
                 }
             } else {
                 logger.error("Given " + mainIdentifier + " was empty or Null - this shouldn't happen - get " + mainIdentifier + " before saving it");
@@ -213,15 +213,15 @@ function saveToDB() {
                 sql="insert into " + dbName + " ";
             } else {
                 sql="update " + dbName + " ";
-            } // fi
+            }
             sql = sql.concat(createFullDataset(dataset));
             if (!isNew)
             	// FIXME: set appropriate getter to match mainIdentifier
-                sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.get${className}Nr( ) + "' LIMIT 1"); // fi
+                sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.get${className}Nr() + "' LIMIT 1");
             updateDataset(sql);
         } catch (SQLException e) {
         	// FIXME: set appropriate getter to match mainIdentifier
-            logger.error("Could not save ${className} " + dataset.get${className}Nr( ) + " to Database", e);
+            logger.error("Could not save ${className} " + dataset.get${className}Nr() + " to Database", e);
             return false;
         }
         return true;
@@ -230,7 +230,7 @@ function saveToDB() {
         
     private String createFullDataset(${className} dataset) {
     	String sql = "set "
--EOT
+EOT
 	for field in $fields
 	do
 		if [ $_fromFile -eq 0 ]
@@ -278,7 +278,7 @@ function saveToDB() {
 		let o++
 	done
 	echo ";"
-	cat << -EOT
+	cat << EOT
             return sql;
         }
     }
@@ -286,7 +286,7 @@ function saveToDB() {
     private String quoteNonNull(Object val) {
         return (val == null ? "NULL" : "'" + val + "'");
     }
--EOT
+EOT
 }
 
 function varsInConstructor() {
@@ -309,18 +309,19 @@ function extraBools() {
 			continue
 		fi
 		_upper="$( toUpper ${field:0:1})${field:1}"
-		cat << -EOT
+		cat << EOT
 	public String get${_upper}() {
 		return (is${_upper}() ? "T" : "F" ); 
 	}	
--EOT
+EOT
 		let o++
 	done
 
 }
 
 function dtoHeader() {
-	cat << -EOT
+
+	cat << EOT
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -345,8 +346,9 @@ public class ${className}Dto {
     }
 
 }
-    
--EOT
+  
+EOT
+
 }
 
 
