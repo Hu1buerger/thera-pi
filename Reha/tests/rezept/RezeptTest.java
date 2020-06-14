@@ -20,21 +20,36 @@ import stammDatenTools.RezTools;
 import systemEinstellungen.SystemPreislisten;
 
 public class RezeptTest {
-    static IK ik = new IK("123456789");
-    static Connection conn;
-
-    static Rezept rez = new Rezept();
+    private static RezeptDto rezDto;
+    
 
     @BeforeClass
     public static void initForAllTests() {
         try {
-            conn = new DatenquellenFactory(ik.digitString()).createConnection();
-        } catch (SQLException e) {
+            rezDto = new RezeptDto(new IK("123456789"));
+        } catch (Exception e) {
             fail("Need running DB connection for these tests");
         }
 
     }
 
+    @Test
+    public void rezConstructor() {
+        Rezept rez = new Rezept();
+        assertTrue(rez.getRezNr() == null);
+    }
+    
+    public void rezCompareCopied() {
+        Rezept rez = rezDto.byRezeptNr("ER1").orElse(new Rezept());
+        // make sure we really got a rezept:
+        assertTrue(rez.getRezNr() != null && !rez.getRezNr().isEmpty());
+        // a deep-copy of Rezept should be same as original
+        // (Well, this actually is arguable - it *may* contain other RezNr & RezID
+        //      - would we still like them to be same?)
+        assertTrue(rez.equals(new Rezept(rez)));
+        assertTrue(rez.hashCode() == (new Rezept(rez)).hashCode());
+    }
+    
     /**
      * This test has been cancelled - the current class-fieldnames are too far off from the DB-fieldnames
      * It is planned to re-org the DB (one of these days :D ) - if we keep this test in mind, we *may*
