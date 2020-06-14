@@ -16,15 +16,17 @@ import mandant.IK;
 import sql.DatenquellenFactory;
 
 public class RezeptDto {
-    private IK ik;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDto.class);
+    
+    private static final String mainIdentifier="REZ_NR";
     private static final String aktRezDB = "verordn";
     private static final String rezDBLZA = "lza";
     private static final String SelectAllSql = "select * from " + aktRezDB
-                                                + " union select * from " + rezDBLZA + " order by rez_nr;";
+                                                + " union select * from " + rezDBLZA + " order by " + mainIdentifier + ";";
     private static final String selectAllFromRezDBWhere = "SELECT * from " + aktRezDB + " WHERE ";
     private static final String selectAllFromLzaDBWhere = "SELECT * from " + rezDBLZA + " WHERE ";
 
+    private IK ik;
 
     public RezeptDto(IK Ik) {
         ik = Ik;
@@ -328,7 +330,7 @@ public class RezeptDto {
      * @return true if no error detected otherwise false
      */
     public boolean rezeptInDBSpeichern(Rezept rez) {
-        String sql="select id from " + aktRezDB + " where REZ_NR='" + rez.getRezNr() + "'";
+        String sql="select id from " + aktRezDB + " where " + mainIdentifier + "='" + rez.getRezNr() + "'";
         boolean isNew = false;
         
         try (Connection conn = new DatenquellenFactory(ik.digitString())
@@ -345,7 +347,7 @@ public class RezeptDto {
                     logger.debug("Rezept will " + rez.getRezNr() + " be added.");
                 }
             } else {
-                logger.debug("Given RezNr was empty or Null - this shouldn't happen - get RezNr before saving it");
+                logger.error("Given RezNr was empty or Null - this shouldn't happen - get RezNr before saving it");
                 return false;
             }
             if (isNew) {
