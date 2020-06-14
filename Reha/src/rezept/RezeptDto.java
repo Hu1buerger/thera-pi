@@ -30,24 +30,43 @@ public class RezeptDto {
         ik = Ik;
     }
 
+    /**
+     * Will return all rezepte as List from both aktuelle and LZA, ordered by RezNr
+     * @return
+     */
     List<Rezept> all() {
         String sql = SelectAllSql;
         return retrieveList(sql);
     }
 
+    /**
+     * Will return all rezepte from akuelle, ordered by RezNr as List
+     * 
+     * @return
+     */
     List<Rezept> allfromVerordn(){
         final String sql = "select * from " + aktRezDB + " order by rez_nr";
         return retrieveList(sql);
     }
 
+    /**
+     * Will return a Rezept given the RezNr by checking both verordn and lza
+     * @param rezeptNummer
+     * @return
+     */
     public Optional<Rezept> byRezeptNr(String rezeptNummer) {
-        String sql = selectAllFromRezDBWhere + "REZ_NR LIKE '" + rezeptNummer + "'"
+        String sql = selectAllFromRezDBWhere + "REZ_NR='" + rezeptNummer + "'"
                 + "UNION " + selectAllFromLzaDBWhere + "REZ_NR LIKE '" + rezeptNummer + "';";
         Rezept rezept = retrieveFirst(sql);
 
         return Optional.ofNullable(rezept);
     }
 
+    /**
+     * Will return a Rezept matching a given Rezept-Id by checking both verordn and lza
+     * @param rezeptId
+     * @return
+     */
     public Optional<Rezept> byRezeptId(int rezeptId) {
         String sql = selectAllFromRezDBWhere + "ID = '" + rezeptId + "'"
                 + "UNION " + selectAllFromLzaDBWhere + "ID = '" + rezeptId + "';";
@@ -56,18 +75,33 @@ public class RezeptDto {
         return Optional.ofNullable(rezept);
     }
 
+    /**
+     * Will return a List of Rezepte from aktuelle Rezepte matching a given PatId (patIntern)
+     * @param patientID
+     * @return
+     */
     public List<Rezept> getAktuelleRezepteByPatNr(int patientID) {
         String sql = selectAllFromRezDBWhere + "PAT_INTERN = '" + patientID + "'";
 
         return retrieveList(sql);
     }
-    
+    /**
+     * Search LZA for Rezepte by PatIntern
+     * @param patientID
+     * @return
+     */
     public List<Rezept> getHistorischeRezepteByPatNr(int patientID) {
         String sql = selectAllFromLzaDBWhere + "PAT_INTERN = '" + patientID + "'";
 
         return retrieveList(sql);
     }
 
+    /**
+     * Search LZA for a Rezept by RezNr
+     * 
+     * @param rezNr
+     * @return
+     */
     public Optional<Rezept> getHistorischesRezeptByRezNr(String rezNr) {
         String sql = selectAllFromLzaDBWhere + "REZ_NR = '" + rezNr + "'";
         Rezept rezept = retrieveFirst(sql);
@@ -75,18 +109,34 @@ public class RezeptDto {
         return Optional.ofNullable(rezept);
     }
 
+    /**
+     * Update the Termine-String of a Rezept identified by its RezId
+     * @param Id
+     * @param TerminListe
+     */
     public void updateRezeptTermine(int Id, String TerminListe) {
         String sql = "UPDATE " + aktRezDB + " SET termine='" + TerminListe
                     + "' WHERE id ='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
 
+    /**
+     * Change the abschluss bool of a Rezept identified by RezId.
+     * @param Id
+     * @param status
+     */
     void rezeptAbschluss(int Id, boolean status) {
         String sql = "UPDATE " + aktRezDB + " SET abschluss='" + ( status ? "T" : "F")
                     + "' WHERE id='" + Id + "' LIMIT 1";
         updateDataset(sql);
     }
 
+    /**
+     * Search both aktuel & lza for Rezepte by Patient & Diszi, order rez_datum descending and return 1st
+     * @param patIntern
+     * @param diszi
+     * @return
+     */
     public Rezept juengstesRezeptVonPatientInDiszi (String patIntern, String diszi) {
         // Suche neuestes Rezept inkl. der Disziplin
 
@@ -280,16 +330,23 @@ public class RezeptDto {
     public boolean rezeptInDBSpeichern(Rezept rez) {
         String sql="select id from " + aktRezDB + " where REZ_NR='" + rez.getRezNr() + "'";
         boolean isNew = false;
+        
         try (Connection conn = new DatenquellenFactory(ik.digitString())
                 .createConnection()) {
-            ResultSet rs = conn.createStatement()
-                    .executeQuery(sql);
-            if (rs.next()) {
-                isNew = false;
-                logger.debug("Rezept will " + rez.getRezNr() + " be updated");
+            if ( rez.getRezNr() != null && !rez.getRezNr().isEmpty()) {
+            
+                ResultSet rs = conn.createStatement()
+                        .executeQuery(sql);
+                if (rs.next()) {
+                    isNew = false;
+                    logger.debug("Rezept will " + rez.getRezNr() + " be updated");
+                } else {
+                    isNew = true;
+                    logger.debug("Rezept will " + rez.getRezNr() + " be added.");
+                }
             } else {
-                isNew = true;
-                logger.debug("Rezept will " + rez.getRezNr() + " be added.");
+                logger.debug("Given RezNr was empty or Null - this shouldn't happen - get RezNr before saving it");
+                return false;
             }
             if (isNew) {
                 sql="insert into " + aktRezDB + " ";
@@ -409,5 +466,24 @@ public class RezeptDto {
      */
     private String quoteNonNull(Object val) {
         return (val == null ? "NULL" : "'" + val + "'");
+    }
+    
+    //@Visible for Testing
+    int countAktuelleRezepte() {
+        String sql="select count(id) from " + aktRezDB;
+        int anzahl = 0;
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection();
+
+            ResultSet rs = conn.createStatement()
+                                                .executeQuery(sql)) {
+                if (rs.next()) {
+                    anzahl = rs.getInt(1);
+                }
+        } catch (SQLException e) {
+            logger.error("could not count Rezepte in Database", e);
+        }
+        
+        return anzahl;
     }
 }
