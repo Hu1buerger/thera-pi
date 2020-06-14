@@ -87,6 +87,7 @@ public class RezeptDto {
 
         return retrieveList(sql);
     }
+    
     /**
      * Search LZA for Rezepte by PatIntern
      * @param patientID
@@ -406,7 +407,6 @@ public class RezeptDto {
                 + "DATUM='" + rez.getErfassungsDatum() + "', "
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
-//                + "VERAENDERD=" + rez.getVeraenderd() == null ? "NULL" : "'" + rez.getVeraenderd() + "'" ) + ", "
                 + "VERAENDERD=" + quoteNonNull(rez.getVeraenderD()) + ", "
                 + "VERAENDERA='" + rez.getVeraendera() + "', "
                 + "LOGFREI1='" + rez.getLogfrei1() + "', "
