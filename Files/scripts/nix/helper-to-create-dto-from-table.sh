@@ -105,12 +105,13 @@ function setFieldsInClass() {
 -EOT
 	for field in $fields
 	do
-		type="$(guessType $o)"
 		if [ $_fromFile -eq 0 ]
 		then
+                        type="$(guessType $o)"
 			allups="$(toUpper $field )"
 			alldowns="$(toLower $field )"
 		else
+                        type="${types[$o]}"
 			allups="$( toUpper ${fieldsDB[$o]} )"
 			alldowns="$field"
 		fi
@@ -131,8 +132,8 @@ function setFieldsInClass() {
 			LocalDate)
 				_line="${_line}(rs.getDate(field) == null ? null : rs.getDate(field).toLocalDate());"
 				;;
-			boolean)
-				_line="${_line}(rs.getBoolean(field));"
+			boolean | Boolean)
+				_line="${_line}(\"T\".equals(rs.getString(field)));"
 				;;
 			String)
 				_line="${_line}(rs.getString(field));"
@@ -146,12 +147,12 @@ function setFieldsInClass() {
 	done
 	cat << -EOT
                 default:
-                    logger.error("Unhandled field in $table found: " + meta.getColumnLabel(o) + " at pos: " + o);
+                    logger.error("Unhandled field in " + dbName + " found: " + meta.getColumnLabel(o) + " at pos: " + o);
                 };
             }
         } catch (SQLException e) {
             // TODO Auto-generated catch block
-            logger.error("Couldn't retrieve dataset in $className");
+            logger.error("Couldn't retrieve dataset in "  + ${className}Dto.class.getName());
             logger.error("Error: " + e.getLocalizedMessage());
         }
         
@@ -199,8 +200,8 @@ function saveToDB() {
 			# Two versions avail:
 			# The latter will use only the default getter/setter created via Eclipse
 			# The first will use the getBOOLMEMBER() that returns the bool as "T"/"F" String
-			#  (created by this script
-				_line="${_line}'\" + dataset.get${firstUp}() + \"'"
+			#  (created by this script)
+				_line="${_line}\" + quoteNonNull(dataset.get${firstUp}()) + \""
 #				_line="${_line}\" + (dataset.is${firstUp}() ? \"'T'\" : \"'F'\") + \""
 				;;
 			*)
@@ -262,6 +263,7 @@ function dtoHeader() {
 	cat << -EOT
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
 import org.slf4j.Logger;
@@ -273,7 +275,7 @@ import sql.DatenquellenFactory;
 public class ${className}Dto {
     private static final Logger logger = LoggerFactory.getLogger(${className}Dto.class);
     
-    private String dbName="${table}";
+    private static final String dbName="${table}";
     private IK ik;
     
     public ${className}Dto(IK Ik) {
