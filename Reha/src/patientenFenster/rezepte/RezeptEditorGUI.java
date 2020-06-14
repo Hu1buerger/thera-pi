@@ -11,13 +11,14 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
+import java.util.stream.Collectors;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -112,7 +113,6 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private JRtaTextField jtfPATINT;
     private JRtaTextField jtfZZSTAT;
     private JRtaTextField jtfHEIMBEWPATSTAM;
-    private JRtaTextField jtfICD10;
     private JRtaTextField jtfICD10_1;
     private JRtaTextField jtfICD10_2;
     private List<JRtaTextField> jtfAll = new ArrayList<JRtaTextField>();
@@ -166,7 +166,6 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private int preisgruppe = -1;
     
     // Copied from orig - should be replace/depr.
-    private Rezept rezTmpRezept = null;
     private boolean neu = false;
     private final JDialog popupDialog = new JDialog();
     private ArztVec verordnenderArzt = null;
@@ -186,6 +185,10 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         rez=Rez;
         neu = Neu;
         mand = Mand;
+        // FIXME: This is a Q&D to bring popups to front - at least it works for "own" popups,
+        //   but unfort. not for popups created e.g. by HMRCheck
+        // The main cause seems to be that directly after creating a new popup, the main Rezept-Editor-Window somehow
+        //   regains focus, shoving the popup to back until you click somewhere on the editor...
         popupDialog.setAlwaysOnTop(true);
         
         try {
@@ -223,6 +226,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             add(getButtonPanel(), BorderLayout.SOUTH);
             setBackgroundPainter(Reha.instance.compoundPainter.get("RezNeuanlage"));
             validate();
+            
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     setzeFocus();
@@ -453,7 +457,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             labKassen.setIcon(SystemConfig.hmSysIcons.get("kleinehilfe"));
             labKassen.setHorizontalTextPosition(JLabel.LEFT);
             labKassen.addMouseListener(new MouseAdapter() {
-                public void mousePressed(MouseEvent ev) {
+                // originally this used mousePressed - wanted to see if https://github.com/mzmine/mzmine2/issues/20 was
+                // also applicable to us - seems to have made no difference...
+                public void mouseClicked(MouseEvent ev) {
                     if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) {
                         return;
                     }
@@ -485,7 +491,9 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             labArzt.setIcon(SystemConfig.hmSysIcons.get("kleinehilfe"));
             labArzt.setHorizontalTextPosition(JLabel.LEFT);
             labArzt.addMouseListener(new MouseAdapter() {
-                public void mousePressed(MouseEvent ev) {
+                // originally this used mousePressed - wanted to see if https://github.com/mzmine/mzmine2/issues/20 was
+                // also applicable to us - seems to have made no difference...
+                public void mouseClicked(MouseEvent ev) {
                     if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) {
                         return;
                     }
@@ -715,7 +723,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
             jscr.getVerticalScrollBar()
                 .setUnitIncrement(15);
-
+            
             if (neu) {
                 // TODO: find a better replacement for isEmpty-check
                 // if (rez.isEmpty()) {
@@ -2335,20 +2343,31 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
         String indi = (String) jcmbINDI.getSelectedItem();
         
         indi = indi.replace(" ", "");
+        /*
+         * As far as I can make out, all of the following is not really used sensibly
+         * so, lets kill it
+         *
         List<Integer> anzahlen = new ArrayList<Integer>();
         List<String> hmPositionen = new ArrayList<String>();
         
-        JRtaComboBox[] leistungenToTest = new JRtaComboBox[]{ jcmbLEIST1, jcmbLEIST2, jcmbLEIST3, jcmbLEIST4};
-        JRtaTextField[] anzahlenToAdd = new JRtaTextField[] {jtfANZ1, jtfANZ2, jtfANZ3, jtfANZ4};
-        for (int i = 0; i < 4; i++) { // Lemmi Doku: Nacheinander alle 4 Leistungen abfragen und Anzahlen addieren
-            itest = leistungenToTest[i].getSelectedIndex();
-            if (itest > 0) {
-                anzahlen.add(Integer.parseInt(anzahlenToAdd[i].getText()));
-                hmPositionen.add(preisvec.get(itest - 1).get(2));
-            }
-        }
+        logger.debug("Lets see:" + rez.positionenundanzahl().toString());
+        Vector<ArrayList<?>> hmposAnzArt = rez.positionenundanzahl();
+        // What do we do all this for? We only want to know .size() > 0...
+        hmPositionen = hmposAnzArt.get(0).stream()
+                .map(object -> Objects.toString(object, null))
+                .collect(Collectors.toList());
+        // What do we do the following for? It's never used hereafter...
+        anzahlen = hmposAnzArt.get(1).stream()
+                .map(object -> Integer.valueOf(Objects.toString(object, null)))
+                .collect(Collectors.toList());
 
-        if (hmPositionen.size() > 0) {
+        logger.debug("anzahlen: " + anzahlen.toString());
+        logger.debug("hmPositionen: " + hmPositionen.toString());
+        
+//        if (hmPositionen.size() > 0) {
+ * 
+ */
+        if (rez.positionenundanzahl().get(0).size() > 0) {
             logger.debug("HMPos not empty");
             String letztbeginn = jtfBEGINDAT.getText()
                                                .trim();
@@ -2378,7 +2397,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                 }
             }
             // TODO: The following block could be sorted properly
-            rezTmpRezept = new Rezept();
+            Rezept rezTmpRezept = new Rezept();
             if (getInstance().neu) {
                 rezTmpRezept = initRezeptNeu();
             } else {
