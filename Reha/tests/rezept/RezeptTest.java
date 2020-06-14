@@ -39,6 +39,7 @@ public class RezeptTest {
         assertTrue(rez.getRezNr() == null);
     }
     
+    @Test
     public void rezCompareCopied() {
         Rezept rez = rezDto.byRezeptNr("ER1").orElse(new Rezept());
         // make sure we really got a rezept:

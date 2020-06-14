@@ -20,7 +20,7 @@ public class RezeptDtoTest {
     }
     
     @Test
-    public void alle() throws Exception {
+    public void holeAlle() throws Exception {
         List<Rezept> rezepte = rezDto.all();
         assertFalse(rezepte.isEmpty());
     }
