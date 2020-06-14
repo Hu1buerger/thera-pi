@@ -184,23 +184,26 @@ function saveToDB() {
         }
     }
 	
-    public void saveToDB($className dataset) {
+    public boolean saveToDB($className dataset) {
     	// FIXME: set appropriate getter to match mainIdentifier
         String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.get${className}Nr( ) + "'";
         boolean isNew = false;
         
         try (Connection conn = new DatenquellenFactory(ik.digitString())
                 .createConnection()) {
-            if ( dataset.getRezNr( ) != null && !dataset.getRezNr().isEmpty()) {  // fi
+            // FIXME: set appropriate getter to match mainIdentifier
+            if ( dataset.get${className}Nr( ) != null && !dataset.get${className}Nr().isEmpty()) {  // fi
             
                 ResultSet rs = conn.createStatement( )
                         .executeQuery(sql);
                 if (rs.next()) { // fi
                     isNew = false;
-                    logger.debug("${className} will " + dataset.getRezNr( ) + " be updated");
+                    // FIXME: set appropriate getter to match mainIdentifier
+                    logger.debug("${className} will " + dataset.get${className}Nr( ) + " be updated");
                 } else {
                     isNew = true;
-                    logger.debug("${className} will " + dataset.getRezNr( ) + " be added.");
+                    // FIXME: set appropriate getter to match mainIdentifier
+                    logger.debug("${className} will " + dataset.get${className}Nr( ) + " be added.");
                 }
             } else {
                 logger.error("Given " + mainIdentifier + " was empty or Null - this shouldn't happen - get " + mainIdentifier + " before saving it");
@@ -276,11 +279,7 @@ function saveToDB() {
 	done
 	echo ";"
 	cat << -EOT
-        try {
-            Connection conn = new DatenquellenFactory(ik.digitString()).createConnection( );
-            boolean rs = conn.createStatement().execute(sql);
-        } catch (SQLException e) {
-            logger.error("Could not save dataset " + dataset.toString( ) + " to Database, table " + dbName + ".", e);
+            return sql;
         }
     }
     
