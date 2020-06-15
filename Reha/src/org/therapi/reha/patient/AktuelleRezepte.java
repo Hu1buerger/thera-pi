@@ -2767,12 +2767,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             patint = Reha.instance.patpanel.rezAktRez.getPatIntern();
             logger.debug("Rez: patint=" + patint);
             rnr = Reha.instance.patpanel.vecaktrez.get(1);
-            // TODO: move the following SQL statement to some dto (RezepteDto?)
+            // TODO: move the following SQL statement to some dto (RezepteDto?)  DONE - landed in rezeptFertigeDto
             // TODO: change rnr.substring to new Rezeptnummern-class + Disziplin
             String cmd = "insert into fertige set ikktraeger='" + ikkost + "', ikkasse='" + ikkass + "', " + "name1='"
                     + kname + "', rez_nr='" + rnr + "', pat_intern='" + patint + "', rezklasse='" + rnr.substring(0, 2)
                     + "'";
-            SqlInfo.sqlAusfuehren(cmd);
+            // SqlInfo.sqlAusfuehren(cmd);
         } else {
             if (!Rechte.hatRecht(Rechte.Rezept_unlock, true)) {
                 return;
@@ -2794,9 +2794,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             logger.debug("Vec: rnr=" + rnr);
             rnr = Reha.instance.patpanel.rezAktRez.getRezNr();
             logger.debug("Rez: rnr=" + rnr);
-            // TODO: move the following SQL statement to some dto (RezepteDto?)
+            // TODO: move the following SQL statement to some dto (RezepteDto?) DONE - landed in rezeptFertigeDto
             String cmd = "delete from fertige where rez_nr='" + rnr + "' LIMIT 1";
-            SqlInfo.sqlAusfuehren(cmd);
+            // SqlInfo.sqlAusfuehren(cmd);
             JComponent abrech1 = AktiveFenster.getFensterAlle("Abrechnung-1");
             if (abrech1 != null) {
                 Reha.instance.abrechnungpanel.doEinlesen(Reha.instance.abrechnungpanel.getaktuellerKassenKnoten(),
@@ -3076,7 +3076,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private void doAufschliessen(Rezept rez) {
         RezeptFertige rf = new RezeptFertige(rez, mand.ik());
         
-        if (!rf.RezeptRevive(rez)) {
+        if (!rf.RezeptRevive()) {
             logger.error("Konnte Rezept nicht aufschliesen");
             JOptionPane.showMessageDialog(null, "Es ist ein Fehler aufgetreten\n"
                     + "Konnte Rezept\n" + rez.getRezNr().toString() + "\n"
