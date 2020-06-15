@@ -35,15 +35,18 @@ public class RezeptFertigeDto {
     }
     
     public void saveToDB(RezeptFertige fertiges) {
+        // Entire Table is apparently set to "no-null" columns
+        // Should be therefore prefer empty to NULL? Or let it go bust and find out where the NULL val came from?
         String sql = "insert into " + dbName + " set "
                 + "IKKTRAEGER=" + (fertiges.getIkKTraeger() == null ? "NULL" : "'" + fertiges.getIkKTraeger().digitString() + "'" ) + ","
                 + "IKKASSE=" + (fertiges.getIkKasse() == null ? "NULL" : "'" + fertiges.getIkKasse().digitString() + "'" ) + ","
-                + "NAME1='" + fertiges.getKassenName() + "',"
-                + "REZ_NR='" + fertiges.getRezNr() + "',"
+                + "NAME1=" + quoteNonNull(fertiges.getKassenName()) + ","
+                + "REZ_NR=" + quoteNonNull(fertiges.getRezNr()) + ","
                 + "PAT_INTERN=" + fertiges.getPatientIntern() + ","
-                + "REZKLASSE='" + fertiges.getRezklasse() + "',"
-//                + "IDKTRAEGER='" + fertiges.getIdKTraeger() + "',"
-                + "EDIFACT='" + fertiges.getEdifact() + "',"
+                + "REZKLASSE=" + quoteNonNull(fertiges.getRezklasse()) + ","
+                + "IDKTRAEGER='',"           // Apparently this is dead meat - but has no default val in DB, so we need
+                                             // to put something in there - non-null column
+                + "EDIFACT=" + quoteNonNull(fertiges.getEdifact()) + ","
                 + "EDIOK='" + fertiges.getEdiOk() + "'";
         try {
             Connection conn = new DatenquellenFactory(ik.digitString()).createConnection();
@@ -111,7 +114,7 @@ public class RezeptFertigeDto {
                 ResultSet rs = conn.createStatement()
                                   .executeQuery(sql)) {
             if (rs.next()) {
-                logger.debug("Next Got: " + rs.toString());
+                // logger.debug("Next Got: " + rs.toString());
                 rezFertig = ofResultset(rs);
             }
         } catch (SQLException e) {
@@ -133,7 +136,7 @@ public class RezeptFertigeDto {
         try {
             for(int o=1;o<=meta.getColumnCount();o++) {
                 String field = meta.getColumnLabel(o).toUpperCase();
-                logger.debug("Checking: " + field + " in " + o);
+                // logger.debug("Checking: " + field + " in " + o);
                 switch (field) {
                 case "IKKTRAEGER":
                     ret.setIkKTraeger(evaluateIK(rs.getString(field)));
@@ -201,6 +204,20 @@ public class RezeptFertigeDto {
         return temp;
     }
 
+    /**
+     * Little helper, since for the DB val='null' != val=NULL.
+     * Should val==null be true, we return a string containing simply NULL,
+     * otherwise we put val in single-quotes to tell DB it can treat val as string.
+     * 
+     * @param val
+     * 
+     * @return
+     */
+    private String quoteNonNull(Object val) {
+        return (val == null ? "NULL" : "'" + val + "'");
+    }
+
+    
     //@Visible for Testing
     int countAlleEintraege() {
         String sql="select count(id) from " + dbName;
