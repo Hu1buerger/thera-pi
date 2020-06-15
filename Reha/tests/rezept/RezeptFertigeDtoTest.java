@@ -25,7 +25,6 @@ public class RezeptFertigeDtoTest {
         assertTrue("We need a Rezept to continue", orez.isPresent());
         Rezept rez = orez.orElse(null);
         RezeptFertige rf = new RezeptFertige(new IK("123456789"));
-        System.out.println("rf= " + rf.toString());
         rf.setRezNr("ER1");
         int anzahlFertigeRez = rfDto.countAlleEintraege();
         rfDto.saveToDB(rf);
