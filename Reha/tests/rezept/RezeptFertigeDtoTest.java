@@ -24,16 +24,16 @@ public class RezeptFertigeDtoTest {
         Optional<Rezept> orez = rDto.byRezeptNr("ER1");
         assertTrue("We need a Rezept to continue", orez.isPresent());
         Rezept rez = orez.orElse(null);
-        RezeptFertige rf = new RezeptFertige(new IK("123456789"));
-        rf.setRezNr("ER1");
+        RezeptFertige rf = new RezeptFertige(rez, new IK("123456789"));
+        // rf.setRezNr("ER1");
         int anzahlFertigeRez = rfDto.countAlleEintraege();
         rfDto.saveToDB(rf);
         assertTrue("Es muessen mehr fertige Rezepte als vorher in DB sein", anzahlFertigeRez < rfDto.countAlleEintraege());
-        rf = rfDto.getByRezNr("ER1");
+        rf = rfDto.getByRezNr("ER1").get();
         assertTrue("Rezept sollte gefunden werden", rf != null);
         rfDto.deleteByRezNr("ER1");
         assertTrue("Es muessen wieder gleich viele Rezepte sein", anzahlFertigeRez == rfDto.countAlleEintraege());
-        rf = rfDto.getByRezNr("ER1");
+        rf = rfDto.getByRezNr("ER1").orElse(null);
         assertTrue("ER1 darf nicht mehr gefunden werden", rf == null);
     }
     

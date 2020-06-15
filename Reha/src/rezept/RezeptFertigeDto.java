@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,10 +23,10 @@ public class RezeptFertigeDto {
         ik = Ik;
     }
     
-    public RezeptFertige getByRezNr(String rezNr) {
+    public Optional<RezeptFertige> getByRezNr(String rezNr) {
         String sql = selectAllWhere + "REZ_NR='" + rezNr + "'";
         
-        return retrieveFirst(sql);
+        return Optional.ofNullable(retrieveFirst(sql));
     }
     
     public RezeptFertige getByRezId(int rezId) {

@@ -57,6 +57,8 @@ public class RezeptFertige {
         rezNr = rez.getRezNr();
         patientIntern = rez.getPatIntern();
         kid = rez.getkId();
+        logger.debug("Rezklasse: " + rez.getRezClass());
+        rezklasse=rez.getRezClass();
         // rez = Rez;
     }
 
@@ -65,7 +67,7 @@ public class RezeptFertige {
     }
     
     public boolean RezeptErledigt() {
-        if ( rezNr .isEmpty() || kid == 0 ) {
+        if ( rezNr.isEmpty() || kid == 0 ) {
             logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
             return false;
         }
@@ -99,20 +101,26 @@ public class RezeptFertige {
         return true;
     }
 
-    public boolean RezeptRevive(Rezept rez) {
+    public boolean RezeptRevive() {
         RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
         RezeptDto rDto = new RezeptDto(ik);
 
-        if ( rez == null || rez.getId() == 0 ) {
+        if ( rezId == 0 ) {
             logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
             return false;
         }
-        rez.setAbschluss(false);
+        /*
+        // rez.setAbschluss(false);
         if (!rfDto.deleteByRezNr(rez.getRezNr())) {
             logger.error("Problems deleting entry in fertige");
             return false;
         };
-        rDto.rezeptAbschluss(rez.getId(), false);
+        */
+        if (!rfDto.deleteByRezNr(rezNr)) {
+            logger.error("Problems deleting entry in fertige");
+            return false;
+        };
+        rDto.rezeptAbschluss(rezId, false);
         
         return true;
     }
