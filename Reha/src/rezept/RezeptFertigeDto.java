@@ -36,11 +36,11 @@ public class RezeptFertigeDto {
     
     public void saveToDB(RezeptFertige fertiges) {
         String sql = "insert into " + dbName + " set "
-                + "IKKTRAEGER='" + fertiges.getIkKTraeger() + "',"
-                + "IKKASSE='" + fertiges.getIkKasse() + "',"
+                + "IKKTRAEGER=" + (fertiges.getIkKTraeger() == null ? "NULL" : "'" + fertiges.getIkKTraeger().digitString() + "'" ) + ","
+                + "IKKASSE=" + (fertiges.getIkKasse() == null ? "NULL" : "'" + fertiges.getIkKasse().digitString() + "'" ) + ","
                 + "NAME1='" + fertiges.getKassenName() + "',"
                 + "REZ_NR='" + fertiges.getRezNr() + "',"
-                + "PAT_INTERN='" + fertiges.getPatientIntern() + "',"
+                + "PAT_INTERN=" + fertiges.getPatientIntern() + ","
                 + "REZKLASSE='" + fertiges.getRezklasse() + "',"
 //                + "IDKTRAEGER='" + fertiges.getIdKTraeger() + "',"
                 + "EDIFACT='" + fertiges.getEdifact() + "',"
@@ -84,7 +84,6 @@ public class RezeptFertigeDto {
         }
         return true;
     }
-
     
     public boolean delete( RezeptFertige fertiges) {
         int rfId = fertiges.getId();
@@ -202,5 +201,23 @@ public class RezeptFertigeDto {
         return temp;
     }
 
+    //@Visible for Testing
+    int countAlleEintraege() {
+        String sql="select count(id) from " + dbName;
+        int anzahl = 0;
+        try (Connection conn = new DatenquellenFactory(ik.digitString())
+                .createConnection();
+
+            ResultSet rs = conn.createStatement()
+                                                .executeQuery(sql)) {
+                if (rs.next()) {
+                    anzahl = rs.getInt(1);
+                }
+        } catch (SQLException e) {
+            logger.error("could not count fertige Rezepte in " + dbName, e);
+        }
+        
+        return anzahl;
+    }
     
 }

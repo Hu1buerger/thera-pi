@@ -8,6 +8,7 @@
  */
 package rezept;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.swing.JOptionPane;
@@ -39,16 +40,24 @@ public class RezeptFertige {
     private String edifact = "";
     private boolean ediok = false;
     private int id;
-    private Rezept rez;
+    
+    private int rezId;
+    private int kid;
+//    private Rezept rez;
 
     private static IK ik;
 
     public RezeptFertige() {
     }
 
-    public RezeptFertige(Rezept Rez, IK Ik) {
+    public RezeptFertige(Rezept rez, IK Ik) {
         ik = Ik;
-        rez = Rez;
+        kassenName = rez.getKTraegerName();
+        rezId = rez.getId();
+        rezNr = rez.getRezNr();
+        patientIntern = rez.getPatIntern();
+        kid = rez.getkId();
+        // rez = Rez;
     }
 
     public RezeptFertige(IK Ik) {
@@ -56,33 +65,36 @@ public class RezeptFertige {
     }
     
     public boolean RezeptErledigt() {
-        KrankenkasseAdrDto kkDto = new KrankenkasseAdrDto(ik);
-        RezeptDto rDto = new RezeptDto(ik);
-        RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
-        Optional<KrankenkasseAdr> kka = kkDto.getIKsById(rez.getkId());
-        if ( rez == null || rez.getId() == 0 ) {
+        if ( rezNr .isEmpty() || kid == 0 ) {
             logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
             return false;
         }
+        
+        KrankenkasseAdrDto kkDto = new KrankenkasseAdrDto(ik);
+        RezeptDto rDto = new RezeptDto(ik);
+        RezeptFertigeDto rfDto = new RezeptFertigeDto(ik);
+        Optional<KrankenkasseAdr> kka = kkDto.getIKsById(kid);
         if (kka.isPresent()) {
-
             ikKTraeger = kka.get()
                             .getIkKostenTraeger();
             ikKasse = kka.get()
                          .getIkKasse();
+            logger.debug("kka: " + kka.toString());
         } else {
-            logger.error("keine Krankenkasse gefunden fuer " + rez.getkId() + " im Rezept: " + rez.getRezNr());
+            logger.error("keine Krankenkasse gefunden fuer " + kid + " im Rezept: " + rezNr);
             return false;
         }
-        
+
+        /*
         kassenName = rez.getKTraegerName();
         rezNr = rez.getRezNr();
         patientIntern = rez.getPatIntern();
         Disziplin = rez.disziplin; // TODO: no getter yet / type-cast
         rez.setAbschluss(true); // Do we want to pass this back?
+        */
         rfDto.saveToDB(this);
         // rDto.rezeptInDBSpeichern(rez);
-        rDto.rezeptAbschluss(rez.getId(), true);
+        rDto.rezeptAbschluss(rezId, true);
         
         return true;
     }
@@ -195,6 +207,36 @@ public class RezeptFertige {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    // Default standard hashcode & equals omitting the ID field
+    @Override
+    public int hashCode() {
+        return Objects.hash(Disziplin, edifact, ediok, idktraeger, ikKTraeger, ikKasse, kassenName, patientIntern,
+                rezNr, rezklasse);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (obj == null)
+            return false;
+        if (getClass() != obj.getClass())
+            return false;
+        RezeptFertige other = (RezeptFertige) obj;
+        return Disziplin == other.Disziplin && Objects.equals(edifact, other.edifact) && ediok == other.ediok
+                && Objects.equals(idktraeger, other.idktraeger) && Objects.equals(ikKTraeger, other.ikKTraeger)
+                && Objects.equals(ikKasse, other.ikKasse) && Objects.equals(kassenName, other.kassenName)
+                && patientIntern == other.patientIntern && Objects.equals(rezNr, other.rezNr)
+                && Objects.equals(rezklasse, other.rezklasse);
+    }
+
+    @Override
+    public String toString() {
+        return "RezeptFertige [ikKTraeger=" + ikKTraeger + ", ikKasse=" + ikKasse + ", kassenName=" + kassenName
+                + ", rezNr=" + rezNr + ", patientIntern=" + patientIntern + ", rezklasse=" + rezklasse + ", Disziplin="
+                + Disziplin + ", idktraeger=" + idktraeger + ", edifact=" + edifact + ", ediok=" + ediok + ", id=" + id + "]";
     }
 
 }
