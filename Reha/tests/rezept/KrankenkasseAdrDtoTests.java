@@ -50,4 +50,21 @@ public class KrankenkasseAdrDtoTests {
         assertTrue("Expected Preisgruppe to be >0 - got " + kka.getPreisgruppe(), kka.getPreisgruppe() >0);
         assertTrue("IK-Kasse should not have been filled with a value", kka.getIkKasse() == null);
     }
+    
+    @Test
+    public void countAlleEintraegeTest() {
+        assertTrue("Expected to have at least 1 entry in kass_adr", kkaDto.countAlleEintraege() > 0);
+    }
+    
+    @Test
+    public void saveRetrieveAndCompareTest() {
+        Optional<KrankenkasseAdr> okka = kkaDto.getById(18);
+        assertTrue("We should have found at least 1 KK-adr", okka.isPresent());
+        KrankenkasseAdr kka = okka.orElse(null);
+        kka.setKuerzel("Test");
+        System.out.println("kka is now: " + kka.toString());
+        assertTrue("Saving dataset should return true on success", kkaDto.saveToDB(kka));
+        assertTrue("Retrieving the kka we saved should result in equal kkas", kka.equals(kkaDto.getById(18).get()));
+    }
+    
 }
