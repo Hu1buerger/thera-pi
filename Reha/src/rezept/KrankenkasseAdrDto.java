@@ -233,6 +233,7 @@ public class KrankenkasseAdrDto {
     }
 
     public boolean saveToDB(KrankenkasseAdr dataset) {
+        logger.debug("Got this DS in saveToDB: " + dataset.toString());
         // FIXME: set appropriate getter to match mainIdentifier
         String sql="select id from " + dbName + " where " + mainIdentifier + "='" + dataset.getIkKasse().digitString() + "'";
         boolean isNew = false;
@@ -266,6 +267,7 @@ public class KrankenkasseAdrDto {
             if (!isNew)
                 // FIXME: set appropriate getter to match mainIdentifier
                 sql = sql.concat(" WHERE " + mainIdentifier + "='" + dataset.getIkKasse().digitString() + "' LIMIT 1");
+            logger.debug("Will run this sql-command: \"" + sql + "\"");
             updateDataset(sql);
         } catch (SQLException e) {
             // FIXME: set appropriate getter to match mainIdentifier
@@ -278,6 +280,7 @@ public class KrankenkasseAdrDto {
     }
         
     private String createFullDataset(KrankenkasseAdr dataset) {
+        logger.debug("Got this DS: " + dataset.toString());
         String sql = "set "
                     + "KUERZEL=" + quoteNonNull(dataset.getKuerzel()) + ","
                     + "PREISGRUPPE=" + dataset.getPreisgruppe() + ","
@@ -294,12 +297,12 @@ public class KrankenkasseAdrDto {
                     + "MATCHCODE=" + quoteNonNull(dataset.getMatchcode()) + ","
                     + "KMEMO=" + quoteNonNull(dataset.getKMemo()) + ","
                     + "RECHNUNG=" + quoteNonNull(dataset.getRechnung()) + ","
-                    + "IK_KASSE=" + quoteNonNull(dataset.getIkKasse().digitString()) + ","
-                    + "IK_PHYSIKA=" + quoteNonNull(dataset.getIkPhysika().digitString()) + ","
-                    + "IK_NUTZER=" + quoteNonNull(dataset.getIkNutzer().digitString()) + ","
-                    + "IK_KOSTENT=" + quoteNonNull(dataset.getIkKostenTraeger().digitString()) + ","
-                    + "IK_KVKARTE=" + quoteNonNull(dataset.getIkKvKarte().digitString()) + ","
-                    + "IK_PAPIER=" + quoteNonNull(dataset.getIkPapier().digitString()) + ","
+                    + "IK_KASSE=" + ( dataset.getIkKasse() == null ? "NULL" : "'" + dataset.getIkKasse().digitString() + "'" ) + ","
+                    + "IK_PHYSIKA=" + ( dataset.getIkPhysika() == null ? "NULL" : "'" + dataset.getIkPhysika().digitString() + "'" ) + ","
+                    + "IK_NUTZER=" +  ( dataset.getIkNutzer() == null ? "NULL" : "'" + dataset.getIkNutzer().digitString() + "'" ) + ","
+                    + "IK_KOSTENT=" + ( dataset.getIkKostenTraeger() == null ? "NULL" : "'" + dataset.getIkKostenTraeger().digitString() + "'" ) + ","
+                    + "IK_KVKARTE=" + ( dataset.getIkKvKarte() == null ? "NULL" : "'" + dataset.getIkKvKarte().digitString() + "'" ) + ","
+                    + "IK_PAPIER=" +  ( dataset.getIkPapier() == null ? "NULL" : "'" + dataset.getIkPapier().digitString() + "'" ) + ","
                     + "EMAIL1=" + quoteNonNull(dataset.getEmail1()) + ","
                     + "EMAIL2=" + quoteNonNull(dataset.getEmail2()) + ","
                     + "EMAIL3=" + quoteNonNull(dataset.getEmail3()) + ","
@@ -327,9 +330,10 @@ public class KrankenkasseAdrDto {
     private IK evaluateIK(String ik) {
         IK temp;
         
-        if (ik == null || ik.isEmpty()) {
-             temp= IK.INVALIDIK;
-            
+        if (ik == null) {
+            temp= null;
+        } else if (ik.isEmpty()) {
+            temp= IK.INVALIDIK;         // This is bad when trying to save a DS via ik.digits()...
         } else {
             temp= new IK(ik);
         }
