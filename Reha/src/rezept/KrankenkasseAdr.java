@@ -2,6 +2,9 @@ package rezept;
 
 import java.util.Objects;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import mandant.IK;
 
 /**
@@ -15,6 +18,7 @@ import mandant.IK;
  *      
  */
 public class KrankenkasseAdr {
+    private static final Logger logger = LoggerFactory.getLogger(KrankenkasseAdr.class);
 
     String kuerzel;
     int preisgruppe;
@@ -330,9 +334,10 @@ public class KrankenkasseAdr {
         this.pgFt = pgFt;
     }
 
+    // Standard hashcode & equals omitting the field ID to compare to different datasets
     @Override
     public int hashCode() {
-        return Objects.hash(email1, email2, email3, fax, hmrabrechnung, id, ikKasse, ikKostent, ikKvKarte, ikNum,
+        return Objects.hash(email1, email2, email3, fax, hmrabrechnung, ikKasse, ikKostent, ikKvKarte, ikNum,
                 ikNutzer, ikPapier, ikPhysika, kMemo, kassenNam1, kassenNam2, kuerzel, kvNummer, matchcode, ort, pgEr,
                 pgFt, pgKg, pgLo, pgMa, pgPo, pgRh, pgRs, plz, postfach, preisgruppe, rechnung, strasse, telefon);
     }
@@ -348,7 +353,7 @@ public class KrankenkasseAdr {
         KrankenkasseAdr other = (KrankenkasseAdr) obj;
         return Objects.equals(email1, other.email1) && Objects.equals(email2, other.email2)
                 && Objects.equals(email3, other.email3) && Objects.equals(fax, other.fax)
-                && hmrabrechnung == other.hmrabrechnung && id == other.id && Objects.equals(ikKasse, other.ikKasse)
+                && hmrabrechnung == other.hmrabrechnung && Objects.equals(ikKasse, other.ikKasse)
                 && Objects.equals(ikKostent, other.ikKostent) && Objects.equals(ikKvKarte, other.ikKvKarte)
                 && Objects.equals(ikNum, other.ikNum) && Objects.equals(ikNutzer, other.ikNutzer)
                 && Objects.equals(ikPapier, other.ikPapier) && Objects.equals(ikPhysika, other.ikPhysika)
@@ -361,7 +366,18 @@ public class KrankenkasseAdr {
                 && preisgruppe == other.preisgruppe && Objects.equals(rechnung, other.rechnung)
                 && Objects.equals(strasse, other.strasse) && Objects.equals(telefon, other.telefon);
     }
-    
 
+    @Override
+    public String toString() {
+        return "KrankenkasseAdr [kuerzel=" + kuerzel + ", preisgruppe=" + preisgruppe + ", kassenNam1=" + kassenNam1
+                + ", kassenNam2=" + kassenNam2 + ", strasse=" + strasse + ", plz=" + plz + ", ort=" + ort
+                + ", postfach=" + postfach + ", fax=" + fax + ", telefon=" + telefon + ", ikNum=" + ikNum
+                + ", kvNummer=" + kvNummer + ", matchcode=" + matchcode + ", kMemo=" + kMemo + ", rechnung=" + rechnung
+                + ", ikKasse=" + ikKasse + ", ikPhysika=" + ikPhysika + ", ikNutzer=" + ikNutzer + ", ikKostent="
+                + ikKostent + ", ikKvKarte=" + ikKvKarte + ", ikPapier=" + ikPapier + ", email1=" + email1 + ", email2="
+                + email2 + ", email3=" + email3 + ", id=" + id + ", hmrabrechnung=" + hmrabrechnung + ", pgKg=" + pgKg
+                + ", pgMa=" + pgMa + ", pgEr=" + pgEr + ", pgLo=" + pgLo + ", pgRh=" + pgRh + ", pgPo=" + pgPo
+                + ", pgRs=" + pgRs + ", pgFt=" + pgFt + "]";
+    }
     
 }
