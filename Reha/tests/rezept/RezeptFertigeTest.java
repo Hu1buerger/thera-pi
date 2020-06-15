@@ -21,7 +21,7 @@ public class RezeptFertigeTest {
     }
 
     @Test
-    public void firstTest() {
+    public void rezeptAbUnAufschliessenTest() {
         Optional<Rezept> orez = rDto.byRezeptNr("ER1");
         assertTrue("We need a Rezept to continue", orez.isPresent());
         Rezept rez = orez.orElse(null);
