@@ -46,6 +46,9 @@ public class RezeptFertigeDto {
                 + "REZKLASSE=" + quoteNonNull(fertiges.getRezklasse()) + ","
                 + "IDKTRAEGER='',"           // Apparently this is dead meat - but has no default val in DB, so we need
                                              // to put something in there - non-null column
+                                             // TODO: Apparently the current AlleTabellen.sql lacks an update that sets this
+                                             //  field to allow NULL & defaults to NULL - once AlleTabellen.sql has been
+                                             //  updated, we can safely revert to setting it to NULL
                 + "EDIFACT=" + quoteNonNull(fertiges.getEdifact()) + ","
                 + "EDIOK='" + fertiges.getEdiOk() + "'";
         try {
@@ -158,8 +161,8 @@ public class RezeptFertigeDto {
                     break;
                 case "IDKTRAEGER":
                     // This field seems to be dead meat.
-                    if ( rs.getString(field) != null ) {
-                        logger.error("This should have been null - seems we found some data");
+                    if ( rs.getString(field) != null && !rs.getString(field).isEmpty()) {
+                        logger.error("We thought this field was not in use - seems we found some data");
                         logger.error("Field idktrager contained: \"" + rs.getString(field) + "\"");
                     };
                     break;
