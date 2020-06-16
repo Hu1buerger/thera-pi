@@ -2811,17 +2811,19 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         try {
 
             Vector<Vector<String>> tests = null;
+            Rezept aktuellesRezept = Reha.instance.patpanel.rezAktRez;
+            List<Rezept> rezepteToTest;
             Vector<String> dummy = new Vector<String>();
             String lastrezdateS = DatFunk.sDatInSQL(
                     DatFunk.sDatPlusTage(DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)), -90));
             logger.debug("Vec: lastrezdate=" + lastrezdateS);
-            LocalDate lastrezdate = Reha.instance.patpanel.rezAktRez.getRezDatum().minusDays(90);
+            LocalDate lastrezdate = aktuellesRezept.getRezDatum().minusDays(90);
             logger.debug("Rez: lastrezdate=" + lastrezdate.toString());
             // TODO: change to new Rezeptnummern + diszi class
             String diszi = Reha.instance.patpanel.vecaktrez.get(1)
                                                            .substring(0, 2);
             logger.debug("Vec: diszi=" + diszi);
-            diszi = Reha.instance.patpanel.rezAktRez.getRezNr().substring(0, 2);
+            diszi = aktuellesRezept.getRezNr().substring(0, 2);
             logger.debug("Rez: diszi=" + diszi);
             // TODO: move the following SQL-stmt to some Dto-class (RezepteDto?)
             String cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
@@ -2829,11 +2831,15 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     + Reha.instance.patpanel.vecaktrez.get(1) + "'";
             logger.debug("Vec: sql-cmd='" + cmd + "'");
             cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
-                    + Reha.instance.patpanel.rezAktRez.getPatIntern() + "' and rez_nr != '"
-                    + Reha.instance.patpanel.rezAktRez.getRezNr() + "'";
+                    + aktuellesRezept.getPatIntern() + "' and rez_nr != '"
+                    + aktuellesRezept.getRezNr() + "'";
             logger.debug("Rez: sql-cmd='" + cmd + "'");
 
             tests = SqlInfo.holeFelder(cmd);
+            logger.debug("Vec: tests=\"" + tests.toString() + "\"");
+            rezepteToTest = rDto.holeDatumUndTermineNachPatientExclRezNr(aktuellesRezept.getPatIntern(),
+                                                                            aktuellesRezept.getRezNr().toString());
+            logger.debug("Rez: tests=" + rezepteToTest.toString());
             // zuerst in den aktuellen Rezepten nachsehen
             // wir holen uns Rezeptnummer,Rezeptdatum und die Termine
             // Anzahl der Termine
