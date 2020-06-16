@@ -67,7 +67,7 @@ public class RezeptFertige {
     }
     
     public boolean RezeptErledigt() {
-        if ( rezNr.isEmpty() || kid == 0 ) {
+        if ( rezNr == null || rezNr.isEmpty() || kid == 0 ) {
             logger.error("Need a proper Rezept to operate on - class not initialized with Rezept?");
             return false;
         }
