@@ -21,6 +21,18 @@ public class RezeptFertigeTest {
     }
 
     @Test
+    public void invalidRezept() {
+        Rezept rez = new Rezept();
+        RezeptFertige rf = new RezeptFertige(rez, new IK("123456789"));
+        int anzahlFertige = rfDto.countAlleEintraege();
+        assertFalse("Dieses Rezept sollte sich nicht abschliessen lassen", rf.RezeptErledigt());
+        // Not sure if the following is legal, since tests may run in parallel?
+        assertTrue("Die Anzahl sollte sich nicht geaendert haben", anzahlFertige == rfDto.countAlleEintraege());
+        assertFalse("Und erst recht nicht aufschliessen lassen", rf.RezeptRevive());
+        assertTrue("Die Anzahl sollte sich nicht geaendert haben", anzahlFertige == rfDto.countAlleEintraege());
+    }
+    
+    @Test
     public void rezeptAbUnAufschliessenTest() {
         Optional<Rezept> orez = rDto.byRezeptNr("ER1");
         assertTrue("We need a Rezept to continue", orez.isPresent());
