@@ -349,6 +349,13 @@ public class Rezept {
     }
 
     /**
+     * @param the iD
+     */
+    public void setId(int ID) {
+        id = ID;
+    }
+    
+    /**
      * @return the rezeptArt
      */
     public int getRezeptArt() {
@@ -711,6 +718,13 @@ public class Rezept {
         return aerzte;
     }
 
+    /**
+     * @param the aerzte
+     */
+    public void setAerzte(String Aerzte) {
+        aerzte = Aerzte;
+    }
+
     public int getArztBetriebsnummer() {
         return arztBetriebsnummer;
     }
@@ -878,10 +892,17 @@ public class Rezept {
     /**
      * @return the veraendera
      */
-    public int getVeraendera() {
+    public int getVeraenderA() {
         return veraendera;
     }
 
+    /**
+     * @param the veraendera
+     */
+    public void setVeraenderA(int VeraenderA) {
+        veraendera = VeraenderA;
+    }
+    
     /**
      * @return the logfrei1
      */
@@ -895,6 +916,13 @@ public class Rezept {
      */
     public String getLogfrei1() {
         return isLogfrei1() ? "T" : "F";
+    }
+    
+    /**
+     * Set the logfrei1
+     */
+    public void setLogfrei1(boolean LogFrei) {
+        logfrei1 = LogFrei;
     }
     
     /**
@@ -913,6 +941,13 @@ public class Rezept {
     }
     
     /**
+     * Set the logfrei2
+     */
+    public void setLogfrei2(boolean LogFrei) {
+        logfrei2 = LogFrei;
+    }
+    
+    /**
      * @return the numfrei1
      */
     public int getNumfrei1() {
@@ -920,10 +955,24 @@ public class Rezept {
     }
 
     /**
+     * @param the numfrei1
+     */
+    public void setNumfrei1(int Numfrei) {
+        numfrei1 = Numfrei;
+    }
+    
+    /**
      * @return the numfrei2
      */
     public int getNumfrei2() {
         return numfrei2;
+    }
+    
+    /**
+     * @param the numfrei1
+     */
+    public void setNumfrei2(int Numfrei) {
+        numfrei2 = Numfrei;
     }
 
     /**
@@ -931,6 +980,13 @@ public class Rezept {
      */
     public String getCharfrei1() {
         return charfrei1;
+    }
+    
+    /**
+     * @param the charfrei1
+     */
+    public void setCharfrei1(String Charfrei) {
+        charfrei1 = Charfrei;
     }
 
     /**
@@ -940,6 +996,13 @@ public class Rezept {
         return charfrei2;
     }
 
+    /**
+     * @param the charfrei2
+     */
+    public void setCharfrei2(String Charfrei) {
+        charfrei2 = Charfrei;
+    }
+    
     /**
      * @return the Erfassungsdatum
      */
@@ -1402,6 +1465,13 @@ public class Rezept {
         return rsplit;
     }
 
+    /**
+     * @param the rsplit
+     */
+    public void setRSplit(String RSplit) {
+        rsplit = RSplit;
+    }
+    
     /**
      * @return the jahrfrei (=VorJahrFrei?)
      */

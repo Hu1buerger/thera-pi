@@ -3,6 +3,7 @@ package rezept;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -12,6 +13,7 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import hauptFenster.Reha;
 import mandant.IK;
 import sql.DatenquellenFactory;
 
@@ -151,6 +153,24 @@ public class RezeptDto {
     }
 
     /**
+     * Originally for doubletten-Test <BR/> Will search for Rezepte in akt. Rezepte by patIntern excluding a specific Rezept
+     * <BR/>currently returns a list of Rezpete that only have the fields
+     *  rez_datum,rez_nr and termine filled - need to mull over whether we want
+     *  <BR/>- fully populated Rezepte(-List)
+     *  <BR/>- A dedicated ArrayList [rezNr, rezDatum, Termine] or whatnot (key/val pairs may be awkward)
+     *  <BR/>- Could drop the 'exclude this rezNr' and sort that at the callers end (and thereby possibly use standard
+     *  'getByPatId()' altogether, obsoleting this method...
+     */
+    // TODO: change RezNr to proper type
+    public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr) {
+        // String sql= "SELECT REZ_DATUM, REZ_NR, TERMINE from " + aktRezDB + " WHERE "
+        String sql= "SELECT * from " + aktRezDB + " WHERE "
+                + "`PAT_INTERN`='" + patID + "' and rez_nr !='" + rezNr + "';";
+        
+        return retrieveList(sql);
+    }
+    
+    /**
      * Takes an SQL-Statement as String and executes it<BR/> (<B>this is NOT! a query!</B>).<BR/>
      * SQL statements can be e.g. <BR/>"update verordn set termine='' where rez_nr='ER1'"<BR/>
      * In theory even <BR/>"alter table ..."<BR/> should be possible...<BR/>
@@ -198,6 +218,7 @@ public class RezeptDto {
             return rezeptLste;
         } catch (SQLException e) {
             logger.error("could not retrieve Rezepte from Database", e);
+            logger.error("Statement: \"" + sql + "\"");
             return Collections.emptyList();
         }
     }
@@ -211,106 +232,256 @@ public class RezeptDto {
      */
     private Rezept ofResultset(ResultSet rs) throws SQLException {
         Rezept rez = new Rezept();
-        rez.patIntern = rs.getInt("PAT_INTERN");
-        rez.rezNr = new Rezeptnummer(rs.getString("REZ_NR"));
-        rez.rezDatum =
+        
+        ResultSetMetaData meta;
+        try {
+            meta = rs.getMetaData();
+        } catch (SQLException e) {
+            logger.error("Could not retrieve metaData", e);
+            return null;
+        }
 
-                rs.getDate("REZ_DATUM") == null ? null
-                        : rs.getDate("REZ_DATUM")
-                            .toLocalDate();
-        rez.anzahl1 = rs.getInt("ANZAHL1");
-        rez.anzahl2 = rs.getInt("ANZAHL2");
-        rez.anzahl3 = rs.getInt("ANZAHL3");
-        rez.anzahl4 = rs.getInt("ANZAHL4");
-        rez.anzahlKM = new BigDecimal(rs.getString("ANZAHLKM"));
-        rez.artDerBeh1 = rs.getInt("ART_DBEH1");
-        rez.artDerBeh2 = rs.getInt("ART_DBEH2");
-        rez.artDerBeh3 = rs.getInt("ART_DBEH3");
-        rez.artDerBeh4 = rs.getInt("ART_DBEH4");
-        rez.befr = "T".equals(Optional.ofNullable(rs.getString("BEFR"))
-                           .orElse(""));
-        rez.rezGeb = new Money(rs.getString("REZ_GEB"));
-        rez.rezBez = "T".equals(Optional.ofNullable(rs.getString("REZ_BEZ"))
-                              .orElse(""));
-        rez.arzt = rs.getString("ARZT");
-        rez.arztId = rs.getInt("ARZTID");
-        rez.aerzte = rs.getString("AERZTE");
-        rez.preise1 = new Money(rs.getString("PREISE1"));
-        rez.preise2 = new Money(rs.getString("PREISE2"));
-        rez.preise3 = new Money(rs.getString("PREISE3"));
-        rez.preise4 = new Money(rs.getString("PREISE4"));
-        rez.erfassungsDatum = rs.getDate("DATUM") == null ? null
-                : rs.getDate("DATUM")
-                    .toLocalDate();
-        rez.diagnose = rs.getString("DIAGNOSE");
-        rez.heimbewohn = "T".equals(Optional.ofNullable(rs.getString("HEIMBEWOHN"))
-                                 .orElse(""));
-        rez.veraenderd = rs.getDate("VERAENDERD") == null ? null
-                : rs.getDate("VERAENDERD")
-                    .toLocalDate();
-        rez.veraendera = rs.getInt("VERAENDERA");
-        rez.rezeptArt = rs.getInt("REZEPTART");
-        rez.logfrei1 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI1"))
-                               .orElse(""));
-        rez.logfrei2 = "T".equals(Optional.ofNullable(rs.getString("LOGFREI2"))
-                               .orElse(""));
-        rez.numfrei1 = rs.getInt("NUMFREI1");
-        rez.numfrei2 = rs.getInt("NUMFREI2");
-        rez.charfrei1 = rs.getString("CHARFREI1");
-        rez.charfrei2 = rs.getString("CHARFREI2");
-        //TODO List<Termin>
-        rez.termine = rs.getString("TERMINE");
-        rez.id = rs.getInt("ID");
-        rez.ktraeger = rs.getString("KTRAEGER");
-        rez.kId = rs.getInt("KID");
-        rez.patId = rs.getInt("PATID");
-        rez.zzStatus = rs.getInt("ZZSTATUS");
-        rez.lastDate = rs.getDate("LASTDATE") == null ? null
-                : rs.getDate("LASTDATE")
-                    .toLocalDate();
-        rez.preisgruppe = rs.getInt("PREISGRUPPE");
-        rez.begruendADR = "T".equals(Optional.ofNullable(rs.getString("BEGRUENDADR"))
-                                  .orElse(""));
-        rez.hausbes = "T".equals(Optional.ofNullable(rs.getString("HAUSBES"))
-                              .orElse(""));
-        rez.indikatSchl = rs.getString("INDIKATSCHL");
-        rez.angelegtVon = rs.getString("ANGELEGTVON");
-        rez.barcodeform = rs.getInt("BARCODEFORM");
-        rez.dauer = rs.getString("DAUER");
-        rez.pos1 = Optional.ofNullable( rs.getString("POS1")).orElse("");
-        rez.pos2 = Optional.ofNullable( rs.getString("POS2")).orElse("");
-        rez.pos3 = Optional.ofNullable( rs.getString("POS3")).orElse("");
-        rez.pos4 = Optional.ofNullable( rs.getString("POS4")).orElse("");
-        rez.frequenz = rs.getString("FREQUENZ");
-        rez.lastEditor = rs.getString("LASTEDIT");
-        rez.berId = rs.getInt("BERID");
-        rez.arztBericht = "T".equals(Optional.ofNullable(rs.getString("ARZTBERICHT"))
-                                  .orElse(""));
-        rez.lastEdDate = rs.getDate("LASTEDDATE") == null ? null
-                : rs.getDate("LASTEDDATE")
-                    .toLocalDate();
-        rez.farbcode =  parseFarbcodeFromDBToint(rs);
-        rez.rsplit = rs.getString("RSPLIT");
-        rez.jahrfrei = rs.getString("JAHRFREI");
-        rez.unter18 = "T".equals(Optional.ofNullable(rs.getString("UNTER18"))
-                              .orElse(""));
-        rez.hbVoll = "T".equals(Optional.ofNullable(rs.getString("HBVOLL"))
-                             .orElse(""));
-        rez.abschluss = "T".equals(Optional.ofNullable(rs.getString("ABSCHLUSS"))
-                                .orElse(""));
-        rez.zzRegel = rs.getInt("ZZREGEL");
-        rez.anzahlHb = rs.getInt("ANZAHLHB");
-        rez.kuerzel1 = rs.getString("KUERZEL1");
-        rez.kuerzel2 = rs.getString("KUERZEL2");
-        rez.kuerzel3 = rs.getString("KUERZEL3");
-        rez.kuerzel4 = rs.getString("KUERZEL4");
-        rez.kuerzel5 = rs.getString("KUERZEL5");
-        rez.kuerzel6 = rs.getString("KUERZEL6");
-        rez.icd10 = rs.getString("ICD10");
-        rez.icd10_2 = rs.getString("ICD10_2");
-        rez.pauschale = "T".equals(Optional.ofNullable(rs.getString("PAUSCHALE"))
-                                .orElse(""));
-
+        try {
+            for(int o=1;o<=meta.getColumnCount();o++) {
+                String field = meta.getColumnLabel(o).toUpperCase();
+                // logger.debug("Checking: " + field + " in " + o);
+                switch (field) {
+                    case "PAT_INTERN":
+                        rez.setPatIntern(rs.getInt(field));
+                        break;
+                    case "REZ_NR":
+                        rez.setRezNr(rs.getString(field));
+                        break;
+                    case "REZ_DATUM":
+                        rez.setRezDatum((rs.getDate(field)== null ? null : rs.getDate(field).toLocalDate()));
+                        break;
+                    case "ANZAHL1":
+                        rez.setBehAnzahl1(rs.getInt(field));
+                        break;
+                    case "ANZAHL2":
+                        rez.setBehAnzahl2(rs.getInt(field));
+                        break;
+                    case "ANZAHL3":
+                        rez.setBehAnzahl3(rs.getInt(field));
+                        break;
+                    case "ANZAHL4":
+                        rez.setBehAnzahl4(rs.getInt(field));
+                        break;
+                    case "ANZAHLKM":
+                        // TODO: do we need to set "0.00" on empty/null/0?
+                        rez.setAnzahlKM(rs.getBigDecimal(field));
+                        break; 
+                    case "ART_DBEH1":
+                        rez.setArtDerBeh1(rs.getInt(field));
+                        break;
+                    case "ART_DBEH2":
+                        rez.setArtDerBeh2(rs.getInt(field));
+                        break;
+                    case "ART_DBEH3":
+                        rez.setArtDerBeh3(rs.getInt(field));
+                        break;
+                    case "ART_DBEH4":
+                        rez.setArtDerBeh4(rs.getInt(field));
+                        break;
+                    case "BEFR":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setBefr("T".equals(rs.getString(field)));
+                        break;
+                    case "REZ_GEB":
+                        rez.setRezGeb(new Money(rs.getString(field)));
+                        break;
+                    case "REZ_BEZ":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setRezBez("T".equals(rs.getString(field)));
+                        break;
+                    case "ARZT":
+                        rez.setArzt(rs.getString(field));
+                        break;
+                    case "ARZTID":
+                        rez.setArztId(rs.getInt(field));
+                        break;
+                    case "AERZTE":
+                        rez.setAerzte(rs.getString(field));
+                        break;
+                    case "PREISE1":
+                        rez.setPreise1(new Money(rs.getString(field)));
+                        break;
+                    case "PREISE2":
+                        rez.setPreise2(new Money(rs.getString(field)));
+                        break;
+                    case "PREISE3":
+                        rez.setPreise3(new Money(rs.getString(field)));
+                        break;
+                    case "PREISE4":
+                        rez.setPreise4(new Money(rs.getString(field)));
+                        break;
+                    case "DATUM":
+                        rez.setErfassungsDatum((rs.getDate(field)== null ? null : rs.getDate(field).toLocalDate()));
+                        break;
+                    case "DIAGNOSE":
+                        rez.setDiagnose(rs.getString(field));
+                        break;
+                    case "HEIMBEWOHN":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setRezBez("T".equals(rs.getString(field)));
+                        break;
+                    case "VERAENDERD":
+                        rez.setVeraenderD((rs.getDate(field)== null ? null : rs.getDate(field).toLocalDate()));
+                        break;
+                    case "VERAENDERA":
+                        rez.setVeraenderA(rs.getInt(field));
+                        break;
+                    case "REZEPTART":
+                        rez.setRezeptArt(rs.getInt(field));
+                        break;
+                    case "LOGFREI1":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setLogfrei1("T".equals(rs.getString(field)));
+                        break;
+                    case "LOGFREI2":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setLogfrei2("T".equals(rs.getString(field)));
+                        break;
+                    case "NUMFREI1":
+                        rez.setNumfrei1(rs.getInt(field));
+                        break;
+                    case "NUMFRE21":
+                        rez.setNumfrei2(rs.getInt(field));
+                        break;
+                    case "CHARFREI1":
+                        rez.setCharfrei1(rs.getString(field));
+                        break;
+                    case "CHARFREI2":
+                        rez.setCharfrei2(rs.getString(field));
+                        break;
+                    //TODO List<Termin>
+                    case "TERMINE":
+                        rez.setTermine(rs.getString(field));
+                        break;
+                    case "ID":
+                        rez.setId(rs.getInt(field));
+                        break;
+                    case "KTRAEGER":
+                        rez.setKTraegerName(rs.getString(field));
+                        break;
+                    case "KID":
+                        rez.setkId(rs.getInt(field));
+                        break;
+                    case "PATID":
+                        rez.setPatId(rs.getInt(field));
+                        break;
+                    case "ZZSTATUS":
+                        rez.setZZStatus(rs.getInt(field));
+                        break;
+                    case "LASTDATE":
+                        rez.setLastDate((rs.getDate(field)== null ? null : rs.getDate(field).toLocalDate()));
+                        break;
+                    case "PREISGRUPPE":
+                        rez.setPreisGruppe(rs.getInt(field));
+                        break;
+                    case "BEGRUENDADR":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setBegruendADR("T".equals(rs.getString(field)));
+                        break;
+                    case "HAUSBES":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setHausBesuch("T".equals(rs.getString(field)));
+                        break;
+                    case "INDIKATSCHL":
+                        rez.setIndikatSchl(rs.getString(field));
+                        break;
+                    case "ANGELEGTVON":
+                        rez.setAngelegtVon(rs.getString(field));
+                        break;
+                    case "BARCODEFORM":
+                        rez.setBarcodeform(rs.getInt(field));
+                        break;
+                    case "DAUER":
+                        rez.setDauer(rs.getString(field));
+                        break;
+                    case "POS1":
+                        rez.setHMPos1(Optional.ofNullable( rs.getString(field)).orElse(""));
+                        break;
+                    case "POS2":
+                        rez.setHMPos2(Optional.ofNullable( rs.getString(field)).orElse(""));
+                        break;
+                    case "POS3":
+                        rez.setHMPos3(Optional.ofNullable( rs.getString(field)).orElse(""));
+                        break;
+                    case "POS4":
+                        rez.setHMPos4(Optional.ofNullable( rs.getString(field)).orElse(""));
+                        break;
+                    case "FREQUENZ":
+                        rez.setFrequenz(rs.getString(field));
+                        break;
+                    case "LASTEDIT":
+                        rez.setLastEditor(rs.getString(field));
+                        break;
+                    case "BERID":
+                        rez.setBerId(rs.getInt(field));
+                        break;
+                    case "ARZTBERICHT":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setArztBericht("T".equals(rs.getString(field)));
+                        break;
+                    case "LASTEDDATE":
+                        rez.setLastEdDate((rs.getDate(field)== null ? null : rs.getDate(field).toLocalDate()));
+                        break;
+                    case "RSPLIT":
+                        rez.setRSplit(rs.getString(field));
+                        break;
+                    case "JAHRFREI":
+                        rez.setJahrfrei(rs.getString(field));
+                        break;
+                    case "UNTER18":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setUnter18("T".equals(rs.getString(field)));
+                        break;
+                    case "HBVOLL":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setHbVoll("T".equals(rs.getString(field)));
+                        break;
+                    case "ABSCHLUSS":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setAbschluss("T".equals(rs.getString(field)));
+                        break;
+                    case "ZZREGEL":
+                        rez.setZZRegel(rs.getInt(field));
+                        break;
+                    case "ANZAHLHB":
+                        rez.setAnzahlHb(rs.getInt(field));
+                        break;
+                    case "KUERZEL1":
+                        rez.setHMKuerzel1(rs.getString(field));
+                        break;
+                    case "KUERZEL2":
+                        rez.setHMKuerzel2(rs.getString(field));
+                        break;
+                    case "KUERZEL3":
+                        rez.setHMKuerzel3(rs.getString(field));
+                        break;
+                    case "KUERZEL4":
+                        rez.setHMKuerzel4(rs.getString(field));
+                        break;
+                    case "KUERZEL5":
+                        rez.setHMKuerzel5(rs.getString(field));
+                        break;
+                    case "KUERZEL6":
+                        rez.setHMKuerzel6(rs.getString(field));
+                        break;
+                    case "ICD10":
+                        rez.setIcd10(rs.getString(field));
+                        break;
+                    case "ICD10_2":
+                        rez.setIcd10_2(rs.getString(field));
+                        break;
+                    case "PAUSCHALE":        // Feld (stand 2020.06) darf nicht null sein
+                        rez.setPauschale("T".equals(rs.getString(field)));
+                        break;
+                    case "FARBCODE":
+                        // Why?
+                        rez.setFarbcode(parseFarbcodeFromDBToint(rs));
+                        break;
+                    default:
+                        logger.error("Unhandled field in Rezepte-DB found: " + meta.getColumnLabel(o) + " at pos: " + o);
+                }
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            logger.error("Couldn't retrieve dataset in RezepteDto");
+            logger.error("Error: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+        
         return rez;
     }
 
@@ -408,7 +579,7 @@ public class RezeptDto {
                 + "DIAGNOSE='" + rez.getDiagnose() + "', "
                 + "HEIMBEWOHN='" + rez.getHeimbewohn() + "', "
                 + "VERAENDERD=" + quoteNonNull(rez.getVeraenderD()) + ", "
-                + "VERAENDERA='" + rez.getVeraendera() + "', "
+                + "VERAENDERA='" + rez.getVeraenderA() + "', "
                 + "LOGFREI1='" + rez.getLogfrei1() + "', "
                 + "LOGFREI2='" + rez.getLogfrei2() + "', "
                 + "NUMFREI1='" + rez.getNumfrei1() + "', "
