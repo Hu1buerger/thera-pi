@@ -286,8 +286,10 @@ public class Rezept {
      * @return String e.g. "ER"
      */
     public String getRezClass() {
-        return getRezNr().substring(0, 2)
-                             .toUpperCase();
+        // This will only work if rezNr != null
+        // TODO: adjust to disziplin-class - maybe return INVALID on null?
+        return (getRezNr() == null ? null : getRezNr().substring(0, 2)
+                                                         .toUpperCase());
     }
     
     /**
