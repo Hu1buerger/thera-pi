@@ -1,5 +1,5 @@
 #!/bin/bash
-DEBUG=0
+DEBUG=1
 
 ##########
 #
@@ -373,9 +373,10 @@ EOT
 
 if [ $_fromFile -eq 0 ]
 then
-	types=($( $mysqlcmd -t -e "show fields from $table"|cut -d'|' -f3| grep -v '+----' ))
+	types=($( $mysqlcmd -t -e "show fields from $table"|cut -d'|' -f3| grep -v '+----'|sed 's/[ ]*\([a-z][^ ]*\).*/\1/g' ))
 	fields="$( $mysqlcmd -t -e "show fields from $table" |cut -d'|' -f2 | grep -v '+----' )"
-	[ $DEBUG -gt 0 ] && echo "DEBUG: fields: \"$fields\""
+	[ $DEBUG -gt 0 ] && echo "DEBUG: fields: \"${fields[@]}\""
+	[ $DEBUG -gt 0 ] && echo "DEBUG: types: \"${types[@]}\""
 else
 	types=( $( function first() { echo $1; }; cat $_file| while read line;do echo $( first $line );done ) )
 	fields="$( function scnd() { echo "${2/;/}" ; }; cat $_file| while read line;do echo $( scnd $line );done )"
