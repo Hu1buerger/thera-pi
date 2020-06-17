@@ -1460,8 +1460,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         new Thread() {
             @Override
             public void run() {
+                Rezept rez = Reha.instance.patpanel.rezAktRez;
                 // TODO: change to rez
-                if (Reha.instance.patpanel.rezAktRez.isUnter18()) {
+                if (rez.isUnter18()) {
                     logger.debug("Rez: is under 18");
                 }
                 if (Reha.instance.patpanel.vecaktrez.get(60)
@@ -1475,9 +1476,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     ZuzahlTools.unter18TestDirekt(tage, true, false);
                 }
                 // Kuerzel5
-                if (!Reha.instance.patpanel.rezAktRez.getHMKuerzel5().isEmpty()) {
-                    logger.debug("Rez: Kuerzel5 is not empty");
-                    ZuzahlTools.jahresWechselTest(Reha.instance.patpanel.rezAktRez.getRezNr(), true, false);
+                if (!rez.getHMKuerzel5().isEmpty()) {
+                    logger.debug("Rez: Kuerzel5 is not empty: \"" + rez.getHMKuerzel5() + "\"");
+                    ZuzahlTools.jahresWechselTest(rez.getRezNr(), true, false);
                 }
                 // TODO: delete me once rezepte have been sorted
                 if (!Reha.instance.patpanel.patDaten.get(69)
@@ -1821,23 +1822,17 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (this.tabaktterm.getRowCount() <= 0) {
             return;
         }
+        Rezept rez = Reha.instance.patpanel.rezAktRez;
         Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
         dtermm.setRowCount(0);
         // TODO: check after change to Rezepte-class
         for (int i = 0; i < vec.size(); i++) {
             // POS1(48)-4(51):
             vec.get(i)
-               .set(3, (Reha.instance.patpanel.rezAktRez.getHMPos1())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos2()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos2())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos3()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos3())
-                       + (Reha.instance.patpanel.rezAktRez.getHMPos4()
-                                                          .trim()
-                                                          .equals("") ? ""
-                                                                  : "," + Reha.instance.patpanel.rezAktRez.getHMPos4()));
+               .set(3, (rez.getHMPos1())
+                       + (rez.getHMPos2().isEmpty() ? "" : "," + rez.getHMPos2())
+                       + (rez.getHMPos3().isEmpty() ? "" : "," + rez.getHMPos3())
+                       + (rez.getHMPos4().trim().isEmpty() ? "" : "," + rez.getHMPos4()));
             dtermm.addRow(vec.get(i));
         }
         termineSpeichern();
@@ -2322,9 +2317,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
     
                 if ((Integer) objTerm[1] == RezTools.REZEPT_IST_BEREITS_VOLL) {
-                    logger.debug("Rezept ist bereits voll");
+                    logger.error("Rezept ist bereits voll");
                 } else if ((Integer) objTerm[1] == RezTools.REZEPT_ABBRUCH) {
-                    logger.debug("Rezept ist abgebrochen");
+                    logger.error("Rezept ist abgebrochen");
                     return;
                 } else {
                     Vector<String> vec = new Vector<String>();
@@ -2838,7 +2833,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             tests = SqlInfo.holeFelder(cmd);
             logger.debug("Vec: tests=\"" + tests.toString() + "\"");
             rezepteToTest = rDto.holeDatumUndTermineNachPatientExclRezNr(aktuellesRezept.getPatIntern(),
-                                                                            aktuellesRezept.getRezNr().toString());
+                                                                            aktuellesRezept.getRezNr().toString(),
+                                                                            true);
             logger.debug("Rez: tests=" + rezepteToTest.toString());
             // zuerst in den aktuellen Rezepten nachsehen
             // wir holen uns Rezeptnummer,Rezeptdatum und die Termine
