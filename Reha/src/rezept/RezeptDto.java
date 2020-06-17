@@ -153,7 +153,8 @@ public class RezeptDto {
     }
 
     /**
-     * Originally for doubletten-Test <BR/> Will search for Rezepte in akt. Rezepte by patIntern excluding a specific Rezept
+     * Originally for doubletten-Test <BR/> Will search for Rezepte in akt. Rezepte (bool aktuelle == true)  or in 
+     * lza (aktuelle == false) by patIntern excluding a specific Rezept
      * <BR/>currently returns a list of Rezpete that only have the fields
      *  rez_datum,rez_nr and termine filled - need to mull over whether we want
      *  <BR/>- fully populated Rezepte(-List)
@@ -162,9 +163,9 @@ public class RezeptDto {
      *  'getByPatId()' altogether, obsoleting this method...
      */
     // TODO: change RezNr to proper type
-    public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr) {
+    public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr, boolean aktuelle) {
         // String sql= "SELECT REZ_DATUM, REZ_NR, TERMINE from " + aktRezDB + " WHERE "
-        String sql= "SELECT * from " + aktRezDB + " WHERE "
+        String sql= "SELECT * from " + ( aktuelle ? aktRezDB : rezDBLZA ) + " WHERE "
                 + "`PAT_INTERN`='" + patID + "' and rez_nr !='" + rezNr + "';";
         
         return retrieveList(sql);
@@ -340,7 +341,7 @@ public class RezeptDto {
                     case "NUMFREI1":
                         rez.setNumfrei1(rs.getInt(field));
                         break;
-                    case "NUMFRE21":
+                    case "NUMFREI2":
                         rez.setNumfrei2(rs.getInt(field));
                         break;
                     case "CHARFREI1":
