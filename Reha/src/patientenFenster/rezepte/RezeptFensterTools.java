@@ -1,32 +1,22 @@
 package patientenFenster.rezepte;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 import java.util.regex.Pattern;
 
 import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import CommonTools.DatFunk;
 import CommonTools.DateTimeFormatters;
-import CommonTools.JRtaComboBox;
-import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
-import abrechnung.Disziplinen;
-import environment.LadeProg;
-import environment.Path;
 import hmrCheck.HMRCheck;
 import mandant.IK;
-import mandant.Mandant;
 import rezept.Rezept;
 import rezept.RezeptDto;
-import stammDatenTools.RezepteTools;
 import systemEinstellungen.SystemPreislisten;
 
 public final class RezeptFensterTools {

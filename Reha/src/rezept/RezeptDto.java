@@ -1,6 +1,5 @@
 package rezept;
 
-import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -14,7 +13,6 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import hauptFenster.Reha;
 import mandant.IK;
 import sql.DatenquellenFactory;
 
