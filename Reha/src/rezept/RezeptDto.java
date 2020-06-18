@@ -140,12 +140,14 @@ public class RezeptDto {
      * <BR/> - ZZStatus
      * <BR/> - rezGeb
      * <BR/> - rezBez
+     * <BR/> - befr
      */
-    public void updateRezeptGebuehrenParameter(int ZZStatus, Money rezGeb, boolean rezBez, String rezNr) {
+    public void updateRezeptGebuehrenParameter(int ZZStatus, Money rezGeb, boolean rezBez, boolean befreit, String rezNr) {
         String sql = "UPDATE " + aktRezDB + " SET "
                                                 + "ZZSTATUS=" + ZZStatus + ", "
                                                 + "REZ_GEB=" + rezGeb + ", "
-                                                + "REZ_BEZ='" + (rezBez ? "T" : "F") + "' "
+                                                + "REZ_BEZ='" + (rezBez ? "T" : "F") + "', "
+                                                + "BEFR='" + (befreit ? "T" : "F") + "' "
                                                 + "WHERE REZ_NR='" + rezNr + "' LIMIT 1";
 
         // sql = String.format(sql, ZZStatus, rezGeb, (rezBez ? "T" : "F"), rezNr);

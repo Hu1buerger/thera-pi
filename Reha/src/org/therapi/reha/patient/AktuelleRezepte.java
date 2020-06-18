@@ -1948,7 +1948,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                               + "where rez_nr='" + xreznr + "' LIMIT 1";
             // SqlInfo.sqlAusfuehren(xcmd);
             // TODO: insert save-to-db
-            rDto.updateRezeptGebuehrenParameter(Zuzahlung.ZZSTATUS_NOTOK, new Money("0.00"), false, xreznr);
+            rDto.updateRezeptGebuehrenParameter(Zuzahlung.ZZSTATUS_NOTOK,
+                                                new Money("0.00"),
+                                                false,
+                                                aktuelAngezeigtesRezept.isBefr(),
+                                                xreznr);
 
             if (SystemConfig.useStornieren) {
                 if (stammDatenTools.ZuzahlTools.existsRGR(xreznr)) {
@@ -2007,20 +2011,25 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         String xreznr = null;
         if (currow >= 0) {
             xreznr = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
-            String xcmd = "update verordn set zzstatus='" + 1 + "', befr='F',rez_bez='T' where rez_nr='"
+            String xcmd = "update verordn set zzstatus='" + Zuzahlung.ZZSTATUS_OK + "', befr='F',rez_bez='T' where rez_nr='"
                     + xreznr + "' LIMIT 1";
-            SqlInfo.sqlAusfuehren(xcmd);
+            // SqlInfo.sqlAusfuehren(xcmd);
             dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[1], currow, 1);
             tabaktrez.validate();
             // TODO: delete me once Rezepte have been sorted
             doVectorAktualisieren(new int[] { 12, 14, 39 }, new String[] { "F", "T", "1" }); // befr, rez_bez,
                                                                                              // zzstatus
                                                                                              // (zuzahlok)
-            // The old way - change values in pat-haupt-rez
+            
             // TODO: A better way: trigger re-read dataset for rezNr
-            Reha.instance.patpanel.rezAktRez.setBefr(false);
-            Reha.instance.patpanel.rezAktRez.setRezBez(true);
-            Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_OK);
+            rDto.updateRezeptGebuehrenParameter(Zuzahlung.ZZSTATUS_OK,
+                                                aktuelAngezeigtesRezept.getRezGeb(),
+                                                true,
+                                                false,
+                                                xreznr);
+            aktuelAngezeigtesRezept.setBefr(false);
+            aktuelAngezeigtesRezept.setRezBez(true);
+            aktuelAngezeigtesRezept.setZZStatus(Zuzahlung.ZZSTATUS_OK);
         }
     }
 
