@@ -120,6 +120,7 @@ import rezept.RezeptFertige;
 import rezept.Zuzahlung;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
+import stammDatenTools.RezepteTools;
 import stammDatenTools.ZuzahlTools;
 import stammDatenTools.ZuzahlTools.ZZStat;
 import systemEinstellungen.SystemConfig;
@@ -2473,6 +2474,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 return;
             }
 
+            Rezept rezToTest = rDto.byRezeptNr((String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)).get();
             int anzterm = dtermm.getRowCount();
             if (anzterm <= 0) {
                 return;
@@ -2555,18 +2557,16 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
 
             /*********************/
-            // Next Block, are the duplicates (of Termine?)
-            Vector<Vector<String>> doublette = null;
-            if (((doublette = doDoublettenTest(anzterm)).size() > 0)) {
-                String msg = "<html><b><font color='#ff0000'>Achtung!</font><br><br>"
+            // Next Block, are Termine of this Rezept also listed in other Rezepte?
+            RezepteTools rezTools = new RezepteTools(mand.ik());
+            List<String[]> doubletten = rezTools.doDoublettenTest(rezToTest);
+            if (doubletten.size() > 0) {
+                String msg = "<html><b><font color='#ff0000'>Achtung! In new way</font><br><br>"
                         + "Ein oder mehrere Behandlungstage wurden in anderen Rezepten entdeckt/abgerechnet</b><br><br>";
-                for (int i = 0; i < doublette.size(); i++) {
-                    msg = msg + "Behandlungstag: " + doublette.get(i)
-                                                              .get(1)
-                            + " - enthalten in Rezept: " + doublette.get(i)
-                                                                    .get(0)
-                            + " - Standort: " + doublette.get(i)
-                                                         .get(2)
+                for (String[] doublette : doubletten) {
+                    msg = msg + "Behandlungstag: " + doublette[1]
+                            + " - enthalten in Rezept: " + doublette[0]
+                            + " - Standort: " + doublette[2]
                             + "<br>";
                 }
                 msg = msg + "<br><br>Wollen Sie das Rezept trotzdem abschlie\u00dfen?</html>";
@@ -2798,126 +2798,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         null);
             }
         }
-    }
-
-    private Vector<Vector<String>> doDoublettenTest(int anzahl) {
-        Vector<Vector<String>> doublette = new Vector<Vector<String>>();
-
-        try {
-
-            Vector<Vector<String>> tests = null;
-            Rezept aktuellesRezept = Reha.instance.patpanel.rezAktRez;
-            List<Rezept> rezepteToTest;
-            Vector<String> dummy = new Vector<String>();
-            String lastrezdateS = DatFunk.sDatInSQL(
-                    DatFunk.sDatPlusTage(DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)), -90));
-            logger.debug("Vec: lastrezdate=" + lastrezdateS);
-            LocalDate lastrezdate = aktuellesRezept.getRezDatum().minusDays(90);
-            logger.debug("Rez: lastrezdate=" + lastrezdate.toString());
-            // TODO: change to new Rezeptnummern + diszi class
-            String diszi = Reha.instance.patpanel.vecaktrez.get(1)
-                                                           .substring(0, 2);
-            logger.debug("Vec: diszi=" + diszi);
-            diszi = aktuellesRezept.getRezNr().substring(0, 2);
-            logger.debug("Rez: diszi=" + diszi);
-            // TODO: move the following SQL-stmt to some Dto-class (RezepteDto?)
-            String cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
-                    + Reha.instance.patpanel.vecaktrez.get(0) + "' and rez_nr != '"
-                    + Reha.instance.patpanel.vecaktrez.get(1) + "'";
-            logger.debug("Vec: sql-cmd='" + cmd + "'");
-            cmd = "select rez_datum,rez_nr,termine from verordn where pat_intern = '"
-                    + aktuellesRezept.getPatIntern() + "' and rez_nr != '"
-                    + aktuellesRezept.getRezNr() + "'";
-            logger.debug("Rez: sql-cmd='" + cmd + "'");
-
-            tests = SqlInfo.holeFelder(cmd);
-            logger.debug("Vec: tests=\"" + tests.toString() + "\"");
-            rezepteToTest = rDto.holeDatumUndTermineNachPatientExclRezNr(aktuellesRezept.getPatIntern(),
-                                                                            aktuellesRezept.getRezNr().toString(),
-                                                                            true);
-            logger.debug("Rez: tests=" + rezepteToTest.toString());
-            // zuerst in den aktuellen Rezepten nachsehen
-            // wir holen uns Rezeptnummer,Rezeptdatum und die Termine
-            // Anzahl der Termine
-            // dtermm.getValueAt(i-1,0);
-            // 1. for next fuer jeden einzelnen Tag des Rezeptes, darin enthalten eine neue
-            // for next fuer alle vorhandenen Rezepte
-            // 2. nur dieselbe Disziplin ueberpuefen
-            // 3. dann durch alle Rezepte hangeln und testen ob irgend ein Tag in den
-            // Terminen enthalten ist
-
-            for (int i = 0; i < tests.size(); i++) {
-                // RezNr:
-                if (tests.get(i)
-                         .get(1)
-                         .startsWith(diszi)) {
-                    for (int i2 = 0; i2 < anzahl; i2++) {
-                        // Termine:
-                        if (tests.get(i)
-                                 .get(2)
-                                 .contains(dtermm.getValueAt(i2, 0)
-                                                 .toString())) {
-                            dummy.clear();
-                            // RezNr:
-                            dummy.add(tests.get(i)
-                                           .get(1));
-                            dummy.add(dtermm.getValueAt(i2, 0)
-                                            .toString());
-                            dummy.add("aktuelle Rezepte");
-                            doublette.add((Vector<String>) dummy.clone());
-                        }
-                    }
-                }
-            }
-            // dann in der Historie
-            // 1. for next fuer jeden einzelnen Tag, darin enthalten eine neue for next fuer
-            // alle vorhandenen Rezepte
-            // 2. nur dieselbe Disziplin ueberpuefen
-            // 3. dann durch alle Rezepte hangeln und testen ob irgend ein Tag in den
-            // Terminen enthalten ist
-            // 4. dann testen ob der Rezeptdatumsvergleich > als 3 Monate trifft dies zu
-            // abbruch
-            // TODO: delete me once Rezepteumbau has been completed
-            cmd = "select rez_datum,rez_nr,termine from lza where pat_intern = '"
-                    + Reha.instance.patpanel.vecaktrez.get(0) + "' and rez_nr != '"
-                    + Reha.instance.patpanel.vecaktrez.get(1) + "' and rez_datum >= '" + lastrezdateS + "'";
-            logger.debug("Vec: cmd='" + cmd + "'");
-            cmd = "select rez_datum,rez_nr,termine from lza where pat_intern = '"
-                    + Reha.instance.patpanel.rezAktRez.getPatIntern() + "' and rez_nr != '"
-                    + Reha.instance.patpanel.rezAktRez.getRezNr() + "' and rez_datum >= '" + lastrezdate + "'";
-            logger.debug("Rez: cmd='" + cmd + "'");
-
-            tests = SqlInfo.holeFelder(cmd);
-            for (int i = 0; i < tests.size(); i++) {
-                // RezNr:
-                if (tests.get(i)
-                         .get(1)
-                         .startsWith(diszi)) {
-                    for (int i2 = 0; i2 < anzahl; i2++) {
-                        // Termine:
-                        if (tests.get(i)
-                                 .get(2)
-                                 .contains(dtermm.getValueAt(i2, 0)
-                                                 .toString())) {
-                            dummy.clear();
-                            // RezNr:
-                            dummy.add(tests.get(i)
-                                           .get(1));
-                            dummy.add(dtermm.getValueAt(i2, 0)
-                                            .toString());
-                            dummy.add("Historie");
-                            doublette.add((Vector<String>) dummy.clone());
-                        }
-                    }
-                }
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Fehler im Doublettentest\n" + ex.getMessage());
-        }
-
-        /*****************/
-        return doublette;
     }
 
     /**
@@ -3385,7 +3265,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 neuDlgOffen = true;
                 RezNeuDlg neuRez = new RezNeuDlg();
                 PinPanel pinPanel = new PinPanel();
-                pinPanel.setName("RezeptNeuanlage");
+                pinPanel.setName("RezeptEditor");
                 pinPanel.getGruen()
                         .setVisible(false);
                 if (lneu) {
@@ -3429,6 +3309,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             return;
                         }
                     }
+                    String tmpRzNr = rezKopierVorlage.getRezNr();  // I think the RezEditor messes up the "Vorlage" upon init
+                                                                   // We'll stash this away to be able to set a nice title
                     // This used to pass a copy to RezNeuanlageGUI - lets see if we still need to do that...
                     RezeptEditorGUI rezNeuAn = new RezeptEditorGUI(rezKopierVorlage, lneu, mand);
                     neuRez.getSmartTitledPanel()
@@ -3440,7 +3322,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     else // Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
                          // Rezept-Neuanlage
                         neuRez.getSmartTitledPanel()
-                              .setTitle("Rezept Neuanlage als Kopie von <-- " + rezKopierVorlage.getRezNr() + " -->");
+                              .setTitle("Rezept Neuanlage als Kopie von --> " + tmpRzNr + " <--");
 
 
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geoeffnet:
@@ -3453,8 +3335,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
                 neuRez.getSmartTitledPanel()
                       .getContentContainer()
-                      .setName("RezeptNeuanlage");
-                neuRez.setName("RezeptNeuanlage");
+                      .setName("RezeptEditor");
+                neuRez.setName("RezeptEditor");
                 neuRez.setModal(true);
                 neuRez.setLocationRelativeTo(null);
                 neuRez.pack();
@@ -3587,89 +3469,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return vorlage;
     }
     
-    /**
-     * Erstelle ein neues Rezept aufgrund einer Kopie (e.Rez.) aus entweder<BR/>
-     *   - letztem Rezept<BR/>
-     *   - ausgewaehltem Rezept<BR/>
-     *   - der Historie<BR/>
-     *   
-     * @param kopierModus
-     * @param neuRez ??
-     */
-    private Vector<String> vecNeuesRezeptVonKopie(int kopierModus) {
-        // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
-        // Rezept-Neuanlage
-        Vector<String> vecRezVorlage = new Vector<String>();
-        String rezToCopy = null;
-        String rezNrToCopy = "";
-        switch (kopierModus) {
-            case REZEPTKOPIERE_LETZTES:
-                RezNeuanlagePreDisziCheck myCheck = new RezNeuanlagePreDisziCheck(
-                                                            btnNeu.getLocationOnScreen(),
-                                                            Reha.instance.patpanel.rezAktRez.getPatIntern(),
-                                                            mand);
-                rezNrToCopy = myCheck.findeDieRezNrZumKopieren();
-                logger.debug("Has found: " + myCheck.hasSelected());
-                logger.debug("Found so far: " + myCheck.getRezNr());
-                logger.debug("And received: " + rezNrToCopy);
-                if ( rezNrToCopy.isEmpty() && !myCheck.hasSelected()) {
-                    myCheck.setModal(true);
-                    myCheck.toFront();
-                    myCheck.setVisible(true);
-                    rezNrToCopy = myCheck.getRezNr();
-                    logger.debug("Has found: " + myCheck.hasSelected());
-                    logger.debug("And found so far: " + myCheck.getRezNr());                
-                }
-                if (myCheck.isDisplayable() )
-                    myCheck.dispose();
-
-                RezeptVorlage vorlage = new RezeptVorlage(
-                                            btnNeu.getLocationOnScreen(),
-                                            Reha.instance.patpanel.rezAktRez.getPatIntern());
-                if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
-                                                 // bereits selbst disposed !
-                    vorlage.setModal(true);
-                    vorlage.toFront();
-                    vorlage.setVisible(true);
-                }
-                // Die Rezept-Kopiervorlage steht jetzt in vorlage.vecResult oder es wurde
-                // nichts gefunden !
-                vecRezVorlage = vorlage.vecResult;
-    
-                if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
-                                                 // bereits selbst disposed !
-                    vorlage.dispose();
-                }
-                vorlage = null;
-                break;
-                
-            case REZEPTKOPIERE_GEWAEHLTES:           // Vorschlag von J. Steinhilber integriert: Kopiere
-                                                     // das angewaehlte Rezept
-                rezToCopy = AktuelleRezepte.getActiveRezNr();
-                vecRezVorlage = (SqlInfo.holeSatz("verordn", " * ", "REZ_NR = '" + rezToCopy + "'",
-                        Arrays.asList(new String[] {})));
-                break;
-                
-            case REZEPTKOPIERE_HISTORIENREZEPT:
-            
-                rezToCopy = null;
-                if ((rezToCopy = Historie.getActiveRezNr()) != null) {
-                    vecRezVorlage = (SqlInfo.holeSatz("lza", " * ", "REZ_NR = '" + rezToCopy + "'",
-                            Arrays.asList(new String[] {})));
-    
-                } else {
-                    JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgew\u00e4hlt");
-                }
-                break;
-                
-            default:
-                logger.error("In neuesRezeptVonKopie - switch on copyMode");
-                logger.error("Unknown copyMode: " + kopierModus);
-            }
-        
-        return vecRezVorlage;
-    }
-
     public Vector<String> getModelTermine() {
         return (Vector<String>) dtermm.getDataVector()
                                       .clone();
@@ -4018,8 +3817,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             initToolbarBtns();
         }
         
-
-
     }
 
 
@@ -4030,11 +3827,13 @@ class RezNeuDlg extends RehaSmartDialog {
      *
      */
     private static final long serialVersionUID = -7104716962577408414L;
+    private static final Logger logger = LoggerFactory.getLogger(RehaSmartDialog.class);
     private RehaTPEventClass rtp = null;
 
     public RezNeuDlg() {
-        super(null, "RezeptNeuanlage");
-        this.setName("RezeptNeuanlage");
+        // This is bull - I'm in (/a Sub-Class of) AktuelleRezepte, not Editor...
+        super(null, "RezeptEditor");
+        this.setName("RezeptEditor");
         rtp = new RehaTPEventClass();
         rtp.addRehaTPEventListener(this);
 
@@ -4044,6 +3843,13 @@ class RezNeuDlg extends RehaSmartDialog {
     public void rehaTPEventOccurred(RehaTPEvent evt) {
         try {
             if (evt.getDetails()[0] != null) {
+                logger.debug("rehaTPEvent: " + evt.toString());
+                logger.debug("This-name: " + this.getName() + " evt-name: " + evt.getDetails()[0].toString());
+                for ( String detail : evt.getDetails()) {
+                    logger.debug("Detail: " + detail);
+                }
+                // I read: "if the event was fired by me, I'll get outa here..." - I understand that talking to yourself
+                //  may be a worrying health condition, 
                 if (evt.getDetails()[0].equals(this.getName())) {
                     this.setVisible(false);
                     this.dispose();
