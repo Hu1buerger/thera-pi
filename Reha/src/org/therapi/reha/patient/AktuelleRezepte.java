@@ -2558,8 +2558,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             /*********************/
             // Next Block, are Termine of this Rezept also listed in other Rezepte?
-            RezepteTools rezTools = new RezepteTools(mand.ik());
-            List<String[]> doubletten = rezTools.doDoublettenTest(rezToTest);
+            // RezepteTools rezTools = new RezepteTools(mand.ik());
+            List<String[]> doubletten = RezeptFensterTools.doDoublettenTest(rezToTest, mand.ik());
             if (doubletten.size() > 0) {
                 String msg = "<html><b><font color='#ff0000'>Achtung! In new way</font><br><br>"
                         + "Ein oder mehrere Behandlungstage wurden in anderen Rezepten entdeckt/abgerechnet</b><br><br>";
