@@ -167,7 +167,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     Vector<String> formular = new Vector<String>();
     Vector<String> aktTerminBuffer = new Vector<String>();
     RezeptDto rDto = null;
-    Rezept rezAktuellesRezept;
+    Rezept aktuelAngezeigtesRezept;
     List<Rezept> listAktuelleRez;
     int aktuellAngezeigt = -1;
     int iformular = -1;
@@ -1560,9 +1560,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             Reha.instance.patpanel.vecaktrez = (SqlInfo.holeSatz("verordn", " * ",
                     "id = '" + String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID))
                        + "'", Arrays.asList(new String[] {})));
-            Reha.instance.patpanel.rezAktRez = rDto.byRezeptId(Integer.parseInt(String.valueOf(
-                                                                tabaktrez.getValueAt(ix,
-                                                                      MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)))).get();
+            aktuelAngezeigtesRezept = rDto.byRezeptId(Integer.parseInt(String.valueOf(
+                                                                    tabaktrez.getValueAt(ix,
+                                                                            MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)))).get();
+            Reha.instance.patpanel.rezAktRez = aktuelAngezeigtesRezept;
             // Huh??
             Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix,
                                                                       MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
@@ -1820,7 +1821,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (this.tabaktterm.getRowCount() <= 0) {
             return;
         }
-        Rezept rez = Reha.instance.patpanel.rezAktRez;
+        Rezept rez = aktuelAngezeigtesRezept;
         Vector<Vector<String>> vec = RezTools.macheTerminVector(this.aktTerminBuffer.get(aktuellAngezeigt));
         dtermm.setRowCount(0);
         // TODO: check after change to Rezepte-class
@@ -1939,13 +1940,15 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                                                 // (zuzahlnichtok)
             // The old way - change values in pat-haupt-rez
             // TODO: A better way: trigger re-read dataset for rezNr
-            Reha.instance.patpanel.rezAktRez.setRezGeb(new Money("0.00"));
-            Reha.instance.patpanel.rezAktRez.setRezBez(false);
-            Reha.instance.patpanel.rezAktRez.setZZStatus(Zuzahlung.ZZSTATUS_NOTOK);
-            // TODO: insert save-to-db
+            aktuelAngezeigtesRezept.setRezGeb(new Money("0.00"));
+            aktuelAngezeigtesRezept.setRezBez(false);
+            aktuelAngezeigtesRezept.setZZStatus(Zuzahlung.ZZSTATUS_NOTOK);
+            
             String xcmd = "update verordn set zzstatus='" + Zuzahlung.ZZSTATUS_NOTOK + "', rez_geb='0.00',rez_bez='F' "
                                                                               + "where rez_nr='" + xreznr + "' LIMIT 1";
-            SqlInfo.sqlAusfuehren(xcmd);
+            // SqlInfo.sqlAusfuehren(xcmd);
+            // TODO: insert save-to-db
+            rDto.updateRezeptGebuehrenParameter(Zuzahlung.ZZSTATUS_NOTOK, new Money("0.00"), false, xreznr);
 
             if (SystemConfig.useStornieren) {
                 if (stammDatenTools.ZuzahlTools.existsRGR(xreznr)) {

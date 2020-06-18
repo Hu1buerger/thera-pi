@@ -136,6 +136,24 @@ public class RezeptDto {
     }
 
     /**
+     * Update RezGebuehr related fields in DB:
+     * <BR/> - ZZStatus
+     * <BR/> - rezGeb
+     * <BR/> - rezBez
+     */
+    public void updateRezeptGebuehrenParameter(int ZZStatus, Money rezGeb, boolean rezBez, String rezNr) {
+        String sql = "UPDATE " + aktRezDB + " SET "
+                                                + "ZZSTATUS=" + ZZStatus + ", "
+                                                + "REZ_GEB=" + rezGeb + ", "
+                                                + "REZ_BEZ='" + (rezBez ? "T" : "F") + "' "
+                                                + "WHERE REZ_NR='" + rezNr + "' LIMIT 1";
+
+        // sql = String.format(sql, ZZStatus, rezGeb, (rezBez ? "T" : "F"), rezNr);
+        
+        updateDataset(sql);
+    }
+    
+    /**
      * Search both aktuel & lza for Rezepte by Patient & Diszi, order rez_datum descending and return 1st
      * @param patIntern
      * @param diszi
