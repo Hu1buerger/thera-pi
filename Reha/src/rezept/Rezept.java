@@ -126,12 +126,6 @@ public class Rezept {
 
     }
     
-    public int AnzahlTermineInRezept() {
-        if (getTermine() == null || getTermine().isEmpty())
-            return 0;
-        return getTermine().split("\n").length;
-    }
-    
     /**
      * Copy Constructor - make a copy of a Rezept (copy as is e.g. no new RzNr!)
      * 
@@ -214,6 +208,17 @@ public class Rezept {
         this.icd10 = fromRez.icd10;
         this.icd10_2 = fromRez.icd10_2;
         this.pauschale = fromRez.pauschale;
+    }
+    
+    /**
+     * Liefert die Anzahl der gespeicherten Termine in einem Rezept
+     * 
+     * @return
+     */
+    public int AnzahlTermineInRezept() {
+        if (getTermine() == null || getTermine().isEmpty())
+            return 0;
+        return getTermine().split("\n").length;
     }
     
     @Override
