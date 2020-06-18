@@ -141,7 +141,7 @@ public class RezeptDto {
      * @param diszi
      * @return
      */
-    public Rezept juengstesRezeptVonPatientInDiszi (String patIntern, String diszi) {
+    public Rezept juengstesRezeptVonPatientInDiszi (int patIntern, String diszi) {
         // Suche neuestes Rezept inkl. der Disziplin
 
         String sql = "SELECT * FROM `lza` WHERE `PAT_INTERN` = " + patIntern + " AND rez_nr like '" + diszi
