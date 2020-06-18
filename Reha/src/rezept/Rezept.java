@@ -126,6 +126,10 @@ public class Rezept {
 
     }
     
+    public int AnzahlTermineInRezept() {
+        return getTermine().split("\n").length;
+    }
+    
     /**
      * Copy Constructor - make a copy of a Rezept (copy as is e.g. no new RzNr!)
      * 
