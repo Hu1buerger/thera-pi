@@ -2002,6 +2002,13 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                                        + "RezeptNummer: " + rez.getRezNr() + "<br><br></html>";
                    JOptionPane.showMessageDialog(popupDialog, fehlerMeldung);
                }
+               
+               String sEvent = getName();
+               RehaTPEvent rEvt = new RehaTPEvent(RezeptEditorGUI.class);
+               rEvt.setRehaEvent("RezeptEditorGUIEvent");
+               rEvt.setDetails(sEvent, "GESPEICHERT");
+               RehaTPEventClass.fireRehaTPEvent(rEvt);
+               return;
 
            }
        });
