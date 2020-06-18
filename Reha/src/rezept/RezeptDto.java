@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -163,10 +164,11 @@ public class RezeptDto {
      *  'getByPatId()' altogether, obsoleting this method...
      */
     // TODO: change RezNr to proper type
-    public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr, boolean aktuelle) {
-        // String sql= "SELECT REZ_DATUM, REZ_NR, TERMINE from " + aktRezDB + " WHERE "
-        String sql= "SELECT * from " + ( aktuelle ? aktRezDB : rezDBLZA ) + " WHERE "
-                + "`PAT_INTERN`='" + patID + "' and rez_nr !='" + rezNr + "';";
+    public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr, boolean aktuelle, LocalDate lastRezDate) {
+        String sql= "SELECT REZ_DATUM, REZ_NR, TERMINE from " 
+                        + ( aktuelle ? aktRezDB : rezDBLZA )
+                        + " WHERE PAT_INTERN=" + patID + " and rez_nr !='" + rezNr + "'"
+                        + ( aktuelle ? ";" : " and REZ_DATUM >= " + lastRezDate + ";");
         
         return retrieveList(sql);
     }
