@@ -127,6 +127,8 @@ public class Rezept {
     }
     
     public int AnzahlTermineInRezept() {
+        if (getTermine() == null || getTermine().isEmpty())
+            return 0;
         return getTermine().split("\n").length;
     }
     
