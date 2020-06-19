@@ -2843,7 +2843,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 return false;
             }
             
-            // PRE: Der Unterbrechungsgrund ist in dem "zu spaetem" Termin, 
+            // PRE: Der Unterbrechungsgrund ist in dem "zu spaetem" Termin
+            // The call to rezUnterbrechung currently stops us from moving this
+            // to e.g. RezeptFensterTools (or some other nice(r) place)
             if (ktagebreak) {
                 if (!"RSFT".contains(disziplin)) {
                     if ( ( (utage = ChronoUnit.DAYS.between(termine.get(i-1), termine.get(i) ) ) > fristbreak)
