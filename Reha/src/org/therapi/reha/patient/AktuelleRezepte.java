@@ -990,12 +990,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                 MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS);
                         */
                         // Using Rezepte, we collected all vals, so here's the selection for the panel:
+                        
                         Object[] fields = new Object[]{
                                 listAktuelleRez.get(i).getRezNr(),
                                 listAktuelleRez.get(i).getZZStatus(),
                                 DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getRezDatum().toString()),
                                 DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getErfassungsDatum().toString()),
-                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getLastDate().toString()),
+                                DatFunk.sDatInDeutsch(lastDateDefaultIfNull(listAktuelleRez.get(i)).toString()),
                                 listAktuelleRez.get(i).isAbschluss(),
                                 listAktuelleRez.get(i).getPatIntern(),
                                 listAktuelleRez.get(i).getIndikatSchl(),
@@ -2671,7 +2672,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                rez.getRezeptArt(),
                                                rez.getRezNr(),
                                                DatFunk.sDatInDeutsch(rez.getRezDatum().toString()),
-                                               DatFunk.sDatInDeutsch(rez.getLastDate().toString()))
+                                               DatFunk.sDatInDeutsch(lastDateDefaultIfNull(rez).toString()))
                                         .check();
                 if (!checkok) {
                     int anfrage = JOptionPane.showConfirmDialog(null,
@@ -2778,7 +2779,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             termine.add(LocalDate.parse(t[0], DateTimeFormatters.ddMMYYYYmitPunkt));
             kommentare.add(t[2]);
         }
-        
         disziplin = Disziplin.ofShort(rez.getRezClass()).medium;
         preisgruppe = rez.getPreisGruppe() - 1; // I swear, I'll kill s/o for this one of these days...
         // Frist zwischen RezDat (bzw. spaetester BehBeginn) und tatsaechlichem BehBeginn
@@ -2806,31 +2806,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                                                                                  .get(5)).get(preisgruppe);
         long utage = 0;
         logger.debug("Frist zum BehBeg: " + fristbeginn);
-        // This wasn't part of original code:
-        // The lazy way (assumes correctly set LastDate):
-        if ( termine.get(0).isAfter(rez.getLastDate()) ) {
-            
-            int frage = JOptionPane.showConfirmDialog(null,
-                    "<html>Der erste Termin ist nach sp&auml;testem Behandlungsdatum."
-                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
-                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
-            if (frage == JOptionPane.NO_OPTION) {
-                return false;
-            }
-        }
-        // The complicated way (works only on Rezept-Datum & 1. Termin + Frist from Systempreislisten.hmFristen):
-        // It's possible that lastDate is not (re-)set when a Rezept is edited (RezDatum changed)?
-        // But, to spare user of pot. 2x same question, we'll else'it here:
-        else if ( (utage =  ChronoUnit.DAYS.between( rez.getRezDatum(), termine.get(0) ) ) > fristbeginn ) {
-            
-            int frage = JOptionPane.showConfirmDialog(null,
-                    "<html>Der erste Termin ist<BR/>" + utage + "<BR/>nach Rezeptdatum."
-                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
-                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
-            if (frage == JOptionPane.NO_OPTION) {
-                return false;
-            }
-        }
         for(int i=1; i<termine.size(); i++) {
             if(termine.get(i-1).equals(termine.get(i))) {
                 JOptionPane.showMessageDialog(null,
@@ -2880,7 +2855,36 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
             }
         }
-        
+        /*
+         * I think this will be done in a following HMR-Check
+         *
+        // This wasn't part of original code:
+        // The lazy way (assumes correctly set LastDate):
+        if ( termine.get(0).isAfter(lastDateDefaultIfNull(rez)) ) {
+            
+            int frage = JOptionPane.showConfirmDialog(null,
+                    "<html>Der erste Termin ist nach sp&auml;testem Behandlungsdatum."
+                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
+                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+            if (frage == JOptionPane.NO_OPTION) {
+                return false;
+            }
+        }
+        // The complicated way (works only on Rezept-Datum & 1. Termin + Frist from Systempreislisten.hmFristen):
+        // It's possible that lastDate is not (re-)set when a Rezept is edited (RezDatum changed)?
+        // But, to spare user of pot. 2x same question, we'll else'it here:
+        else if ( (utage =  ChronoUnit.DAYS.between( rez.getRezDatum(), termine.get(0) ) ) > fristbeginn ) {
+            
+            int frage = JOptionPane.showConfirmDialog(null,
+                    "<html>Der erste Termin ist<BR/>" + utage + "<BR/>nach Rezeptdatum."
+                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
+                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+            if (frage == JOptionPane.NO_OPTION) {
+                return false;
+            }
+        }
+        */
+
         return true;
     }
     
@@ -2992,127 +2996,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         };
 
     }
-
-    /*****************************************************/
-    class MyTermClass {
-        String ddatum;
-        String behandler;
-        String stext;
-        String sart;
-        String qdatum;
-
-        public MyTermClass(String s1, String s2, String s3, String s4, String s5) {
-            ddatum = s1;
-            behandler = s2;
-            stext = s3;
-            sart = s4;
-            qdatum = (s5 == null ? " " : s5);
-        }
-
-        public String getDDatum() {
-            return ddatum;
-        }
-
-        public String getBehandler() {
-            return behandler;
-        }
-
-        public String getStext() {
-            return stext;
-        }
-
-        public String getSArt() {
-            return sart;
-        }
-
-        public String getQDatum() {
-            return qdatum;
-        }
-    }
-
-    class MyTermTableModel extends DefaultTableModel {
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1L;
-
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            if (columnIndex == 0) {
-                return String.class;
-            }
-            else {
-                return String.class;
-            }
-        }
-
-        @Override
-        public boolean isCellEditable(int row, int col) {
-            // Note that the data/cell address is constant,
-            // no matter where the cell appears onscreen.
-            if (aktuelAngezeigtesRezept.isAbschluss()) {
-                return false;
-            }
-            if (col == 0) {
-                return true;
-            } else if (col == 1) {
-                return true;
-            } else if (col == 2) {
-                return true;
-            } else if (col == 3) {
-                return true;
-            } else if (col == 11) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }
-
-    class MyAktRezeptTableModel extends DefaultTableModel {
-        /**
-         *
-         */
-        private static final long serialVersionUID = 1L;
-        
-        public static final int AKTREZTABMODELCOL_REZNr = 0;
-        public static final int AKTREZTABMODELCOL_BEZICON = 1; // zzstatus
-        public static final int AKTREZTABMODELCOL_REZDATUM = 2;
-        public static final int AKTREZTABMODELCOL_ANGELEGTDATUM = 3;
-        public static final int AKTREZTABMODELCOL_SPAETBEHBEG = 4;
-        public static final int AKTREZTABMODELCOL_REZSTATUS = 5; // abschluss
-        public static final int AKTREZTABMODELCOL_PATINTERN = 6;
-        public static final int AKTREZTABMODELCOL_INDIKATSCHL = 7;
-        public static final int AKTREZTABMODELCOL_ID = 8;
-        public static final int AKTREZTABMODELCOL_TERMINE = 9;
-        
-        @Override
-        public Class<?> getColumnClass(int columnIndex) {
-            if (columnIndex == 1 || columnIndex == 5) {
-                return JLabel.class;
-            } else {
-                return String.class;
-            }
-        }
-
-        @Override
-        public boolean isCellEditable(int row, int col) {
-            // Note that the data/cell address is constant,
-            // no matter where the cell appears onscreen.
-
-            if (col == 0) {
-                return true;
-            } else if (col == 3) {
-                return true;
-            } else if (col == 7) {
-                return true;
-            } else if (col == 11) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-
+    
+    private LocalDate lastDateDefaultIfNull(Rezept rez) {
+        return rez.getLastDate() == null ? 
+                RezeptFensterTools.calcLatestStartDate(rez)
+                : rez.getLastDate();
     }
 
     public void doRezeptGebuehr(Point pt) { // Lemmi Doku: Bares Kassieren der Rezeptgebuehr
@@ -3716,9 +3604,149 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         rgeb.pack();
         rgeb.setVisible(true);
     }
+    
+    /*****************************************************
+     * Inner helper classes
+     */
+    
+    /**
+     * Seems dead meat... At a shrewed guess, somebody starting on these "Termine Strings"
+     *
+     */
+    class MyTermClass {
+        String ddatum;
+        String behandler;
+        String stext;
+        String sart;
+        String qdatum;
 
-    /**********************************************/
+        public MyTermClass(String s1, String s2, String s3, String s4, String s5) {
+            ddatum = s1;
+            behandler = s2;
+            stext = s3;
+            sart = s4;
+            qdatum = (s5 == null ? " " : s5);
+        }
 
+        public String getDDatum() {
+            return ddatum;
+        }
+
+        public String getBehandler() {
+            return behandler;
+        }
+
+        public String getStext() {
+            return stext;
+        }
+
+        public String getSArt() {
+            return sart;
+        }
+
+        public String getQDatum() {
+            return qdatum;
+        }
+    }
+
+    /**
+     * The "Termine" table.
+     * <BR/>Used to build the table displaying the Termine of a Rezept
+     * 
+     */
+    class MyTermTableModel extends DefaultTableModel {
+        /**
+         *
+         */
+        private static final long serialVersionUID = 1L;
+
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            if (columnIndex == 0) {
+                return String.class;
+            }
+            else {
+                return String.class;
+            }
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            // Note that the data/cell address is constant,
+            // no matter where the cell appears onscreen.
+            if (aktuelAngezeigtesRezept.isAbschluss()) {
+                return false;
+            }
+            if (col == 0) {
+                return true;
+            } else if (col == 1) {
+                return true;
+            } else if (col == 2) {
+                return true;
+            } else if (col == 3) {
+                return true;
+            } else if (col == 11) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    }
+
+    /**
+     * The table-model for the Termine-table-class
+     * 
+     */
+    class MyAktRezeptTableModel extends DefaultTableModel {
+        /**
+         *
+         */
+        private static final long serialVersionUID = 1L;
+        
+        public static final int AKTREZTABMODELCOL_REZNr = 0;
+        public static final int AKTREZTABMODELCOL_BEZICON = 1; // zzstatus
+        public static final int AKTREZTABMODELCOL_REZDATUM = 2;
+        public static final int AKTREZTABMODELCOL_ANGELEGTDATUM = 3;
+        public static final int AKTREZTABMODELCOL_SPAETBEHBEG = 4;
+        public static final int AKTREZTABMODELCOL_REZSTATUS = 5; // abschluss
+        public static final int AKTREZTABMODELCOL_PATINTERN = 6;
+        public static final int AKTREZTABMODELCOL_INDIKATSCHL = 7;
+        public static final int AKTREZTABMODELCOL_ID = 8;
+        public static final int AKTREZTABMODELCOL_TERMINE = 9;
+        
+        @Override
+        public Class<?> getColumnClass(int columnIndex) {
+            if (columnIndex == 1 || columnIndex == 5) {
+                return JLabel.class;
+            } else {
+                return String.class;
+            }
+        }
+
+        @Override
+        public boolean isCellEditable(int row, int col) {
+            // Note that the data/cell address is constant,
+            // no matter where the cell appears onscreen.
+
+            if (col == 0) {
+                return true;
+            } else if (col == 3) {
+                return true;
+            } else if (col == 7) {
+                return true;
+            } else if (col == 11) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+    }
+    
+    /**
+     * Provides the "toolsbox" icons & actions that go with a selected Rezept
+     *
+     */
     class ToolsDlgAktuelleRezepte {
         public ToolsDlgAktuelleRezepte(String command, Point pt) {
             Map<Object, ImageIcon> icons = new HashMap<Object, ImageIcon>();
@@ -3837,6 +3865,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
     }
 
+    /**
+     * Suspected dead meat...
+     *
+     */
     class rezToolbarButtons {
         
         public rezToolbarButtons() {
@@ -3845,13 +3877,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         
     }
 
-
 }
 
+/**
+ * This class provides a listener for 
+ */
 class RezNeuDlg extends RehaSmartDialog {
-    /**
-     *
-     */
     private static final long serialVersionUID = -7104716962577408414L;
     private static final Logger logger = LoggerFactory.getLogger(RehaSmartDialog.class);
     private RehaTPEventClass rtp = null;
@@ -3873,6 +3904,7 @@ class RezNeuDlg extends RehaSmartDialog {
                 for ( String detail : evt.getDetails()) {
                     logger.debug("Detail: " + detail);
                 }
+                // Talking to myself? Time for seppuku...
                 if (evt.getDetails()[0].equals(this.getName())) {
                     this.setVisible(false);
                     this.dispose();
