@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import CommonTools.DateTimeFormatters;
 import CommonTools.SqlInfo;
+import core.Disziplin;
 import hmrCheck.HMRCheck;
 import mandant.IK;
 import rezept.Rezept;
@@ -28,7 +29,7 @@ public final class RezeptFensterTools {
 
     static LocalDate chkLastBeginDat(LocalDate rezDat, String lastDat, String preisGroup, String aktDiszi) {
         LocalDate spaetestAnfang;
-        if (lastDat.trim().equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
+        if (lastDat == null || lastDat.trim().equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
             // Preisgruppe holen
             int pg = Integer.parseInt(preisGroup) - 1;
             // Frist zwischen Rezeptdatum und erster Behandlung
@@ -206,4 +207,29 @@ public final class RezeptFensterTools {
        rez.setTermine(neueTermine);
    }
 
+   /**
+    * Calculates the default 'latestStartDate' for a Rezept
+    */
+   public static LocalDate calcLatestStartDate(Rezept rez) {
+       Disziplin diszi = Disziplin.ofShort(rez.getRezClass());
+       int pg = rez.getPreisGruppe();
+       LocalDate startDatum = rez.getRezDatum();
+       // This take Werktage vs Kalendertage into account:
+       return chkLastBeginDat(startDatum,
+                              rez.getLastDate() == null? null : rez.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt),
+                              Integer.toString(pg),
+                              diszi.medium);
+       // Q&D, just add Frist to startDate, don't care about Werktage...
+       // return calcLatestStartDate(diszi, pg - 1, startDatum);
+   }
+   
+   // Simple, Q&D...
+   private static final LocalDate calcLatestStartDate(Disziplin diszi, int preisgruppe, LocalDate rezDate) {
+       String disziplin = diszi.medium;
+       
+       // Frist zwischen RezDat (bzw. spaetester BehBeginn) und tatsaechlichem BehBeginn
+       int fristBisBeginn = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                           .get(0)).get(preisgruppe);
+       return rezDate.plusDays(fristBisBeginn);
+   }
 }

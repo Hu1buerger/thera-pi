@@ -991,7 +991,14 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                     LocalDate stest2 = RezeptFensterTools.chkLastBeginDat(rezDat, jtfBEGINDAT.getText().trim(),
                                                                                    jtfPREISGR.getText(), aktuelleDisziplin);
                     setLastDatInTable(stest2);
-                    thisRezept.setLastDate(stest2);
+                    // Lets skip this for now & see who goes bust
+                    if ( !".  .".equals(jtfBEGINDAT.getText().trim())) {
+                        thisRezept.setLastDate(stest2);
+                        logger.debug("Setting non-default last-date.\nWas: \"" + jtfBEGINDAT.getText() + "\"" );
+                    } else {
+                        // sonst kann man es nicht loeschen ;)
+                        thisRezept.setLastDate(null);
+                    }
                     thisRezept.setLastEdDate(LocalDate.now());
                     thisRezept.setLastEditor(Reha.aktUser);
             }
