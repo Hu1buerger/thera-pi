@@ -19,7 +19,10 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
@@ -72,6 +75,7 @@ import com.jgoodies.forms.layout.FormLayout;
 import CommonTools.Colors;
 import CommonTools.DatFunk;
 import CommonTools.DateTableCellEditor;
+import CommonTools.DateTimeFormatters;
 import CommonTools.ExUndHop;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
@@ -85,6 +89,7 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
+import core.Disziplin;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -178,7 +183,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private static final int REZEPTKOPIERE_NIX = 0;
     private static final int REZEPTKOPIERE_LETZTES = 1;
     private static final int REZEPTKOPIERE_GEWAEHLTES = 2;
-    // This bugger is used in Historie.java...
+    // This bugger is also used in Historie.java...
     static final int REZEPTKOPIERE_HISTORIENREZEPT = 3;
 
 
@@ -1338,17 +1343,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
 
         String terms = xvec.get(0);
-        if (terms == null) {
-            dtermm.setRowCount(0);
-            tabaktterm.validate();
-            anzahlTermine.setText("Anzahl Termine: 0");
-            SystemConfig.hmAdrRDaten.put("<Rletztdat>", "");
-            SystemConfig.hmAdrRDaten.put("<Rerstdat>", "");
-            SystemConfig.hmAdrRDaten.put("<Ranzahltage>", "0");
-            inEinzelTermine = false;
-            return;
-        }
-        if (terms.equals("")) {
+        if (terms == null || terms.isEmpty()) {
             dtermm.setRowCount(0);
             tabaktterm.validate();
             anzahlTermine.setText("Anzahl Termine: 0");
@@ -1476,15 +1471,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     }
                     ZuzahlTools.unter18TestDirekt(tage, true, false);
                 }
-                // Kuerzel5
-                if (!rez.getHMKuerzel5().isEmpty()) {
-                    logger.debug("Rez: Kuerzel5 is not empty: \"" + rez.getHMKuerzel5() + "\"");
-                    ZuzahlTools.jahresWechselTest(rez.getRezNr(), true, false);
-                }
-                // TODO: delete me once rezepte have been sorted
+                // Pat-Daten Jahrfrei
                 if (!Reha.instance.patpanel.patDaten.get(69)
                                                     .equals("")) {
-                    logger.debug("Vec: Kuerzel5 is not empty");
                     ZuzahlTools.jahresWechselTest(Reha.instance.patpanel.vecaktrez.get(1), true, false);
                 }
             }
@@ -1514,8 +1503,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             ListSelectionModel lsm = (ListSelectionModel) e.getSource();
 
-            boolean isAdjusting = e.getValueIsAdjusting();
-            if (isAdjusting) {
+            if (e.getValueIsAdjusting()) {
                 return;
             }
             if (lsm.isSelectionEmpty()) {
@@ -2413,8 +2401,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             String disziplin = StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
             logger.debug("Vec: diszi=" + disziplin);
             // TODO: change to new RezeptNummern & Disziplin classes
-            disziplin = StringTools.getDisziplin(rez.getRezNr());
-            logger.debug("Rez: diszi=" + disziplin + " does this work yet: " + rez.getRezClass());
+            disziplin = Disziplin.ofShort(rez.getRezClass()).medium;
+            logger.debug("Rez: diszi=" + disziplin);
             if (SystemPreislisten.hmHMRAbrechnung.get(disziplin)
                                                  .get(pghmr - 1) < 1) {
                 String meldung = "Die Tarifgruppe dieser Verordnung unterliegt nicht den Heilmittelrichtlinien.\n\n"
@@ -2435,7 +2423,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
                     // TODO: done changed to Rezepte
                     if (RezTools.getDisziplinFromRezNr(rez.getRezNr())
-                                .equals(aktDisziplin)) {
+                                                                .equals(aktDisziplin)) {
                         // Rezept gehoert zu der Sparte, die gerade im Abrechnungspanel geoeffnet ist
                         Reha.instance.abrechnungpanel.einlesenErneuern(rez.getRezNr());
                     } else {
@@ -2481,7 +2469,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if (currow < 0) {
             return;
         }
-        if (dtblm.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS) == null) {
+        // if (dtblm.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS) == null) {
+        if (!rez.isAbschluss()) {
             // derzeit offen also abschliessen
             if (!Rechte.hatRecht(Rechte.Rezept_lock, true)) {
                 return;
@@ -2489,16 +2478,34 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             // Is this guaranteed the same as Reha.instance.patpanel.rezAktRez? If so, we can skip this and use
             //  passed in rez
-            Rezept rezToTest = rDto.byRezeptNr((String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)).get();
-            int anzterm = dtermm.getRowCount();
+            // f.i. lets see who shouts...
+            // Rezept rezToTest = rDto.byRezeptNr((String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)).get();
+            int anzterm = rez.AnzahlTermineInRezept();
             if (anzterm <= 0) {
                 return;
             }
+            /*
             String vgldat1 = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZDATUM);
+            logger.debug("vgldat1 in tabakrez: " + vgldat1);
+            LocalDate rezDat = rez.getRezDatum();
+            vgldat1 = rez.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+            logger.debug("vgldat1 in rez: " + vgldat1 + " as localdate: " + rezDat);
             String vgldat2 = (String) dtermm.getValueAt(0, 0);
-            String vgldat3 = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_SPAETBEHBEG);
+            logger.debug("vgldat2 in tabakrez: " + vgldat2);
+            LocalDate ersterBehTermin = LocalDate.parse(
+                                                (rez.getTermine().split("\n")[0]).split("@")[0], // Von 1.Zeile alles vor '@'
+                                                DateTimeFormatters.ddMMYYYYmitPunkt);
+            logger.debug("vlgdat2 as localdate: " + ersterBehTermin);
+            */
+            // String vgldat3 = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_SPAETBEHBEG);
+            // logger.debug("vlgdat3 in tabakrez: " + vgldat3);
+            // LocalDate spaetesterAnfang = rez.getLastDate();
+            // logger.debug("vlgdat3 as localdate: " + spaetesterAnfang);
             String vglreznum = tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                         .toString();
+            logger.debug("vglRezNum in tabakrez: " + vglreznum);
+            vglreznum = rez.getRezNr();
+            logger.debug("vglRezNum in rez: " + vglreznum);
 
             // TODO: delete me after Rezepte have been sorted
             int dummypeisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
@@ -2510,53 +2517,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             //  passing patId & rezNr as params
             /*********************/
             // First block: various Patientenstammdaten checks
-            if (Reha.instance.patpanel.patDaten.get(23)
-                                               .trim()
-                                               .length() != 5) {
-                JOptionPane.showMessageDialog(null, "Die im Patientenstamm zugewiesene Postleitzahl ist fehlerhaft");
+            if (!pruefePatDatenVorRezAbschluss(rez))
                 return;
-            }
-            if (Reha.instance.patpanel.patDaten.get(14)
-                                               .trim()
-                                               .equals("")) {
-                JOptionPane.showMessageDialog(null,
-                        "Die im Patientenstamm zugewiesene Krankenkasse hat keine Kassennummer");
-                return;
-            }
-            if (Reha.instance.patpanel.patDaten.get(15)
-                                               .trim()
-                                               .equals("")) {
-                JOptionPane.showMessageDialog(null, "Der Mitgliedsstatus fehlt im Patientenstamm, bitte eintragen");
-                return;
-            }
-            if ("135".indexOf(Reha.instance.patpanel.patDaten.get(15)
-                                                             .substring(0, 1)) < 0) {
-                JOptionPane.showMessageDialog(null, "Der im Patientenstamm vermerkte Mitgliedsstatus ist ung\u00fcltig\n\n"
-                        + "Fehlerhafter Status = " + Reha.instance.patpanel.patDaten.get(15) + "\n");
-                return;
-            }
-            if (Reha.instance.patpanel.patDaten.get(16)
-                                               .trim()
-                                               .equals("")) {
-                JOptionPane.showMessageDialog(null,
-                        "Die Krankenkassen-Mitgliedsnummer fehlt im Patientenstamm, bitte eintragen");
-                return;
-            }
-            // TODO: delete me once Rezepte has been sorted
-            if (!Reha.instance.patpanel.patDaten.get(68)
-                                                .trim()
-                                                .equals(Reha.instance.patpanel.vecaktrez.get(37))) {
-                JOptionPane.showMessageDialog(null,
-                        "ID der Krankenkasse im Patientenstamm pa\u00dft nicht zu der ID der Krankenkasse im Rezept");
-                return;
-            }
-            if (!Reha.instance.patpanel.patDaten.get(68)
-                    .trim()
-                    .equals(Integer.toString(rez.getkId()))) {
-                JOptionPane.showMessageDialog(null,
-                        "ID der Krankenkasse im Patientenstamm pa\u00dft nicht zu der ID der Krankenkasse im Rezept");
-                return;
-            }
 
             // Ok, now we've got enough valid Patientenstammdaten to bill a Rezept
             
@@ -2565,18 +2527,26 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             
             // TODO: Change to new RezeptNummern & Diszi-class
             String diszi = RezTools.getDisziplinFromRezNr(rez.getRezNr());
-            int preisgruppe = rez.getPreisGruppe();
+            logger.debug("Diszi from rezTools: " + diszi);
+            logger.debug("Diszi from rez: " + rez.getRezClass());
 
+            if (!doTageTest(rez)) {
+                logger.debug("TageTest with Rezept determined not HMR-conform");
+                return;
+            }
+            /*
             if (!doTageTest(vgldat3, vgldat2, anzterm, diszi, preisgruppe - 1)) {
                 return;
             }
+            */
 
             /*********************/
             // Next Block, are Termine of this Rezept also listed in other Rezepte?
             // RezepteTools rezTools = new RezepteTools(mand.ik());
-            List<String[]> doubletten = RezeptFensterTools.doDoublettenTest(rezToTest, mand.ik());
+            // this originally used (way) above rezToTezt
+            List<String[]> doubletten = RezeptFensterTools.doDoublettenTest(rez, mand.ik());
             if (doubletten.size() > 0) {
-                String msg = "<html><b><font color='#ff0000'>Achtung! In new way</font><br><br>"
+                String msg = "<html><b><font color='#ff0000'>Achtung!</font><br><br>"
                         + "Ein oder mehrere Behandlungstage wurden in anderen Rezepten entdeckt/abgerechnet</b><br><br>";
                 for (String[] doublette : doubletten) {
                     msg = msg + "Behandlungstag: " + doublette[1]
@@ -2649,6 +2619,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             Vector<Integer> anzahlen = new Vector<Integer>();
             Vector<String> hmpositionen = new Vector<String>();
 
+            int preisgruppe = rez.getPreisGruppe();
+            
             String position = "";
 
             Disziplinen disziSelect = new Disziplinen();
@@ -2815,13 +2787,158 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     /**
      * Checks the dates for too many days between Rezept-Datum & Behandlungsbeginn and/or too many days between 2 Termine
      * 
+     * @return true if test passed
+     */
+    private boolean doTageTest(Rezept rez) {
+        List<LocalDate> termine = new ArrayList<LocalDate>();
+        String disziplin;
+        int preisgruppe;
+        List<String> kommentare = new ArrayList<String>();
+        String ret;
+        for (String termin : rez.getTermine().split("\n")) {
+            String[] t = termin.split("@"); // 0=dtsch-dat, 1=behandler, 2=kommentar, 3=HM, 4=sql-dat
+            termine.add(LocalDate.parse(t[0], DateTimeFormatters.ddMMYYYYmitPunkt));
+            kommentare.add(t[2]);
+        }
+        
+        disziplin = Disziplin.ofShort(rez.getRezClass()).medium;
+        preisgruppe = rez.getPreisGruppe() - 1; // I swear, I'll kill s/o for this one of these days...
+        // Frist zwischen RezDat (bzw. spaetester BehBeginn) und tatsaechlichem BehBeginn
+        int fristbeginn = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                            .get(0)).get(preisgruppe);
+        // Frist zwischen den Behjandlungen
+        int fristbreak = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                           .get(2)).get(preisgruppe);
+        if (fristbreak > 14) {      // Magic number - Astrid, this will need checking on new HMR
+            if (!disziplin.equals("Podo")) {
+                fristbreak = 14;    // Magic number - Astrid, this will need checking on new HMR
+            }
+        }
+        // Beginn-Berechnung nach Kalendertagen
+        boolean ktagebeginn = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                                .get(1)).get(preisgruppe);
+        // Unterbrechung-Berechnung nach Kalendertagen
+        boolean ktagebreak = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                               .get(3)).get(preisgruppe);
+        // Beginnfrist: Samstag als Werktag werten (wirk nur bei Werktagregel)
+        boolean beginnsamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                                  .get(4)).get(preisgruppe);
+        // Unterbrechungsfrist: Samstag als Werktag werten (wirk nur bei Werktagregel)
+        boolean breaksamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
+                                                                                 .get(5)).get(preisgruppe);
+        long utage = 0;
+        logger.debug("Frist zum BehBeg: " + fristbeginn);
+        // This wasn't part of original code:
+        // The lazy way (assumes correctly set LastDate):
+        if ( termine.get(0).isAfter(rez.getLastDate()) ) {
+            
+            int frage = JOptionPane.showConfirmDialog(null,
+                    "<html>Der erste Termin ist nach sp&auml;testem Behandlungsdatum."
+                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
+                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+            if (frage == JOptionPane.NO_OPTION) {
+                return false;
+            }
+        }
+        // The complicated way (works only on Rezept-Datum & 1. Termin + Frist from Systempreislisten.hmFristen):
+        // It's possible that lastDate is not (re-)set when a Rezept is edited (RezDatum changed)?
+        // But, to spare user of pot. 2x same question, we'll else'it here:
+        else if ( (utage =  ChronoUnit.DAYS.between( rez.getRezDatum(), termine.get(0) ) ) > fristbeginn ) {
+            
+            int frage = JOptionPane.showConfirmDialog(null,
+                    "<html>Der erste Termin ist<BR/>" + utage + "<BR/>nach Rezeptdatum."
+                    + "<BR/>M&ouml;chten Sie das Rezept trotzdem abschliessen?</html>",
+                    "Wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+            if (frage == JOptionPane.NO_OPTION) {
+                return false;
+            }
+        }
+        for(int i=1; i<termine.size(); i++) {
+            if(termine.get(i-1).equals(termine.get(i))) {
+                JOptionPane.showMessageDialog(null,
+                        "Zwei identische Behandlungstage sind nicht zul\u00e4ssig - Abschlu\u00df des Rezeptes fehlgeschlagen");
+                return false;
+            }
+            if( termine.get(i).isBefore(termine.get(i - 1))) {
+                JOptionPane.showMessageDialog(null,
+                        "Bitte sortieren Sie zuerst die Behandlungstage - Abschlu\u00df des Rezeptes fehlgeschlagen");
+                return false;
+            }
+            
+            // PRE: Der Unterbrechungsgrund ist in dem "zu spaetem" Termin, 
+            if (ktagebreak) {
+                if (!"RSFT".contains(disziplin)) {
+                    if ( ( (utage = ChronoUnit.DAYS.between(termine.get(i-1), termine.get(i) ) ) > fristbreak)
+                                    && (kommentare.get(i).trim().isEmpty())) {
+                        ret = rezUnterbrechung(true, "", i + 1, Long.toString(utage));// Unterbrechungsgrund
+                        if (ret.isEmpty()) {
+                            return false;
+                        } else {
+                            dtermm.setValueAt(ret, i, 2);
+                        }
+                    }
+                }
+            } else {
+                if (!"RSFT".contains(disziplin)) {
+                    if ((utage = HMRCheck.hmrTageDifferenz(
+                                            termine.get(i-1).format(DateTimeFormatters.ddMMYYYYmitPunkt),
+                                            termine.get(i).format(DateTimeFormatters.ddMMYYYYmitPunkt),
+                                            fristbreak,
+                                            breaksamstag)) > 0
+                            && kommentare.get(i).trim().isEmpty()) {
+                        ret = rezUnterbrechung(true, "", i + 1, Long.toString(utage));// Unterbrechungsgrund-Eingabe
+                        if (ret.isEmpty()) {
+                            return false;
+                        } else {
+                            // FIXME: this needs to properly add the comment to the rez, and then re-read it...
+                            RezeptFensterTools.updateKommentarInTermin(rez, i, ret, mand.ik());
+                            // TODO: reread/-paint dterm
+                            // Original code as Q&D for above todo - caution! a table-change-listener may re-write to Rez&DB
+                            // dtermm.setValueAt(ret, i, 2);
+                        }
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Adds/changes a comment of a Termin in the Termine-String of a Rezept.
+     * <BR/>Alters the passed in Rezept and also updates the database with new Termine
+     * <BR/>
+     * <BR/>TODO: think about transferring this to Rezept/-Dto...
+     *  
+     * @param rez           Rezept to be altered
+     * @param welcherTermin Which of the termine should be altered. 0=first Termin
+     * @param kommentar     The kommentar (Unterbrech-Begr.?) to be set
+     **/
+    private void updateKommentarInTermin(Rezept rez, int welcherTermin, String kommentar) {
+        String[] termine = rez.getTermine().split("\n");
+        String[] eintrag = termine[welcherTermin].split("@");
+        eintrag[2] = kommentar;
+        String neuerEintrag = eintrag[0];
+        for (int i=1; i<eintrag.length; i++)
+            neuerEintrag.concat("@" + eintrag[i]);
+        termine[welcherTermin] = neuerEintrag;
+        String neueTermine = termine[0];
+        for (int i=1; i<termine.length; i++)
+            neueTermine.concat("\n" + termine[i]);
+        rDto.updateRezeptTermine(rez.getId(), neueTermine);
+        rez.setTermine(neueTermine);
+    }
+    
+    /**
+     * Checks the dates for too many days between Rezept-Datum & Behandlungsbeginn and/or too many days between 2 Termine
+     *  Huh?? Where's the test on "Rez-Dat vs Behandlungsbeginn" gone?
      * @param latestdat
      * @param starttag
      * @param tageanzahl
      * @param disziplin
      * @param preisgruppe
      * @return
-     */
+     **/
     // TODO: To properly use the new rezept-class the strings *tag should be changed to LocalDate & disziplin to class disziplin
     // TODO: Move this entire check to some other class like AktuelleRezepteChecks.java or whatnot
     private boolean doTageTest(String latestdat, String starttag, int tageanzahl, String disziplin, int preisgruppe) {
@@ -2836,9 +2953,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         int fristbreak = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
                                                                            .get(2)).get(preisgruppe);
 
-        if (fristbreak > 14) {
+        if (fristbreak > 14) {      // Magic number - Astrid, this will need checking on new HMR
             if (!disziplin.equals("Podo")) {
-                fristbreak = 14;
+                fristbreak = 14;    // Magic number - Astrid, this will need checking on new HMR
             }
         }
         // Beginn-Berechnung nach Kalendertagen
@@ -2904,6 +3021,40 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return true;
     }
 
+    private boolean pruefePatDatenVorRezAbschluss(Rezept rez) {
+        if (Reha.instance.patpanel.patDaten.get(23).trim().length() != 5) {
+            JOptionPane.showMessageDialog(null, "Die im Patientenstamm zugewiesene Postleitzahl ist fehlerhaft");
+            return false;
+        }
+        if (Reha.instance.patpanel.patDaten.get(14).trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null,
+                                          "Die im Patientenstamm zugewiesene Krankenkasse hat keine Kassennummer");
+            return false;
+        }
+        if (Reha.instance.patpanel.patDaten.get(15).trim().isEmpty()) {
+            JOptionPane.showMessageDialog(null, "Der Mitgliedsstatus fehlt im Patientenstamm, bitte eintragen");
+            return false;
+        }
+        if ("135".indexOf(Reha.instance.patpanel.patDaten.get(15)
+                                                            .substring(0, 1)) < 0) {
+        JOptionPane.showMessageDialog(null, "Der im Patientenstamm vermerkte Mitgliedsstatus ist ung\u00fcltig\n\n"
+                                            + "Fehlerhafter Status = " + Reha.instance.patpanel.patDaten.get(15) + "\n");
+            return false;
+        }
+        if (Reha.instance.patpanel.patDaten.get(16).trim().isEmpty()) {
+        JOptionPane.showMessageDialog(null,
+                                      "Die Krankenkassen-Mitgliedsnummer fehlt im Patientenstamm, bitte eintragen");
+            return false;
+        }
+        if (!Reha.instance.patpanel.patDaten.get(68).trim()
+                                                    .equals(Integer.toString(rez.getkId()))) {
+            JOptionPane.showMessageDialog(null,
+                                          "ID der Krankenkasse im Patientenstamm pa\u00dft nicht zu der ID der Krankenkasse im Rezept");
+            return false;
+        }
+        return true;
+    }
+    
     private boolean rezGeschlossenMitWarnung() {
         if (aktuelAngezeigtesRezept.isAbschluss()) {
             JOptionPane.showMessageDialog(null,

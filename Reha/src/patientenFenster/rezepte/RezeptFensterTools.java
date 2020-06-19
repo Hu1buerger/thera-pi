@@ -178,5 +178,32 @@ public final class RezeptFensterTools {
        /*****************/
        return doublette;
    }
+   
+   /**
+    * Adds/changes a comment of a Termin in the Termine-String of a Rezept.
+    * <BR/>Alters the passed in Rezept and also updates the database with new Termine
+    * <BR/>
+    * <BR/>TODO: think about transferring this to Rezept/-Dto...
+    *  
+    * @param rez           Rezept to be altered
+    * @param welcherTermin Which of the termine should be altered. 0=first Termin
+    * @param kommentar     The kommentar (Unterbrech-Begr.?) to be set
+    **/
+   public static void updateKommentarInTermin(Rezept rez, int welcherTermin, String kommentar, IK ik) {
+       RezeptDto rDto = new RezeptDto(ik);
+       
+       String[] termine = rez.getTermine().split("\n");
+       String[] eintrag = termine[welcherTermin].split("@");
+       eintrag[2] = kommentar;
+       String neuerEintrag = eintrag[0];
+       for (int i=1; i<eintrag.length; i++)
+           neuerEintrag.concat("@" + eintrag[i]);
+       termine[welcherTermin] = neuerEintrag;
+       String neueTermine = termine[0];
+       for (int i=1; i<termine.length; i++)
+           neueTermine.concat("\n" + termine[i]);
+       rDto.updateRezeptTermine(rez.getId(), neueTermine);
+       rez.setTermine(neueTermine);
+   }
 
 }
