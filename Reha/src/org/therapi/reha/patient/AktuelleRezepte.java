@@ -2484,23 +2484,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             if (anzterm <= 0) {
                 return;
             }
-            /*
-            String vgldat1 = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZDATUM);
-            logger.debug("vgldat1 in tabakrez: " + vgldat1);
-            LocalDate rezDat = rez.getRezDatum();
-            vgldat1 = rez.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
-            logger.debug("vgldat1 in rez: " + vgldat1 + " as localdate: " + rezDat);
-            String vgldat2 = (String) dtermm.getValueAt(0, 0);
-            logger.debug("vgldat2 in tabakrez: " + vgldat2);
-            LocalDate ersterBehTermin = LocalDate.parse(
-                                                (rez.getTermine().split("\n")[0]).split("@")[0], // Von 1.Zeile alles vor '@'
-                                                DateTimeFormatters.ddMMYYYYmitPunkt);
-            logger.debug("vlgdat2 as localdate: " + ersterBehTermin);
-            */
-            // String vgldat3 = (String) tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_SPAETBEHBEG);
-            // logger.debug("vlgdat3 in tabakrez: " + vgldat3);
-            // LocalDate spaetesterAnfang = rez.getLastDate();
-            // logger.debug("vlgdat3 as localdate: " + spaetesterAnfang);
             String vglreznum = tabaktrez.getValueAt(currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                         .toString();
             logger.debug("vglRezNum in tabakrez: " + vglreznum);
@@ -2534,12 +2517,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 logger.debug("TageTest with Rezept determined not HMR-conform");
                 return;
             }
-            /*
-            if (!doTageTest(vgldat3, vgldat2, anzterm, diszi, preisgruppe - 1)) {
-                return;
-            }
-            */
-
+            
             /*********************/
             // Next Block, are Termine of this Rezept also listed in other Rezepte?
             // RezepteTools rezTools = new RezepteTools(mand.ik());
@@ -2904,123 +2882,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return true;
     }
     
-    /**
-     * Adds/changes a comment of a Termin in the Termine-String of a Rezept.
-     * <BR/>Alters the passed in Rezept and also updates the database with new Termine
-     * <BR/>
-     * <BR/>TODO: think about transferring this to Rezept/-Dto...
-     *  
-     * @param rez           Rezept to be altered
-     * @param welcherTermin Which of the termine should be altered. 0=first Termin
-     * @param kommentar     The kommentar (Unterbrech-Begr.?) to be set
-     **/
-    private void updateKommentarInTermin(Rezept rez, int welcherTermin, String kommentar) {
-        String[] termine = rez.getTermine().split("\n");
-        String[] eintrag = termine[welcherTermin].split("@");
-        eintrag[2] = kommentar;
-        String neuerEintrag = eintrag[0];
-        for (int i=1; i<eintrag.length; i++)
-            neuerEintrag.concat("@" + eintrag[i]);
-        termine[welcherTermin] = neuerEintrag;
-        String neueTermine = termine[0];
-        for (int i=1; i<termine.length; i++)
-            neueTermine.concat("\n" + termine[i]);
-        rDto.updateRezeptTermine(rez.getId(), neueTermine);
-        rez.setTermine(neueTermine);
-    }
-    
-    /**
-     * Checks the dates for too many days between Rezept-Datum & Behandlungsbeginn and/or too many days between 2 Termine
-     *  Huh?? Where's the test on "Rez-Dat vs Behandlungsbeginn" gone?
-     * @param latestdat
-     * @param starttag
-     * @param tageanzahl
-     * @param disziplin
-     * @param preisgruppe
-     * @return
-     **/
-    // TODO: To properly use the new rezept-class the strings *tag should be changed to LocalDate & disziplin to class disziplin
-    // TODO: Move this entire check to some other class like AktuelleRezepteChecks.java or whatnot
-    private boolean doTageTest(String latestdat, String starttag, int tageanzahl, String disziplin, int preisgruppe) {
-        String vglalt;
-        String vglneu;
-        String kommentar;
-        String ret;
-        // Frist zwischen RezDat (bzw. spaetester BehBeginn) und tatsaechlichem BehBeginn
-        int fristbeginn = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                            .get(0)).get(preisgruppe);
-        // Frist zwischen den Behjandlungen
-        int fristbreak = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                           .get(2)).get(preisgruppe);
-
-        if (fristbreak > 14) {      // Magic number - Astrid, this will need checking on new HMR
-            if (!disziplin.equals("Podo")) {
-                fristbreak = 14;    // Magic number - Astrid, this will need checking on new HMR
-            }
-        }
-        // Beginn-Berechnung nach Kalendertagen
-        boolean ktagebeginn = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                                .get(1)).get(preisgruppe);
-        // Unterbrechung-Berechnung nach Kalendertagen
-        boolean ktagebreak = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                               .get(3)).get(preisgruppe);
-        // Beginnfrist: Samstag als Werktag werten (wirk nur bei Werktagregel)
-        boolean beginnsamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                                  .get(4)).get(preisgruppe);
-        // Unterbrechungsfrist: Samstag als Werktag werten (wirk nur bei Werktagregel)
-        boolean breaksamstag = (Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(disziplin)
-                                                                                 .get(5)).get(preisgruppe);
-        for (int i = 0; i < tageanzahl; i++) {
-            if (i > 0) {
-                vglalt = (String) dtermm.getValueAt(i - 1, 0);
-                vglneu = (String) dtermm.getValueAt(i, 0);
-                if (vglalt.equals(vglneu)) {
-                    JOptionPane.showMessageDialog(null,
-                            "Zwei identische Behandlungstage sind nicht zul\u00e4ssig - Abschlu\u00df des Rezeptes fehlgeschlagen");
-                    return false;
-                }
-                if (DatFunk.TageDifferenz(vglalt, vglneu) < 0) {
-                    JOptionPane.showMessageDialog(null,
-                            "Bitte sortieren Sie zuerst die Behandlungstage - Abschlu\u00df des Rezeptes fehlgeschlagen");
-                    return false;
-                }
-
-                kommentar = (String) dtermm.getValueAt(i, 2);
-                long utage = 0;
-                // Wenn nach Kalendertagen ermittelt werden soll
-                if (ktagebreak) {
-                    if (!"RSFT".contains(aktuelAngezeigtesRezept.getRezNr()
-                                                                         .substring(0, 2))) {
-                        if (((utage = DatFunk.TageDifferenz(vglalt, vglneu)) > fristbreak) && (kommentar.trim()
-                                                                                                        .equals(""))) {
-                            ret = rezUnterbrechung(true, "", i + 1, Long.toString(utage));// Unterbrechungsgrund
-                            if (ret.equals("")) {
-                                return false;
-                            } else {
-                                dtermm.setValueAt(ret, i, 2);
-                            }
-                        }
-                    }
-                } else {
-                    if (!"RSFT".contains(aktuelAngezeigtesRezept.getRezNr()
-                                                                         .substring(0, 2))) {
-                        if ((utage = HMRCheck.hmrTageDifferenz(vglalt, vglneu, fristbreak, breaksamstag)) > 0
-                                && kommentar.trim()
-                                            .equals("")) {
-                            ret = rezUnterbrechung(true, "", i + 1, Long.toString(utage));// Unterbrechungsgrund
-                            if (ret.equals("")) {
-                                return false;
-                            } else {
-                                dtermm.setValueAt(ret, i, 2);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return true;
-    }
-
     private boolean pruefePatDatenVorRezAbschluss(Rezept rez) {
         if (Reha.instance.patpanel.patDaten.get(23).trim().length() != 5) {
             JOptionPane.showMessageDialog(null, "Die im Patientenstamm zugewiesene Postleitzahl ist fehlerhaft");
