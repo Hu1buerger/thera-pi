@@ -86,6 +86,10 @@ public class HMRCheck {
         fehlertext = new FehlerTxt();
     }
 
+    /**
+     * This should now be obsoleted
+     * 
+     *
     public HMRCheck(Rezeptvector rezept, String currTypeOfVO, Vector<Vector<String>> xpreisvec) {
         diszis = new Disziplinen();
         diszis.setCurrTypeOfVO(currTypeOfVO);
@@ -113,35 +117,36 @@ public class HMRCheck {
         }
         fehlertext = new FehlerTxt();
     }
+    */
 
-    public HMRCheck(Rezept rezTmpRezept, String currDisziFromActRK, Vector<Vector<String>> preisvec2) {
+    public HMRCheck(Rezept rezept, String currDisziFromActRK, Vector<Vector<String>> preisvec2) {
         // TODO Auto-generated constructor stub
         diszis = new Disziplinen();
         diszis.setCurrTypeOfVO(currDisziFromActRK);
         anzahl = new Vector<Integer>();
         positionen = new Vector<String>();
-        indischluessel = rezTmpRezept.getIndikatSchl().replace(" ", "");
+        indischluessel = rezept.getIndikatSchl().replace(" ", "");
         disziplin = diszis.getCurrDisziIdx();
         for (int i = 0; i < 4; i++) {
-            String tmp = rezTmpRezept.getHMPos(i + 1);
+            String tmp = rezept.getHMPos(i + 1);
             if (tmp != "") {
-                anzahl.add(i, rezTmpRezept.getBehAnzahl(i + 1));
+                anzahl.add(i, rezept.getBehAnzahl(i + 1));
                 positionen.add(i, tmp);
             } else {
                 break;
             }
         }
         preisvec = preisvec2;
-        rezeptart = rezTmpRezept.getRezeptArt();
-        reznummer = rezTmpRezept.getRezNr();
-        unter18 = rezTmpRezept.isUnter18();
+        rezeptart = rezept.getRezeptArt();
+        reznummer = rezept.getRezNr();
+        unter18 = rezept.isUnter18();
 //        rezdatum = DatFunk.sDatInDeutsch(rezTmpRezept.getRezDatum());
-        rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
-        if (rezTmpRezept.getLastDate() == null) {
-            letztbeginn = RezeptFensterTools.calcLatestStartDate(rezTmpRezept)
+        rezdatum = rezept.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+        if (rezept.getLastDate() == null) {
+            letztbeginn = RezeptFensterTools.calcLatestStartDate(rezept)
                                                     .format(DateTimeFormatters.ddMMYYYYmitPunkt);
         } else {
-            letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+            letztbeginn = rezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         }
         if (reznummer == null || reznummer.isEmpty()) {
             logger.debug("Neues Rezept fuer HMR-Check");
