@@ -86,7 +86,7 @@ public class RezeptTableModel extends AbstractTableModel {
         default:
             //should never happen
 
-            logger.error("unknown column requested: [column = " + columnIndex);
+            logger.error("unknown column requested: [column = " + columnIndex + " ]");
             return new Object();
         }
     }
