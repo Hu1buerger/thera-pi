@@ -22,6 +22,7 @@ import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
 import commonData.Rezeptvector;
 import hauptFenster.Reha;
+import patientenFenster.rezepte.RezeptFensterTools;
 import rezept.Rezept;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -136,7 +137,12 @@ public class HMRCheck {
         unter18 = rezTmpRezept.isUnter18();
 //        rezdatum = DatFunk.sDatInDeutsch(rezTmpRezept.getRezDatum());
         rezdatum = rezTmpRezept.getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
-        letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+        if (rezTmpRezept.getLastDate() == null) {
+            letztbeginn = RezeptFensterTools.calcLatestStartDate(rezTmpRezept)
+                                                    .format(DateTimeFormatters.ddMMYYYYmitPunkt);
+        } else {
+            letztbeginn = rezTmpRezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+        }
         if (reznummer == null || reznummer.isEmpty()) {
             logger.debug("Neues Rezept fuer HMR-Check");
             neurezept = true;

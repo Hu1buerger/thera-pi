@@ -994,9 +994,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         Object[] fields = new Object[]{
                                 listAktuelleRez.get(i).getRezNr(),
                                 listAktuelleRez.get(i).getZZStatus(),
-                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getRezDatum().toString()),
-                                DatFunk.sDatInDeutsch(listAktuelleRez.get(i).getErfassungsDatum().toString()),
-                                DatFunk.sDatInDeutsch(lastDateDefaultIfNull(listAktuelleRez.get(i)).toString()),
+                                listAktuelleRez.get(i).getRezDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt),
+                                listAktuelleRez.get(i).getErfassungsDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt),
+                                lastDateDefaultIfNull(listAktuelleRez.get(i)).format(DateTimeFormatters.ddMMYYYYmitPunkt),
                                 listAktuelleRez.get(i).isAbschluss(),
                                 listAktuelleRez.get(i).getPatIntern(),
                                 listAktuelleRez.get(i).getIndikatSchl(),

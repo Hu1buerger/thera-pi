@@ -419,6 +419,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             strRezepklassenAktiv = diszis.getActiveRK();
             jcmbRKLASSE = diszis.getComboBoxActiveRK();
 
+            jtfBEGINDAT.setToolTipText("Nur setzen falls abweichend von HMR Frist");
             if (SystemConfig.AngelegtVonUser) {
                 jtfANGEL.setText(Reha.aktUser);
                 jtfANGEL.setEditable(false);
@@ -992,11 +993,13 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                                                                                    jtfPREISGR.getText(), aktuelleDisziplin);
                     setLastDatInTable(stest2);
                     // Lets skip this for now & see who goes bust
-                    if ( !".  .".equals(jtfBEGINDAT.getText().trim())) {
+                    if ( !".  .".equals(jtfBEGINDAT.getText().trim()) 
+                         && !stest2.equals(LocalDate.parse(jtfBEGINDAT.getText(), DateTimeFormatters.ddMMYYYYmitPunkt))) {
                         thisRezept.setLastDate(stest2);
-                        logger.debug("Setting non-default last-date.\nWas: \"" + jtfBEGINDAT.getText() + "\"" );
+                        logger.debug("Setting non-default last-date. Was: \"" + jtfBEGINDAT.getText() + "\"" );
                     } else {
                         // sonst kann man es nicht loeschen ;)
+                        logger.debug("LastDate was determined to be either empty or contain default HMR-Frist date");
                         thisRezept.setLastDate(null);
                     }
                     thisRezept.setLastEdDate(LocalDate.now());
@@ -1439,6 +1442,14 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             if (componentName.equals("rez_datum") || componentName.equals("lastdate")) {
                 if (ctrlIsPressed && jumpForward) {
                     eingabeVerordnArt.requestFocusInWindow();
+                } else if (componentName.equals("rez_datum")) {
+                    if (".  .".equals(jtfBEGINDAT.getText().trim()) && !".  .".equals(jtfREZDAT.getText().trim())) {
+                        // FIXME: Q&D - figure out proper way to get HMR-Frist (and change it on diszi-change)
+                        jtfBEGINDAT.setToolTipText("HMR-Frist: " 
+                                                    + (LocalDate.parse(jtfREZDAT.getText(), DateTimeFormatters.ddMMYYYYmitPunkt))
+                                                                        .plusDays(14)                       // Magic Number alert!
+                                                                        .format(DateTimeFormatters.ddMMYYYYmitPunkt));
+                    }
                 }
                 return;
             }
