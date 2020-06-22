@@ -159,21 +159,21 @@ public class PatientToolBarLogic {
             // patientHauptPanel.getLogic().setzeFocus();
         }
         if (cmd.equals("comboBoxChanged")) {
-            if (patientHauptPanel.patToolBarPanel.getSucheOhneEingabe(patientHauptPanel.jcom.getSelectedIndex())) {
+            int selIdx = patientHauptPanel.jcom.getSelectedIndex();
+            if (patientHauptPanel.patToolBarPanel.getSucheOhneEingabe(selIdx)) {
                 // Eingabe sperren
-//                patientHauptPanel.tfsuchen.setDisabledTextColor(Color.red);
                 patientHauptPanel.tfsuchen.setBackground(Color.lightGray);
                 patientHauptPanel.tfsuchen.setForeground(Color.red);
                 patientHauptPanel.tfsuchen.setOpaque(true);
-//                patientHauptPanel.tfsuchen.setEnabled(false);
                 patientHauptPanel.tfsuchen.setEditable(false);
             } else {
                 // Eingabe freigeben
                 patientHauptPanel.tfsuchen.setForeground(Color.gray);
                 patientHauptPanel.tfsuchen.setOpaque(false);
-//                patientHauptPanel.tfsuchen.setEnabled(true);
                 patientHauptPanel.tfsuchen.setEditable(true);
             }
+            String txt = patientHauptPanel.patToolBarPanel.getToolTipText(selIdx);
+            patientHauptPanel.tfsuchen.setToolTipText(txt);
         }
     }
 

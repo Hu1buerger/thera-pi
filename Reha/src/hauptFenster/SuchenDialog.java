@@ -159,8 +159,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
     private void initialize() {
 
         // Lemmi 20101212: zuletzt eingestellte und gemerkte Dimension des Suchfensters zurückholen
-        Dimension dim = new Dimension(300, 400); // Diese Defaultwerte haben keine Wirkung !
-
+        Dimension dim = new Dimension(300, 400); 
         dim.width = SystemConfig.hmPatientenSuchenDlgIni.get("fensterbreite");
         dim.height = SystemConfig.hmPatientenSuchenDlgIni.get("fensterhoehe");
 
@@ -265,7 +264,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                         sucheBeenden();
                     }
 
-                    if (e.getKeyCode() == KeyEvent.VK_DOWN) { // ArrDwn gedrückt
+                    if (e.getKeyCode() == KeyEvent.VK_DOWN) {
                         e.consume();
                         if (jtable.getRowCount() > 0) {
                             jtable.requestFocus();
@@ -318,24 +317,28 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
             dim.width = minWidth;
             this.setSize(dim);
             jtable = new JXTable(tblDataModel);
+            int col_nname = 0;
+            int col_vname = 1;
+            int col_geboren = 2;
+            int col_pat_intern = 3;
+            int col_rezepte = 4;
             this.jtable.getColumnModel()
-                       .getColumn(0)
+                       .getColumn(col_nname)
                        .setPreferredWidth(100);
-            this.jtable.getColumn(3)
-                       .setMinWidth(0); // Spalte pat_intern ausblenden
-            this.jtable.getColumn(3)
-                       .setMaxWidth(0); // Breite der Spalte pat_intern
+            this.jtable.getColumn(col_pat_intern)
+                       .setMinWidth(0);
+            this.jtable.getColumn(col_pat_intern)
+                       .setMaxWidth(0);
 
-            // Lemmi 20101212: Einige maximale Spaltenbreiten fixiert
             if (suchart == toolBar.getAktRezIdx()) {
-                this.jtable.getColumn(2)
-                           .setPreferredWidth(80); // Geboren
-                this.jtable.getColumn(2)
-                           .setMaxWidth(100); // Geboren
-                this.jtable.getColumn(4)
-                           .setPreferredWidth(100); // Rezepte
+                this.jtable.getColumn(col_geboren)
+                           .setPreferredWidth(80);
+                this.jtable.getColumn(col_geboren)
+                           .setMaxWidth(100);
+                this.jtable.getColumn(col_rezepte)
+                           .setPreferredWidth(100);
 //                this.jtable.setGridColor(Color.red);  // Debughilfe
-                this.jtable.getColumn(4).sizeWidthToFit();
+                this.jtable.getColumn(col_rezepte).sizeWidthToFit();
             }
 
             InputMap inputMap = jtable.getInputMap(JComponent.WHEN_FOCUSED);
@@ -348,7 +351,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
             jtable.addKeyListener(new java.awt.event.KeyAdapter() {
                 @Override
                 public void keyPressed(java.awt.event.KeyEvent e) {
-                    if (e.getKeyCode() == 10) { // ENTER
+                    if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                         aufrufer.setLastRow(jtable.getSelectedRow());
                         sucheAbfeuern();
                         e.consume();
@@ -395,7 +398,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
             jContentPane.add(jtp, BorderLayout.CENTER);
 
             if (suchart == toolBar.getAktRezIdx()) {
-                // NOTHING to do
                 // Lemmi 20101212: wir brauchen kein Suchwert-Eingabefeld im Ergebnisdialog
                 jtext.setText("");
             } else {
@@ -450,12 +452,10 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
         if (jXTitledPanel == null) {
             jXTitledPanel = new JXTitledPanel();
 
-            // Lemmi 20101212: Erweitert um "Patienten mit aktuellen Rezepten"
             String titel = "Suche ";
             String kriterium = toolBar.getKritAsString(suchart);
             if (suchart == toolBar.getTelIdx()) {
                 titel = titel + "Nummer... " + this.fname + " in ";
-                // || suchart == toolBar.getVolleVoIdx() || suchart == toolBar.getAbgebrVoIdx()
             } else {
                 titel = titel + "Patient..." + this.fname + " in ";
             }
@@ -567,8 +567,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                         Dimension dim = SuchenDialog.this.getSize();
                         int oX = e.getXOnScreen();
                         int oY = e.getYOnScreen();
-                        for (int i = 0; i < 1; i++) { // Lemmi Frage: Was ist denn das für eine magische Konstruktion:
-                                                      // Warum kein switch????
+                        for (int i = 0; i < 1; i++) { 
                             if (sizeart == 1) { // nord-west
                                 dim.width = (oX > orgbounds[0] ? dim.width - (oX - orgbounds[0])
                                         : dim.width + (orgbounds[0] - oX));
@@ -598,8 +597,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                                 break;
                             }
                             if (sizeart == 3) { // nord
-                                // dim.width = (oX > orgbounds[0] ? dim.width+(oX-orgbounds[0]) :
-                                // dim.width-(orgbounds[0]-oX));
                                 dim.height = (oY > orgbounds[1] ? dim.height - (oY - orgbounds[1])
                                         : dim.height + (orgbounds[1] - oY));
                                 dim.width = (dim.width < 185 ? 185 : dim.width);
@@ -628,8 +625,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                             if (sizeart == 5) { // west
                                 dim.width = (oX > orgbounds[0] ? dim.width - (oX - orgbounds[0])
                                         : dim.width + (orgbounds[0] - oX));
-                                // dim.height = (oY > orgbounds[1] ? dim.height+(oY-orgbounds[1]) :
-                                // dim.height-(orgbounds[1]-oY));
                                 dim.width = (dim.width < 185 ? 185 : dim.width);
                                 dim.height = (dim.height < 125 ? 125 : dim.height);
                                 orgbounds[0] = oX;
@@ -655,8 +650,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                                 break;
                             }
                             if (sizeart == 7) { // süd
-                                // dim.width = (oX > orgbounds[0] ? dim.width+(oX-orgbounds[0]) :
-                                // dim.width-(orgbounds[0]-oX));
                                 dim.height = (oY > orgbounds[1] ? dim.height + (oY - orgbounds[1])
                                         : dim.height - (orgbounds[1] - oY));
                                 dim.width = (dim.width < 185 ? 185 : dim.width);
@@ -672,8 +665,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                             if (sizeart == 8) { // ost
                                 dim.width = (oX > orgbounds[0] ? dim.width + (oX - orgbounds[0])
                                         : dim.width - (orgbounds[0] - oX));
-                                // dim.height = (oY > orgbounds[1] ? dim.height+(oY-orgbounds[1]) :
-                                // dim.height-(orgbounds[1]-oY));
                                 dim.width = (dim.width < 185 ? 185 : dim.width);
                                 dim.height = (dim.height < 125 ? 125 : dim.height);
                                 orgbounds[0] = oX;
@@ -753,7 +744,7 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
             jButtonEx.addActionListener(new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    // table export ala rehaSql.RehaSqlPanel.starteExport() / rehaSql.RehaSqlPanel.starteCalc()
+                    // ToDo: table export ala rehaSql.RehaSqlPanel.starteExport() / rehaSql.RehaSqlPanel.starteCalc()
                     //OOTools.exportTab2Calc(jtable);
                 }
             });
@@ -877,15 +868,13 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
             setCursor(Cursors.wartenCursor);
             Vector<Vector<String>> extErgebnis = null;
 
-            eingabe = jTextField.getText()
-                                .trim();
+            eingabe = jTextField.getText();
             while (eingabe.contains("  ")) {
                 eingabe = eingabe.replace("  ", " ");
             }
             suche = eingabe.split(" ");
 
             if (suchart == toolBar.getNnVnIdx()) { // "Name Vorname"
-                // 2015-08 McM auf Suche nach Umlaut-Umschreibung erweitert
                 if (eingabe.contains(" ")) {
                     sstmt = select1 + SucheKlang("n_name", suche[0]) + ") AND (" + SucheKlang("v_name", suche[1])
                             + orderResult;
@@ -895,15 +884,6 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
 
             } else if (suchart == toolBar.getPatIdIdx()) { // "Patienten-ID"
                 sstmt = select1 + "pat_intern = '" + suche[0] + "') LIMIT 1";
-            } else if (suchart == toolBar.getVnNnIdx()) { // "Vorname Name" (Erweiterung von Drud) + Umlaut-Suche (McM)
-
-                if (eingabe.contains(" ")) {
-                    sstmt = select1 + SucheKlang("v_name", suche[0]) + ") AND (" + SucheKlang("n_name", suche[1])
-                            + orderResult;
-                } else {
-                    sstmt = select1 + SucheKlang("v_name", suche[0]) + orderResult;
-                }
-
             } else if (suchart == toolBar.getTelIdx()) { // Telefon privat, geschäftlich oder mobil
                 sstmt = "select n_name,v_name,DATE_FORMAT(geboren,'%d.%m.%Y') as geboren, pat_intern, telefonp, telefong, telefonm "
                         + "from pat5 where (telefonp LIKE '%" + suche[0] + "%' "
@@ -923,34 +903,9 @@ public class SuchenDialog extends JXDialog implements RehaTPEventListener {
                     sstmt = select1 + "anamnese LIKE '%" + suche[0] + "%'" + orderResult;
                 }
             } else if (suchart == toolBar.getVolleVoIdx()) { // Patienten mit vollen, nicht abgeschlossenen Rezepten (® by Norbart/Astrid)
-//                sstmt = "SELECT p.n_name, p.v_name, DATE_FORMAT(p.geboren,'%d.%m.%Y') AS geboren, v.pat_intern, v.rez_nr, v.behandler "
-//                        + "FROM (volle AS v left outer join fertige AS f ON v.rez_nr = f.rez_nr)"
-//                        + "LEFT JOIN pat5 AS p ON v.pat_intern = p.pat_intern "
-//                        + "WHERE f.rez_nr IS NULL ORDER BY v.behandler, v.rez_nr";
                 PatMitVollenVOs treffer = new PatMitVollenVOs(new IK(Reha.getAktIK()));
                 extErgebnis = treffer.getPatList();
             } else if (suchart == toolBar.getAbgebrVoIdx()) { // Patienten mit abgebrochenen Rezepten (® by MSc)
-//                sstmt = "(SELECT p.n_name, p.v_name, DATE_FORMAT(p.geboren,'%d.%m.%Y') AS geboren, v.pat_intern, v.rez_nr, "
-//                        +   "str_to_date(substring(v.termine FROM (character_length(v.termine)-10)),'%Y-%m-%d') AS LetzteBehandlung, "
-//                        +   "substring(substring(right(v.termine,length(v.termine)/ (length(v.termine)-length(replace(v.termine,'\n','')))),"
-//                        +     "locate('@',right(v.termine,length(v.termine)/(LENGTH(v.termine)-length(replace(v.termine,'\n','')))))+1 ),1 ,"
-//                        +     "locate('@',substring(right(v.termine,length(v.termine)/ (length(v.termine)-length(replace(v.termine,'\n','')))),"
-//                        +     "locate('@',right(v.termine,length(v.termine)/(length(v.termine)-length(replace(v.termine,'\n','')))))+1 ))-1 ) AS LetzterTherapeut "
-//                        + "FROM ("
-//                        +   "SELECT v1.pat_intern, v1.rez_nr, v1.termine, v1.abschluss FROM verordn AS v1 "
-//                        +   "WHERE str_to_date(substring(v1.termine FROM (character_length(v1.termine)-10)),'%Y-%m-%d') <= '2019-09-25' "
-//                        + ") AS v LEFT JOIN pat5 AS p ON (v.pat_intern=p.pat_intern) "
-//                        + "WHERE !(v.termine='') AND !(v.termine is null) AND (v.abschluss='F') "
-//                        + "ORDER BY substring(v.termine FROM (character_length(v.termine)-10))"
-//                        + ") UNION ("   // + nie angefangene Rezepte
-//                        + "SELECT p.n_name, p.v_name, DATE_FORMAT(p.geboren,'%d.%m.%Y') AS geboren, v.pat_intern, rez_nr, "
-//                        +     "'  - ' AS LetzteBehandlung, '' AS LetzterTherapeut "
-//                        + "FROM ("
-//                        +   " SELECT v1.pat_intern, v1.rez_nr, v1.termine, v1.abschluss FROM verordn AS v1 "
-//                        +   "WHERE v1.rez_datum  <= '2019-09-25' "
-//                        + ") as v LEFT JOIN pat5 AS p ON (v.pat_intern=p.pat_intern) "
-//                        + "WHERE (v.termine='') OR (v.termine is null)"
-//                        + ") ORDER BY LetzteBehandlung DESC, rez_nr, n_name";
                 PatMitAbgebrochenenVOs treffer = new PatMitAbgebrochenenVOs(new IK(Reha.getAktIK()));
                 extErgebnis = treffer.getPatList();
             } else if (suchart == toolBar.getAktRezIdx()) { // Lemmi 20101212: Erweitert um "Nur Patienten mit aktuellen

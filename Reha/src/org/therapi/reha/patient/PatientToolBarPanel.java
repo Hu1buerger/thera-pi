@@ -36,6 +36,15 @@ public class PatientToolBarPanel extends JXPanel {
     private String kriterium[] = { "Nachname Vorname", "Telefon", "Notizen", "Patienten-ID",
             "volle, nicht abgeschlossene Rezepte", "abgebrochene Rezepte (> 21 Tage inaktiv)", "Patienten mit aktuellen Rezepten" };
 
+    private String toolTipTexte[] = { 
+            "<html>Sucheingabe (Anfangsbuchstaben von):<br><br>Nachname[Leerzeichen]Vorname<br>&nbsp;&nbsp;oder<br>Nachname<br>&nbsp;&nbsp;oder<br>[Leerzeichen]Vorname</html>", 
+            "enthaltene Ziffernfolge eingeben", 
+            "enthaltene Buchstabenfolge eingeben", 
+            "ID eingeben",
+            "kein Filter m\u00f6glich", 
+            "kein Filter m\u00f6glich", 
+            "kein Filter m\u00f6glich" };
+
     public String getKritAsString(int idx) {
         return kriterium[idx];
     }
@@ -48,11 +57,6 @@ public class PatientToolBarPanel extends JXPanel {
     public int getPatIdIdx() {
         return Arrays.asList(kriterium)
                      .indexOf("Patienten-ID");
-    }
-
-    public int getVnNnIdx() {
-        return Arrays.asList(kriterium)
-                     .indexOf("Vorname Nachname");
     }
 
     public int getTelIdx() {
@@ -87,6 +91,13 @@ public class PatientToolBarPanel extends JXPanel {
         return false;
     }
 
+    public String getToolTipText(int idx) {
+        if (idx < toolTipTexte.length) {
+            return toolTipTexte[idx];
+        }
+        return null;
+    }
+
 
     public PatientToolBarPanel(PatientHauptPanel patHauptPanel) {
         super();
@@ -111,8 +122,9 @@ public class PatientToolBarPanel extends JXPanel {
 
         // Lemmi 20101212: Die letzte benutzte Suchart aus der INI-Datei holen und
         // wieder setzen
-        int suchart = SystemConfig.hmPatientenSuchenDlgIni.get("suchart");
+         int suchart = SystemConfig.hmPatientenSuchenDlgIni.get("suchart");
         patientHauptPanel.jcom.setSelectedIndex(suchart);
+        String toolTipText = getToolTipText(suchart);
 
         patientHauptPanel.jcom.setBackground(new Color(247, 209, 176));
         add(patientHauptPanel.jcom, cc.xyw(4, 2, 8));
@@ -171,6 +183,7 @@ public class PatientToolBarPanel extends JXPanel {
         patientHauptPanel.tfsuchen.setName("suchenach");
         patientHauptPanel.tfsuchen.addKeyListener(patientHauptPanel.toolBarKeys);
         patientHauptPanel.tfsuchen.addFocusListener(patientHauptPanel.toolBarFocus);
+        patientHauptPanel.tfsuchen.setToolTipText(toolTipText);
         // patientHauptPanel.tfsuchen.setDropTarget(dndt);
         try {
             patientHauptPanel.tfsuchen.getDropTarget()
