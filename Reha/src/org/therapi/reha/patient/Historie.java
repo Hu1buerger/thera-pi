@@ -1011,11 +1011,11 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
     }
 
     public static String getActiveRezNr() {
-        if (Reha.instance.patpanel.historie.tabhistorie.getSelectedRow() < 0) {
+        if (Reha.instance.patpanel.historie.tabHistRezepte.getSelectedRow() < 0) {
             return null;
         }
-        return Reha.instance.patpanel.historie.tabhistorie.getValueAt(
-                Reha.instance.patpanel.historie.tabhistorie.getSelectedRow(), 0)
+        return Reha.instance.patpanel.historie.tabHistRezepte.getValueAt(
+                Reha.instance.patpanel.historie.tabHistRezepte.getSelectedRow(), 0)
                                                           .toString();
     }
 
