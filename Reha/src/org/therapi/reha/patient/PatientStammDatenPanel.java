@@ -519,7 +519,7 @@ public class PatientStammDatenPanel extends JXPanel {
                         Thread.sleep(20);
                         xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
                     }
-                    while ((!AktuelleRezepte.initOk)) {
+                    while ((!RezepteAktuell.initOk)) {
                         Thread.sleep(20);
                     }
 

@@ -130,11 +130,11 @@ import systemEinstellungen.SystemPreislisten;
 import systemTools.IconListRenderer;
 import systemTools.ListenerTools;
 
-public class AktuelleRezepte extends JXPanel implements ListSelectionListener, TableModelListener,
+public class RezepteAktuell extends JXPanel implements ListSelectionListener, TableModelListener,
         TableColumnModelExtListener, PropertyChangeListener, ActionListener {
 
     private static final long serialVersionUID = 5440388431022834348L;
-    private static final Logger logger = LoggerFactory.getLogger(AktuelleRezepte.class);
+    private static final Logger logger = LoggerFactory.getLogger(RezepteAktuell.class);
     JXPanel leerPanel = null;
     JXPanel vollPanel = null;
     JXPanel wechselPanel = null;
@@ -194,7 +194,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private Mandant mand;
     private Connection connection;
 
-    public AktuelleRezepte(PatientHauptPanel eltern, Connection connection) {
+    public RezepteAktuell(PatientHauptPanel eltern, Connection connection) {
         
         this.connection = connection;
         mand = Reha.instance.mandant();
@@ -2366,9 +2366,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     public static String getActiveRezNr() {
-        int row = AktuelleRezepte.tabaktrez.getSelectedRow();
+        int row = RezepteAktuell.tabaktrez.getSelectedRow();
         if (row >= 0) {
-            return AktuelleRezepte.tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
+            return RezepteAktuell.tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                             .toString();
         }
         return null;
@@ -3361,7 +3361,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 break;
             case REZEPTKOPIERE_GEWAEHLTES:           // Vorschlag von J. Steinhilber integriert: Kopiere
                                                      // das angewaehlte Rezept
-                rezNrToCopy = AktuelleRezepte.getActiveRezNr();
+                rezNrToCopy = RezepteAktuell.getActiveRezNr();
                 vorlage = rDto.byRezeptNr(rezNrToCopy).orElse(new Rezept());
                 break;
                 

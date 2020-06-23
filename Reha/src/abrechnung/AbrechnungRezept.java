@@ -86,7 +86,7 @@ import org.jdesktop.swingx.treetable.TreeTableModel;
 import org.jdesktop.swingx.treetable.TreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 import org.therapi.reha.patient.Historie;
 import org.therapi.reha.patient.RezepteHistorisch;
 
@@ -4493,7 +4493,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
              * edibuf.append(voIndex[aktRezept.getRezArt()]+EOL); }
              */
             edibuf.append(voIndex[aktRezept.getRezArt()]);
-            if (AktuelleRezepte.isDentist(test)) {
+            if (RezepteAktuell.isDentist(test)) {
                 edibuf.append(plus + "1");
                 System.out.println("Zahnarztverordnung");
             }

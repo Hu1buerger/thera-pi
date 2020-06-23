@@ -34,7 +34,7 @@ import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTitledPanel;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -628,10 +628,10 @@ public class AbrechnungPrivat extends JXDialog
     }
 
     private void doTabelle() {
-        int row = AktuelleRezepte.tabaktrez.getSelectedRow();
+        int row = RezepteAktuell.tabaktrez.getSelectedRow();
         if (row >= 0) {
-            TableTool.loescheRowAusModel(AktuelleRezepte.tabaktrez, row);
-            AktuelleRezepte.tabaktrez.repaint();
+            TableTool.loescheRowAusModel(RezepteAktuell.tabaktrez, row);
+            RezepteAktuell.tabaktrez.repaint();
             Reha.instance.patpanel.aktRezept.setzeKarteiLasche();
         }
     }

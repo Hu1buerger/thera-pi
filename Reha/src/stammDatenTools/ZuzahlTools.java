@@ -11,7 +11,7 @@ import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import CommonTools.DatFunk;
 import CommonTools.ExUndHop;
@@ -154,7 +154,7 @@ public class ZuzahlTools {
                 // 1";
                 // new ExUndHop().setzeStatement(cmd);
                 SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Zuzahlung.ZZSTATUS_NOTOK + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
-                Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_NOTOK);
+                Reha.instance.patpanel.aktRezept.setzeBild(RezepteAktuell.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_NOTOK);
                 ret[0] = new Boolean(true);
                 ret[1] = Integer.valueOf(tage.size());
                 ret[2] = Integer.valueOf(erstergroesser - 1);
@@ -176,11 +176,11 @@ public class ZuzahlTools {
                     // JOptionPane.showMessageDialog(null ,"Achtung es sind noch "+(tagex*-1)+" Tage
                     // bis zur Vollj\ufffdhrigkeit\n"+
                     // "Unter Umst\ufffdnden wechselt der Zuzahlungsstatus im Verlauf dieses Rezeptes");
-                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BALD18);
+                    Reha.instance.patpanel.aktRezept.setzeBild(RezepteAktuell.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BALD18);
                     SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Zuzahlung.ZZSTATUS_BALD18 + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
                     ret[4] = Integer.valueOf(Zuzahlung.ZZSTATUS_BALD18);
                 } else {
-                    Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BEFREIT);
+                    Reha.instance.patpanel.aktRezept.setzeBild(RezepteAktuell.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BEFREIT);
                     SqlInfo.aktualisiereSaetze("verordn", "zzstatus='" + Zuzahlung.ZZSTATUS_BEFREIT + "'", "rez_nr='" + rez_nr + "' LIMIT 1");
                     ret[4] = Integer.valueOf(Zuzahlung.ZZSTATUS_BEFREIT);
                 }
@@ -190,7 +190,7 @@ public class ZuzahlTools {
 
             }
         } else if (unter18 && (aktzzregel == 0)) {
-            Reha.instance.patpanel.aktRezept.setzeBild(AktuelleRezepte.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BEFREIT);
+            Reha.instance.patpanel.aktRezept.setzeBild(RezepteAktuell.tabaktrez.getSelectedRow(), Zuzahlung.ZZSTATUS_BEFREIT);
             ret[0] = Boolean.valueOf(false);
             ret[1] = tage.size();
             ret[4] = Integer.valueOf(Zuzahlung.ZZSTATUS_BEFREIT);

@@ -5,7 +5,7 @@ import java.sql.Connection;
 import javax.swing.JComponent;
 import javax.swing.SwingWorker;
 
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import com.sun.star.uno.Exception;
 
@@ -37,7 +37,7 @@ public class PatUndVOsuchen {
                         }
                         xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
                     }
-                    while ((!AktuelleRezepte.initOk)) {
+                    while ((!RezepteAktuell.initOk)) {
                         try {
                             Thread.sleep(20);
                         } catch (InterruptedException e) {

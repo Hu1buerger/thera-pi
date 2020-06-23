@@ -33,7 +33,7 @@ import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -2227,7 +2227,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private void setRezDatInTable(String datum) {
         int row = getselectedRow();
         if (row >= 0) {
-            AktuelleRezepte.tabaktrez.getModel()
+            RezepteAktuell.tabaktrez.getModel()
                                      .setValueAt(datum, row, 2);
         }
     }
@@ -2240,7 +2240,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private void setLastDatInTable(LocalDate datum) {
         int row = getselectedRow();
         if (row >= 0) {
-            AktuelleRezepte.tabaktrez.getModel()
+            RezepteAktuell.tabaktrez.getModel()
                                      .setValueAt(datum.format(DateTimeFormatters.ddMMYYYYmitPunkt), row, 4);
         }
     }

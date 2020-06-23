@@ -53,7 +53,7 @@ import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thera_pi.common.image.JpegWriter;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.factories.CC;
@@ -657,10 +657,10 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                         .getParent()).setVisible(false);
 
         String rez_num = "";
-        if (AktuelleRezepte.tabaktrez.getRowCount() > 0) {
-            int row = AktuelleRezepte.tabaktrez.getSelectedRow();
+        if (RezepteAktuell.tabaktrez.getRowCount() > 0) {
+            int row = RezepteAktuell.tabaktrez.getSelectedRow();
             if (row >= 0) {
-                rez_num = AktuelleRezepte.tabaktrez.getValueAt(row, 0)
+                rez_num = RezepteAktuell.tabaktrez.getValueAt(row, 0)
                                                    .toString()
                                                    .trim();
             }

@@ -52,7 +52,7 @@ public class PatientMultiFunctionPanel extends JXPanel {
         tabpan.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         tabpan.setOpaque(true);
         tabpan.setBackgroundPainter(Reha.instance.compoundPainter.get("getTabs2"));
-        patientHauptPanel.aktRezept = new AktuelleRezepte(patientHauptPanel, connection);
+        patientHauptPanel.aktRezept = new RezepteAktuell(patientHauptPanel, connection);
         tabpan.add(patientHauptPanel.aktRezept);
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[0] + " - 0", tabpan);
         patientHauptPanel.multiTab.setMnemonicAt(0, KeyEvent.VK_A);
@@ -79,7 +79,7 @@ public class PatientMultiFunctionPanel extends JXPanel {
         return rechts;
     }
 
-    public AktuelleRezepte getAktRez() {
+    public RezepteAktuell getAktRez() {
         return patientHauptPanel.aktRezept;
     }
 

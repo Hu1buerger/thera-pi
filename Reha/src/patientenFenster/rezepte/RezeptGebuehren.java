@@ -27,7 +27,7 @@ import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.MattePainter;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -72,10 +72,10 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
     private RgebHintergrund rgb;
     MattePainter mp = null;
     LinearGradientPaint p = null;
-    private AktuelleRezepte aktuelleRezepte;
+    private RezepteAktuell aktuelleRezepte;
     ITextDocument textDocument = null;
 
-    public RezeptGebuehren(AktuelleRezepte aktrez, boolean kopie, boolean historie, Point pt) {
+    public RezeptGebuehren(RezepteAktuell aktrez, boolean kopie, boolean historie, Point pt) {
         super(null, "RezeptGebuehr");
         if (aktrez != null) {
             this.aktuelleRezepte = aktrez;
@@ -499,7 +499,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                         SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
             }
             try {
-                AktuelleRezepte.setZuzahlImage(Zuzahlung.ZZSTATUS_OK); // zuzahlok
+                RezepteAktuell.setZuzahlImage(Zuzahlung.ZZSTATUS_OK); // zuzahlok
             } catch (Exception ex3) {
                 JOptionPane.showMessageDialog(null,
                         "Der Zuzahlungsstatus im Rezeptstamm konnte nicht korrekt gesetzt werden.\n+"

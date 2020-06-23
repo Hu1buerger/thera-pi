@@ -47,7 +47,7 @@ import org.jdesktop.swingx.border.DropShadowBorder;
 import org.jdesktop.swingx.plaf.windows.WindowsTaskPaneUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import CommonTools.SqlInfo;
 import CommonTools.ini.INIFile;
@@ -788,7 +788,7 @@ public class LinkeTaskPane extends JXPanel {
                         Thread.sleep(20);
                         xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
                     }
-                    while ((!AktuelleRezepte.initOk)) {
+                    while ((!RezepteAktuell.initOk)) {
                         Thread.sleep(20);
                     }
 

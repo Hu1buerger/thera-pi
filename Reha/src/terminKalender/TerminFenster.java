@@ -35,7 +35,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.border.DropShadowBorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
@@ -3623,7 +3623,7 @@ public class TerminFenster implements RehaTPEventListener, ActionListener, DropT
                         }
                     }
                     whilezeit = System.currentTimeMillis();
-                    while (!AktuelleRezepte.initOk) {
+                    while (!RezepteAktuell.initOk) {
                         Thread.sleep(20);
                         if (System.currentTimeMillis() - whilezeit > 2500) {
                             break;

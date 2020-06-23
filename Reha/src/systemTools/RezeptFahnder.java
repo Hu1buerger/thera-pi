@@ -6,7 +6,7 @@ import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
-import org.therapi.reha.patient.AktuelleRezepte;
+import org.therapi.reha.patient.RezepteAktuell;
 
 import CommonTools.SqlInfo;
 import events.PatStammEvent;
@@ -58,7 +58,7 @@ public class RezeptFahnder {
                             Thread.sleep(20);
                             xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
                         }
-                        while ((!AktuelleRezepte.initOk)) {
+                        while ((!RezepteAktuell.initOk)) {
                             Thread.sleep(20);
                         }
 
