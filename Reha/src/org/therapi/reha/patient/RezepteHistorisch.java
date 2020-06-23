@@ -1051,10 +1051,50 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     }
     // Rezept-Related actions:
     private void actionArztBericht(ActionEvent e) {
-        // TODO: fill me..
+        if (!Rechte.hatRecht(Rechte.Historie_thbericht, true)) {
+            return;
+        }
+        if (aktPanel.equals("leerPanel")) {
+            JOptionPane.showMessageDialog(null, "Ich sag jetzt nix....\n\n"
+                    + "....außer - und für welches der nicht vorhandenen Rezepte in der Historie wollen Sie einen Therapiebericht erstellen....");
+            return;
+        }
+        boolean neuber = true;
+        int berid = 0;
+        String xreznr;
+        String xverfasser = "";
+        int currow = tabHistRezepte.getSelectedRow();
+        if (currow >= 0) {
+            xreznr = (String) tabHistRezepte.getValueAt(currow, RezeptHistTableModel.HISTREZTABCOL_NR);
+        } else {
+            xreznr = "";
+        }
+
+        int iexistiert = Reha.instance.patpanel.berichte.berichtExistiert(xreznr);
+        if (iexistiert > 0) {
+            xverfasser = Reha.instance.patpanel.berichte.holeVerfasser();
+            neuber = false;
+            berid = iexistiert;
+            String meldung = "<html>Für das Historienrezept <b>" + xreznr
+                    + "</b> existiert bereits ein Bericht.<br>\nVorhandener Bericht wird jetzt geöffnet";
+            JOptionPane.showMessageDialog(null, meldung);
+        }
+
+        final boolean xneuber = neuber;
+        final String xxreznr = xreznr;
+        final int xberid = berid;
+        final int xcurrow = currow;
+        final String xxverfasser = xverfasser;
+        ArztBericht ab = new ArztBericht(null, "arztberichterstellen", xneuber, xxreznr, xberid, 1, xxverfasser, "",
+                xcurrow);
+        ab.setModal(true);
+        ab.setLocationRelativeTo(null);
+        ab.setVisible(true);
+        ab = null;
+        return;
     }
     private void actionTools(ActionEvent e) {
-        // TODO: fill me..
+        new ToolsDlgHistorie("", btnTools.getLocationOnScreen());
     }
     
     // TerminToolbarActions: (are they supposed to work at all?)
