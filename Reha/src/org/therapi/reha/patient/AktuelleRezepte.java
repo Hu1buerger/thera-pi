@@ -3368,7 +3368,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             case REZEPTKOPIERE_HISTORIENREZEPT:
                 
                 rezNrToCopy = null;
-                if ((rezNrToCopy = Historie.getActiveRezNr()) != null) {
+                if ((rezNrToCopy = RezepteHistorisch.getActiveRezNr()) != null) {
                     vorlage = rDto.getHistorischesRezeptByRezNr(rezNrToCopy).orElse(new Rezept());
     
                 } else {
@@ -3396,8 +3396,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 String rez_nr = dtblm.getValueAt(mod, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                      .toString()
                                      .trim();
-                SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
-                        Arrays.asList(new String[] { "id" }));
+                // SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
+                //        Arrays.asList(new String[] { "id" }));
+                Rezept rez = rDto.byRezeptNr(rez_nr).get();
+                // FIXME: decide whether alter table lza or insert pos. missing lastdate here
+                rDto.rezeptInHistSpeichern(rez);
                 SqlInfo.sqlAusfuehren("delete from verordn where rez_nr='" + rez_nr + "'");
                 Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
                 final String xrez_nr = String.valueOf(rez_nr);

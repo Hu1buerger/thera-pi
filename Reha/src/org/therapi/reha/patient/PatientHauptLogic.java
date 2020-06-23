@@ -27,6 +27,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import CommonTools.DatFunk;
 import CommonTools.JRtaTextField;
@@ -54,6 +56,8 @@ import stammDatenTools.ZuzahlTools;
 import systemEinstellungen.SystemConfig;
 
 public class PatientHauptLogic {
+    
+    private static final Logger logger = LoggerFactory.getLogger(PatientHauptLogic.class);
 
     public PatientHauptPanel patientHauptPanel = null;
     private String lastseek = "";
@@ -715,6 +719,7 @@ public class PatientHauptLogic {
         //// System.out.println("Event im Neuen PatStamm = "+evt);
         //// System.out.println("Detail 0 = "+evt.getDetails()[0]);
         //// System.out.println("Detail 1 = "+evt.getDetails()[1]);
+        logger.debug("PatStammEvent: " + evt.toString());
         if (evt.getDetails()[0].equals("#PATSUCHEN")) {
             final String xpatint = evt.getDetails()[1].trim();
             final String xrez = evt.getDetails()[2].trim();
@@ -798,8 +803,10 @@ public class PatientHauptLogic {
                                 rezNb = xrez.split("#REZHOLEN-")[1].trim();
                             }
                             try {
+                                // patientHauptPanel.historie.holeRezepte(xpatint, rezNb);
                                 patientHauptPanel.historie.holeRezepte(xpatint, rezNb);
                             } catch (Exception ex) {
+                                logger.error("Error in getting hist. Rezepte in PatientenHauptlogic: ", ex);
                                 // ex.printStackTrace();
                             }
                             return null;

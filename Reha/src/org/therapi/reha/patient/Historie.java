@@ -24,17 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -59,13 +49,9 @@ import CommonTools.DatFunk;
 import CommonTools.JCompTools;
 import CommonTools.SqlInfo;
 import dialoge.ToolsDialog;
-import environment.LadeProg;
 import environment.Path;
 import gui.Cursors;
 import hauptFenster.Reha;
-import hauptFenster.RehaIOServer;
-import hauptFenster.ReverseSocket;
-import io.RehaIOMessages;
 import jxTableTools.DateTableCellEditor;
 import jxTableTools.TableTool;
 import oOorgTools.OOTools;
@@ -79,7 +65,7 @@ import systemTools.IconListRenderer;
 
 public class Historie extends JXPanel implements ActionListener, TableModelListener, PropertyChangeListener {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -7023226994175632749L;
     JXPanel leerPanel = null;
@@ -188,7 +174,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 
     class HistorPanel extends JXPanel {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = -1044284924785143054L;
         ImageIcon hgicon;
@@ -480,12 +466,11 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
         }
         String[] tlines = terms.split("\n");
         int lines = tlines.length;
-        Vector<String> tvec = new Vector<String>();
         dtermm.setRowCount(0);
         for (int i = 0; i < lines; i++) {
+            Vector<String> tvec = new Vector<String>();
             String[] terdat = tlines[i].split("@");
             int ieinzel = terdat.length;
-            tvec.clear();
             for (int y = 0; y < ieinzel; y++) {
                 if (y == 0) {
                     tvec.add((terdat[y].trim()
@@ -494,15 +479,15 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                     tvec.add(terdat[y]);
                 }
             }
-            dtermm.addRow((Vector<?>) tvec.clone());
+            dtermm.addRow( tvec);
         }
         anzahlTermine.setText("Anzahl Termine: " + lines);
 
     }
 
     /******************
-     * 
-     * 
+     *
+     *
      */
     public void doRechneAlles() {
         double gesamtHistor = 0.00; // new Double(0.00);
@@ -584,7 +569,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                  * vec =
                  * SqlInfo.holeFeld("select sum(gesamt) from faktura where rez_nr = '"+suchrez+
                  * "'");
-                 * 
+                 *
                  * if(! vec.get(0).equals("")){ gesamtumsatz =
                  * gesamtumsatz+Double.parseDouble(vec.get(0)); System.out.println("-1- "+vec);
                  * }else{ vec = SqlInfo.holeSatz(db, felder, "id='"+suchrezid+"'",
@@ -640,8 +625,8 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
     }
 
     /******************
-     * 
-     * 
+     *
+     *
      */
     @Override
     public void actionPerformed(ActionEvent arg0) {
@@ -856,7 +841,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                          * String[] diszis = null; if(SystemConfig.mitRs){ diszis = new String[]
                          * {"Physio","Massage","Ergo","Logo","Podo","Rsport","Ftrain"}; }else{ diszis =
                          * new String[] {"Physio","Massage","Ergo","Logo","Podo"}; }
-                         * 
+                         *
                          * String aktDisziplin =
                          * diszis[Reha.instance.abrechnungpanel.cmbDiszi.getSelectedIndex()];
                          */
@@ -1004,7 +989,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
         if (einnahme.equals("")) {
             einnahme = SqlInfo.holeEinzelFeld("select reznr from rgaffaktura where reznr = '" + sreznum + "' LIMIT 1");
         } else {
-            // Kopie der Gebuehrenquittung 
+            // Kopie der Gebuehrenquittung
             SystemConfig.hmRgkDaten.put("<Rgknummer>", String.valueOf(sreznum));
             SystemConfig.hmRgkDaten.put("<Rgkdatum>", srezdat);
             SystemConfig.hmRgkDaten.put("<Rgkbetrag>", String.valueOf(einnahme.replace(".", ",")));
@@ -1134,7 +1119,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 
 class MyHistorieTableModel extends DefaultTableModel {
     /**
-    * 
+    *
     */
     private static final long serialVersionUID = 1L;
 
@@ -1166,7 +1151,7 @@ class MyHistorieTableModel extends DefaultTableModel {
 
 class MyHistorTermTableModel extends DefaultTableModel {
     /**
-    * 
+    *
     */
     private static final long serialVersionUID = 1L;
 

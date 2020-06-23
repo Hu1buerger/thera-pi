@@ -57,7 +57,8 @@ public class PatientMultiFunctionPanel extends JXPanel {
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[0] + " - 0", tabpan);
         patientHauptPanel.multiTab.setMnemonicAt(0, KeyEvent.VK_A);
 
-        patientHauptPanel.historie = new Historie();
+        //FIXME: Q&D grab Mandant from Reha.instance until we pass it around properly...
+        patientHauptPanel.historie = new RezepteHistorisch(Reha.instance.mandant().ik());
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[1] + " - 0", patientHauptPanel.historie);
         patientHauptPanel.multiTab.setMnemonicAt(1, KeyEvent.VK_H);
 

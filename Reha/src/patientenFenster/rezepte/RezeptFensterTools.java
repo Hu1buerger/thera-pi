@@ -32,9 +32,11 @@ public final class RezeptFensterTools {
         if (lastDat == null || lastDat.trim().equals(".  .")) { // spaetester Beginn nicht angegeben? -> aus Preisgruppe holen
             // Preisgruppe holen
             int pg = Integer.parseInt(preisGroup) - 1;
+            logger.debug("PG=" + pg + " rezDat=" + rezDat + " aktDiszi=" + aktDiszi + " lastDat=" + lastDat);
             // Frist zwischen Rezeptdatum und erster Behandlung
             int frist = (Integer) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
                                                                           .get(0)).get(pg);
+            logger.debug("Frist=" + frist);
             // Kalendertage
             if ((Boolean) ((Vector<?>) SystemPreislisten.hmFristen.get(aktDiszi)
                                                                   .get(1)).get(pg)) {
@@ -211,6 +213,11 @@ public final class RezeptFensterTools {
     * Calculates the default 'latestStartDate' for a Rezept
     */
    public static LocalDate calcLatestStartDate(Rezept rez) {
+       if ( rez == null) {
+           logger.error("Rezept was null");
+           return null;
+       }
+       logger.debug("Checking rezept: " + rez.toString());
        Disziplin diszi = Disziplin.ofShort(rez.getRezClass());
        int pg = rez.getPreisGruppe();
        LocalDate startDatum = rez.getRezDatum();

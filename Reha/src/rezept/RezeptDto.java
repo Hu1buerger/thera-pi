@@ -513,9 +513,28 @@ public class RezeptDto {
             return -1;
         }
     }
+    
+    /**
+     * Will (try) to save a Rezept to the "historische rezepte" table. Will check whether Rezept(-Nr) already
+     *  exists and if so, update otherwise insert.
+     * <BR/> Contains a Q&D to fix no-null on lastdate in lza - this should either be removed (if alter lza table)
+     *  or inserted on caller side, with proper "werktage/kalendartage" switch and Fristen taken from diszi...
+     * 
+     * @param rez - the Rezept to save
+     * 
+     * @return true if no error detected otherwise false
+     */
+    public boolean rezeptInHistSpeichern(Rezept rez) {
+        // TODO: create either copy ("insert into lza select...") or create own insert, since we should never have to update...
+        if (rez.getLastDate() == null) {
+            rez.setLastDate(rez.getRezDatum().plusDays(14)); // Q&D - either lza needs to handle this or
+                                                             // caller should have fixed it properly before calling us
+        }
+        return rezeptInDBSpeichern(rez, false);
+    };
 
     /**
-     * Will (try) to save a Rezept to the verordn-table. Will check whether Rezept(-Nr) already exists and if so, update
+     * Will (try) to save a Rezept to the "aktuelle rezepte" table. Will check whether Rezept(-Nr) already exists and if so, update
      *   otherwise insert.
      *   
      * @param rez - the Rezept to save
@@ -523,7 +542,12 @@ public class RezeptDto {
      * @return true if no error detected otherwise false
      */
     public boolean rezeptInDBSpeichern(Rezept rez) {
-        String sql="select id from " + aktRezDB + " where " + mainIdentifier + "='" + rez.getRezNr() + "'";
+        return rezeptInDBSpeichern(rez, true);
+    }
+    
+    private boolean rezeptInDBSpeichern(Rezept rez, boolean aktuelle) {
+        String dbName = (aktuelle ? aktRezDB : rezDBLZA);
+        String sql="select id from " + dbName + " where " + mainIdentifier + "='" + rez.getRezNr() + "'";
         boolean isNew = false;
         
         try (Connection conn = new DatenquellenFactory(ik.digitString())
@@ -544,9 +568,9 @@ public class RezeptDto {
                 return false;
             }
             if (isNew) {
-                sql="insert into " + aktRezDB + " ";
+                sql="insert into " + dbName + " ";
             } else {
-                sql="update " + aktRezDB + " ";
+                sql="update " + dbName + " ";
             }
             sql = sql.concat(createFullDataset(rez));
             if (!isNew)

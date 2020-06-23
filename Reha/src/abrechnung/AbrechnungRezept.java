@@ -88,6 +88,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.therapi.reha.patient.AktuelleRezepte;
 import org.therapi.reha.patient.Historie;
+import org.therapi.reha.patient.RezepteHistorisch;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -1397,7 +1398,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 Vector<Vector<String>> xvec = SqlInfo.holeFelder(cmd);
                 // System.out.println(xvec);
                 if (xvec.size() > 0) {
-                    Historie.copyToClipboard(xvec.get(0)
+                    RezepteHistorisch.copyToClipboard(xvec.get(0)
                                                  .get(0)
                             + "\t" + xvec.get(0)
                                          .get(1)
