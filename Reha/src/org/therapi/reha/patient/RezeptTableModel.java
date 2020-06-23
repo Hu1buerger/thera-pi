@@ -78,7 +78,7 @@ public class RezeptTableModel extends AbstractTableModel {
         case ANGELEGT_AM:
             return rezept.getErfassungsDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         case SPAETESTER_BEGINN:
-            return rezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
+            return rezept.getLastDate() == null ? "" : rezept.getLastDate().format(DateTimeFormatters.ddMMYYYYmitPunkt);
         case STATUS:
             return rezept.getZZStatus();
         case INDI_SCHLUESSEL:
