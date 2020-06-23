@@ -83,10 +83,10 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     public JLabel anzahlTermine = null;
     public JLabel anzahlHistorie = null;
     public String aktPanel = "";
-    public JXTable tabhistorie = null;
-    public JXTable tabaktterm = null;
-    public RezeptHistTableModel dtblm;
-    public RezeptHistTermTableModel dtermm;
+    public JXTable tabHistRezepte = null;
+    public JXTable tabHistTerm = null;
+    public RezeptHistTableModel tblmodHistRez;
+    public RezeptHistTermTableModel tblmodHistTerm;
     public TableCellEditor tbl = null;
     public boolean rezneugefunden = false;
     public boolean neuDlgOffen = false;
@@ -194,40 +194,40 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     public JScrollPane getTermine() {
         List<String> terminListe = new ArrayList<String>();
 
-        dtermm = new RezeptHistTermTableModel(terminListe);
-        dtermm.addTableModelListener(e -> actionTableModelChange(e));
+        tblmodHistTerm = new RezeptHistTermTableModel(terminListe);
+        tblmodHistTerm.addTableModelListener(e -> actionTableModelChange(e));
         /*
         String[] column = { "Beh.Datum", "Behandler", "Text", "Beh.Art", "" };
         dtermm.setColumnIdentifiers(column);
         */
-        tabaktterm = new JXTable(dtermm);
-        tabaktterm.setHighlighters(HighlighterFactory.createSimpleStriping(Colors.PiOrange.alpha(0.25f)));
-        tabaktterm.setDoubleBuffered(true);
-        tabaktterm.addPropertyChangeListener(e -> actionTablePropertyChange(e));
-        tabaktterm.setEditable(false);
-        tabaktterm.setSortable(false);
-        tabaktterm.setSelectionMode(0);
-        tabaktterm.setHorizontalScrollEnabled(true);
+        tabHistTerm = new JXTable(tblmodHistTerm);
+        tabHistTerm.setHighlighters(HighlighterFactory.createSimpleStriping(Colors.PiOrange.alpha(0.25f)));
+        tabHistTerm.setDoubleBuffered(true);
+        tabHistTerm.addPropertyChangeListener(e -> actionTablePropertyChange(e));
+        tabHistTerm.setEditable(false);
+        tabHistTerm.setSortable(false);
+        tabHistTerm.setSelectionMode(0);
+        tabHistTerm.setHorizontalScrollEnabled(true);
         tbl = new DateTableCellEditor();
-        tabaktterm.getColumnModel()
+        tabHistTerm.getColumnModel()
                   .getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT)
                   .setCellEditor(tbl);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT)
                   .setMinWidth(60);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT)
                   .setCellRenderer(new DateCellRenderer());
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDLER)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHDLER)
                   .setMinWidth(60);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_TEXT)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_TEXT)
                   .setMinWidth(40);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHART)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_BEHART)
                   .setMinWidth(40);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_SECRET)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_SECRET)
                   .setMinWidth(0);
-        tabaktterm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_SECRET)
+        tabHistTerm.getColumn(RezeptHistTermTableModel.HISTTERMTABCOL_SECRET)
                   .setMaxWidth(0);
-        tabaktterm.setOpaque(true);
-        tabaktterm.addKeyListener(new KeyAdapter() {
+        tabHistTerm.setOpaque(true);
+        tabHistTerm.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent arg0) {
                 if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -237,9 +237,9 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             }
 
         });
-        tabaktterm.validate();
-        tabaktterm.setName("AktTerm");
-        JScrollPane termscr = JCompTools.getTransparentScrollPane(tabaktterm);
+        tabHistTerm.validate();
+        tabHistTerm.setName("AktTerm");
+        JScrollPane termscr = JCompTools.getTransparentScrollPane(tabHistTerm);
         termscr.getVerticalScrollBar()
                .setUnitIncrement(15);
         return termscr;
@@ -249,52 +249,52 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         JXPanel dummypan = new JXPanel(new BorderLayout());
         dummypan.setOpaque(false);
         dummypan.setBorder(null);
-        dtblm = new RezeptHistTableModel();
+        tblmodHistRez = new RezeptHistTableModel();
         // String[] column = { "Rezept-Nr.", "bezahlt", "Rez-Datum", "angelegt am", "sp\u00e4t.Beginn", "Pat-Nr.", "Indi.Schl.",
         //        "ID" };
         // dtblm.setColumnIdentifiers(column);
-        tabhistorie = new JXTable(dtblm);
-        tabhistorie.setHighlighters(HighlighterFactory.createSimpleStriping(Colors.PiOrange.alpha(0.25f)));
-        tabhistorie.setDoubleBuffered(true);
-        tabhistorie.setEditable(false);
-        tabhistorie.setSortable(false);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_NR)
+        tabHistRezepte = new JXTable(tblmodHistRez);
+        tabHistRezepte.setHighlighters(HighlighterFactory.createSimpleStriping(Colors.PiOrange.alpha(0.25f)));
+        tabHistRezepte.setDoubleBuffered(true);
+        tabHistRezepte.setEditable(false);
+        tabHistRezepte.setSortable(false);
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_NR)
                    .setMaxWidth(75);
         TableCellRenderer renderer = new DefaultTableRenderer(new MappedValue(StringValues.EMPTY, IconValues.ICON),
                 JLabel.CENTER);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
                    .setCellRenderer(renderer);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
                    .setMaxWidth(45);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
                    .setMaxWidth(75);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
                    .setCellRenderer(new DateCellRenderer());
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
                    .setMaxWidth(75);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
                    .setCellRenderer(new DateCellRenderer());
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_SPAETESTERBEGINN)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_SPAETESTERBEGINN)
                    .setCellRenderer(new DateCellRenderer());
         // Don't use this unprepared - it will screw up the index - invisible columns don't count towards # of cols...
         // tabhistorie.getColumnExt(RezeptHistTableModel.HISTREZTABCOL_PATNR).setVisible(false);
         
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)
                    .setMinWidth(0);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)
                    .setMaxWidth(0);
         // Don't use this unprepared - it will screw up the index - invisible columns don't count towards # of cols...
         // tabhistorie.getColumnExt(RezeptHistTableModel.HISTREZTABCOL_ID).setVisible(false);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_ID)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ID)
                    .setMinWidth(0);
-        tabhistorie.getColumn(RezeptHistTableModel.HISTREZTABCOL_ID)
+        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ID)
                    .setMaxWidth(0);
-        tabhistorie.validate();
-        tabhistorie.setName("AktRez");
-        tabhistorie.setSelectionMode(0);
-        tabhistorie.getSelectionModel()
+        tabHistRezepte.validate();
+        tabHistRezepte.setName("AktRez");
+        tabHistRezepte.setSelectionMode(0);
+        tabHistRezepte.getSelectionModel()
                    .addListSelectionListener(new HistorRezepteListSelectionHandler());
-        tabhistorie.addMouseListener(new MouseAdapter() {
+        tabHistRezepte.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent arg0) {
                 long zeit = System.currentTimeMillis();
@@ -313,7 +313,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 }
             }
         });
-        tabhistorie.addKeyListener(new KeyAdapter() {
+        tabHistRezepte.addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent arg0) {
                 if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
@@ -326,7 +326,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
 
         });
         dummypan.setPreferredSize(new Dimension(0, 100));
-        JScrollPane aktrezscr = JCompTools.getTransparentScrollPane(tabhistorie);
+        JScrollPane aktrezscr = JCompTools.getTransparentScrollPane(tabHistRezepte);
         aktrezscr.getVerticalScrollBar()
                  .setUnitIncrement(15);
         dummypan.add(aktrezscr, BorderLayout.CENTER);
@@ -340,12 +340,8 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 wechselPanel.remove(vollPanel);
                 wechselPanel.add(leerPanel);
                 aktPanel = "leerPanel";
-                for (int i = 0; i < 4; i++) {
-                    try {
-                        histbut[i].setEnabled(false);
-                    } catch (Exception ex) {
-
-                    }
+                for (JButton btn : allUsedTBButtons) {
+                    btn.setEnabled(false);
                 }
             }
         } else {
@@ -353,6 +349,10 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 wechselPanel.remove(leerPanel);
                 wechselPanel.add(vollPanel);
                 aktPanel = "vollPanel";
+                for (JButton btn : allUsedTBButtons) {
+                    btn.setEnabled(true);
+                }
+                /*
                 for (int i = 0; i < 4; i++) {
                     try {
                         histbut[i].setEnabled(true);
@@ -360,6 +360,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
 
                     }
                 }
+                */
             }
         }
     }
@@ -462,7 +463,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                     Arrays.asList(new String[] {}));
             */
             rez = new RezeptDto(ik).getHistorischesRezeptByRezNr(
-                        (String) tabhistorie.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR))
+                        (String) tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR))
                                                                                     .orElse(new Rezept());
         } else {
             rez = new Rezept(Rez);
@@ -470,8 +471,8 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
 
         String terms = rez.getTermine();
         if (terms == null || terms.equals("")) {
-            dtermm.emptyTable();
-            tabaktterm.validate();
+            tblmodHistTerm.emptyTable();
+            tabHistTerm.validate();
             anzahlTermine.setText("Anzahl Termine: 0");
             return;
         }
@@ -499,7 +500,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         }
         */
         //FIXME: need to get the data displayed in table
-        dtermm.updateTermine(terms);
+        tblmodHistTerm.updateTermine(terms);
         anzahlTermine.setText("Anzahl Termine: " + lines);
 
     }
@@ -539,7 +540,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     }
 
     public double doRechneHistorie(String db) {
-        int rows = tabhistorie.getRowCount();
+        int rows = tabHistRezepte.getRowCount();
         String felder = "anzahl1,anzahl2,anzahl3,anzahl3,preise1,preise2,preise3,preise4,hausbes";
         Double gesamtumsatz = new Double(0.00);
         if (db.equals("lza")) {
@@ -549,8 +550,8 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             String suchrezid = null;
             String suchrez = null;
             for (int i = 0; i < rows; i++) {
-                suchrezid = String.valueOf(tabhistorie.getValueAt(i, RezeptHistTableModel.HISTREZTABCOL_ID));
-                suchrez = (String) tabhistorie.getValueAt(i, RezeptHistTableModel.HISTREZTABCOL_NR);
+                suchrezid = String.valueOf(tabHistRezepte.getValueAt(i, RezeptHistTableModel.HISTREZTABCOL_ID));
+                suchrez = (String) tabHistRezepte.getValueAt(i, RezeptHistTableModel.HISTREZTABCOL_NR);
                 Vector<String> vec = null;
                 /*********************/
                 vec = SqlInfo.holeSatz(db, felder, "id='" + suchrezid + "'", Arrays.asList(new String[] {}));
@@ -663,9 +664,9 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             int berid = 0;
             String xreznr;
             String xverfasser = "";
-            int currow = tabhistorie.getSelectedRow();
+            int currow = tabHistRezepte.getSelectedRow();
             if (currow >= 0) {
-                xreznr = (String) tabhistorie.getValueAt(currow, 0);
+                xreznr = (String) tabHistRezepte.getValueAt(currow, 0);
             } else {
                 xreznr = "";
             }
@@ -707,20 +708,20 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             return;
         }
         if (cmd.equals("werkzeuge")) {
-            new ToolsDlgHistorie("", histbut[1].getLocationOnScreen());
+            new ToolsDlgHistorie("", btnTools.getLocationOnScreen());
         }
 
     }
 
     void setRezeptDaten() {
-        int row = this.tabhistorie.getSelectedRow();
+        int row = this.tabHistRezepte.getSelectedRow();
         if (row >= 0) {
             final int xrow = row;
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    String reznr = (String) tabhistorie.getValueAt(xrow, 0);
-                    String id = String.valueOf(tabhistorie.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_ID));
+                    String reznr = (String) tabHistRezepte.getValueAt(xrow, 0);
+                    String id = String.valueOf(tabHistRezepte.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_ID));
                     jpan1.setRezeptDaten(reznr, id);
                 }
             });
@@ -748,7 +749,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         List<Rezept> rezepte = new RezeptDto(ik).getHistorischeRezepteByPatNr(Integer.parseInt(xpatint));
         int anz = rezepte.size();
         ZZStat iconKey;
-        dtblm.emptyTable();
+        tblmodHistRez.emptyTable();
         new Thread() {
             @Override
             public void run() {
@@ -761,7 +762,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             int zzBild = rez.getZZStatus();
             final String testreznum = rez.getRezNr();
             iconKey = stammDatenTools.ZuzahlTools.getIconKey(zzBild, testreznum);
-            dtblm.addRow(rez);
+            tblmodHistRez.addRow(rez);
             // FIXME: Disabled until I can figure out a nice way for this:
             // dtblm.setValueAt(stammDatenTools.ZuzahlTools.getZzIcon(iconKey), i, 1);
             
@@ -779,23 +780,23 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 int row = 0;
                 rezneugefunden = true;
                 for (int ii = 0; ii < anz; ii++) {
-                    if (tabhistorie.getValueAt(ii, 0)
+                    if (tabHistRezepte.getValueAt(ii, 0)
                                    .equals(xrez_nr)) {
                         row = ii;
                         break;
                     }
 
                 }
-                tabhistorie.setRowSelectionInterval(row, row);
-                jpan1.setRezeptDaten((String) tabhistorie.getValueAt(row, 0),
-                        String.valueOf(tabhistorie.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_ID)));
-                tabhistorie.scrollRowToVisible(row);
+                tabHistRezepte.setRowSelectionInterval(row, row);
+                jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(row, 0),
+                        String.valueOf(tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                tabHistRezepte.scrollRowToVisible(row);
                 holeEinzelTermine(row, null);
             } else {
                 rezneugefunden = true;
-                tabhistorie.setRowSelectionInterval(0, 0);
-                jpan1.setRezeptDaten((String) tabhistorie.getValueAt(0, 0),
-                        String.valueOf(tabhistorie.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                tabHistRezepte.setRowSelectionInterval(0, 0);
+                jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(0, 0),
+                        String.valueOf(tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_ID)));
             }
             anzahlHistorie.setText("Anzahl Rezepte in Historie: " + anz);
             wechselPanel.revalidate();
@@ -806,17 +807,17 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             wechselPanel.revalidate();
             wechselPanel.repaint();
             // dtblm.setRowCount(0);
-            dtblm.emptyTable();
-            dtermm.emptyTable();
+            tblmodHistRez.emptyTable();
+            tblmodHistTerm.emptyTable();
         }
     }
 
     private void doUebertrag() {
-        int row = tabhistorie.getSelectedRow();
+        int row = tabHistRezepte.getSelectedRow();
         if (row >= 0) {
             try {
-                int mod = tabhistorie.convertRowIndexToModel(row);
-                String rez_nr = dtblm.getValueAt(mod, 0)
+                int mod = tabHistRezepte.convertRowIndexToModel(row);
+                String rez_nr = tblmodHistRez.getValueAt(mod, 0)
                                      .toString()
                                      .trim();
                 SqlInfo.transferRowToAnotherDB("lza", "verordn", "rez_nr", rez_nr, true,
@@ -824,7 +825,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 String xcmd = "update verordn set abschluss='F' where rez_nr='" + rez_nr + "' LIMIT 1";
                 SqlInfo.sqlAusfuehren(xcmd);
                 SqlInfo.sqlAusfuehren("delete from lza where rez_nr='" + rez_nr + "'");
-                TableTool.loescheRowAusModel(tabhistorie, row);
+                TableTool.loescheRowAusModel(tabHistRezepte, row);
                 String htmlstring = "<html><b><font color='#ff0000'>Achtung!!!!</font><br>"
                         + "Wenn Sie das Rezept lediglich zur Ansicht in die aktuelle Rezepte transferieren<br>"
                         + "sollten Sie die zugeh\u00f6rigen Fakturadaten <font color='#ff0000'>nicht l\u00f6schen.</font><br><br>"
@@ -867,29 +868,29 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     }
 
     public void setzeKarteiLasche() {
-        if (tabhistorie.getRowCount() == 0) {
+        if (tabHistRezepte.getRowCount() == 0) {
             holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
-            Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabhistorie.getRowCount(), "Rezept-Historie"));
+            Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabHistRezepte.getRowCount(), "Rezept-Historie"));
         } else {
-            Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabhistorie.getRowCount(), "Rezept-Historie"));
+            Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabHistRezepte.getRowCount(), "Rezept-Historie"));
         }
     }
 
     private void doTageDrucken() {
-        int akt = this.tabhistorie.getSelectedRow();
+        int akt = this.tabHistRezepte.getSelectedRow();
         if (akt < 0) {
             JOptionPane.showMessageDialog(null, "Kein Historien-Rezept f\u00fcr \u00dcbertrag in Clipboard ausgew\u00e4hlt");
             return;
         }
-        String stage = "Rezeptnummer: " + tabhistorie.getValueAt(akt, 0)
+        String stage = "Rezeptnummer: " + tabHistRezepte.getValueAt(akt, 0)
                                                      .toString()
-                + " - Rezeptdatum: " + tabhistorie.getValueAt(akt, 2)
+                + " - Rezeptdatum: " + tabHistRezepte.getValueAt(akt, 2)
                                                   .toString()
                 + "\n";
-        int tage = dtermm.getRowCount();
+        int tage = tblmodHistTerm.getRowCount();
 
         for (int i = 0; i < tage; i++) {
-            stage = stage + Integer.toString(i + 1) + "\t" + dtermm.getValueAt(i, 0)
+            stage = stage + Integer.toString(i + 1) + "\t" + tblmodHistTerm.getValueAt(i, 0)
                                                                    .toString()
                     + "\n";
         }
@@ -906,12 +907,12 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         if (!Rechte.hatRecht(Rechte.Sonstiges_Reha301, true)) {
             return;
         }
-        int row = tabhistorie.getSelectedRow();
+        int row = tabHistRezepte.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(null, "Kein Rezept f\u00fcr Fallsteuerung ausgew\u00e4hlt");
             return;
         }
-        Reha.instance.progLoader.Dta301Fenster(1, tabhistorie.getValueAt(row, 0)
+        Reha.instance.progLoader.Dta301Fenster(1, tabHistRezepte.getValueAt(row, 0)
                                                              .toString());
     }
 
@@ -919,7 +920,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         if (!Rechte.hatRecht(Rechte.Rezept_gebuehren, true)) {
             return;
         }
-        int row = tabhistorie.getSelectedRow();
+        int row = tabHistRezepte.getSelectedRow();
         if (row < 0) {
             JOptionPane.showMessageDialog(null, "Kein Rezept f\u00fcr Rezeptgeb\u00fchr-Kopie ausgew\u00e4hlt");
             return;
@@ -928,9 +929,9 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         // wenn nicht bezahlt testen ob OpRgaf l\u00e4uft falls nicht starten
         // dann \u00fcber sockComm die Rechnung suchen und drucken
         // evtl. OpRgaf wieder beenden
-        String sreznum = tabhistorie.getValueAt(row, 0)
+        String sreznum = tabHistRezepte.getValueAt(row, 0)
                                     .toString();
-        String srezdat = tabhistorie.getValueAt(row, 2)
+        String srezdat = tabHistRezepte.getValueAt(row, 2)
                                     .toString();
         String einnahme = SqlInfo.holeEinzelFeld(
                 "select einnahme from kasse where rez_nr = '" + sreznum + "' or ktext like '%" + sreznum + "%'LIMIT 1");
@@ -959,11 +960,11 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     }
 
     public static String getActiveRezNr() {
-        if (Reha.instance.patpanel.historie.tabhistorie.getSelectedRow() < 0) {
+        if (Reha.instance.patpanel.historie.tabHistRezepte.getSelectedRow() < 0) {
             return null;
         }
-        return Reha.instance.patpanel.historie.tabhistorie.getValueAt(
-                Reha.instance.patpanel.historie.tabhistorie.getSelectedRow(), 0)
+        return Reha.instance.patpanel.historie.tabHistRezepte.getValueAt(
+                Reha.instance.patpanel.historie.tabHistRezepte.getSelectedRow(), 0)
                                                           .toString();
     }
 
@@ -1101,8 +1102,8 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                                     inRezeptDaten = true;
                                     setCursor(Cursors.wartenCursor);
                                     holeEinzelTermine(ix, null);
-                                    jpan1.setRezeptDaten((String) tabhistorie.getValueAt(ix, 0),
-                                            String.valueOf(tabhistorie.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                                    jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(ix, 0),
+                                            String.valueOf(tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_ID)));
                                     setCursor(Cursors.normalCursor);
                                     inRezeptDaten = false;
                                 } catch (Exception ex) {
