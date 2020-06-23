@@ -61,7 +61,7 @@ public class Rezeptnummer {
     }
     
     public String rezeptNummer() {
-        logger.debug("Diszi=" + disziplin + " and rezZiffern=" + rezeptZiffern);
+        // logger.debug("Diszi=" + disziplin + " and rezZiffern=" + rezeptZiffern);
         // TODO: if diszi == (COMMON || INV) => boing!
         if ( disziplin == null || disziplin == Disziplin.INV)
             return null;
