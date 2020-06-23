@@ -50,6 +50,7 @@ import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.Colors;
 import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
 import CommonTools.JCompTools;
 import CommonTools.SqlInfo;
 import dialoge.ToolsDialog;
@@ -882,17 +883,18 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             JOptionPane.showMessageDialog(null, "Kein Historien-Rezept f\u00fcr \u00dcbertrag in Clipboard ausgew\u00e4hlt");
             return;
         }
-        String stage = "Rezeptnummer: " + tabHistRezepte.getValueAt(akt, 0)
+        String stage = "Rezeptnummer: " + tabHistRezepte.getValueAt(akt, RezeptHistTableModel.HISTREZTABCOL_NR)
                                                      .toString()
-                + " - Rezeptdatum: " + tabHistRezepte.getValueAt(akt, 2)
-                                                  .toString()
+                + " - Rezeptdatum: " + ((LocalDate) tabHistRezepte.getValueAt(akt, RezeptHistTableModel.HISTREZTABCOL_REZDAT)
+                                                  ).format(DateTimeFormatters.dMYYYYmitPunkt)
                 + "\n";
         int tage = tblmodHistTerm.getRowCount();
 
         for (int i = 0; i < tage; i++) {
-            stage = stage + Integer.toString(i + 1) + "\t" + tblmodHistTerm.getValueAt(i, 0)
-                                                                   .toString()
-                    + "\n";
+            stage = stage + Integer.toString(i + 1) + "\t" + ((LocalDate) tblmodHistTerm
+                                            .getValueAt(i, RezeptHistTermTableModel.HISTTERMTABCOL_BEHDAT))
+                                                                                .format(DateTimeFormatters.ddMMYYYYmitPunkt)
+                                                                                                                    + "\n";
         }
         copyToClipboard(stage);
     }
