@@ -184,11 +184,37 @@ public class RezeptDto {
     // TODO: change RezNr to proper type
     public List<Rezept> holeDatumUndTermineNachPatientExclRezNr(int patID, String rezNr, boolean aktuelle, LocalDate lastRezDate) {
         String sql= "SELECT REZ_DATUM, REZ_NR, TERMINE from " 
-                        + ( aktuelle ? aktRezDB : rezDBLZA )
+                        + ( aktuelle ? aktRezDB : aktRezDB )
                         + " WHERE PAT_INTERN=" + patID + " and rez_nr !='" + rezNr + "'"
                         + ( aktuelle ? ";" : " and REZ_DATUM >= " + lastRezDate + ";");
         
         return retrieveList(sql);
+    }
+    
+    /**
+     * Delete a Rezept from aktuelle by RezNr
+     * @param rezNr
+     */
+    public void deleteByRezNr(String rezNr) {
+        if (rezNr == null || rezNr.isEmpty()) {
+            // TODO: throw something at caller...
+            logger.error("RezNr " + rezNr + " on delete was not usable...");
+        }
+        String sql = "delete from " + aktRezDB + " where REZ_NR='" + rezNr + "' limit 1";
+        updateDataset(sql);
+    }
+    
+    /**
+     * Delete a Rezept from Historie by RezNr
+     * @param rezNr
+     */
+    public void deleteHistorieByRezNr(String rezNr) {
+        if (rezNr == null || rezNr.isEmpty()) {
+            // TODO: throw something at caller...
+            logger.error("RezNr " + rezNr + " on delete from lza was not usable...");
+        }
+        String sql = "delete from " + rezDBLZA + " where REZ_NR='" + rezNr + "' limit 1";
+        updateDataset(sql);
     }
     
     /**

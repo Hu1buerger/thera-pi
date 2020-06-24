@@ -44,6 +44,8 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.renderer.IconValues;
 import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -63,6 +65,7 @@ import mandant.IK;
 import oOorgTools.OOTools;
 import patientenFenster.HistorDaten;
 import patientenFenster.KeinRezept;
+import patientenFenster.rezepte.RezeptFensterTools;
 import rechteTools.Rechte;
 import rezept.Rezept;
 import rezept.RezeptDto;
@@ -76,6 +79,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
      *
      */
     private static final long serialVersionUID = -7023226994175632749L;
+    private static final Logger logger = LoggerFactory.getLogger(RezepteHistorisch.class);
     
     IK ik;
     JXPanel leerPanel = null;
@@ -818,14 +822,27 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         if (row >= 0) {
             try {
                 int mod = tabHistRezepte.convertRowIndexToModel(row);
-                String rez_nr = tblmodHistRez.getValueAt(mod, 0)
+                String rez_nr = tblmodHistRez.getValueAt(mod, RezeptHistTableModel.HISTREZTABCOL_NR)
                                      .toString()
                                      .trim();
-                SqlInfo.transferRowToAnotherDB("lza", "verordn", "rez_nr", rez_nr, true,
-                        Arrays.asList(new String[] { "id" }));
-                String xcmd = "update verordn set abschluss='F' where rez_nr='" + rez_nr + "' LIMIT 1";
-                SqlInfo.sqlAusfuehren(xcmd);
-                SqlInfo.sqlAusfuehren("delete from lza where rez_nr='" + rez_nr + "'");
+                // SqlInfo.transferRowToAnotherDB("lza", "verordn", "rez_nr", rez_nr, true,
+                //        Arrays.asList(new String[] { "id" }));
+                // String xcmd = "update verordn set abschluss='F' where rez_nr='" + rez_nr + "' LIMIT 1";
+                //SqlInfo.sqlAusfuehren(xcmd);
+                // SqlInfo.sqlAusfuehren("delete from lza where rez_nr='" + rez_nr + "'");
+                try {
+                    RezeptDto rDto = new RezeptDto(ik);
+                    Rezept rez = rDto.getHistorischesRezeptByRezNr(rez_nr).get();
+                    rez.setAbschluss(false);
+                    // TODO: if we didn't alter lza to allow null-lastdate, the following can stay
+                    if (rez.getLastDate().equals(RezeptFensterTools.calcLatestStartDate(rez)))
+                        rez.setLastDate(null);
+                    rDto.rezeptInDBSpeichern(rez);
+                    rDto.deleteHistorieByRezNr(rez_nr);
+                } catch(Exception e) {
+                    logger.error("Could not transfer Rezept " + rez_nr + " from hist to aktuelle db");
+                    // TODO: msg to user?
+                }
                 TableTool.loescheRowAusModel(tabHistRezepte, row);
                 String htmlstring = "<html><b><font color='#ff0000'>Achtung!!!!</font><br>"
                         + "Wenn Sie das Rezept lediglich zur Ansicht in die aktuelle Rezepte transferieren<br>"

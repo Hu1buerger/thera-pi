@@ -120,6 +120,7 @@ import rezept.Money;
 import rezept.Rezept;
 import rezept.RezeptDto;
 import rezept.RezeptFertige;
+import rezept.RezeptFertigeDto;
 import rezept.Zuzahlung;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
@@ -3400,8 +3401,13 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                 //        Arrays.asList(new String[] { "id" }));
                 Rezept rez = rDto.byRezeptNr(rez_nr).get();
                 // FIXME: decide whether alter table lza or insert pos. missing lastdate here
-                rDto.rezeptInHistSpeichern(rez);
-                SqlInfo.sqlAusfuehren("delete from verordn where rez_nr='" + rez_nr + "'");
+                try {
+                    rDto.rezeptInHistSpeichern(rez);
+                    rDto.deleteByRezNr(rez.getRezNr());
+                } catch (Exception e) {
+                    logger.error("Fehler beim verschieben ins LZA: " + rez.toString(),e);
+                    //TODO: msg an user?
+                }
                 Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
                 final String xrez_nr = String.valueOf(rez_nr);
 
@@ -3409,7 +3415,11 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                     @Override
                     public void run() {
                         Reha.instance.patpanel.historie.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
-                        SqlInfo.sqlAusfuehren("delete from fertige where rez_nr='" + xrez_nr + "'");
+                        // RezeptFertigeDto rfDto = new RezeptFertigeDto(mand.ik());
+                        if (!(new RezeptFertigeDto(mand.ik())).deleteByRezNr(xrez_nr)) {
+                            logger.error("Fehler beim loeschen von " + xrez_nr + " aus fertige-DB.");
+                        };
+                        // SqlInfo.sqlAusfuehren("delete from fertige where rez_nr='" + xrez_nr + "'");
                         RezTools.loescheRezAusVolleTabelle(xrez_nr);
                         if (Reha.instance.abrechnungpanel != null) {
                             String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
