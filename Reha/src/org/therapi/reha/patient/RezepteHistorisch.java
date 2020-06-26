@@ -469,10 +469,12 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             */
             rez = new RezeptDto(ik).getHistorischesRezeptByRezNr(
                         (String) tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR))
-                                                                                    .orElse(new Rezept());
+                                                                                    .orElse(null);
         } else {
             rez = new Rezept(Rez);
         }
+        if (rez == null)
+            return;
 
         String terms = rez.getTermine();
         if (terms == null || terms.equals("")) {
@@ -656,6 +658,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent arg0) {
         String cmd = arg0.getActionCommand();
+        /*
         if (cmd.equals("arztbericht")) {
             if (!Rechte.hatRecht(Rechte.Historie_thbericht, true)) {
                 return;
@@ -698,8 +701,11 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             ab.setVisible(true);
             ab = null;
             return;
-        } else if (cmd.equals("historinfo")) {
+        } else
+        */
+        if (cmd.equals("historinfo")) {
             return;
+        // can't find an Object defining this string...
         } else if (cmd.equals("historumsatz")) {
             new SwingWorker<Void, Void>() {
                 @Override
@@ -709,6 +715,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                 }
             }.execute();
             return;
+        // Likewise - no ref. in entire code...
         } else if (cmd.equals("historprinttage")) {
             return;
         }
@@ -755,12 +762,6 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         int anz = rezepte.size();
         ZZStat iconKey;
         tblmodHistRez.emptyTable();
-        new Thread() {
-            @Override
-            public void run() {
-                holeEinzelTermine(0, null);
-            }
-        }.start();
         for (Rezept rez : rezepte) {
             if(rez == null)     // shouldn't need this on empty list...
                 break;
@@ -780,6 +781,12 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             System.out.println("Timingprobleme beim setzen des Reitertitels - Reiter: Historie");
         }
         if (anz > 0) {
+            new Thread() {
+                @Override
+                public void run() {
+                    holeEinzelTermine(0, null);
+                }
+            }.start();
             setzeHistoriePanelAufNull(false);
             if (xrez_nr.length() > 0) {
                 int row = 0;
@@ -843,7 +850,9 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                     logger.error("Could not transfer Rezept " + rez_nr + " from hist to aktuelle db");
                     // TODO: msg to user?
                 }
-                TableTool.loescheRowAusModel(tabHistRezepte, row);
+                // TableTool.loescheRowAusModel(tabHistRezepte, row);
+                tblmodHistRez.removeRow(row);
+                tblmodHistTerm.emptyTable();
                 String htmlstring = "<html><b><font color='#ff0000'>Achtung!!!!</font><br>"
                         + "Wenn Sie das Rezept lediglich zur Ansicht in die aktuelle Rezepte transferieren<br>"
                         + "sollten Sie die zugeh\u00f6rigen Fakturadaten <font color='#ff0000'>nicht l\u00f6schen.</font><br><br>"
@@ -1075,7 +1084,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         }
         if (aktPanel.equals("leerPanel")) {
             JOptionPane.showMessageDialog(null, "Ich sag jetzt nix....\n\n"
-                    + "....außer - und für welches der nicht vorhandenen Rezepte in der Historie wollen Sie einen Therapiebericht erstellen....");
+                    + "....au\u00dfer - und f\u00fcr welches der nicht vorhandenen Rezepte in der Historie wollen Sie einen Therapiebericht erstellen....");
             return;
         }
         boolean neuber = true;
@@ -1094,8 +1103,8 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             xverfasser = Reha.instance.patpanel.berichte.holeVerfasser();
             neuber = false;
             berid = iexistiert;
-            String meldung = "<html>Für das Historienrezept <b>" + xreznr
-                    + "</b> existiert bereits ein Bericht.<br>\nVorhandener Bericht wird jetzt geöffnet";
+            String meldung = "<html>F\u00fcr das Historienrezept <b>" + xreznr
+                    + "</b> existiert bereits ein Bericht.<br>\nVorhandener Bericht wird jetzt ge\u00f6ffnet";
             JOptionPane.showMessageDialog(null, meldung);
         }
 

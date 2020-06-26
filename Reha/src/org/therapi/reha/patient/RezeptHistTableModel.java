@@ -60,6 +60,10 @@ public class RezeptHistTableModel extends AbstractTableModel {
         rezeptListe.add(rez);
     }
     
+    public void removeRow(int row) {
+        rezeptListe.remove(row);
+    }
+    
     public String getColumnName(int column) {
         return columnNames[column];
     }

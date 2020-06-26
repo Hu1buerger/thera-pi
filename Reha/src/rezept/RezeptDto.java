@@ -693,7 +693,7 @@ public class RezeptDto {
                 + "KUERZEL5=" + quoteNonNull(rez.getHMKuerzel5()) + ", "
                 + "KUERZEL6=" + quoteNonNull(rez.getHMKuerzel6()) + ", "
                 + "ICD10='" + rez.getIcd10() + "', "
-                + "ICD10_2='" + rez.getIcd10_2() + "', "
+                + "ICD10_2=" + quoteNonNull(rez.getIcd10_2()) + ", "
                 + "PAUSCHALE='" + rez.getPauschale() + "' ";
         return sql;
         // logger.debug("Ran SQL command: ");
