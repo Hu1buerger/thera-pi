@@ -2567,10 +2567,10 @@ public class RezTools {
 
     /***************************************************/
     /***************************************************/
-    /****** Funktionen f\u00fcr Abrechnung nach \u00a7302 **********/
+    /****** Funktionen fuer Abrechnung nach Para.302 **********/
     /***************************************************/
     public static Object[] unter18Check(Vector<Vector<Object>> behandlungsfall, String geburtstag) {
-        // unter 18 ab Vector x \u00fcber 18 gesplittet
+        // unter 18 ab Vector x ueber 18 gesplittet
         Object[] ret = { Boolean.valueOf(true), behandlungsfall.size(), Boolean.valueOf(false) };
         String tag1 = (String) behandlungsfall.get(behandlungsfall.size() - 1)
                                               .get(0);
