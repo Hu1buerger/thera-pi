@@ -92,10 +92,13 @@ public class PatientHauptPanel extends JXPanel {
     public Gutachten gutachten = null;
     public String[] tabTitel = { "aktuelle Rezepte", "Rezept-Historie", "Therapieberichte", "Dokumentation",
             "Gutachten", "Arzt & KK", "Plandaten" };
-    public JLabel[] rezlabs = new JLabel[15];
+    /**
+     * 0 ?? - 1 hausbesuch - 2 angelegt - 3 kostentraeger - 4 arzt - 5 verornungsart - 6 begruendung - 7 arztbericht
+     * 8 behandlung1 - 9 frequenz - 10 behandlung2 - 11  behandlung3 - 12  behandlung4 - 13  indikation - 14  Dauer
+     * 15 LastEditor - 16 LastEditDate
+     */
+    public JLabel[] rezlabs = new JLabel[17];
 
-    // Labels: 0-, 1-, 2-'angelegt von', 3-ktraeger, 4-Arzt, 5-Rezeptart, 6-BegrAdR,
-    // 7-TBericht
     public JTextArea rezdiag = null;
 
     public ImageIcon[] imgzuzahl = new ImageIcon[4];
