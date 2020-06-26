@@ -64,6 +64,9 @@ public class RezeptDaten extends JXPanel implements ActionListener {
     private JMenuItem copyToBunker = null;
     private JRtaLabel hblab = null;
 
+    /**
+     * "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R."
+     */
     public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
 
     public RezeptDaten(PatientHauptPanel eltern) {
@@ -126,19 +129,27 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             verordnenderArzt.init(rezDieseVO.getArztId());
             logger.debug("Rez: verordnArtz=" + verordnenderArzt);
             String diszi = RezTools.getDisziplinFromRezNr(vecDieseVO.getRezClass());
+            logger.debug("diszi from Vec: " + diszi);
+            diszi = rezDieseVO.getRezClass();
+            logger.debug("diszi from Rez: " + diszi);
             int prgruppe = 0;
             try {
                 prgruppe = Integer.parseInt(vecDieseVO.getPreisgruppe())-1;
             } catch (Exception ex) {
+                logger.error("Couldn't get Preisgruppe vor Rez:" + rezDieseVO.getRezNr(),ex);
             }
 
             String stest = StringTools.NullTest(vecDieseVO.getHausbesuchS());
-            String einzeln = StringTools.NullTest(vecDieseVO.getHbVollS());
-            if (stest.equals("T")) {
-                hblab.setText(StringTools.NullTest(vecDieseVO.getAnzHBS())+" *");
-                hblab.setIcon((einzeln.equals("T") ? hbimg : hbimg2));
+            // String einzeln = StringTools.NullTest(vecDieseVO.getHbVollS());
+            // if (stest.equals("T")) {
+            if (rezDieseVO.isHausBesuch()) {
+                boolean einzeln = rezDieseVO.isHbVoll();
+                // hblab.setText(StringTools.NullTest(vecDieseVO.getAnzHBS())+" *");
+                hblab.setText(rezDieseVO.getAnzahlHb() + " *");
+                // hblab.setIcon((einzeln.equals("T") ? hbimg : hbimg2));
+                hblab.setIcon((einzeln ? hbimg : hbimg2));
                 hblab.setAlternateText(
-                        "<html>" + (einzeln.equals("T")
+                        "<html>" + (einzeln
                                 ? "Hausbesuch einzeln (Privatwohnung/-haus)<br>Positionsnummer: "
                                         + SystemPreislisten.hmHBRegeln.get(diszi)
                                                                       .get(prgruppe)
@@ -156,15 +167,15 @@ public class RezeptDaten extends JXPanel implements ActionListener {
                 hblab.setIcon(null);
             }
 
-            Reha.instance.patpanel.rezlabs[2].setText("angelegt von: "+vecDieseVO.getAngelegtVon());
-            if(StringTools.ZahlTest( vecDieseVO.getKtraeger()) >= 0 ){
+            Reha.instance.patpanel.rezlabs[2].setText("angelegt von: " + rezDieseVO.getAngelegtVon());
+            if(rezDieseVO.getkId() >= 0 ){
                 Reha.instance.patpanel.rezlabs[3].setForeground(Color.BLACK);
             } else {
                 Reha.instance.patpanel.rezlabs[3].setForeground(Color.RED);
             }
-            Reha.instance.patpanel.rezlabs[3].setText(StringTools.NullTest(vecDieseVO.getKtrName()));
+            Reha.instance.patpanel.rezlabs[3].setText(rezDieseVO.getKTraegerName());
 
-            if(StringTools.ZahlTest( vecDieseVO.getArztId()) >= 0 ){
+            if(rezDieseVO.getArztId() >= 0 ){
                 Reha.instance.patpanel.rezlabs[4].setForeground(Color.BLACK);
             } else {
                 Reha.instance.patpanel.rezlabs[4].setForeground(Color.RED);
@@ -172,11 +183,16 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             Reha.instance.patpanel.rezlabs[4].setText(StringTools.NullTest(verordnenderArzt.getNNameLanr()));
 
             int test = vecDieseVO.getRezArt();
+            logger.debug("RezArt vec: " + test);
+            test = rezDieseVO.getRezeptArt();
+            logger.debug("RezArt rez: " + test);
             if (test >= 0) {
                 Reha.instance.patpanel.rezlabs[5].setText(rezart[test]);
                 if (test == 2) {
                     stest = StringTools.NullTest(vecDieseVO.getBegrAdRS());
-                    if (stest.equals("T")) {
+                    logger.debug("AdR-Begr.: vec: " + stest);
+                    logger.debug("AdR-Begr.: rez: " + rezDieseVO.getBegruendADR());
+                    if (rezDieseVO.isBegruendADR()) {
                         Reha.instance.patpanel.rezlabs[6].setForeground(Color.BLACK);
                         Reha.instance.patpanel.rezlabs[6].setText("Begr\u00fcndung o.k.");
                     } else {
