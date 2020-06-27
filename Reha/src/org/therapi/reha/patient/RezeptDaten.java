@@ -49,7 +49,7 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import terminKalender.TerminFenster;
 
-public class RezeptDaten extends JXPanel implements ActionListener {
+public class RezeptDaten extends JXPanel {
     /**
      * 
      */
@@ -66,9 +66,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
     private JMenuItem copyToBunker = null;
     private JRtaLabel hblab = null;
 
-    /**
-     * "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R."
-     */
+    /** "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." **/
     public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
 
     public RezeptDaten(PatientHauptPanel eltern) {
@@ -628,11 +626,12 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             copyToBunker.setIcon(SystemConfig.hmSysIcons.get("bunker"));
             copyToBunker.setRolloverEnabled(true);
             copyToBunker.setEnabled(true);
-            copyToBunker.addActionListener(this);
+            copyToBunker.addActionListener(e -> actionCopyToBunker(e));
         }
         return copyToBunker;
     }
 
+    /*
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand()
@@ -667,5 +666,37 @@ public class RezeptDaten extends JXPanel implements ActionListener {
             }
         }
 
+    }
+    */
+    
+    // Actions
+    private void actionCopyToBunker(ActionEvent e) {
+        // TODO: delete me once Rezepte have been sorted
+        int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
+        logger.debug("Vec: farbcode=" + farbcode);
+        farbcode = Reha.instance.patpanel.rezAktRez.getFarbcode();
+        logger.debug("Rez: farbcode=" + farbcode);
+        TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
+        String dragText = Reha.instance.patpanel.patDaten.get(0)
+                                                         .substring(0, 1)
+                + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3) + "\u00b0"
+                + reznum.getText() + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "\u00b0"
+                + Reha.instance.patpanel.rezlabs[14].getText();
+        Reha.instance.copyLabel.setText(String.valueOf(dragText));
+        Reha.instance.bunker.setText("TERMDATEXT" + "\u00b0" + String.valueOf(dragText));
+        String[] daten = { (Reha.instance.patpanel.patDaten.get(0)
+                                                           .startsWith("F") ? "F-" : "H-")
+                + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3),
+                Reha.instance.patpanel.rezAktRez.getRezNr()
+                        + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
+                Reha.instance.patpanel.rezAktRez.getDauer() };
+
+        if (Reha.instance.terminpanel != null) {
+            Reha.instance.terminpanel.setDatenVonExternInSpeicherNehmen(daten.clone());
+            Reha.instance.shiftLabel.setText(
+                    "bereit f\u00fcr F2= " + daten[0] + "\u00b0" + daten[1] + "\u00b0" + daten[2] + " Min.");
+        } else {
+            Reha.instance.shiftLabel.setText(" ");
+        }
     }
 }
