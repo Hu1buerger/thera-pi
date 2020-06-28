@@ -139,6 +139,9 @@ public class RezeptDaten extends JXPanel {
             } catch (Exception ex) {
                 logger.error("Couldn't get Preisgruppe vor Rez:" + rezDieseVO.getRezNr(),ex);
             }
+            logger.debug("PG vec: " + prgruppe);
+            prgruppe = rezDieseVO.getPreisGruppe() - 1;
+            logger.debug("PG rez: " + prgruppe);
 
             String stest = StringTools.NullTest(vecDieseVO.getHausbesuchS());
             // String einzeln = StringTools.NullTest(vecDieseVO.getHbVollS());
@@ -588,7 +591,6 @@ public class RezeptDaten extends JXPanel {
         JScrollPane jscrdiag = JCompTools.getTransparentScrollPane(eltern.rezdiag);
         jscrdiag.validate();
         diagpan.add(jscrdiag, BorderLayout.CENTER);
-
         jpan.add(diagpan, cc.xywh(3, 21, 3, 4, CellConstraints.FILL, CellConstraints.FILL));
         
         jpan.addSeparator("", cc.xyw(1, 25, 5));
@@ -630,44 +632,6 @@ public class RezeptDaten extends JXPanel {
         }
         return copyToBunker;
     }
-
-    /*
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (e.getActionCommand()
-             .equals("Rezept kopieren")) {
-         // TODO: delete me once Rezepte have been sorted
-            int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
-            logger.debug("Vec: farbcode=" + farbcode);
-            farbcode = Reha.instance.patpanel.rezAktRez.getFarbcode();
-            logger.debug("Rez: farbcode=" + farbcode);
-            TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
-            String dragText = Reha.instance.patpanel.patDaten.get(0)
-                                                             .substring(0, 1)
-                    + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3) + "\u00b0"
-                    + reznum.getText() + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "\u00b0"
-                    + Reha.instance.patpanel.rezlabs[14].getText();
-            Reha.instance.copyLabel.setText(String.valueOf(dragText));
-            Reha.instance.bunker.setText("TERMDATEXT" + "\u00b0" + String.valueOf(dragText));
-            String[] daten = { (Reha.instance.patpanel.patDaten.get(0)
-                                                               .startsWith("F") ? "F-" : "H-")
-                    + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3),
-// TODO: check it works with Rezepte
-                    Reha.instance.patpanel.rezAktRez.getRezNr()
-                            + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
-                    Reha.instance.patpanel.rezAktRez.getDauer() };
-
-            if (Reha.instance.terminpanel != null) {
-                Reha.instance.terminpanel.setDatenVonExternInSpeicherNehmen(daten.clone());
-                Reha.instance.shiftLabel.setText(
-                        "bereit f\u00fcr F2= " + daten[0] + "\u00b0" + daten[1] + "\u00b0" + daten[2] + " Min.");
-            } else {
-                Reha.instance.shiftLabel.setText(" ");
-            }
-        }
-
-    }
-    */
     
     // Actions
     private void actionCopyToBunker(ActionEvent e) {
@@ -694,7 +658,7 @@ public class RezeptDaten extends JXPanel {
         if (Reha.instance.terminpanel != null) {
             Reha.instance.terminpanel.setDatenVonExternInSpeicherNehmen(daten.clone());
             Reha.instance.shiftLabel.setText(
-                    "bereit f\u00fcr F2= " + daten[0] + "\u00b0" + daten[1] + "\u00b0" + daten[2] + " Min.");
+                    "bereit f\u00fcr F2= " + daten[0] + "\u00b0" + daten[1] + "\u00b0" + daten[2] + " Min."); // \u00b0 = '˚' ("Grad")
         } else {
             Reha.instance.shiftLabel.setText(" ");
         }
