@@ -17,16 +17,20 @@ import javax.swing.SwingWorker;
 import javax.swing.TransferHandler;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
+import CommonTools.DateTimeFormatters;
 import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import hauptFenster.Reha;
+import rezept.Rezept;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
@@ -36,18 +40,25 @@ public class HistorDaten extends JXPanel {
      * 
      */
     private static final long serialVersionUID = 2322653747361882977L;
-    // public JLabel[] rezlabs = {null,null,null,null,null,null,null,null,null};
+    private static final Logger logger = LoggerFactory.getLogger(HistorDaten.class);
     public JRtaTextField reznum = null;
     public JRtaTextField draghandler = null;
     public ImageIcon hbimg = null;
     public ImageIcon hbimg2 = null;
+    private Rezept rezDieseVO = null;
     public Vector<String> vecaktrez = null;
 
+    /**
+     * 0 RezNr?? - 1 hausbesuch - 2 angelegt - 3 kostentraeger - 4 arzt - 5 verornungsart - 6 begruendung - 7 arztbericht
+     * 8 behandlung1 - 9 frequenz - 10 behandlung2 - 11  behandlung3 - 12  behandlung4 - 13  indikation - 14  Dauer
+     * 15 LastEditor - 16 LastEditDate
+     */
     public JLabel[] rezlabs = { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            null };
+            null, null, null };
     public JTextArea rezdiag = null;
 
-    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. außerhalb d.R." };
+    /** "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." **/
+    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
     /*
      * ImageIcon hgicon; int icx,icy; AlphaComposite xac1 = null; AlphaComposite
      * xac2 = null;
@@ -135,10 +146,10 @@ public class HistorDaten extends JXPanel {
                             stest = StringTools.NullTest(vecaktrez.get(42));
                             if (stest.equals("T")) {
                                 rezlabs[6].setForeground(Color.BLACK);
-                                rezlabs[6].setText("Begründung o.k.");
+                                rezlabs[6].setText("Begr\u00fcndung o.k.");
                             } else {
                                 rezlabs[6].setForeground(Color.RED);
-                                rezlabs[6].setText("Begründung fehlt");
+                                rezlabs[6].setText("Begr\u00fcndung fehlt");
                             }
 
                         } else {
@@ -235,6 +246,9 @@ public class HistorDaten extends JXPanel {
                         rezdiag.setText(StringTools.NullTest(vecaktrez.get(23)));
                     }
                     // rezdiag.setText(StringTools.NullTest((String)vecaktrez.get(23)));
+                    rezlabs[15].setText(rezDieseVO.getLastEditor());
+                    rezlabs[16].setText("am: " + rezDieseVO.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt));
+                    
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -263,12 +277,14 @@ public class HistorDaten extends JXPanel {
 
     public JScrollPane getDatenPanel() {
         JScrollPane jscr = null;
-
+                                     //        1            2         3           4        5
         FormLayout lay = new FormLayout("fill:0:grow(0.33),2px,fill:0:grow(0.33),2px,fill:0:grow(0.33)",
                 // FormLayout lay = new FormLayout("p,fill:0:grow(0.50),p,fill:0:grow(0.50),p",
-                // 1.Sep 2.Sep 3.Sep
-                // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
-                "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,1dlu,p,1dlu,p, 1dlu,p,5dlu,p,5dlu,p,1dlu,p,20dlu:g,0px");
+                //      1.Sep                2.Sep                              3.Sep
+              // 1  2   3  4   5  6   7  8   9  10 11 12  13  14 15  16  17 18  19 20  21 22  23  24    25  26 27
+              //"p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,5dlu,p,1dlu,p,20dlu:g,1px,p,1dlu");
+                "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,5dlu,p,1dlu,p,26dlu,1px,p,1dlu");
+        //      "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,38dlu,1px,p,1dlu");
         CellConstraints cc = new CellConstraints();
         PanelBuilder jpan = new PanelBuilder(lay);
         jpan.getPanel()
@@ -289,7 +305,7 @@ public class HistorDaten extends JXPanel {
                 draghandler.setText(Reha.instance.patpanel.patDaten.get(0)
                                                                    .substring(0, 1)
                         + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3)
-                        + "°" + reznum.getText() + "°" + rezlabs[14].getText());
+                        + "\u00b0" + reznum.getText() + "\u00b0" + rezlabs[14].getText());
                 JComponent c = draghandler;
                 TransferHandler th = c.getTransferHandler();
                 th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
@@ -352,6 +368,13 @@ public class HistorDaten extends JXPanel {
         rezlabs[14].setName("Dauer");
         rezlabs[14].setFont(fontbehandlung);
 
+        rezlabs[15] = new JLabel(" ");
+        rezlabs[15].setName("lasteditor");
+        rezlabs[15].setForeground(Color.GRAY);
+        rezlabs[16] = new JLabel(" ");
+        rezlabs[16].setName("lasteditdate");
+        rezlabs[16].setForeground(Color.GRAY);
+        
         rezdiag = new JTextArea("");
         rezdiag.setOpaque(false);
         rezdiag.setFont(new Font("Courier", Font.PLAIN, 11));
@@ -387,10 +410,19 @@ public class HistorDaten extends JXPanel {
         jpan.addSeparator("", cc.xyw(1, 19, 5));
 
         jpan.add(rezlabs[13], cc.xy(1, 21));
-        // jpan.add(rezlabs[14],cc.xy(1, 23));
+        // rezlabs[14] added between 9 & 10...
+                
         JScrollPane jscrdiag = JCompTools.getTransparentScrollPane(rezdiag);
         jscrdiag.validate();
         jpan.add(jscrdiag, cc.xywh(3, 21, 3, 4));
+
+        jpan.addSeparator("", cc.xyw(1, 25, 5));
+        
+        JLabel labLastEdit = new JLabel("Zuletzt bearbeitet durch:");
+        labLastEdit.setForeground(Color.GRAY);
+        jpan.add(labLastEdit, cc.xy(1, 26));
+        jpan.add(rezlabs[15], cc.xy(3, 26));
+        jpan.add(rezlabs[16], cc.xy(5, 26));
 
         jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
         jscr.getVerticalScrollBar()
