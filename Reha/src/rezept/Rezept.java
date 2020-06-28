@@ -16,7 +16,13 @@ import core.Disziplin;
 
 public class Rezept {
     private static final Logger logger = LoggerFactory.getLogger(Rezept.class);
-            
+    
+    // "Erstverordnung", "Folgeverordnung", "Folgev. ausserhalb d.R."
+    // TODO: Enum?
+    public static final int REZART_ERSTVO = 0;
+    public static final int REZART_FOLGEVO = 1;
+    public static final int REZART_FOLGEVOADR = 2;
+
     Rezeptnummer rezNr;
     Disziplin disziplin;
     int id;
