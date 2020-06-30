@@ -172,6 +172,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         rezlabs[6] = new JLabel(" ");
         rezlabs[6].setName("begruendung");
         rezlabs[6].setForeground(Color.RED);
+        rezlabs[6].setVisible(false);
 
         rezlabs[7] = new JLabel(" ");
         rezlabs[7].setName("arztbericht");
@@ -307,7 +308,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         logger.debug("Entering fillInData on RezNr: " + rez.getRezNr());
         rezlabs[4].setText("Kein Arzt");
         rezlabs[5].setText(" ");
-        rezlabs[6].setText(" ");
+        rezlabs[6].setText("<HTML><font color=red>Begr\u00fcndung fehlt</font><html>");
         // rezlabs[7].setText(" ");
         rezlabs[7].setText("<HTML><font color=red>Therapiebericht fehlt</font><html>");
         rezlabs[9].setText("<HTML><font color=red>??? / Wo.</font><html>");
@@ -333,12 +334,10 @@ public class RezeptDatenDarstellen extends JXPanel{
             String[] rezArt = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
             rezlabs[5].setText(rezArt[rezArtImRezept]);
             if (rezArtImRezept == Rezept.REZART_FOLGEVOADR) {
+                rezlabs[6].setVisible(true);
                 if (rez.isBegruendADR()) {
                     rezlabs[6].setForeground(Color.BLACK);
                     rezlabs[6].setText("Begr\u00fcndung o.k.");
-                } else {
-                    rezlabs[6].setForeground(Color.RED);
-                    rezlabs[6].setText("Begr\u00fcndung fehlt");
                 }
             }
         }
@@ -383,7 +382,7 @@ public class RezeptDatenDarstellen extends JXPanel{
             }
         }
 
-        if (!rez.getDauer().isEmpty()) {
+        if (rez.getDauer() != null && !rez.getDauer().isEmpty()) {
             rezlabs[14].setForeground(Color.BLACK);
             rezlabs[14].setText(rez.getDauer() + " Min.");
         }
@@ -401,7 +400,9 @@ public class RezeptDatenDarstellen extends JXPanel{
         }
         
         rezlabs[15].setText(rez.getLastEditor());
-        rezlabs[16].setText("am: " + rez.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt));
+        rezlabs[16].setText("am: " + (rez.getLastEdDate() == null 
+                                                ? "???" 
+                                                : rez.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt)));
         
     }
     
@@ -411,6 +412,9 @@ public class RezeptDatenDarstellen extends JXPanel{
         String diszi = Disziplin.ofShort(rez.getRezClass()).medium;
         int prgruppe = rez.getPreisGruppe() - 1;
         
+        if (rez.getHMPos(idxHM) == null)
+            return retVal;
+        
         try {
             preisvec = SystemPreislisten.hmPreise.get(diszi)
                                                  .get(prgruppe);
@@ -418,7 +422,6 @@ public class RezeptDatenDarstellen extends JXPanel{
             logger.error("Konnte PG in setRezeptDaten von " + rez.getRezNr() + " via " + diszi + " nicht holen.");
             JOptionPane.showMessageDialog(null,
                     "Achtung Fehler beim Bezug der Preislisteninformation!\nKlasse: RezeptDaten");
-            RezeptDaten.feddisch = true;
             return retVal;
         }
         final int KUERZEL = 1;
