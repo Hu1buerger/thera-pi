@@ -676,7 +676,7 @@ public class RezeptDto {
                 + "POS4='" + rez.getHMPos4() + "', "
                 + "FREQUENZ='" + rez.getFrequenz() + "', "
                 + "LASTEDIT='" + rez.getLastEditor() + "', "
-                + "BERID='" + rez.getBerId() + "', "
+                + "BERID=" + rez.getBerId() + ", "
                 + "ARZTBERICHT='" + rez.getArztBericht() + "', "
                 + "FARBCODE='" + rez.getFarbcode() + "', "
                 + "RSPLIT=" + quoteNonNull(rez.getRSplit()) + ", "
