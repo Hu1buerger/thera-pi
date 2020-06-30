@@ -26,7 +26,7 @@ public class Rezept {
     Rezeptnummer rezNr;
     Disziplin disziplin;
     int id;
-    int rezeptArt; // erstverordn, VO oder Adr - why not as Enum?
+    int rezeptArt = -1; // erstverordn, VO oder Adr - why not as Enum?
     LocalDate rezDatum;
 
     int patIntern;
