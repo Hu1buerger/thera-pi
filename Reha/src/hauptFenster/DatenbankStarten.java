@@ -213,7 +213,7 @@ final class DatenbankStarten implements Runnable {
 
                 new SocketClient().setzeInitStand("HashMaps initialisieren");
 
-                SystemConfig.HashMapsVorbereiten();
+                SystemConfig.officeDocumentFieldsVorbereiten();
 
                 Thread.sleep(50);
 
