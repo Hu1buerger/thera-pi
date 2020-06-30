@@ -659,7 +659,7 @@ public class RezeptDto {
                 + "CHARFREI2=" + quoteNonNull(rez.getCharfrei2()) + ", "
                 + "TERMINE=" + quoteNonNull(rez.getTermine()) + ", "
                 + "KTRAEGER='" + rez.getKTraegerName() + "', "
-                + "KID='" + rez.getkId() + "', "
+                + "KID=" + rez.getkId() + ", "
                 + "ZZSTATUS=" + rez.getZZStatus() + ", "
                 + "LASTDATE=" + quoteNonNull(rez.getLastDate()) + ", "
                 + "PREISGRUPPE=" + rez.getPreisGruppe() + ", "
