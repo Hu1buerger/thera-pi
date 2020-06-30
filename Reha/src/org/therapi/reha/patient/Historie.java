@@ -64,7 +64,11 @@ import stammDatenTools.ZuzahlTools.ZZStat;
 import systemEinstellungen.SystemConfig;
 import systemTools.IconListRenderer;
 
-public class Historie extends JXPanel implements ActionListener, TableModelListener, PropertyChangeListener {
+/**
+ * @DEPRECATED - in 1.1.8 use {@link org.therapi.reha.patient.RezepteHistorisch#RezepteHistorisch(IK)} instead...
+  *
+ */
+@Deprecated public class Historie extends JXPanel implements ActionListener, TableModelListener, PropertyChangeListener {
     /**
      *
      */

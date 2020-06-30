@@ -35,6 +35,12 @@ import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
+/**
+ * @deprecated in 1.1.8
+ * <BR/>use {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(String, boolean, mandant.IK)} instead
+ * 
+ */
+@Deprecated
 public class HistorDaten extends JXPanel {
     /**
      * 

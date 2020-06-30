@@ -87,7 +87,6 @@ import org.jdesktop.swingx.treetable.TreeTableNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.therapi.reha.patient.RezepteAktuell;
-import org.therapi.reha.patient.Historie;
 import org.therapi.reha.patient.RezepteHistorisch;
 
 import com.jgoodies.forms.layout.CellConstraints;

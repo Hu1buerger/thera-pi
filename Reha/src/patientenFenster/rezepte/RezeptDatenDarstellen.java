@@ -41,6 +41,11 @@ import rezept.RezeptDto;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
+/**
+ * Class used to extract certain fields of a Rezept and display them as a sort of summary
+ *  (in the PatientenFenster below the RezeptListe)
+ * 
+ */
 public class RezeptDatenDarstellen extends JXPanel{
     static final long serialVersionUID = 1;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDatenDarstellen.class);
@@ -66,6 +71,15 @@ public class RezeptDatenDarstellen extends JXPanel{
     private JTextArea rezdiag = null;
     private JScrollPane jscr = null;
     
+    /**
+     * Provide me an Ik, so that I can grab a Rezept from DB and extract information.
+     * Provide the boolean Aktuelle so that I can choose whether you want current or
+     * historical Rezepte.
+     * 
+     * @param RezNr     The RezeptNr of the Rezept to extract information from
+     * @param Aktuelle  Is the rezept in aktuelle (verordn) or Historie (LZA)
+     * @param Ik        The IK to use when getting the Rezept
+     */
     public RezeptDatenDarstellen(String RezNr, boolean Aktuelle, IK Ik) {
         super();
         rezNr = RezNr;
@@ -81,6 +95,12 @@ public class RezeptDatenDarstellen extends JXPanel{
         validate();
     }
 
+    /**
+     * Call this method to update the panel with a different Rezept
+     * 
+     * @param RezNr     The RezeptNr used to retrieve the Rezept(-data)
+     * @param Aktuelle  Is the Rezept in aktuelle (TRUE == verordn) or Hist. (LZA)?
+     */
     public void updateDatenPanel(String RezNr, boolean Aktuelle) {
         rezNr = RezNr;
         aktuelle = Aktuelle;

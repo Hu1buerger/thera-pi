@@ -75,10 +75,11 @@ import stammDatenTools.ZuzahlTools.ZZStat;
 import systemEinstellungen.SystemConfig;
 import systemTools.IconListRenderer;
 
+/**
+ * Replaces the historie.java and uses the Rezept-class
+ *
+ */
 public class RezepteHistorisch extends JXPanel implements ActionListener {
-    /**
-     *
-     */
     private static final long serialVersionUID = -7023226994175632749L;
     private static final Logger logger = LoggerFactory.getLogger(RezepteHistorisch.class);
     
@@ -114,6 +115,10 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
 
     // int idInTable = 7;
 
+    /**
+     * Replaces the old Historie.java, now with IK param and Rezept-class
+     * @param Ik
+     */
     public RezepteHistorisch(IK Ik) {
         super();
         ik = Ik;
