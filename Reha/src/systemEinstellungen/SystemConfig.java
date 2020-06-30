@@ -969,7 +969,7 @@ public class SystemConfig {
         oGruppen = new GruppenEinlesen().init();
     }
 
-    public static void HashMapsVorbereiten() {
+    public static void officeDocumentFieldsVorbereiten() {
         /********************/
         hmAdrKDaten = new HashMap<String, String>();
         List<String> lAdrKDaten = Arrays.asList(new String[] { "<Kadr1>", "<Kadr2>", "<Kadr3>", "<Kadr4>", "<Kadr5>",
@@ -1007,15 +1007,15 @@ public class SystemConfig {
             hmAdrRDaten.put(lAdrRDaten.get(i), "");
         }
         /********************/
-        hmAdrBDaten = new HashMap<String, String>();
-        List<String> lAdrBDaten = Arrays.asList(new String[] { "<Badr1>", "<Badr2>", "<Badr3>", "<Badr4>", "<Badr5>",
+        hmAdrBDaten = new HashMap<>();
+        List<String> lAdrBerichtDaten = Arrays.asList(new String[] { "<Badr1>", "<Badr2>", "<Badr3>", "<Badr4>", "<Badr5>",
                 "<Bbanrede>", "<Bihrenpat>", "<Bdisziplin>", "<Bdiagnose>", "<Breznr>", "<Brezdatum>", "<Bblock1>",
                 "<Bblock2>", "<Bblock3>", "<Bblock4>", "<Btitel1>", "<Btitel2>", "<Btitel3>", "<Btitel4>", "<Bnname>",
                 "<Bvnname>", "<Bgeboren>", "<Btherapeut>", "<Berstdat>", "<Bletztdat>", "<Banzahl1>", "<Banzahl2>",
                 "<Banzahl3>", "<Banzahl4>", "<Blang1>", "<Blang2>", "<Blang3>", "<Blang4>", "<Barztfax>",
                 "<Barztemail>" });
-        for (int i = 0; i < lAdrBDaten.size(); i++) {
-            hmAdrBDaten.put(lAdrBDaten.get(i), "");
+        for (String key : lAdrBerichtDaten) {
+            hmAdrBDaten.put(key,"");
         }
         /********************/
         hmAdrAFRDaten = new HashMap<String, String>();
@@ -1027,7 +1027,7 @@ public class SystemConfig {
             hmAdrAFRDaten.put(lAdrAFRDaten.get(i), "");
         }
         /********************/
-        hmAdrHMRDaten = new HashMap<String, String>();
+        hmAdrHMRDaten = new HashMap<>();
 
     }
 
