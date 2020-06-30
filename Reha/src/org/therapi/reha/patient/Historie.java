@@ -57,6 +57,7 @@ import jxTableTools.TableTool;
 import oOorgTools.OOTools;
 import patientenFenster.HistorDaten;
 import patientenFenster.KeinRezept;
+import patientenFenster.rezepte.RezeptDatenDarstellen;
 import rechteTools.Rechte;
 import stammDatenTools.RezTools;
 import stammDatenTools.ZuzahlTools.ZZStat;
@@ -84,7 +85,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
     public String[] indphysio = null;
     public String[] indergo = null;
     public String[] indlogo = null;
-    public HistorDaten jpan1 = null;
+    public RezeptDatenDarstellen jpan1 = null;
     public JButton[] histbut = { null, null, null, null };
     public static boolean inRezeptDaten = false;
 
@@ -158,7 +159,8 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                     dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
                     dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
 
-                    jpan1 = new HistorDaten();
+                    // jpan1 = new HistorDaten();
+                    jpan1 = new RezeptDatenDarstellen(null, false, Reha.instance.mandant().ik());
                     vollPanel.add(jpan1, vpcc.xyw(1, 4, 1));
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -712,7 +714,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                 public void run() {
                     String reznr = (String) tabhistorie.getValueAt(xrow, 0);
                     String id = (String) tabhistorie.getValueAt(xrow, idInTable);
-                    jpan1.setRezeptDaten(reznr, id);
+                    jpan1.updateDatenPanel(reznr, false);
                 }
             });
 
@@ -788,15 +790,17 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 
                 }
                 tabhistorie.setRowSelectionInterval(row, row);
-                jpan1.setRezeptDaten((String) tabhistorie.getValueAt(row, 0),
-                        (String) tabhistorie.getValueAt(row, idInTable));
+                // jpan1.setRezeptDaten((String) tabhistorie.getValueAt(row, 0),
+                //         (String) tabhistorie.getValueAt(row, idInTable));
+                jpan1.updateDatenPanel((String) tabhistorie.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR),false);
                 tabhistorie.scrollRowToVisible(row);
                 holeEinzelTermine(row, null);
             } else {
                 rezneugefunden = true;
                 tabhistorie.setRowSelectionInterval(0, 0);
-                jpan1.setRezeptDaten((String) tabhistorie.getValueAt(0, 0),
-                        (String) tabhistorie.getValueAt(0, idInTable));
+                // jpan1.setRezeptDaten((String) tabhistorie.getValueAt(0, 0),
+                //        (String) tabhistorie.getValueAt(0, idInTable));
+                jpan1.updateDatenPanel((String) tabhistorie.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_NR),false);
             }
             anzahlHistorie.setText("Anzahl Rezepte in Historie: " + anz);
             wechselPanel.revalidate();
@@ -906,8 +910,9 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                                     inRezeptDaten = true;
                                     setCursor(Cursors.wartenCursor);
                                     holeEinzelTermine(ix, null);
-                                    jpan1.setRezeptDaten((String) tabhistorie.getValueAt(ix, 0),
-                                            (String) tabhistorie.getValueAt(ix, idInTable));
+                                    // jpan1.setRezeptDaten((String) tabhistorie.getValueAt(ix, 0),
+                                    //        (String) tabhistorie.getValueAt(ix, idInTable));
+                                    jpan1.updateDatenPanel((String) tabhistorie.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_NR),false);
                                     setCursor(Cursors.normalCursor);
                                     inRezeptDaten = false;
                                 } catch (Exception ex) {

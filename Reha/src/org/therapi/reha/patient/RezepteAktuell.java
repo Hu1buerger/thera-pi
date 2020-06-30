@@ -2007,7 +2007,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
             String xcmd = "update verordn set zzstatus='" + Zuzahlung.ZZSTATUS_OK + "', befr='F',rez_bez='T' where rez_nr='"
                     + xreznr + "' LIMIT 1";
             // SqlInfo.sqlAusfuehren(xcmd);
-            dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[1], currow, 1);
+            dtblm.setValueAt(Reha.instance.patpanel.imgzuzahl[1], currow, MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON);
             tabaktrez.validate();
             // TODO: delete me once Rezepte have been sorted
             doVectorAktualisieren(new int[] { 12, 14, 39 }, new String[] { "F", "T", "1" }); // befr, rez_bez,
@@ -3787,7 +3787,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
             list.setCellRenderer(new IconListRenderer(icons));
             Reha.toolsDlgRueckgabe = -1;
             ToolsDialog tDlg = new ToolsDialog(Reha.getThisFrame(), "Werkzeuge: aktuelle Rezepte", list);
-            tDlg.setPreferredSize(new Dimension(275, (255 + 28) + // Lemmi: Breite, H\u00f6he des Werkzeug-Dialogs
+            tDlg.setPreferredSize(new Dimension(275, (255 + 28) + // Lemmi: Breite, Hoehe des Werkzeug-Dialogs
                     ((Boolean) SystemConfig.hmPatientenWerkzeugDlgIni.get("ToolsDlgShowButton") ? 25 : 0)));
             tDlg.setLocation(pt.x - 70, pt.y + 30);
             tDlg.pack();

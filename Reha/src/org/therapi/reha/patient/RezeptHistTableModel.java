@@ -6,9 +6,9 @@ import java.util.List;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,10 @@ import org.slf4j.LoggerFactory;
 import CommonTools.DateTimeFormatters;
 import patientenFenster.rezepte.RezeptFensterTools;
 import rezept.Rezept;
+import stammDatenTools.ZuzahlTools.ZZStat;
 
 public class RezeptHistTableModel extends AbstractTableModel {
+    static final long serialVersionUID = 1L;
     private static final Logger logger = LoggerFactory.getLogger(RezeptHistTableModel.class);
     static final int HISTREZTABCOL_NR = 0;
     static final int HISTREZTABCOL_BEZAHLT = 1;
@@ -69,7 +71,8 @@ public class RezeptHistTableModel extends AbstractTableModel {
     }
 
     public int getRowCount() {
-        logger.debug("GetRowCount=" + (rezeptListe == null ? 0 : rezeptListe.size()));
+        // FIXME: Re-enable to see how often it gets called (WWAAYY TOO OFTEN!)
+        // logger.debug("GetRowCount=" + (rezeptListe == null ? 0 : rezeptListe.size()));
         for (Rezept rez : rezeptListe) {
             // logger.debug("RezNummer: " + rez.getRezNr());
         }
@@ -80,43 +83,15 @@ public class RezeptHistTableModel extends AbstractTableModel {
         return columnNames.length;
     }
 
-    /* override this in rezhisttable.java
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Rezept rezept = rezeptListe.get(rowIndex);
-        String colName = columnNames[columnIndex];
-        switch (colName) {
-        case "Rezept-Nr.":
-            return rezept.getRezNr();
-        case "bezahlt":
-            return bezahlt;
-            //rezept.isRezBez(); // Would we ever have a non-paid Rezept in Historie?
-        case "Rez-Datum":
-            return rezept.getRezDatum();
-        case "angelegt am":
-            return rezept.getErfassungsDatum().format(DateTimeFormatters.ddMMYYYYmitPunkt);
-        case "sp\u00e4t.Beginn":
-            return RezeptFensterTools.calcLatestStartDate(rezept);
-        case "Pat-Nr.":
-            return rezept.getPatIntern();
-        case "Indi.Schl.":
-            return rezept.getIndikatSchl();
-        case "ID":
-            return rezept.getId();
-        default:
-            //should never happen
-
-            logger.error("unknown column requested: [column = " + columnIndex + " ]");
-            return new Object();
-        }
-    }
- */   
     public Object getValueAt(int rowIndex, int columnIndex) {
         Rezept rezept = rezeptListe.get(rowIndex);
         switch (columnIndex) {
             case HISTREZTABCOL_NR:
                 return rezept.getRezNr();
             case HISTREZTABCOL_BEZAHLT:
-                return bezahlt;
+                logger.debug("Icon from " + rezept.getZZStatus() + " " + rezept.getRezNr());
+                ZZStat iconKey = stammDatenTools.ZuzahlTools.getIconKey(rezept.getZZStatus(), rezept.getRezNr());
+                return stammDatenTools.ZuzahlTools.getZzIcon(iconKey);
                 //rezept.isRezBez(); // Would we ever have a non-paid Rezept in Historie?
             case HISTREZTABCOL_REZDAT:
                 return rezept.getRezDatum();
@@ -137,14 +112,14 @@ public class RezeptHistTableModel extends AbstractTableModel {
                 return new Object();
         }
     }
-
+    
     @Override
     public Class<?> getColumnClass(int columnIndex) {
         switch (columnIndex) {
         case HISTREZTABCOL_NR:
             return String.class;
         case HISTREZTABCOL_BEZAHLT:
-            return Icon.class;
+            return JLabel.class;
         case HISTREZTABCOL_REZDAT:
             return LocalDate.class;
         case HISTREZTABCOL_ANGELEGTAM:
@@ -166,6 +141,8 @@ public class RezeptHistTableModel extends AbstractTableModel {
 }
 
 class DateCellRenderer extends DefaultTableCellRenderer {
+    static final long serialVersionUID = 1L;
+
     public DateCellRenderer() { super(); }
 
     @Override

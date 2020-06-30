@@ -65,6 +65,7 @@ import mandant.IK;
 import oOorgTools.OOTools;
 import patientenFenster.HistorDaten;
 import patientenFenster.KeinRezept;
+import patientenFenster.rezepte.RezeptDatenDarstellen;
 import patientenFenster.rezepte.RezeptFensterTools;
 import rechteTools.Rechte;
 import rezept.Rezept;
@@ -98,7 +99,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     public String[] indphysio = null;
     public String[] indergo = null;
     public String[] indlogo = null;
-    public HistorDaten jpan1 = null;
+    public RezeptDatenDarstellen jpan1 = null;
     
     private JButton btnArztBericht;
     private JButton btnTools;
@@ -182,7 +183,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                     dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
                     dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
 
-                    jpan1 = new HistorDaten();
+                    jpan1 = new RezeptDatenDarstellen(null, false, ik);
                     vollPanel.add(jpan1, vpcc.xyw(1, 4, 1));
                 } catch (Exception ex) {
                     ex.printStackTrace();
@@ -732,9 +733,11 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    String reznr = (String) tabHistRezepte.getValueAt(xrow, 0);
+                    String reznr = (String) tabHistRezepte.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_NR);
                     String id = String.valueOf(tabHistRezepte.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_ID));
-                    jpan1.setRezeptDaten(reznr, id);
+                    // jpan1.setRezeptDaten(reznr, id);
+                    logger.debug("Calling rezDataUpdate with " + reznr + " could use " + id);
+                    jpan1.updateDatenPanel(reznr, false);
                 }
             });
 
@@ -800,15 +803,23 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
 
                 }
                 tabHistRezepte.setRowSelectionInterval(row, row);
-                jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(row, 0),
-                        String.valueOf(tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                // jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(row, 0),
+                //        String.valueOf(tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                String reznr = (String) tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR);
+                String id = String.valueOf(tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_ID));
+                logger.debug("Calling rezDataUpdate with " + reznr + " could use " + id);
+                jpan1.updateDatenPanel((String) tabHistRezepte.getValueAt(row, RezeptHistTableModel.HISTREZTABCOL_NR), false);
                 tabHistRezepte.scrollRowToVisible(row);
                 holeEinzelTermine(row, null);
             } else {
                 rezneugefunden = true;
                 tabHistRezepte.setRowSelectionInterval(0, 0);
-                jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(0, 0),
-                        String.valueOf(tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                // jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(0, 0),
+                //        String.valueOf(tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                String reznr = (String) tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_NR);
+                String id = String.valueOf(tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_ID));
+                logger.debug("Calling rezDataUpdate with " + reznr + " could use " + id);
+                jpan1.updateDatenPanel((String) tabHistRezepte.getValueAt(0, RezeptHistTableModel.HISTREZTABCOL_NR), false);
             }
             anzahlHistorie.setText("Anzahl Rezepte in Historie: " + anz);
             wechselPanel.revalidate();
@@ -1170,8 +1181,12 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                                     inRezeptDaten = true;
                                     setCursor(Cursors.wartenCursor);
                                     holeEinzelTermine(ix, null);
-                                    jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(ix, 0),
-                                            String.valueOf(tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                                    // jpan1.setRezeptDaten((String) tabHistRezepte.getValueAt(ix, 0),
+                                    //         String.valueOf(tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_ID)));
+                                    String reznr = (String) tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_NR);
+                                    String id = String.valueOf(tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_ID));
+                                    logger.debug("Calling rezDataUpdate with " + reznr + " could use " + id);
+                                    jpan1.updateDatenPanel((String) tabHistRezepte.getValueAt(ix, RezeptHistTableModel.HISTREZTABCOL_NR), false);
                                     setCursor(Cursors.normalCursor);
                                     inRezeptDaten = false;
                                 } catch (Exception ex) {

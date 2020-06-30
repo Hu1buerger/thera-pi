@@ -217,7 +217,7 @@ public final class RezeptFensterTools {
            logger.error("Rezept was null");
            return null;
        }
-       logger.debug("Checking rezept: " + rez.toString());
+       // logger.debug("Checking rezept: " + rez.toString());
        Disziplin diszi = Disziplin.ofShort(rez.getRezClass());
        int pg = rez.getPreisGruppe();
        LocalDate startDatum = rez.getRezDatum();

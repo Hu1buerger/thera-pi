@@ -53,7 +53,7 @@ public class RezeptHistTermTableModel extends AbstractTableModel {
         if (terminListe == null)
             return null;
         String[] termEinzelteile = terminListe.get(row).split("@");
-        logger.debug("Got data: " + termEinzelteile);
+        // logger.debug("Got data: " + termEinzelteile);
         switch (col) {
             case HISTTERMTABCOL_BEHDAT:
                 return LocalDate.parse(termEinzelteile[col], DateTimeFormatters.ddMMYYYYmitPunkt);
@@ -75,7 +75,8 @@ public class RezeptHistTermTableModel extends AbstractTableModel {
     }
     
     public int getRowCount() {
-        logger.debug("Term-GetRowCount=" + (terminListe == null ? 0 : terminListe.size()));
+     // FIXME: Re-enable to see how often it gets called (WWAAYY TOO OFTEN!)
+        // logger.debug("Term-GetRowCount=" + (terminListe == null ? 0 : terminListe.size()));
         return terminListe == null ? 0 : terminListe.size();
     }
     

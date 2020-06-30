@@ -271,7 +271,7 @@ public class RezeptDaten extends JXPanel {
 
             if (stest.isEmpty()) {
                 Reha.instance.patpanel.rezlabs[9].setForeground(Color.RED);
-                Reha.instance.patpanel.rezlabs[9].setText(stest + "??? / Wo.");
+                Reha.instance.patpanel.rezlabs[9].setText(stest + "??? / Wo."); // stest is empty...
             } else {
                 Reha.instance.patpanel.rezlabs[9].setForeground(Color.BLACK);
                 Reha.instance.patpanel.rezlabs[9].setText(stest + " / Wo.");
