@@ -98,7 +98,7 @@ public class Rezept {
     String pos3;
     String pos4;
     String frequenz;
-    int berId;
+    int berId = -1;
     boolean arztBericht;
     int farbcode = -1; // this is varChar in DB - but seems to be used (sometimes?) as int
     String rsplit;
