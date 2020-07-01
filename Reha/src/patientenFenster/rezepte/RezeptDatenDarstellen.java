@@ -15,6 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 
 import org.jdesktop.swingx.JXPanel;
@@ -27,6 +28,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
 import CommonTools.DateTimeFormatters;
+import CommonTools.ExUndHop;
 import CommonTools.JCompTools;
 import CommonTools.JRtaLabel;
 import CommonTools.JRtaTextField;
@@ -36,6 +38,7 @@ import commonData.Rezeptvector;
 import core.Disziplin;
 import hauptFenster.Reha;
 import mandant.IK;
+import rechteTools.Rechte;
 import rezept.Rezept;
 import rezept.RezeptDto;
 import systemEinstellungen.SystemConfig;
@@ -63,10 +66,12 @@ public class RezeptDatenDarstellen extends JXPanel{
     private boolean aktuelle;
     
     // Move to some better place:
-    private JRtaLabel hblab = null;
+    private JRtaLabel hblab = null;         // replaces rezlabs[1] - JRtaTextfield doesn't offer 'alternateText' which is
+                                            // used for HB when visiting 1 location whith multiple Patienten (In aktuelle)...
     private ImageIcon hbimg = null;
     private ImageIcon hbimg2 = null;
-    private JRtaTextField reznum = null;
+    private JRtaTextField reznum = null;    // replaces rezlabs[0] - it's not clear if we can offer all the features we want
+                                            // to do with RezNum on an ArrayElement...
     private JRtaTextField draghandler = null;
     private JTextArea rezdiag = null;
     private JScrollPane jscr = null;
@@ -80,6 +85,7 @@ public class RezeptDatenDarstellen extends JXPanel{
      * @param Aktuelle  Is the rezept in aktuelle (verordn) or Historie (LZA)
      * @param Ik        The IK to use when getting the Rezept
      */
+    // TODO: maybe migrate away from RezNr & Ik and drop in a full Rezept...
     public RezeptDatenDarstellen(String RezNr, boolean Aktuelle, IK Ik) {
         super();
         rezNr = RezNr;
@@ -101,13 +107,14 @@ public class RezeptDatenDarstellen extends JXPanel{
      * @param RezNr     The RezeptNr used to retrieve the Rezept(-data)
      * @param Aktuelle  Is the Rezept in aktuelle (TRUE == verordn) or Hist. (LZA)?
      */
+    // TODO: maybe migrate away from RezNr & Ik and drop in a full Rezept...
     public void updateDatenPanel(String RezNr, boolean Aktuelle) {
         rezNr = RezNr;
         aktuelle = Aktuelle;
         reznum.setText(rezNr);
         if (rezNr != null && !rezNr.isEmpty()) {
             logger.debug("Update on valid rezNr " + rezNr);
-            Rezept rez = (aktuelle ? grabAktRez() : grabHistRez());
+            rez = (aktuelle ? grabAktRez() : grabHistRez());
             if (rez == null) {
                 logger.error("Couldn't find Rezept in " + RezNr + (Aktuelle ? "aktuelle " : "historische ") + "Rezepte.");
                 return;
@@ -152,10 +159,12 @@ public class RezeptDatenDarstellen extends JXPanel{
          * rezlabs[0].setText("KG57606");
          */
 
-        rezlabs[1] = new JLabel(" ");
-        rezlabs[1].setHorizontalTextPosition(JLabel.LEFT);
-        rezlabs[1].setName("hausbesuch");
-        rezlabs[1].setIcon(hbimg);
+        hblab = new JRtaLabel(" ");
+        hblab.setHorizontalTextPosition(JLabel.LEFT);
+        hblab.setName("hausbesuch");
+        hblab.setIcon(hbimg);
+        if (!aktuelle)
+            activateHBAnzahlEditable();
 
         rezlabs[2] = new JLabel(" ");
         rezlabs[2].setName("angelegt");
@@ -221,7 +230,7 @@ public class RezeptDatenDarstellen extends JXPanel{
 
         jpan.add(reznum, cc.xy(1, 1));
         // jpan.add(rezlabs[0],cc.xy(1, 1));
-        jpan.add(rezlabs[1], cc.xy(3, 1));
+        jpan.add(hblab, cc.xy(3, 1));
         jpan.add(rezlabs[2], cc.xy(5, 1));
 
         jpan.addSeparator("", cc.xyw(1, 3, 5));
@@ -295,6 +304,34 @@ public class RezeptDatenDarstellen extends JXPanel{
         reznum.setDragEnabled(false);
     }
     
+    private void activateHBAnzahlEditable() {
+        hblab.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent arg0) {
+
+                if ((arg0.getSource() instanceof JLabel) && (arg0.getClickCount() == 2)) {
+                    if (!Rechte.hatRecht(Rechte.Rezept_editvoll, true)) {
+                        return;
+                    }
+                    int anzhb = Reha.instance.patpanel.rezAktRez.getAnzahlHb();
+                    Object ret = JOptionPane.showInputDialog(null, "Geben Sie bitte die neue Anzahl f\u00fcr Hausbesuch ein",
+                            anzhb);
+                    if (ret == null) {
+                        return;
+                    }
+                    int neueHBAnzahl = Integer.valueOf(ret.toString());
+                    if ( neueHBAnzahl != anzhb ) {
+                        hblab.setText(((String) ret).trim() + " *");
+                        new ExUndHop().setzeStatement("update verordn set anzahlhb=" + neueHBAnzahl + " "
+                                + "where rez_nr='" + rez.getRezNr() + "' LIMIT 1");
+                     // TODO: Fire Update-event
+                        Reha.instance.patpanel.rezAktRez.setAnzahlHb(neueHBAnzahl);
+                    }
+                }
+            }
+        });
+    }
+    
     private JScrollPane getDatenScrPane() {
         JScrollPane pane = new JScrollPane();
         Component table = null;
@@ -305,7 +342,6 @@ public class RezeptDatenDarstellen extends JXPanel{
     
     private void fillInRezData(Rezept rez) {
         // Empty defaults:
-        logger.debug("Entering fillInData on RezNr: " + rez.getRezNr());
         rezlabs[4].setText("Kein Arzt");
         rezlabs[5].setText(" ");
         rezlabs[6].setText("<HTML><font color=red>Begr\u00fcndung fehlt</font><html>");
@@ -314,6 +350,27 @@ public class RezeptDatenDarstellen extends JXPanel{
         rezlabs[9].setText("<HTML><font color=red>??? / Wo.</font><html>");
         rezlabs[13].setText("");
         rezlabs[14].setText("<HTML><font color=red>??? Min.</font><html>");
+        
+        // Historie (currently) uses simplified HB icon display
+        if (aktuelle)
+            setHbIconsAndText();
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int farbcode = rez.getFarbcode();
+                if (farbcode > 0) {
+                    reznum.setText(rez.getRezNr());
+                    reznum.setForeground((SystemConfig.vSysColsObject.get(0)
+                                                                     .get(farbcode)[0]));
+                    reznum.repaint();
+                } else {
+                    reznum.setText(rez.getRezNr());
+                    reznum.setForeground(Color.BLUE);
+                    reznum.repaint();
+                }
+            }
+        });
         
         rezlabs[2].setText("angelegt von: " + rez.getAngelegtVon());
 
@@ -439,8 +496,7 @@ public class RezeptDatenDarstellen extends JXPanel{
                     if (thisID == idOfPricelistEntry) {
                         retVal = rez.getBehAnzahl(idxHM) + "  *  "
                                 + priceListEntry[KUERZEL];
-                        if (!rez.getRezNr()
-                                    .startsWith("RH")) {
+                        if (!rez.getRezNr().startsWith("RH") && aktuelle) {
                             retVal = retVal + " (" + rez.getHMPos(idxHM) + ")";
                         }
                     }
@@ -451,16 +507,18 @@ public class RezeptDatenDarstellen extends JXPanel{
     }
     
     private void setHbIconsAndText() {
+        logger.debug("In setHB for: " + rez.getRezNr());
         String diszi = Disziplin.ofShort(rez.getRezClass()).medium;
         int prgruppe = rez.getPreisGruppe() - 1;
         if (rez.isHausBesuch()) {
-            boolean einzeln = rez.isHbVoll();
+            // Not sure this sufficiently qualifies - should take isHeimbewohner() into account as well?
+            // boolean einzeln = rez.isHbVoll();
             // hblab.setText(StringTools.NullTest(vecDieseVO.getAnzHBS())+" *");
             hblab.setText(rez.getAnzahlHb() + " *");
             // hblab.setIcon((einzeln.equals("T") ? hbimg : hbimg2));
-            hblab.setIcon((einzeln ? hbimg : hbimg2));
+            hblab.setIcon((rez.isHbVoll() ? hbimg : hbimg2));
             hblab.setAlternateText(
-                    "<html>" + (einzeln
+                    "<html>" + (rez.isHbVoll()
                             ? "Hausbesuch einzeln (Privatwohnung/-haus)<br>Positionsnummer: "
                                     + SystemPreislisten.hmHBRegeln.get(diszi)
                                                                   .get(prgruppe)
