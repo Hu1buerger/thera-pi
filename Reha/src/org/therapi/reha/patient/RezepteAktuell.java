@@ -482,14 +482,14 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                  .setMaxWidth(0);
         for (int i = 0; i < column.length; i++) {
             switch (i) {
-            case MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON: // Bez. Icons
-            case MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS: // Status
-                tabaktrez.getColumn(i)
-                         .setCellRenderer(renderer);
-                break;
-            default: // Text
-                tabaktrez.getColumn(i)
-                         .setCellRenderer(centerRenderer);
+                case MyAktRezeptTableModel.AKTREZTABMODELCOL_BEZICON: // Bez. Icons
+                case MyAktRezeptTableModel.AKTREZTABMODELCOL_REZSTATUS: // Status
+                    tabaktrez.getColumn(i)
+                             .setCellRenderer(renderer);
+                    break;
+                default: // Text
+                    tabaktrez.getColumn(i)
+                             .setCellRenderer(centerRenderer);
             }
         }
         tabaktrez.validate();
