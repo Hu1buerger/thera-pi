@@ -95,6 +95,11 @@ import systemTools.IconListRenderer;
 
     int idInTable = 7;
 
+    /**
+     * @DEPRECATED - in 1.1.8 use {@link org.therapi.reha.patient.RezepteHistorisch#RezepteHistorisch(IK)} instead...
+      *
+     */
+    @Deprecated 
     public Historie() {
         super();
         setOpaque(false);

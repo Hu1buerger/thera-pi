@@ -51,7 +51,7 @@ import terminKalender.TerminFenster;
 /**
  * 
  * @deprecated in 1.1.8 - use 
- * {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, aktuel?, IK)}
+ * {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, aktuell?, IK)}
  * instead
  */
 @Deprecated
@@ -75,7 +75,7 @@ public class RezeptDaten extends JXPanel {
 
     /**
      * @deprecated use
-     *  {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, Aktuel?, IK)}
+     *  {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, Aktuell?, IK)}
      *  instead
      * @param eltern
      */
