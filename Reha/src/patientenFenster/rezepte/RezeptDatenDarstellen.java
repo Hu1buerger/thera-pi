@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.HashMap;
 import java.util.Vector;
 
 import javax.swing.ImageIcon;
@@ -53,12 +54,12 @@ public class RezeptDatenDarstellen extends JXPanel{
     static final long serialVersionUID = 1;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDatenDarstellen.class);
     
-    /**
-     * 0 RezNr?? - 1 hausbesuch - 2 angelegt - 3 kostentraeger - 4 arzt - 5 verornungsart - 6 begruendung - 7 arztbericht
-     * 8 behandlung1 - 9 frequenz - 10 behandlung2 - 11  behandlung3 - 12  behandlung4 - 13  indikation - 14  Dauer
-     * 15 LastEditor - 16 LastEditDate
-     */
-    private JLabel[] rezlabs = new JLabel[17];
+    /** "angelegt", "kostentraeger", "arzt", "verordnungsart", "begruendung", "arztbericht", "behandlung1",
+            "frequenz", "behandlung2", "behandlung3", "behandlung4", "indikation", "dauer", "lastEditor", "lastEditDate" **/
+    // These are used as keys in the HM
+    String[] fieldNames = { "angelegt", "kostentraeger", "arzt", "verordnungsart", "begruendung", "arztbericht", "behandlung1",
+            "frequenz", "behandlung2", "behandlung3", "behandlung4", "indikation", "dauer", "lastEditor", "lastEditDate" };
+    private HashMap<String, JLabel> rezFields = new HashMap<>();
     
     private Rezept rez;
     private String rezNr;
@@ -67,7 +68,7 @@ public class RezeptDatenDarstellen extends JXPanel{
     
     // Move to some better place:
     private JRtaLabel hblab = null;         // replaces rezlabs[1] - JRtaTextfield doesn't offer 'alternateText' which is
-                                            // used for HB when visiting 1 location whith multiple Patienten (In aktuelle)...
+                                            // used for HB when visiting 1 location with multiple Patienten (in aktuelle)...
     private ImageIcon hbimg = null;
     private ImageIcon hbimg2 = null;
     private JRtaTextField reznum = null;    // replaces rezlabs[0] - it's not clear if we can offer all the features we want
@@ -163,62 +164,33 @@ public class RezeptDatenDarstellen extends JXPanel{
         hblab.setHorizontalTextPosition(JLabel.LEFT);
         hblab.setName("hausbesuch");
         hblab.setIcon(hbimg);
-        if (!aktuelle)
+        if (aktuelle)
             activateHBAnzahlEditable();
 
-        rezlabs[2] = new JLabel(" ");
-        rezlabs[2].setName("angelegt");
-
-        rezlabs[3] = new JLabel(" ");
-        rezlabs[3].setName("kostentraeger");
-
-        rezlabs[4] = new JLabel(" ");
-        rezlabs[4].setName("arzt");
-
-        rezlabs[5] = new JLabel(" ");
-        rezlabs[5].setName("verornungsart");
-
-        rezlabs[6] = new JLabel(" ");
-        rezlabs[6].setName("begruendung");
-        rezlabs[6].setForeground(Color.RED);
-        rezlabs[6].setVisible(false);
-
-        rezlabs[7] = new JLabel(" ");
-        rezlabs[7].setName("arztbericht");
-        rezlabs[7].setVisible(false);
-
-        rezlabs[8] = new JLabel("");
-        rezlabs[8].setName("behandlung1");
-        rezlabs[8].setFont(fontbehandlung);
-        rezlabs[9] = new JLabel(" ");
-        rezlabs[9].setName("frequenz");
-        rezlabs[9].setFont(fontbehandlung);
-
-        rezlabs[10] = new JLabel(" ");
-        rezlabs[10].setName("behandlung2");
-        rezlabs[10].setFont(fontbehandlung);
-        rezlabs[11] = new JLabel(" ");
-        rezlabs[11].setName("behandlung3");
-        rezlabs[11].setFont(fontbehandlung);
-        rezlabs[12] = new JLabel(" ");
-        rezlabs[12].setName("behandlung4");
-        rezlabs[12].setFont(fontbehandlung);
-
-        rezlabs[13] = new JLabel(" ");
-        rezlabs[13].setName("indikation");
-        rezlabs[13].setFont(fontbehandlung);
-
-        rezlabs[14] = new JLabel(" ");
-        rezlabs[14].setName("Dauer");
-        rezlabs[14].setFont(fontbehandlung);
-
-        rezlabs[15] = new JLabel(" ");
-        rezlabs[15].setName("lasteditor");
-        rezlabs[15].setForeground(Color.GRAY);
-        rezlabs[16] = new JLabel(" ");
-        rezlabs[16].setName("lasteditdate");
-        rezlabs[16].setForeground(Color.GRAY);
+        // All piggies are equal...
+        for (String field : fieldNames ) {
+            JLabel lab = new JLabel(" ");
+            lab.setName(field);
+            rezFields.put(field, lab);
+        }
+        // But some are more equal... ;)
+        rezFields.get("begruendung").setForeground(Color.RED);
+        rezFields.get("begruendung").setVisible(false);
         
+        
+        rezFields.get("arztbericht").setVisible(false);
+        
+        rezFields.get("behandlung1").setFont(fontbehandlung);
+        rezFields.get("behandlung2").setFont(fontbehandlung);
+        rezFields.get("behandlung3").setFont(fontbehandlung);
+        rezFields.get("behandlung4").setFont(fontbehandlung);
+        rezFields.get("frequenz").setFont(fontbehandlung);
+        rezFields.get("indikation").setFont(fontbehandlung);
+        rezFields.get("dauer").setFont(fontbehandlung);
+        
+        rezFields.get("lastEditor").setForeground(Color.GRAY);
+        rezFields.get("lastEditDate").setForeground(Color.GRAY);
+                
         rezdiag = new JTextArea("");
         rezdiag.setOpaque(false);
         rezdiag.setFont(new Font("Courier", Font.PLAIN, 11));
@@ -231,29 +203,31 @@ public class RezeptDatenDarstellen extends JXPanel{
         jpan.add(reznum, cc.xy(1, 1));
         // jpan.add(rezlabs[0],cc.xy(1, 1));
         jpan.add(hblab, cc.xy(3, 1));
-        jpan.add(rezlabs[2], cc.xy(5, 1));
+        // jpan.add(rezlabs[2], cc.xy(5, 1));
+        jpan.add(rezFields.get("angelegt"), cc.xy(5, 1));
 
         jpan.addSeparator("", cc.xyw(1, 3, 5));
 
-        jpan.add(rezlabs[3], cc.xy(1, 5));
-        jpan.add(rezlabs[4], cc.xy(5, 5));
+        //jpan.add(rezlabs[3], cc.xy(1, 5));
+        jpan.add(rezFields.get("kostentraeger"), cc.xy(1, 5));
+        jpan.add(rezFields.get("arzt"), cc.xy(5, 5));
 
-        jpan.add(rezlabs[5], cc.xy(1, 7));
-        jpan.add(rezlabs[6], cc.xy(3, 7));
-        jpan.add(rezlabs[7], cc.xy(5, 7));
+        jpan.add(rezFields.get("verordnungsart"), cc.xy(1, 7));
+        jpan.add(rezFields.get("begruendung"), cc.xy(3, 7));
+        jpan.add(rezFields.get("arztbericht"), cc.xy(5, 7));
 
         jpan.addSeparator("", cc.xyw(1, 9, 5));
 
-        jpan.add(rezlabs[8], cc.xy(1, 11));
-        jpan.add(rezlabs[9], cc.xy(3, 11));
-        jpan.add(rezlabs[14], cc.xy(5, 11));
-        jpan.add(rezlabs[10], cc.xy(1, 13));
-        jpan.add(rezlabs[11], cc.xy(1, 15));
-        jpan.add(rezlabs[12], cc.xy(1, 17));
+        jpan.add(rezFields.get("behandlung1"), cc.xy(1, 11));
+        jpan.add(rezFields.get("frequenz"), cc.xy(3, 11));
+        jpan.add(rezFields.get("dauer"), cc.xy(5, 11));
+        jpan.add(rezFields.get("behandlung2"), cc.xy(1, 13));
+        jpan.add(rezFields.get("behandlung3"), cc.xy(1, 15));
+        jpan.add(rezFields.get("behandlung4"), cc.xy(1, 17));
 
         jpan.addSeparator("", cc.xyw(1, 19, 5));
 
-        jpan.add(rezlabs[13], cc.xy(1, 21));
+        jpan.add(rezFields.get("indikation"), cc.xy(1, 21));
         // rezlabs[14] added between 9 & 10...
                 
         JScrollPane jscrdiag = JCompTools.getTransparentScrollPane(rezdiag);
@@ -265,8 +239,8 @@ public class RezeptDatenDarstellen extends JXPanel{
         JLabel labLastEdit = new JLabel("Zuletzt bearbeitet durch:");
         labLastEdit.setForeground(Color.GRAY);
         jpan.add(labLastEdit, cc.xy(1, 26));
-        jpan.add(rezlabs[15], cc.xy(3, 26));
-        jpan.add(rezlabs[16], cc.xy(5, 26));
+        jpan.add(rezFields.get("lastEditor"), cc.xy(3, 26));
+        jpan.add(rezFields.get("lastEditDate"), cc.xy(5, 26));
 
         jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
         jscr.getVerticalScrollBar()
@@ -284,7 +258,7 @@ public class RezeptDatenDarstellen extends JXPanel{
                 draghandler.setText(Reha.instance.patpanel.patDaten.get(0)
                                                                    .substring(0, 1)
                         + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3)
-                        + "\u00b0" + reznum.getText() + "\u00b0" + rezlabs[14].getText());
+                        + "\u00b0" + reznum.getText() + "\u00b0" + rezFields.get("dauer").getText());
                 JComponent c = draghandler;
                 TransferHandler th = c.getTransferHandler();
                 th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
@@ -342,14 +316,14 @@ public class RezeptDatenDarstellen extends JXPanel{
     
     private void fillInRezData(Rezept rez) {
         // Empty defaults:
-        rezlabs[4].setText("Kein Arzt");
-        rezlabs[5].setText(" ");
-        rezlabs[6].setText("<HTML><font color=red>Begr\u00fcndung fehlt</font><html>");
+        rezFields.get("arzt").setText("Kein Arzt");
+        // rezlabs[5].setText(" ");
+        rezFields.get("begruendung").setText("<HTML><font color=red>Begr\u00fcndung fehlt</font><html>");
         // rezlabs[7].setText(" ");
-        rezlabs[7].setText("<HTML><font color=red>Therapiebericht fehlt</font><html>");
-        rezlabs[9].setText("<HTML><font color=red>??? / Wo.</font><html>");
-        rezlabs[13].setText("");
-        rezlabs[14].setText("<HTML><font color=red>??? Min.</font><html>");
+        rezFields.get("arztbericht").setText("<HTML><font color=red>Therapiebericht fehlt</font><html>");
+        rezFields.get("frequenz").setText("<HTML><font color=red>??? / Wo.</font><html>");
+        rezFields.get("indikation").setText("");
+        rezFields.get("dauer").setText("<HTML><font color=red>??? Min.</font><html>");
         
         // Historie (currently) uses simplified HB icon display
         if (aktuelle)
@@ -372,38 +346,41 @@ public class RezeptDatenDarstellen extends JXPanel{
             }
         });
         
-        rezlabs[2].setText("angelegt von: " + rez.getAngelegtVon());
+        // rezlabs[2].setText("angelegt von: " + rez.getAngelegtVon());
+        rezFields.get("angelegt").setText("angelegt von: " + rez.getAngelegtVon());
 
-        rezlabs[3].setForeground((rez.getkId() >= 0 ? Color.BLACK : Color.RED));
-        rezlabs[3].setText(rez.getKTraegerName());
+        // rezlabs[3].setForeground((rez.getkId() >= 0 ? Color.BLACK : Color.RED));
+        // rezlabs[3].setText(rez.getKTraegerName());
+        rezFields.get("kostentraeger").setForeground((rez.getkId() >= 0 ? Color.BLACK : Color.RED));
+        rezFields.get("kostentraeger").setText(rez.getKTraegerName());
         
         ArztVec verordnenderArzt = new ArztVec();
         if (verordnenderArzt.init(rez.getArztId())) {
-            rezlabs[4].setForeground(Color.BLACK);
-            rezlabs[4].setText( verordnenderArzt.getNNameLanr() );
+            rezFields.get("arzt").setForeground(Color.BLACK);
+            rezFields.get("arzt").setText( verordnenderArzt.getNNameLanr() );
             
         } else {
-            rezlabs[4].setForeground(Color.RED);
+            rezFields.get("arzt").setForeground(Color.RED);
         }
         
         int rezArtImRezept = rez.getRezeptArt();
         if (rezArtImRezept >= 0) {
             String[] rezArt = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
-            rezlabs[5].setText(rezArt[rezArtImRezept]);
+            rezFields.get("verordnungsart").setText(rezArt[rezArtImRezept]);
             if (rezArtImRezept == Rezept.REZART_FOLGEVOADR) {
-                rezlabs[6].setVisible(true);
+                rezFields.get("begruendung").setVisible(true);
                 if (rez.isBegruendADR()) {
-                    rezlabs[6].setForeground(Color.BLACK);
-                    rezlabs[6].setText("Begr\u00fcndung o.k.");
+                    rezFields.get("begruendung").setForeground(Color.BLACK);
+                    rezFields.get("begruendung").setText("Begr\u00fcndung o.k.");
                 }
             }
         }
         
         if (rez.isArztBericht()) {
-            rezlabs[7].setVisible(true);
+            rezFields.get("arztbericht").setVisible(true);
             if ( rez.getBerId() > 0) {
-                rezlabs[7].setForeground(Color.BLACK);
-                rezlabs[7].setText("Therapiebericht o.k.");
+                rezFields.get("arztbericht").setForeground(Color.BLACK);
+                rezFields.get("arztbericht").setText("Therapiebericht o.k.");
             } 
             /* else {
                 rezlabs[7].setForeground(Color.RED);
@@ -412,36 +389,36 @@ public class RezeptDatenDarstellen extends JXPanel{
         }
         
         // Beautified HM-Pos1 String:
-        rezlabs[8].setText(showHM(rez,1));
+        rezFields.get("behandlung1").setText(showHM(rez,1));
         
         if ( rez.getFrequenz() == null || rez.getFrequenz().isEmpty()) {
-            rezlabs[9].setForeground(Color.RED);
-            rezlabs[9].setText("??? / Wo.");
+            rezFields.get("frequenz").setForeground(Color.RED);
+            rezFields.get("frequenz").setText("??? / Wo.");
         } else {
-            rezlabs[9].setForeground(Color.BLACK);
-            rezlabs[9].setText(rez.getFrequenz() + " / Wo.");
+            rezFields.get("frequenz").setForeground(Color.BLACK);
+            rezFields.get("frequenz").setText(rez.getFrequenz() + " / Wo.");
         }
         
         // Beautified HM-Pos2-4 String:
-        rezlabs[10].setText(showHM(rez,2));
-        rezlabs[11].setText(showHM(rez,3));
-        rezlabs[12].setText(showHM(rez,4));
+        rezFields.get("behandlung2").setText(showHM(rez,2));
+        rezFields.get("behandlung3").setText(showHM(rez,3));
+        rezFields.get("behandlung4").setText(showHM(rez,4));
         
         String indiSchl = rez.getIndikatSchl();
         if (!rez.getRezNr().startsWith("RH")) {
             if (indiSchl.isEmpty() || "kein IndiSchl.".equals(indiSchl)) {
-                    rezlabs[13].setForeground(Color.RED);
-                    rezlabs[13].setText("??? " + indiSchl);
+                rezFields.get("indikation").setForeground(Color.RED);
+                rezFields.get("indikation").setText("??? " + indiSchl);
                 
             } else {
-                    rezlabs[13].setForeground(Color.BLACK);
-                    rezlabs[13].setText(indiSchl);
+                rezFields.get("indikation").setForeground(Color.BLACK);
+                rezFields.get("indikation").setText(indiSchl);
             }
         }
 
         if (rez.getDauer() != null && !rez.getDauer().isEmpty()) {
-            rezlabs[14].setForeground(Color.BLACK);
-            rezlabs[14].setText(rez.getDauer() + " Min.");
+            rezFields.get("dauer").setForeground(Color.BLACK);
+            rezFields.get("dauer").setText(rez.getDauer() + " Min.");
         }
         
         String icd101 = rez.getIcd10();
@@ -456,9 +433,8 @@ public class RezeptDatenDarstellen extends JXPanel{
             rezdiag.setText(rez.getDiagnose());
         }
         
-        rezlabs[15].setText(rez.getLastEditor());
-        rezlabs[16].setText("am: " + (rez.getLastEdDate() == null 
-                                                ? "???" 
+        rezFields.get("lastEditor").setText(rez.getLastEditor());
+        rezFields.get("lastEditDate").setText("am: " + (rez.getLastEdDate() == null ? "???" 
                                                 : rez.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt)));
         
     }
