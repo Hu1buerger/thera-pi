@@ -33,6 +33,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
@@ -269,27 +270,37 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         tabHistRezepte.setDoubleBuffered(true);
         tabHistRezepte.setEditable(false);
         tabHistRezepte.setSortable(false);
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_NR)
-                   .setMaxWidth(75);
         TableCellRenderer renderer = new DefaultTableRenderer(new MappedValue(StringValues.EMPTY, IconValues.ICON),
                 JLabel.CENTER);
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
-                   .setCellRenderer(renderer);
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i=0; i < tblmodHistRez.getColumnCount(); i++) {
+            switch(i) {
+                case RezeptHistTableModel.HISTREZTABCOL_BEZAHLT:
+                    tabHistRezepte.getColumn(i)
+                                    .setCellRenderer(renderer);
+                    break;
+                case RezeptHistTableModel.HISTREZTABCOL_REZDAT:
+                case RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM:
+                case RezeptHistTableModel.HISTREZTABCOL_SPAETESTERBEGINN:
+                    tabHistRezepte.getColumn(i)
+                                    .setCellRenderer(new DateCellRenderer());
+                    break;
+                default:
+                    tabHistRezepte.getColumn(i)
+                                    .setCellRenderer(centerRenderer);
+            }
+        }
+//        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_NR)
+//                   .setMaxWidth(75);
         tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_BEZAHLT)
                    .setMaxWidth(45);
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
-                   .setMaxWidth(75);
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
-                   .setCellRenderer(new DateCellRenderer());
+//        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_REZDAT)
+//                   .setMaxWidth(75);
         tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
                    .setMaxWidth(75);
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_ANGELEGTAM)
-                   .setCellRenderer(new DateCellRenderer());
-        tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_SPAETESTERBEGINN)
-                   .setCellRenderer(new DateCellRenderer());
         // Don't use this unprepared - it will screw up the index - invisible columns don't count towards # of cols...
         // tabhistorie.getColumnExt(RezeptHistTableModel.HISTREZTABCOL_PATNR).setVisible(false);
-        
         tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)
                    .setMinWidth(0);
         tabHistRezepte.getColumn(RezeptHistTableModel.HISTREZTABCOL_PATNR)

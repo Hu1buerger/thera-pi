@@ -143,7 +143,7 @@ public class RezeptHistTableModel extends AbstractTableModel {
 class DateCellRenderer extends DefaultTableCellRenderer {
     static final long serialVersionUID = 1L;
 
-    public DateCellRenderer() { super(); }
+    public DateCellRenderer() { super(); setHorizontalAlignment(JLabel.CENTER);}
 
     @Override
     public void setValue(Object value) {
