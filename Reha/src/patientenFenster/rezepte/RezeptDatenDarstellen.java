@@ -148,10 +148,8 @@ public class RezeptDatenDarstellen extends JXPanel{
         FormLayout lay = new FormLayout("fill:0:grow(0.33),2px,fill:0:grow(0.33),2px,fill:0:grow(0.33)",
                 // FormLayout lay = new FormLayout("p,fill:0:grow(0.50),p,fill:0:grow(0.50),p",
                 //      1.Sep                2.Sep                              3.Sep
-              // 1  2   3  4   5  6   7  8   9  10 11 12  13  14 15  16  17 18  19 20  21 22  23  24    25  26 27
-              //"p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,5dlu,p,1dlu,p,20dlu:g,1px,p,1dlu");
+              // 1  2   3  4   5  6   7  8   9  10 11 12  13  14 15  16  17 18  19 20  21 22  23  24  25  26 27
                 "p,2dlu,p,2dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,1dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,32dlu,1px,p,1dlu");
-        //      "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,38dlu,1px,p,1dlu");
         CellConstraints cc = new CellConstraints();
         PanelBuilder jpan = new PanelBuilder(lay);
         jpan.getPanel()
