@@ -317,40 +317,26 @@ public class RezeptDatenDarstellen extends JXPanel{
     private void fillInRezData(Rezept rez) {
         // Empty defaults:
         rezFields.get("arzt").setText("Kein Arzt");
-        // rezlabs[5].setText(" ");
         rezFields.get("begruendung").setText("<HTML><font color=red>Begr\u00fcndung fehlt</font><html>");
-        // rezlabs[7].setText(" ");
         rezFields.get("arztbericht").setText("<HTML><font color=red>Therapiebericht fehlt</font><html>");
         rezFields.get("frequenz").setText("<HTML><font color=red>??? / Wo.</font><html>");
         rezFields.get("indikation").setText("");
         rezFields.get("dauer").setText("<HTML><font color=red>??? Min.</font><html>");
         
+        reznum.setText(rez.getRezNr());
+        
         // Historie (currently) uses simplified HB icon display
         if (aktuelle)
             setHbIconsAndText();
+        // Aktuelle likes coloured RezNums:
+        if (aktuelle)
+            setRezNumColour(rez);
         
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                int farbcode = rez.getFarbcode();
-                if (farbcode > 0) {
-                    reznum.setText(rez.getRezNr());
-                    reznum.setForeground((SystemConfig.vSysColsObject.get(0)
-                                                                     .get(farbcode)[0]));
-                    reznum.repaint();
-                } else {
-                    reznum.setText(rez.getRezNr());
-                    reznum.setForeground(Color.BLUE);
-                    reznum.repaint();
-                }
-            }
-        });
-        
-        // rezlabs[2].setText("angelegt von: " + rez.getAngelegtVon());
         rezFields.get("angelegt").setText("angelegt von: " + rez.getAngelegtVon());
+        rezFields.get("lastEditor").setText(rez.getLastEditor());
+        rezFields.get("lastEditDate").setText("am: " + (rez.getLastEdDate() == null ? "???" 
+                                                : rez.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt)));
 
-        // rezlabs[3].setForeground((rez.getkId() >= 0 ? Color.BLACK : Color.RED));
-        // rezlabs[3].setText(rez.getKTraegerName());
         rezFields.get("kostentraeger").setForeground((rez.getkId() >= 0 ? Color.BLACK : Color.RED));
         rezFields.get("kostentraeger").setText(rez.getKTraegerName());
         
@@ -361,6 +347,13 @@ public class RezeptDatenDarstellen extends JXPanel{
             
         } else {
             rezFields.get("arzt").setForeground(Color.RED);
+        }
+        if (rez.isArztBericht()) {
+            rezFields.get("arztbericht").setVisible(true);
+            if ( rez.getBerId() > 0) {
+                rezFields.get("arztbericht").setForeground(Color.BLACK);
+                rezFields.get("arztbericht").setText("Therapiebericht o.k.");
+            } 
         }
         
         int rezArtImRezept = rez.getRezeptArt();
@@ -376,20 +369,12 @@ public class RezeptDatenDarstellen extends JXPanel{
             }
         }
         
-        if (rez.isArztBericht()) {
-            rezFields.get("arztbericht").setVisible(true);
-            if ( rez.getBerId() > 0) {
-                rezFields.get("arztbericht").setForeground(Color.BLACK);
-                rezFields.get("arztbericht").setText("Therapiebericht o.k.");
-            } 
-            /* else {
-                rezlabs[7].setForeground(Color.RED);
-                rezlabs[7].setText("Therapiebericht fehlt");
-            } */
-        }
         
-        // Beautified HM-Pos1 String:
+        // Beautified HM-Pos String:
         rezFields.get("behandlung1").setText(showHM(rez,1));
+        rezFields.get("behandlung2").setText(showHM(rez,2));
+        rezFields.get("behandlung3").setText(showHM(rez,3));
+        rezFields.get("behandlung4").setText(showHM(rez,4));
         
         if ( rez.getFrequenz() == null || rez.getFrequenz().isEmpty()) {
             rezFields.get("frequenz").setForeground(Color.RED);
@@ -399,10 +384,6 @@ public class RezeptDatenDarstellen extends JXPanel{
             rezFields.get("frequenz").setText(rez.getFrequenz() + " / Wo.");
         }
         
-        // Beautified HM-Pos2-4 String:
-        rezFields.get("behandlung2").setText(showHM(rez,2));
-        rezFields.get("behandlung3").setText(showHM(rez,3));
-        rezFields.get("behandlung4").setText(showHM(rez,4));
         
         String indiSchl = rez.getIndikatSchl();
         if (!rez.getRezNr().startsWith("RH")) {
@@ -432,11 +413,25 @@ public class RezeptDatenDarstellen extends JXPanel{
         } else {
             rezdiag.setText(rez.getDiagnose());
         }
-        
-        rezFields.get("lastEditor").setText(rez.getLastEditor());
-        rezFields.get("lastEditDate").setText("am: " + (rez.getLastEdDate() == null ? "???" 
-                                                : rez.getLastEdDate().format(DateTimeFormatters.ddMMYYYYmitPunkt)));
-        
+                
+    }
+
+    /**
+     * @param rez
+     */
+    private void setRezNumColour(Rezept rez) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int farbcode = rez.getFarbcode();
+                if (farbcode > 0) {
+                    reznum.setText(rez.getRezNr());
+                    reznum.setForeground((SystemConfig.vSysColsObject.get(0)
+                                                                     .get(farbcode)[0]));
+                    reznum.repaint();
+                }
+            }
+        });
     }
     
     private String showHM(Rezept rez, int idxHM) {
