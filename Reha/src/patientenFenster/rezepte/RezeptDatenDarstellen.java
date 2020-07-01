@@ -67,12 +67,12 @@ public class RezeptDatenDarstellen extends JXPanel{
     private boolean aktuelle;
     
     // Move to some better place:
-    private JRtaLabel hblab = null;         // replaces rezlabs[1] - JRtaTextfield doesn't offer 'alternateText' which is
-                                            // used for HB when visiting 1 location with multiple Patienten (in aktuelle)...
+    private JRtaLabel hblab = null;         // JRtaTextfield doesn't offer 'alternateText' which is used for HB
+                                            //  when visiting 1 location with multiple Patienten (in aktuelle)...
     private ImageIcon hbimg = null;
     private ImageIcon hbimg2 = null;
-    private JRtaTextField reznum = null;    // replaces rezlabs[0] - it's not clear if we can offer all the features we want
-                                            // to do with RezNum on an ArrayElement...
+    private JRtaTextField reznum = null;    // It's not clear if we can offer all the features we want
+                                            // to do with RezNum on an JLabal...
     private JRtaTextField draghandler = null;
     private JTextArea rezdiag = null;
     private JScrollPane jscr = null;
@@ -154,11 +154,6 @@ public class RezeptDatenDarstellen extends JXPanel{
         reznum.setOpaque(false);
         reznum.setEditable(false);
         reznum.setBorder(null);
-        /*
-         * rezlabs[0] = new JLabel(); rezlabs[0].setFont(fontreznr);
-         * rezlabs[0].setName("rezeptnummer"); rezlabs[0].setForeground(Color.BLUE);
-         * rezlabs[0].setText("KG57606");
-         */
 
         hblab = new JRtaLabel(" ");
         hblab.setHorizontalTextPosition(JLabel.LEFT);
@@ -176,10 +171,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         // But some are more equal... ;)
         rezFields.get("begruendung").setForeground(Color.RED);
         rezFields.get("begruendung").setVisible(false);
-        
-        
         rezFields.get("arztbericht").setVisible(false);
-        
         rezFields.get("behandlung1").setFont(fontbehandlung);
         rezFields.get("behandlung2").setFont(fontbehandlung);
         rezFields.get("behandlung3").setFont(fontbehandlung);
@@ -187,7 +179,6 @@ public class RezeptDatenDarstellen extends JXPanel{
         rezFields.get("frequenz").setFont(fontbehandlung);
         rezFields.get("indikation").setFont(fontbehandlung);
         rezFields.get("dauer").setFont(fontbehandlung);
-        
         rezFields.get("lastEditor").setForeground(Color.GRAY);
         rezFields.get("lastEditDate").setForeground(Color.GRAY);
                 
@@ -201,14 +192,11 @@ public class RezeptDatenDarstellen extends JXPanel{
         rezdiag.setEditable(false);
 
         jpan.add(reznum, cc.xy(1, 1));
-        // jpan.add(rezlabs[0],cc.xy(1, 1));
         jpan.add(hblab, cc.xy(3, 1));
-        // jpan.add(rezlabs[2], cc.xy(5, 1));
         jpan.add(rezFields.get("angelegt"), cc.xy(5, 1));
 
         jpan.addSeparator("", cc.xyw(1, 3, 5));
 
-        //jpan.add(rezlabs[3], cc.xy(1, 5));
         jpan.add(rezFields.get("kostentraeger"), cc.xy(1, 5));
         jpan.add(rezFields.get("arzt"), cc.xy(5, 5));
 
@@ -228,7 +216,6 @@ public class RezeptDatenDarstellen extends JXPanel{
         jpan.addSeparator("", cc.xyw(1, 19, 5));
 
         jpan.add(rezFields.get("indikation"), cc.xy(1, 21));
-        // rezlabs[14] added between 9 & 10...
                 
         JScrollPane jscrdiag = JCompTools.getTransparentScrollPane(rezdiag);
         jscrdiag.validate();
@@ -484,9 +471,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         if (rez.isHausBesuch()) {
             // Not sure this sufficiently qualifies - should take isHeimbewohner() into account as well?
             // boolean einzeln = rez.isHbVoll();
-            // hblab.setText(StringTools.NullTest(vecDieseVO.getAnzHBS())+" *");
             hblab.setText(rez.getAnzahlHb() + " *");
-            // hblab.setIcon((einzeln.equals("T") ? hbimg : hbimg2));
             hblab.setIcon((rez.isHbVoll() ? hbimg : hbimg2));
             hblab.setAlternateText(
                     "<html>" + (rez.isHbVoll()
