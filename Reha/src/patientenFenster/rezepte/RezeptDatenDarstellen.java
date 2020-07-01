@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Font;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -13,7 +14,9 @@ import java.util.Vector;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -37,6 +40,7 @@ import CommonTools.StringTools;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
 import core.Disziplin;
+import environment.Path;
 import hauptFenster.Reha;
 import mandant.IK;
 import rechteTools.Rechte;
@@ -44,6 +48,7 @@ import rezept.Rezept;
 import rezept.RezeptDto;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
+import terminKalender.TerminFenster;
 
 /**
  * Class used to extract certain fields of a Rezept and display them as a sort of summary
@@ -75,6 +80,8 @@ public class RezeptDatenDarstellen extends JXPanel{
                                             // to do with RezNum on an JLabal...
     private JRtaTextField draghandler = null;
     private JTextArea rezdiag = null;
+    private JPopupMenu jPopupMenu = null;
+    private JMenuItem copyToBunker = null;
     private JScrollPane jscr = null;
     
     /**
@@ -239,18 +246,49 @@ public class RezeptDatenDarstellen extends JXPanel{
     private void activateRezNumField() {
         
         reznum.setDragEnabled(true);
-        reznum.addMouseListener(new MouseAdapter() {
-            @Override
-            public void mousePressed(MouseEvent e) {
-                draghandler.setText(Reha.instance.patpanel.patDaten.get(0)
-                                                                   .substring(0, 1)
-                        + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3)
-                        + "\u00b0" + reznum.getText() + "\u00b0" + rezFields.get("dauer").getText());
-                JComponent c = draghandler;
-                TransferHandler th = c.getTransferHandler();
-                th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
-            }
-        });
+        if (aktuelle) {
+            reznum.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    if (e.getButton() != java.awt.event.MouseEvent.BUTTON3) {
+                     // TODO: delete me once Rezepte have been sorted
+                        int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
+                        logger.debug("Vec: farbcode=" + farbcode);
+                        farbcode = Reha.instance.patpanel.rezAktRez.getFarbcode();
+                        logger.debug("Rez: farbcode=" + farbcode);
+                        TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
+                        draghandler.setText("TERMDATEXT" + "\u00b0" + Reha.instance.patpanel.patDaten.get(0)
+                                                                                                .substring(0, 1)
+                                + "-" + Reha.instance.patpanel.patDaten.get(2) + ","
+                                + Reha.instance.patpanel.patDaten.get(3) + "\u00b0" + String.valueOf(reznum.getText())
+                                + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "\u00b0"
+                                + Reha.instance.patpanel.rezlabs[14].getText());
+                        JComponent c = draghandler;
+                        TransferHandler th = c.getTransferHandler();
+                        th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
+                        if (Path.Instance.isLinux()) {
+                            Reha.dragDropComponent = draghandler;
+                        }
+
+                    } else {
+                        ZeigePopupMenu(e);
+                    }
+                }
+            });
+        } else {
+            reznum.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    draghandler.setText(Reha.instance.patpanel.patDaten.get(0)
+                                                                       .substring(0, 1)
+                            + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3)
+                            + "\u00b0" + reznum.getText() + "\u00b0" + rezFields.get("dauer").getText());
+                    JComponent c = draghandler;
+                    TransferHandler th = c.getTransferHandler();
+                    th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
+                }
+            });
+        }
         draghandler = new JRtaTextField("GROSS", true);
         draghandler.setTransferHandler(new TransferHandler("text"));
 
@@ -490,6 +528,59 @@ public class RezeptDatenDarstellen extends JXPanel{
         } else {
             hblab.setText(null);
             hblab.setIcon(null);
+        }
+    }
+    
+    private void ZeigePopupMenu(java.awt.event.MouseEvent me) {
+        JPopupMenu jPop = getTerminPopupMenu();
+        jPop.show(me.getComponent(), me.getX(), me.getY());
+    }
+
+    private JPopupMenu getTerminPopupMenu() {
+        if (jPopupMenu == null) {
+            jPopupMenu = new JPopupMenu();
+            jPopupMenu.add(copyToBunker());
+        }
+        return jPopupMenu;
+    }
+    
+    private JMenuItem copyToBunker() {
+        if (copyToBunker == null) {
+            copyToBunker = new JMenuItem();
+            copyToBunker.setText("Rezept kopieren");
+            copyToBunker.setIcon(SystemConfig.hmSysIcons.get("bunker"));
+            copyToBunker.setRolloverEnabled(true);
+            copyToBunker.setEnabled(true);
+            copyToBunker.addActionListener(e -> actionCopyToBunker(e));
+        }
+        return copyToBunker;
+    }
+    
+    // Actions
+    private void actionCopyToBunker(ActionEvent e) {
+        // TODO: delete me once Rezepte have been sorted
+        int farbcode = rez.getFarbcode();
+        TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
+        String dragText = Reha.instance.patpanel.patDaten.get(0)
+                                                         .substring(0, 1)
+                + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3) + "\u00b0"
+                + reznum.getText() + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "\u00b0"
+                + rezFields.get("dauer").getText();
+        Reha.instance.copyLabel.setText(String.valueOf(dragText));
+        Reha.instance.bunker.setText("TERMDATEXT" + "\u00b0" + String.valueOf(dragText));
+        String[] daten = { (Reha.instance.patpanel.patDaten.get(0)
+                                                           .startsWith("F") ? "F-" : "H-")
+                + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3),
+                rez.getRezNr()
+                        + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
+                rez.getDauer() };
+
+        if (Reha.instance.terminpanel != null) {
+            Reha.instance.terminpanel.setDatenVonExternInSpeicherNehmen(daten.clone());
+            Reha.instance.shiftLabel.setText(
+                    "bereit f\u00fcr F2= " + daten[0] + "\u00b0" + daten[1] + "\u00b0" + daten[2] + " Min."); // \u00b0 = '˚' ("Grad")
+        } else {
+            Reha.instance.shiftLabel.setText(" ");
         }
     }
     
