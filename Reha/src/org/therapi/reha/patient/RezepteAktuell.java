@@ -105,6 +105,7 @@ import hmrCheck.HMRCheck;
 import jxTableTools.MyTableStringDatePicker;
 import jxTableTools.TableTool;
 import krankenKasse.KassenFormulare;
+import mandant.IK;
 import mandant.Mandant;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
@@ -112,6 +113,7 @@ import patientenFenster.KeinRezept;
 import patientenFenster.rezepte.RezNeuanlagePreDisziCheck;
 import patientenFenster.rezepte.RezTest;
 import patientenFenster.rezepte.RezTestPanel;
+import patientenFenster.rezepte.RezeptDatenDarstellen;
 import patientenFenster.rezepte.RezeptEditorGUI;
 import patientenFenster.rezepte.RezeptGebuehren;
 import patientenFenster.rezepte.RezeptFensterTools;
@@ -153,7 +155,8 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
     public String[] indergo = null;
     public String[] indlogo = null;
     public String[] indpodo = null;
-    public RezeptDaten rezDatenPanel = null;
+    // public RezeptDaten rezDatenPanel = null;
+    private RezeptDatenDarstellen rezDatenPanel = null;
     private JButton btnNeu;
     private JButton btnEdit;
     private JButton btnDel;
@@ -274,7 +277,8 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                     dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
                     dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
 
-                    rezDatenPanel = new RezeptDaten(xeltern);
+                    // rezDatenPanel = new RezeptDaten(xeltern);
+                    rezDatenPanel = new RezeptDatenDarstellen(null, true, mand.ik());
                     vollPanel.add(rezDatenPanel, vpcc.xyw(1, 4, 1));
                     indiSchluessel();
                     initOk = true;
@@ -499,7 +503,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
             public void mouseClicked(MouseEvent arg0) {
                 if (arg0.getClickCount() == 2 && arg0.getButton() == 1) {
                     long zeit = System.currentTimeMillis();
-                    while (!RezeptDaten.feddisch) {
+                    while (!RezeptDatenDarstellen.feddisch) {
                         try {
                             Thread.sleep(20);
                             if (System.currentTimeMillis() - zeit > 5000) {
@@ -1071,8 +1075,11 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                             Reha.instance.patpanel.rezAktRez = aktuelAngezeigtesRezept;
                             logger.debug("rezAktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
                             // TODO: revisit once Rezepte has been sorted
-                            rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr),
-                                    String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                            // rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr),
+                            //         String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                            // Originally did this:
+                            // rezDatenPanel.updateDatenPanel((String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr), true);
+                            rezDatenPanel.updateDatenPanel(aktuelAngezeigtesRezept.getRezNr(), true);
                         } else {
                             rezneugefunden = true;
                             // TODO: remove me once Rezepte has been sorted
@@ -1083,8 +1090,9 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                             aktuelAngezeigtesRezept = listAktuelleRez.get(row);
                             Reha.instance.patpanel.rezAktRez = aktuelAngezeigtesRezept;
                             logger.debug("vecaktrez from Rez: " + Reha.instance.patpanel.rezAktRez.toString());
-                            rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
-                                    String.valueOf(tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                            //rezDatenPanel.setRezeptDaten((String) tabaktrez.getValueAt(0, 0),
+                            //        String.valueOf(tabaktrez.getValueAt(0, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+                            rezDatenPanel.updateDatenPanel((String) tabaktrez.getValueAt(0, 0), true);
                         }
 
                         try {
@@ -1178,7 +1186,8 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
             String reznr = (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
             rezAngezeigt = reznr;
             String id = String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
-            rezDatenPanel.setRezeptDaten(reznr, id);
+            // rezDatenPanel.setRezeptDaten(reznr, id);
+            rezDatenPanel.updateDatenPanel(reznr, true);
         }
     }
 
@@ -1500,7 +1509,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                 rezneugefunden = false;
                 return;
             }
-            if (!RezeptDaten.feddisch) {
+            if (!RezeptDatenDarstellen.feddisch) {
                 return;
             }
             ListSelectionModel lsm = (ListSelectionModel) e.getSource();
@@ -1515,7 +1524,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                 int maxIndex = lsm.getMaxSelectionIndex();
                 for (int i = minIndex; i <= maxIndex; i++) {
                     if (lsm.isSelectedIndex(i)) {
-                        RezeptDaten.feddisch = false;
+                        RezeptDatenDarstellen.feddisch = false;
                         final int ix = i;
                         datenHolenUndEinstellen();
                         break;
@@ -1561,9 +1570,10 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
             Reha.instance.patpanel.aktRezept.rezAngezeigt = (String) tabaktrez.getValueAt(ix,
                                                                       MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
 
-            rezDatenPanel.setRezeptDaten(String.valueOf(tabaktrez.getValueAt(ix,
-                                                                      MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)),
-                    String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+            // rezDatenPanel.setRezeptDaten(String.valueOf(tabaktrez.getValueAt(ix,
+            //                                                          MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)),
+            //        String.valueOf(tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));
+            rezDatenPanel.updateDatenPanel(aktuelAngezeigtesRezept.getRezNr(), true);
             setCursor(Cursors.normalCursor);
             final String testreznum = tabaktrez.getValueAt(ix, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr)
                                                .toString();
@@ -3263,7 +3273,7 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                 if (!lneu) {
                     if (tabaktrez.getRowCount() > 0) {
                         try {
-                            RezeptDaten.feddisch = false;
+                            RezeptDatenDarstellen.feddisch = false;
                             // TODO: Remove once Rezepte has been sorted
                             aktualisiereVector(String.valueOf(tabaktrez.getValueAt(tabaktrez.getSelectedRow()
                                                                                                  , MyAktRezeptTableModel.AKTREZTABMODELCOL_ID)));

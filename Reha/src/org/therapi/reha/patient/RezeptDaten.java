@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Vector;
@@ -49,10 +48,15 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import terminKalender.TerminFenster;
 
+/**
+ * 
+ * @deprecated in 1.1.8 - use 
+ * {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, aktuel?, IK)}
+ * instead
+ */
+@Deprecated
 public class RezeptDaten extends JXPanel {
-    /**
-     * 
-     */
+
     private static final long serialVersionUID = -6994295488322966514L;
     private static final Logger logger = LoggerFactory.getLogger(RezeptDaten.class);
     public JRtaTextField reznum = null;
@@ -69,6 +73,13 @@ public class RezeptDaten extends JXPanel {
     /** "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." **/
     public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. au\u00dferhalb d.R." };
 
+    /**
+     * @deprecated use
+     *  {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, Aktuel?, IK)}
+     *  instead
+     * @param eltern
+     */
+    @Deprecated
     public RezeptDaten(PatientHauptPanel eltern) {
         super();
         this.setOpaque(false);
@@ -113,6 +124,7 @@ public class RezeptDaten extends JXPanel {
 
     }
 
+    @Deprecated
     public void setRezeptDaten(String reznummer, String sid) {
         RezeptDaten.feddisch = false;
         boolean reha = false;

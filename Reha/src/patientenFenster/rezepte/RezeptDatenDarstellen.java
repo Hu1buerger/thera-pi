@@ -84,6 +84,9 @@ public class RezeptDatenDarstellen extends JXPanel{
     private JMenuItem copyToBunker = null;
     private JScrollPane jscr = null;
     
+    // grummel...
+    public static boolean feddisch = false;
+    
     /**
      * Provide me an Ik, so that I can grab a Rezept from DB and extract information.
      * Provide the boolean Aktuelle so that I can choose whether you want current or
@@ -117,6 +120,7 @@ public class RezeptDatenDarstellen extends JXPanel{
      */
     // TODO: maybe migrate away from RezNr & Ik and drop in a full Rezept...
     public void updateDatenPanel(String RezNr, boolean Aktuelle) {
+        feddisch = false;
         rezNr = RezNr;
         aktuelle = Aktuelle;
         reznum.setText(rezNr);
@@ -135,6 +139,7 @@ public class RezeptDatenDarstellen extends JXPanel{
             deactivateRezNumField();
         }
         validate();
+        feddisch = true;
     }
         
     private JScrollPane getDatenScrlPane() {
@@ -145,7 +150,7 @@ public class RezeptDatenDarstellen extends JXPanel{
                 //      1.Sep                2.Sep                              3.Sep
               // 1  2   3  4   5  6   7  8   9  10 11 12  13  14 15  16  17 18  19 20  21 22  23  24    25  26 27
               //"p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,1dlu,p,1dlu,p,1dlu,p,5dlu,p,5dlu,p,1dlu,p,20dlu:g,1px,p,1dlu");
-                "p,2dlu,p,2dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,1dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,26dlu,1px,p,1dlu");
+                "p,2dlu,p,2dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,1dlu,p,1dlu,p,2dlu,p,2dlu,p,1dlu,p,32dlu,1px,p,1dlu");
         //      "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,38dlu,1px,p,1dlu");
         CellConstraints cc = new CellConstraints();
         PanelBuilder jpan = new PanelBuilder(lay);
@@ -451,6 +456,10 @@ public class RezeptDatenDarstellen extends JXPanel{
                     reznum.setText(rez.getRezNr());
                     reznum.setForeground((SystemConfig.vSysColsObject.get(0)
                                                                      .get(farbcode)[0]));
+                    reznum.repaint();
+                } else {
+                    reznum.setText(rez.getRezNr());
+                    reznum.setForeground(Color.BLUE);
                     reznum.repaint();
                 }
             }
