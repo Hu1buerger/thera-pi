@@ -421,6 +421,10 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     public JToolBar getTerminToolbar() {
         allUsedTerminTBButtons = new LinkedList<JButton>();
         JToolBar jtb = new JToolBar();
+        jtb.setOpaque(false);
+        jtb.setRollover(true);
+        jtb.setBorder(null);
+        jtb.setOpaque(false);
         
         btnNeu = new JButton();
         btnNeu.setIcon(SystemConfig.hmSysIcons.get("neu"));
@@ -440,11 +444,14 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
         jtb.add(btnDel);
         { allUsedTerminTBButtons.add(btnDel); }
         
+        jtb.addSeparator(new Dimension(40, 0));
+        
         btnSort = new JButton();
         btnSort.setIcon(SystemConfig.hmSysIcons.get("sort"));
         btnSort.setToolTipText("Termine nach Datum sortieren");
         btnSort.setActionCommand("terminsortieren");
         btnSort.addActionListener(e -> actionTerminSort(e));
+        btnSort.setEnabled(false);
         jtb.add(btnSort);
         { allUsedTerminTBButtons.add(btnSort); }
 
