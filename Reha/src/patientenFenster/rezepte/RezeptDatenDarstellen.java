@@ -251,18 +251,14 @@ public class RezeptDatenDarstellen extends JXPanel{
                 @Override
                 public void mousePressed(MouseEvent e) {
                     if (e.getButton() != java.awt.event.MouseEvent.BUTTON3) {
-                     // TODO: delete me once Rezepte have been sorted
-                        int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
-                        logger.debug("Vec: farbcode=" + farbcode);
-                        farbcode = Reha.instance.patpanel.rezAktRez.getFarbcode();
-                        logger.debug("Rez: farbcode=" + farbcode);
+                        int farbcode = rez.getFarbcode();
                         TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
                         draghandler.setText("TERMDATEXT" + "\u00b0" + Reha.instance.patpanel.patDaten.get(0)
                                                                                                 .substring(0, 1)
                                 + "-" + Reha.instance.patpanel.patDaten.get(2) + ","
                                 + Reha.instance.patpanel.patDaten.get(3) + "\u00b0" + String.valueOf(reznum.getText())
                                 + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "\u00b0"
-                                + Reha.instance.patpanel.rezlabs[14].getText());
+                                + rezFields.get("dauer").getText());
                         JComponent c = draghandler;
                         TransferHandler th = c.getTransferHandler();
                         th.exportAsDrag(c, e, TransferHandler.COPY); // TransferHandler.COPY
@@ -312,7 +308,7 @@ public class RezeptDatenDarstellen extends JXPanel{
                     if (!Rechte.hatRecht(Rechte.Rezept_editvoll, true)) {
                         return;
                     }
-                    int anzhb = Reha.instance.patpanel.rezAktRez.getAnzahlHb();
+                    int anzhb = rez.getAnzahlHb();
                     Object ret = JOptionPane.showInputDialog(null, "Geben Sie bitte die neue Anzahl f\u00fcr Hausbesuch ein",
                             anzhb);
                     if (ret == null) {
@@ -331,6 +327,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         });
     }
     
+    /*
     private JScrollPane getDatenScrPane() {
         JScrollPane pane = new JScrollPane();
         Component table = null;
@@ -338,6 +335,7 @@ public class RezeptDatenDarstellen extends JXPanel{
         
         return pane;
     }
+    */
     
     private void fillInRezData(Rezept rez) {
         // Empty defaults:
@@ -558,7 +556,6 @@ public class RezeptDatenDarstellen extends JXPanel{
     
     // Actions
     private void actionCopyToBunker(ActionEvent e) {
-        // TODO: delete me once Rezepte have been sorted
         int farbcode = rez.getFarbcode();
         TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
         String dragText = Reha.instance.patpanel.patDaten.get(0)
@@ -568,12 +565,12 @@ public class RezeptDatenDarstellen extends JXPanel{
                 + rezFields.get("dauer").getText();
         Reha.instance.copyLabel.setText(String.valueOf(dragText));
         Reha.instance.bunker.setText("TERMDATEXT" + "\u00b0" + String.valueOf(dragText));
-        String[] daten = { (Reha.instance.patpanel.patDaten.get(0)
-                                                           .startsWith("F") ? "F-" : "H-")
-                + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3),
-                rez.getRezNr()
-                        + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
-                rez.getDauer() };
+        String[] daten = { (Reha.instance.patpanel.patDaten.get(0).startsWith("F") ? "F-" : "H-")
+                                + Reha.instance.patpanel.patDaten.get(2) + ","
+                                + Reha.instance.patpanel.patDaten.get(3),
+                            rez.getRezNr()
+                                + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
+                            rez.getDauer() };
 
         if (Reha.instance.terminpanel != null) {
             Reha.instance.terminpanel.setDatenVonExternInSpeicherNehmen(daten.clone());
