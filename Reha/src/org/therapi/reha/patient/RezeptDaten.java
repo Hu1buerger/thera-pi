@@ -50,7 +50,7 @@ import terminKalender.TerminFenster;
 
 /**
  * 
- * @deprecated in 1.1.19 - use 
+ * @deprecated in 1.1.9 - use 
  * {@link patientenFenster.rezepte.RezeptDatenDarstellen#RezeptDatenDarstellen(RezNr, aktuell?, IK)}
  * instead
  */
