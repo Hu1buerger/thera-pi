@@ -299,6 +299,9 @@ public class TherapieBerichte extends JXPanel implements ListSelectionListener, 
             xcmd = "update lza set berid='-1' where rez_nr='" + vec.get(0) + "'";
             // System.out.println(xcmd);
             new ExUndHop().setzeStatement(xcmd);
+            // Since we were too lazy to figure out where we updated, we'll need to do both:
+            Reha.instance.patpanel.aktRezept.setRezeptDaten();
+            Reha.instance.patpanel.historie.setRezeptDaten();
         } else {
             // System.out.println("Rezeptnummer konnte nicht ermittelt werden");
         }
