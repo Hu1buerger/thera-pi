@@ -239,7 +239,7 @@ public class PatientToolBarLogic {
             }
             if (srez_nr.isEmpty() || (!srez_nr.startsWith("RH"))) {
                 try {
-                    srez_nr = Reha.instance.patpanel.vecakthistor.get(1);
+                    srez_nr = Reha.instance.patpanel.rezHistRez.getRezNr();
                 } catch (Exception ex) {
                     srez_nr = "-1";
                 }

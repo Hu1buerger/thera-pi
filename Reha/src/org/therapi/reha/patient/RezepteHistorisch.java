@@ -759,6 +759,9 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                     String reznr = (String) tabHistRezepte.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_NR);
                     String id = String.valueOf(tabHistRezepte.getValueAt(xrow, RezeptHistTableModel.HISTREZTABCOL_ID));
                     // jpan1.setRezeptDaten(reznr, id);
+                    // Grummel - somehow overlooked this bugger - need to get full Rezept, might want to 
+                    // TODO: check if we can use it in updateDatenPanel too...
+                    Reha.instance.patpanel.rezHistRez = (new RezeptDto(ik)).getHistorischesRezeptByRezNr(reznr).orElse(null);
                     logger.debug("Calling rezDataUpdate with " + reznr + " could use " + id);
                     jpan1.updateDatenPanel(reznr, false);
                 }

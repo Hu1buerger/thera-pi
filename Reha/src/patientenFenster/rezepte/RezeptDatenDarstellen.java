@@ -332,16 +332,6 @@ public class RezeptDatenDarstellen extends JXPanel{
         });
     }
     
-    /*
-    private JScrollPane getDatenScrPane() {
-        JScrollPane pane = new JScrollPane();
-        Component table = null;
-        JScrollPane pane1 =new JScrollPane(table);
-        
-        return pane;
-    }
-    */
-    
     private void fillInRezData(Rezept rez) {
         // Empty defaults:
         rezFields.get("arzt").setText("Kein Arzt");

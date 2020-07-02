@@ -112,7 +112,9 @@ public class PatientHauptPanel extends JXPanel {
     // TODO: remove after Rezepte has been sorted
     public Vector<String> vecaktrez = null;
     public Rezept rezAktRez = null;
+    // TODO: remove after Rezepte has been sorted
     public Vector<String> vecakthistor = null;
+    public Rezept rezHistRez = null;
 
     // PatStamm-Event Listener == extrem wichtig
     private PatStammEventListener patientStammEventListener = null;

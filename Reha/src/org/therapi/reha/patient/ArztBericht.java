@@ -442,7 +442,11 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
                 }
                 diagnose.setText(xdiagnose);
             } else if ((!this.reznr.equals("")) && (this.aufrufvon == 1)) {
-                xdiagnose = Reha.instance.patpanel.vecakthistor.get(23);
+                // delete me once rezepte has been sorted...
+                xdiagnose = Reha.instance.patpanel.vecakthistor.get(23); // .getDiagnose()
+                logger.debug("Hist-RezNr from vec: " + xdiagnose);
+                xdiagnose = Reha.instance.patpanel.rezHistRez.getRezNr();
+                logger.debug("Hist-RezNr from rez: " + xdiagnose);
                 if (xdiagnose.equals("")) {
                     xdiagnose = SqlInfo.holeEinzelFeld("select diagnose from bericht1 where berichtid='"
                             + Integer.toString(this.berichtid) + "' LIMIT 1");
