@@ -1184,11 +1184,17 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
     public void setRezeptDaten() {
         int row = tabaktrez.getSelectedRow();
         if (row >= 0) {
-            String reznr = (String) tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
-            rezAngezeigt = reznr;
-            String id = String.valueOf(tabaktrez.getValueAt(row, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
-            // rezDatenPanel.setRezeptDaten(reznr, id);
-            rezDatenPanel.updateDatenPanel(reznr, true);
+            final int xrow = row;
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    String reznr = (String) tabaktrez.getValueAt(xrow, MyAktRezeptTableModel.AKTREZTABMODELCOL_REZNr);
+                    rezAngezeigt = reznr;
+                    String id = String.valueOf(tabaktrez.getValueAt(xrow, MyAktRezeptTableModel.AKTREZTABMODELCOL_ID));
+                    // rezDatenPanel.setRezeptDaten(reznr, id);
+                    rezDatenPanel.updateDatenPanel(reznr, true);
+                }
+            });
         }
     }
 
