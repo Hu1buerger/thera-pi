@@ -320,8 +320,10 @@ public class RezeptDatenDarstellen extends JXPanel{
                     int neueHBAnzahl = Integer.valueOf(ret.toString());
                     if ( neueHBAnzahl != anzhb ) {
                         hblab.setText(((String) ret).trim() + " *");
-                        new ExUndHop().setzeStatement("update verordn set anzahlhb=" + neueHBAnzahl + " "
-                                + "where rez_nr='" + rez.getRezNr() + "' LIMIT 1");
+                        //new ExUndHop().setzeStatement("update verordn set anzahlhb=" + neueHBAnzahl + " "
+                        //        + "where rez_nr='" + rez.getRezNr() + "' LIMIT 1");
+                        rez.setAnzahlHb(neueHBAnzahl);
+                        (new RezeptDto(ik)).rezeptInDBSpeichern(rez);
                      // TODO: Fire Update-event
                         Reha.instance.patpanel.rezAktRez.setAnzahlHb(neueHBAnzahl);
                     }
