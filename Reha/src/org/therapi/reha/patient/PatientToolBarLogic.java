@@ -183,7 +183,7 @@ public class PatientToolBarLogic {
             public void run() {
                 try {
                     // hier Pat_intern und Rezeptnummer ermitteln
-                    if (patientHauptPanel.aktPatID.equals("")) {
+                    if (patientHauptPanel.aktPatID == null || patientHauptPanel.aktPatID.isEmpty()) {
                         return;
                     }
                     String spat_intern = patientHauptPanel.patDaten.get(29);
@@ -230,7 +230,7 @@ public class PatientToolBarLogic {
 
     public void doPatFragebogen() {
         try {
-            if (patientHauptPanel.aktPatID.equals("")) {
+            if (patientHauptPanel.aktPatID == null || patientHauptPanel.aktPatID.isEmpty()) {
                 return;
             }
             String srez_nr = "-1";
@@ -398,11 +398,10 @@ public class PatientToolBarLogic {
                 doSMS();
                 break;
             case 3:
-                doPatFragebogen();
                 if (!Rechte.hatRecht(Rechte.Patient_zusatzinfo, true)) {
-
                     return;
                 }
+                doPatFragebogen();
                 break;
             case 4:
                 new iCalRehaExporter();
