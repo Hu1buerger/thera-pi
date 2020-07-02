@@ -584,10 +584,10 @@ public class RezeptDto {
                         .executeQuery(sql);
                 if (rs.next()) {
                     isNew = false;
-                    logger.debug("Rezept will " + rez.getRezNr() + " be updated");
+                    logger.debug("Rezept " + rez.getRezNr() + " will be updated");
                 } else {
                     isNew = true;
-                    logger.debug("Rezept will " + rez.getRezNr() + " be added.");
+                    logger.debug("Rezept " + rez.getRezNr() + " will be added.");
                 }
             } else {
                 logger.error("Given RezNr was empty or Null - this shouldn't happen - get RezNr before saving it");
