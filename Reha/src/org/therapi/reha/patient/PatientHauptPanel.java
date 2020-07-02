@@ -104,6 +104,8 @@ public class PatientHauptPanel extends JXPanel {
     @Deprecated
     public JLabel[] rezlabs = new JLabel[17];
 
+    // Likewise
+    @Deprecated
     public JTextArea rezdiag = null;
 
     public ImageIcon[] imgzuzahl = new ImageIcon[4];
