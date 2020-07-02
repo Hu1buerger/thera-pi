@@ -769,7 +769,8 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
             //       if so, we can just tell it to update with RezNr, if not we're in trouble...
             // Reha.instance.patpanel.historie.jpan1.rezlabs[7].setForeground(Color.BLACK);
             // Reha.instance.patpanel.historie.jpan1.rezlabs[7].setText("Therapiebericht o.k.");
-            Reha.instance.patpanel.historie.jpan1.updateDatenPanel(reznr, false);
+            // Reha.instance.patpanel.historie.jpan1.updateDatenPanel(reznr, false);
+            Reha.instance.patpanel.historie.setRezeptDaten();
             // Reha.instance.patpanel.historie.jpan1.vecaktrez.set(54, Integer.toString(berichtnr));
         }
 
