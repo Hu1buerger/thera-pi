@@ -105,11 +105,9 @@ import hmrCheck.HMRCheck;
 import jxTableTools.MyTableStringDatePicker;
 import jxTableTools.TableTool;
 import krankenKasse.KassenFormulare;
-import mandant.IK;
 import mandant.Mandant;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
-// import patientenFenster.rezepte.RezNeuanlage;
 import patientenFenster.rezepte.RezNeuanlagePreDisziCheck;
 import patientenFenster.rezepte.RezTest;
 import patientenFenster.rezepte.RezTestPanel;
@@ -1180,6 +1178,9 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
         setRezeptDaten();
     }
     
+    /**
+     * This will update the data-panel (summary of selected Rezept)
+     */
     public void setRezeptDaten() {
         int row = tabaktrez.getSelectedRow();
         if (row >= 0) {

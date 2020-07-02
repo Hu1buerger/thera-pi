@@ -759,8 +759,11 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
             // TODO: delete me once Rezepte have been sorted
             Reha.instance.patpanel.vecaktrez.set(54, Integer.toString(berichtnr));
             Reha.instance.patpanel.rezAktRez.setBerId(berichtnr);
-            Reha.instance.patpanel.rezlabs[7].setForeground(Color.BLACK);
-            Reha.instance.patpanel.rezlabs[7].setText("Therapiebericht o.k.");
+            // This ain't gonna work no more:
+            // Reha.instance.patpanel.rezlabs[7].setForeground(Color.BLACK);
+            // Reha.instance.patpanel.rezlabs[7].setText("Therapiebericht o.k.");
+            //maybe this instead:
+            Reha.instance.patpanel.aktRezept.setRezeptDaten();
         } else if (this.aufrufvon == 1) {
             // TODO: old code altered field & rezept in RezDatenPanel directly - am I sure the rezept has been saved to DB?
             //       if so, we can just tell it to update with RezNr, if not we're in trouble...
