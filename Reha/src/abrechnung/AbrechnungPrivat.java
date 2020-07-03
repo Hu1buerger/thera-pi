@@ -1071,9 +1071,14 @@ public class AbrechnungPrivat extends JXDialog
                     "Die Anwendungsregel dieser Tarifgruppe ist Splitting!!!\nBei dieser Regel m\u00fcssen die Behandlungstage mit der Anzahl der Behandlungen im Rezept \u00fcbereinstimmen!");
             return;
         }
-        // Aenderungen in Preis und ggfls. in Anzahl
-        // Benoetigt werde: Anzahlen auf dem Rezept, Anzahl alter Preis, Anzahl neuer
-        // Preis.
+        /**
+         * Aenderungen in Preis und ggfls. in Anzahl
+         * <BR/> Benoetigt werde: Anzahlen auf dem Rezept, Anzahl alter Preis, Anzahl neuer
+         * Preis.
+        */
+        // Not sure if ArtDerBehandlung1 just does the same differently than AdB2-4, 
+        //  or if it actually does something different...
+        // TODO: take a closer look later:
         if (Reha.instance.patpanel.rezAktRez.getArtDerBeh1() != 0) {
             String artDerBeh = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBeh1());
             String hmPos=Reha.instance.patpanel.rezAktRez.getHMPos1();
@@ -1111,8 +1116,7 @@ public class AbrechnungPrivat extends JXDialog
             anzahlNeu = Integer.toString(splitpreise[1]);
             preisNeu = RezTools.getPreisAktFromID(artDerBeh, "", preisliste);
 
-            if (!pos.trim()
-                    .equals("")) {
+            if (!pos.trim().isEmpty()) {
                 einzelPreis.add(Double.parseDouble(preisNeu));
                 labs[0].setText(
                         labs[0].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
