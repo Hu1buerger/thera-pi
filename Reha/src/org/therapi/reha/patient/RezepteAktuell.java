@@ -2961,19 +2961,14 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
 
     private void privatRechnung() {
         try {
-            // Preisgruppe ermitteln
-            int preisgruppe = 0;
             // TODO: Original code used field as string - check constructKasseHMap if it could deal with an int
             KasseTools.constructKasseHMap(Integer.toString(aktuelAngezeigtesRezept.getkId()));
-            // TODO: the original code retrieved a string & parsed it - should that have gone bust
-            //   (due to pg==null?) an error was displayed - what is an error now? pg=0?
-            preisgruppe = aktuelAngezeigtesRezept.getPreisGruppe();
             
             Point pt = btnTools.getLocationOnScreen();
             pt.x = pt.x - 75;
             pt.y = pt.y + 30;
             AbrechnungPrivat abrechnungPrivat = new AbrechnungPrivat(Reha.getThisFrame(),
-                    "Privat-/BG-/Nachsorge-Rechnung erstellen", -1, preisgruppe);
+                    "Privat-/BG-/Nachsorge-Rechnung erstellen", aktuelAngezeigtesRezept, -1);
             abrechnungPrivat.setLocation(pt);
             abrechnungPrivat.pack();
             abrechnungPrivat.setModal(true);
