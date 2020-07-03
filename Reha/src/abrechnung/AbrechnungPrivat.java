@@ -1123,7 +1123,7 @@ public class AbrechnungPrivat extends JXDialog
             }
 
         }
-        /***********************************/
+        /*********************************** /
         if (Reha.instance.patpanel.rezAktRez.getArtDerBeh2() != 0) {
             String artDerBeh = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBeh2());
             String hmPos=Reha.instance.patpanel.rezAktRez.getHMPos2();
@@ -1178,7 +1178,7 @@ public class AbrechnungPrivat extends JXDialog
             }
 
         }
-        /***********************************/
+        /*********************************** /
         if (Reha.instance.patpanel.rezAktRez.getArtDerBeh3() != 0) {
             String artDerBeh = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBeh3());
             String hmPos=Reha.instance.patpanel.rezAktRez.getHMPos3();
@@ -1186,14 +1186,12 @@ public class AbrechnungPrivat extends JXDialog
             
             originalPos.add(hmPos);
             originalId.add(artDerBeh);
-            // test = behAnzahl;
             originalAnzahl.add((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
             originalLangtext.add(RezTools.getLangtextFromID(artDerBeh, "", preisliste)
                                          .replace("30Min.", "")
                                          .replace("45Min.", ""));
 
             pos = RezTools.getKurzformFromID(artDerBeh, preisliste);
-            // test = behAnzahl;
             anzahlAlt = Integer.toString((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
             preisAlt = RezTools.getPreisAltFromID(artDerBeh, "", preisliste);
 
@@ -1229,56 +1227,57 @@ public class AbrechnungPrivat extends JXDialog
                 }
 
             }
-        }
-        /***********************************/
-        if (Reha.instance.patpanel.rezAktRez.getArtDerBeh4() != 0) {
-            String artDerBeh = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBeh4());
-            String hmPos=Reha.instance.patpanel.rezAktRez.getHMPos4();
-            int behAnzahl = Reha.instance.patpanel.rezAktRez.getBehAnzahl4();
-            
-            originalPos.add(hmPos);
-            originalId.add(artDerBeh);
-            // test = behAnzahl;
-            originalAnzahl.add((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
-            originalLangtext.add(RezTools.getLangtextFromID(artDerBeh, "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
-
-            pos = RezTools.getKurzformFromID(artDerBeh, preisliste);
-            anzahlAlt = Integer.toString((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
-            preisAlt = RezTools.getPreisAltFromID(artDerBeh, "", preisliste);
-
-            if (!pos.trim()
-                    .equals("")) {
-                einzelPreis.add(Double.parseDouble(preisAlt));
-                labs[3].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
-
-            } else {
-                JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[3].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
-            }
-            if (splitpreise[0] < behAnzahl) {
+        } */
+        for(int i=2;i<=4;i++) {
+            /***********************************/
+            if (Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i) != 0) {
+                String artDerBeh = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
+                String hmPos=Reha.instance.patpanel.rezAktRez.getHMPos(i);
+                int behAnzahl = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
+                
                 originalPos.add(hmPos);
                 originalId.add(artDerBeh);
-                originalAnzahl.add(behAnzahl - splitpreise[0]);
-                originalLangtext.add(
-                        RezTools.getLangtextFromID(artDerBeh, "", preisliste)
-                                .replace("30Min.", "")
-                                .replace("45Min.", ""));
-                anzahlNeu = Integer.toString(behAnzahl - splitpreise[0]);
-                preisNeu = RezTools.getPreisAktFromID(artDerBeh, "", preisliste);
-                if (!pos.trim()
-                        .equals("")) {
-                    einzelPreis.add(Double.parseDouble(preisNeu));
-                    labs[3].setText(
-                            labs[3].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
-
+                // test = behAnzahl;
+                originalAnzahl.add((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
+                originalLangtext.add(RezTools.getLangtextFromID(artDerBeh, "", preisliste)
+                                             .replace("30Min.", "")
+                                             .replace("45Min.", ""));
+    
+                pos = RezTools.getKurzformFromID(artDerBeh, preisliste);
+                anzahlAlt = Integer.toString((splitpreise[0] > behAnzahl ? behAnzahl : splitpreise[0]));
+                preisAlt = RezTools.getPreisAltFromID(artDerBeh, "", preisliste);
+    
+                if (!pos.trim().isEmpty()) {
+                    einzelPreis.add(Double.parseDouble(preisAlt));
+                    labs[i-1].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+    
                 } else {
-                    JOptionPane.showMessageDialog(null,
-                            "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                    labs[3].setText(labs[3].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                    JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
+                    labs[i-1].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
                 }
-
+                if (splitpreise[0] < behAnzahl) {
+                    originalPos.add(hmPos);
+                    originalId.add(artDerBeh);
+                    originalAnzahl.add(behAnzahl - splitpreise[0]);
+                    originalLangtext.add(
+                            RezTools.getLangtextFromID(artDerBeh, "", preisliste)
+                                    .replace("30Min.", "")
+                                    .replace("45Min.", ""));
+                    anzahlNeu = Integer.toString(behAnzahl - splitpreise[0]);
+                    preisNeu = RezTools.getPreisAktFromID(artDerBeh, "", preisliste);
+                    if (!pos.trim()
+                            .equals("")) {
+                        einzelPreis.add(Double.parseDouble(preisNeu));
+                        labs[i-1].setText(
+                                labs[i-1].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+    
+                    } else {
+                        JOptionPane.showMessageDialog(null,
+                                "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
+                        labs[i-1].setText(labs[i-1].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                    }
+    
+                }
             }
         }
         /***********************************/
