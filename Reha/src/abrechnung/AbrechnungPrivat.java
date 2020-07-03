@@ -226,7 +226,7 @@ public class AbrechnungPrivat extends JXDialog
         jcmb.setSelectedIndex(this.preisgruppe - 1);
         this.aktGruppe = this.preisgruppe - 1;
         jcmb.setActionCommand("neuertarif");
-        jcmb.addActionListener(this);
+        jcmb.addActionListener(e -> actionNeuerTarif(e));
         pan.add(jcmb, cc.xy(3, 8));
         jrb[0] = new JRtaRadioButton("Formular f\u00fcr Privatrechnung verwenden");
         jrb[0].addChangeListener(this);
@@ -1308,11 +1308,13 @@ public class AbrechnungPrivat extends JXDialog
             regleBGE();
             return;
         }
+        /*
         if (cmd.equals("neuertarif")) {
             this.aktGruppe = jcmb.getSelectedIndex();
             doNeuerTarif();
             return;
         }
+        */
         if (cmd.equals("korrektur")) {
             this.rueckgabe = -2;
             // doKorrektur();
@@ -1327,7 +1329,6 @@ public class AbrechnungPrivat extends JXDialog
             this.rueckgabe = 0;
             doRgRechnungPrepare();
         }
-
     }
 
     @Override
@@ -1617,6 +1618,22 @@ public class AbrechnungPrivat extends JXDialog
              * Thread.sleep(150); }catch (NOAException e) { e.printStackTrace(); }
              */
         }
+    }
+    
+    /*
+     * Actions
+     */
+    
+    private void actionNeuerTarif(ActionEvent arg0) {
+        this.aktGruppe = jcmb.getSelectedIndex();
+        doNeuerTarif();
+        return;
+    }
+    private void actionKorrektur(ActionEvent arg0) {
+        this.rueckgabe = -2;
+        // doKorrektur();
+        FensterSchliessen("dieses");
+        return;
     }
 
     @Override
