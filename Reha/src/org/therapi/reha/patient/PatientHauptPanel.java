@@ -112,9 +112,11 @@ public class PatientHauptPanel extends JXPanel {
     public ImageIcon[] imgrezstatus = new ImageIcon[2];
     public Vector<String> patDaten = new Vector<String>();
     // TODO: remove after Rezepte has been sorted
+    @Deprecated
     public Vector<String> vecaktrez = null;
     public Rezept rezAktRez = null;
     // TODO: remove after Rezepte has been sorted
+    @Deprecated
     public Vector<String> vecakthistor = null;
     public Rezept rezHistRez = null;
 
