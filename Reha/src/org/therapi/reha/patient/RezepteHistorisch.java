@@ -16,7 +16,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.LocalDate;
@@ -28,13 +27,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 
@@ -61,10 +68,8 @@ import environment.Path;
 import gui.Cursors;
 import hauptFenster.Reha;
 import jxTableTools.DateTableCellEditor;
-import jxTableTools.TableTool;
 import mandant.IK;
 import oOorgTools.OOTools;
-import patientenFenster.HistorDaten;
 import patientenFenster.KeinRezept;
 import patientenFenster.rezepte.RezeptDatenDarstellen;
 import patientenFenster.rezepte.RezeptFensterTools;
@@ -1174,7 +1179,6 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     }
 
 
-
     /*************************************************/
     // Inner Helper-Classes:
     class HistorRezepteListSelectionHandler implements ListSelectionListener {
@@ -1271,18 +1275,24 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
     class ToolsDlgHistorie {
         public ToolsDlgHistorie(String command, Point pt) {
 
-            Map<Object, ImageIcon> icons = new HashMap<Object, ImageIcon>();
-            icons.put("Gesamtumsatz dieses Patienten", SystemConfig.hmSysIcons.get("euro"));
-            icons.put("Behandlungstage in Clipboard", SystemConfig.hmSysIcons.get("einzeltage"));
-            icons.put("Transfer in aktuelle Rezepte", SystemConfig.hmSysIcons.get("undo"));
-            icons.put("Rezeptgeb\u00fchrquittung (Kopie)", SystemConfig.hmSysIcons.get("rezeptgebuehr"));
-            icons.put("Daten in neues Rezept kopieren", SystemConfig.hmSysIcons.get("neu"));
-
-            icons.put("\u00a7301 Reha-Fallsteuerung", SystemConfig.hmSysIcons.get("abrdreieins"));
-            // create a list with some test data
-            JList list = new JList(new Object[] { "Gesamtumsatz dieses Patienten", "Behandlungstage in Clipboard",
+            final int HISTTOOLS_GESUMSATZ=0;
+            final int HISTTOOLS_BEHTAGECB=1;
+            final int HISTTOOLS_TRANSAKTL=2;
+            final int HISTTOOLS_REZQUITT=3;
+            final int HISTTOOLS_COPY2NEW=4;
+            final int HISTTOOLS_REHAFS=5;
+            String[] tools = new String[]{"Gesamtumsatz dieses Patienten", "Behandlungstage in Clipboard",
                     "Transfer in aktuelle Rezepte", "Rezeptgeb\u00fchrquittung (Kopie)", "Daten in neues Rezept kopieren",
-                    "\u00a7301 Reha-Fallsteuerung" });
+                    "\u00a7301 Reha-Fallsteuerung"};
+            Map<Object, ImageIcon> icons = new HashMap<Object, ImageIcon>();
+            icons.put(tools[HISTTOOLS_GESUMSATZ], SystemConfig.hmSysIcons.get("euro"));
+            icons.put(tools[HISTTOOLS_BEHTAGECB], SystemConfig.hmSysIcons.get("einzeltage"));
+            icons.put(tools[HISTTOOLS_TRANSAKTL], SystemConfig.hmSysIcons.get("undo"));
+            icons.put(tools[HISTTOOLS_REZQUITT], SystemConfig.hmSysIcons.get("rezeptgebuehr"));
+            icons.put(tools[HISTTOOLS_COPY2NEW], SystemConfig.hmSysIcons.get("neu"));
+            icons.put(tools[HISTTOOLS_REHAFS], SystemConfig.hmSysIcons.get("abrdreieins"));
+            
+            JList list = new JList(tools);
             list.setCellRenderer(new IconListRenderer(icons));
             Reha.toolsDlgRueckgabe = -1;
             ToolsDialog tDlg = new ToolsDialog(Reha.getThisFrame(), "Werkzeuge: Historie", list);
@@ -1294,116 +1304,49 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
             tDlg.activateListener();
             tDlg.setVisible(true);
             switch (Reha.toolsDlgRueckgabe) {
-            case 0:
-                if (!Rechte.hatRecht(Rechte.Historie_gesamtumsatz, true)) {
-                    return;
-                }
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        doRechneAlles();
-                        return null;
+                case HISTTOOLS_GESUMSATZ:
+                    if (!Rechte.hatRecht(Rechte.Historie_gesamtumsatz, true)) {
+                        return;
                     }
-                }.execute();
-                break;
-            case 1:
-                if (!Rechte.hatRecht(Rechte.Historie_tagedrucken, true)) {
-                    return;
-                }
-                doTageDrucken();
-                break;
-            case 2:
-                if (!Rechte.hatRecht(Rechte.Sonstiges_rezepttransfer, true)) {
-                    return;
-                }
-                int anfrage = JOptionPane.showConfirmDialog(null,
-                        "Das ausgew\u00e4hlte Rezept wirklich zur\u00fcck in den aktuellen Rezeptstamm transferieren?",
-                        "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
-                if (anfrage == JOptionPane.YES_OPTION) {
-                    doUebertrag();
-                }
-                break;
-            case 3:
-                doRgebKopie();
-                break;
-            case 4:
-                doKopieToNew();
-                break;
-            case 5:
-                do301FallSteuerung();
-                break;
-
+                    new SwingWorker<Void, Void>() {
+                        @Override
+                        protected Void doInBackground() throws Exception {
+                            doRechneAlles();
+                            return null;
+                        }
+                    }.execute();
+                    break;
+                case HISTTOOLS_BEHTAGECB:
+                    if (!Rechte.hatRecht(Rechte.Historie_tagedrucken, true)) {
+                        return;
+                    }
+                    doTageDrucken();
+                    break;
+                case HISTTOOLS_TRANSAKTL:
+                    if (!Rechte.hatRecht(Rechte.Sonstiges_rezepttransfer, true)) {
+                        return;
+                    }
+                    int anfrage = JOptionPane.showConfirmDialog(null,
+                            "Das ausgew\u00e4hlte Rezept wirklich zur\u00fcck in den aktuellen Rezeptstamm transferieren?",
+                            "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+                    if (anfrage == JOptionPane.YES_OPTION) {
+                        doUebertrag();
+                    }
+                    break;
+                case HISTTOOLS_REZQUITT:
+                    doRgebKopie();
+                    break;
+                case HISTTOOLS_COPY2NEW:
+                    doKopieToNew();
+                    break;
+                case HISTTOOLS_REHAFS:
+                    do301FallSteuerung();
+                    break;
+                default:
+                    logger.error("Unknown tool requested in Hist-Toolbox: " + Reha.toolsDlgRueckgabe);
             }
             tDlg = null;
         }
     }
 
 }
-
-/*************************************/
-/*************************************/
-
-/*
-class MyHistorieTableModel extends DefaultTableModel {
-    /**
-    *
-    * /
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 1) {
-            return JLabel.class;
-        } else {
-            return String.class;
-        }
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        if (col == 0) {
-            return true;
-        } else if (col == 3) {
-            return true;
-        } else if (col == 7) {
-            return true;
-        } else if (col == 11) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-}
-
-class MyHistorTermTableModel extends DefaultTableModel {
-    /**
-    *
-    * /
-    private static final long serialVersionUID = 1L;
-
-    @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        if (columnIndex == 0) {
-            return String.class;
-        } else {
-            return String.class;
-        }
-    }
-
-    @Override
-    public boolean isCellEditable(int row, int col) {
-        if (col == 0) {
-            return true;
-        } else if (col == 1) {
-            return true;
-        } else if (col == 2) {
-            return true;
-        } else if (col == 11) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-}
-*/
