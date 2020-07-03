@@ -165,7 +165,7 @@ public class AbrechnungPrivat extends JXDialog
         preisok = true;
 
         this.rueckgabe = rueckgabe;
-        this.preisgruppe = preisgruppe;
+        this.preisgruppe = rez.getPreisGruppe();
         this.setUndecorated(true);
         this.setName("Privatrechnung");
         this.jtp = new JXTitledPanel();
