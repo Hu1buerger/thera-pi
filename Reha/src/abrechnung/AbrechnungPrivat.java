@@ -34,6 +34,8 @@ import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTitledPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.therapi.reha.patient.RezepteAktuell;
 
 import com.jgoodies.forms.layout.CellConstraints;
@@ -75,6 +77,7 @@ public class AbrechnungPrivat extends JXDialog
      *
      */
     private static final long serialVersionUID = 1036517682792665034L;
+    private static final Logger logger = LoggerFactory.getLogger(AbrechnungPrivat.class);
 
     private JXTitledPanel jtp = null;
     private MouseAdapter mymouse = null;
@@ -152,6 +155,7 @@ public class AbrechnungPrivat extends JXDialog
          * true; return null; } }.execute();
          */
         disziplin = RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1));
+        
         preisliste = SystemPreislisten.hmPreise.get(disziplin)
                                                .get(ipg);
         preisok = true;
@@ -208,7 +212,7 @@ public class AbrechnungPrivat extends JXDialog
         adr2.setForeground(Color.BLUE);
         pan.add(adr2, cc.xy(3, 4));
 
-        lab = new JLabel("Preisgruppe wählen:");
+        lab = new JLabel("Preisgruppe w\u00e4hlen:");
         pan.add(lab, cc.xy(3, 6));
         // jcmb = new JRtaComboBox(SystemConfig.vPreisGruppen);
 
@@ -219,10 +223,10 @@ public class AbrechnungPrivat extends JXDialog
         jcmb.setActionCommand("neuertarif");
         jcmb.addActionListener(this);
         pan.add(jcmb, cc.xy(3, 8));
-        jrb[0] = new JRtaRadioButton("Formular für Privatrechnung verwenden");
+        jrb[0] = new JRtaRadioButton("Formular f\u00fcr Privatrechnung verwenden");
         jrb[0].addChangeListener(this);
         pan.add(jrb[0], cc.xy(3, 10));
-        jrb[1] = new JRtaRadioButton("Formular für Kostenträger Rechnung verwenden");
+        jrb[1] = new JRtaRadioButton("Formular f\u00fcr Kostentr\u00e4ger Rechnung verwenden");
         jrb[1].addChangeListener(this);
         pan.add(jrb[1], cc.xy(3, 12));
         bg.add(jrb[0]);
@@ -466,7 +470,7 @@ public class AbrechnungPrivat extends JXDialog
     }
 
     private void doFaktura(String kostentraeger) {
-        // Hier die Sätze in die faktura-datenbank schreiben
+        // Hier die Saetze in die faktura-datenbank schreiben
 
         String plz = "";
         String ort = "";
@@ -515,7 +519,7 @@ public class AbrechnungPrivat extends JXDialog
                 writeBuf.append("anzahl='" + Integer.toString(originalAnzahl.get(i)) + "', ");
                 writeBuf.append("anzahltage='" + Integer.toString(originalAnzahl.get(i)) + "', ");
             } else if ((i == (wgpos - 1)) || (kmvec.indexOf(i) >= 0)) {
-                // Weggebühren Kilometer und Pauschale differenzieren
+                // Weggebuehren Kilometer und Pauschale differenzieren
                 writeBuf.append("pos_int='" + RezTools.getIDFromPos(originalPos.get(i), "", preisliste) + "', ");
                 writeBuf.append("anzahl='" + Integer.toString(originalAnzahl.get(i)) + "', ");
                 if (patKilometer > 0) {
@@ -781,7 +785,7 @@ public class AbrechnungPrivat extends JXDialog
         }
 
         /*************************************************/
-        // Änderungen in Preis
+        // Aenderungen in Preis
         if (!Reha.instance.patpanel.vecaktrez.get(8)
                                              .equals("0")) {
             originalPos.add(Reha.instance.patpanel.vecaktrez.get(48));
@@ -950,11 +954,11 @@ public class AbrechnungPrivat extends JXDialog
                                                        .get(this.aktGruppe)
                                                        .get(3)).trim()
                                                                .equals("")) {
-                    // Wegegeldpauschale ist nicht vorgesehen und Kilometer sind null - ganz schön
-                    // blöd....
+                    // Wegegeldpauschale ist nicht vorgesehen und Kilometer sind null - ganz schoen
+                    // bloed....
                     JOptionPane.showMessageDialog(null,
                             "Im Patientenstamm sind keine Kilometer hinterlegt und eine pauschale\n"
-                                    + "Wegegeldberechnung ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht abgerechnet!");
+                                    + "Wegegeldberechnung ist f\u00fcr diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht abgerechnet!");
                 } else {
                     if (preisanwenden[0]) {
                         preis = RezTools.getPreisAltFromPosNeu(pos.toString(), "", preisliste);
@@ -971,7 +975,7 @@ public class AbrechnungPrivat extends JXDialog
             } else {
                 /*******
                  * es wurden zwar Kilometer angegeben aber diese Preisgruppe kennt keine
-                 * Wegegebühr
+                 * Wegegebuehr
                  ****/
                 if ((pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                        .get(this.aktGruppe)
@@ -980,7 +984,7 @@ public class AbrechnungPrivat extends JXDialog
                     JOptionPane.showMessageDialog(null,
                             "Im Patientenstamm sind zwar " + patKilometer
                                     + " Kilometer hinterlegt aber Wegegeldberechnung\n"
-                                    + "ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
+                                    + "ist f\u00fcr diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
                 } else {
                     if (preisanwenden[0]) {
                         preis = RezTools.getPreisAltFromPosNeu(pos.toString(), "", preisliste);
@@ -1053,17 +1057,17 @@ public class AbrechnungPrivat extends JXDialog
         int testanzahl = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(3));
         if (testanzahl != (splitpreise[0] + splitpreise[1])) {
             JOptionPane.showMessageDialog(null,
-                    "Die Anwendungsregel dieser Tarifgruppe ist Splitting!!!\nBei dieser Regel müssen die Behandlungstage mit der Anzahl der Behandlungen im Rezept übereinstimmen!");
+                    "Die Anwendungsregel dieser Tarifgruppe ist Splitting!!!\nBei dieser Regel m\u00fcssen die Behandlungstage mit der Anzahl der Behandlungen im Rezept \u00fcbereinstimmen!");
             return;
         }
-        // Änderungen in Preis und ggfls. in Anzahl
-        // Benötigt werde: Anzahlen auf dem Rezept, Anzahl alter Preis, Anzahl neuer
+        // Aenderungen in Preis und ggfls. in Anzahl
+        // Benoetigt werde: Anzahlen auf dem Rezept, Anzahl alter Preis, Anzahl neuer
         // Preis.
         if (!Reha.instance.patpanel.vecaktrez.get(8)
                                              .equals("0")) {
             originalPos.add(Reha.instance.patpanel.vecaktrez.get(48));
             originalId.add(Reha.instance.patpanel.vecaktrez.get(8));
-            // jetzt Anzahlen für alter Preis
+            // jetzt Anzahlen fuer alter Preis
             originalAnzahl.add(splitpreise[0]);
             originalLangtext.add(RezTools.getLangtextFromID(Reha.instance.patpanel.vecaktrez.get(8), "", preisliste)
                                          .replace("30Min.", "")
@@ -1083,7 +1087,7 @@ public class AbrechnungPrivat extends JXDialog
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
                 labs[0].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
-            // jetzt Anzahlen für neuer Preis
+            // jetzt Anzahlen fuer neuer Preis
             originalPos.add(Reha.instance.patpanel.vecaktrez.get(48));
             originalId.add(Reha.instance.patpanel.vecaktrez.get(8));
             originalAnzahl.add(splitpreise[1]);
@@ -1320,11 +1324,11 @@ public class AbrechnungPrivat extends JXDialog
                                                        .get(this.aktGruppe)
                                                        .get(3)).trim()
                                                                .equals("")) {
-                    // Wegegeldpauschale ist nicht vorgesehen und Kilometer sind null - ganz schön
-                    // blöd....
+                    // Wegegeldpauschale ist nicht vorgesehen und Kilometer sind null - ganz schoen
+                    // bloed....
                     JOptionPane.showMessageDialog(null,
                             "Im Patientenstamm sind keine Kilometer hinterlegt und eine pauschale\n"
-                                    + "Wegegeldberechnung ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht abgerechnet!");
+                                    + "Wegegeldberechnung ist f\u00fcr diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht abgerechnet!");
                 } else {
                     preisAlt = RezTools.getPreisAltFromPosNeu(pos.toString(), "", preisliste);
                     originalAnzahl.add(althb);
@@ -1349,7 +1353,7 @@ public class AbrechnungPrivat extends JXDialog
             } else {
                 /*******
                  * es wurden zwar Kilometer angegeben aber diese Preisgruppe kennt keine
-                 * Wegegebühr
+                 * Wegegebuehr
                  ****/
                 if ((pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                        .get(this.aktGruppe)
@@ -1358,7 +1362,7 @@ public class AbrechnungPrivat extends JXDialog
                     JOptionPane.showMessageDialog(null,
                             "Im Patientenstamm sind zwar " + patKilometer
                                     + " Kilometer hinterlegt aber Wegegeldberechnung\n"
-                                    + "ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
+                                    + "ist f\u00fcr diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
                 } else {
                     preisAlt = RezTools.getPreisAltFromPosNeu(pos.toString(), "", preisliste);
                     kmBeiHB = patKilometer;
@@ -1641,7 +1645,7 @@ public class AbrechnungPrivat extends JXDialog
         // entries = SystemConfig.hmAdrRDaten.entrySet();
 
         for (int i = 0; i < placeholders.length; i++) {
-            // an dieser Stelle völlig idiotisch
+            // an dieser Stelle voellig idiotisch
             entries = SystemConfig.hmAdrRDaten.entrySet();
             it = entries.iterator();
             if (placeholders[i].getDisplayText()
@@ -1695,7 +1699,7 @@ public class AbrechnungPrivat extends JXDialog
                 placeholders[i].getTextRange()
                                .setText(SystemConfig.hmAdrPDaten.get("<Panrede>"));
             } else {
-                /********* Rezeptdaten überprüfen ***********/
+                /********* Rezeptdaten Ueberpruefen ***********/
                 while (it.hasNext()) {
                     Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
                     try {
