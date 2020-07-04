@@ -26,11 +26,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
@@ -196,7 +199,11 @@ public class AbrechnungPrivat extends JXDialog
         this.rtp.addRehaTPEventListener(this);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         // Bloody dirty, but seems to work...
-        addESCKeyListenerToAllComponents(this);
+        // addESCKeyListenerToAllComponents(this);
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke("ESCAPE"), "escGedrueckt");
+        getRootPane().getActionMap().put("escGedrueckt", escaped);
+        
     }
 
     private JXPanel getContent() {
@@ -1700,6 +1707,14 @@ public class AbrechnungPrivat extends JXDialog
         FensterSchliessen("dieses");
         return;
     }
+    Action escaped = new AbstractAction() {
+        static final long serialVersionUID = 1L;
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            rueckgabe = -1;
+            FensterSchliessen("SuchDirEinsAus");
+        }
+    };
 
     @Override
     public void stateChanged(ChangeEvent arg0) {
