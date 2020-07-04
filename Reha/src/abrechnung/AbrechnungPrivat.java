@@ -194,6 +194,8 @@ public class AbrechnungPrivat extends JXDialog
         this.rtp = new RehaTPEventClass();
         this.rtp.addRehaTPEventListener(this);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // Bloddy dirty, but seems to work...
+        addKeyListenerToAllComponents(this);
     }
 
     private JXPanel getContent() {
@@ -1628,6 +1630,15 @@ public class AbrechnungPrivat extends JXDialog
             }
         }
     };
+    private void addKeyListenerToAllComponents(Component c) {
+        c.addKeyListener(keyListener);
+        if (c instanceof Container) {
+            final Container cont = (Container)c;
+            for ( Component child : cont.getComponents()) {
+                addKeyListenerToAllComponents(child);
+            }
+        }
+    }
     
     /**
      * Recursively remove Key-,Mouse- & MouseMotionListeners from all components and children
