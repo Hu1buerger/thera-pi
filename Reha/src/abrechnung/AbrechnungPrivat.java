@@ -2,15 +2,21 @@ package abrechnung;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.beans.PropertyChangeListener;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Arrays;
@@ -74,7 +80,7 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
 public class AbrechnungPrivat extends JXDialog
-        implements FocusListener, ActionListener, MouseListener, KeyListener, RehaTPEventListener, ChangeListener {
+        implements FocusListener, ActionListener, MouseListener, RehaTPEventListener, ChangeListener {
     /**
      *
      */
@@ -95,6 +101,7 @@ public class AbrechnungPrivat extends JXDialog
     private JLabel adr2 = null;
     // private JRtaTextField[] tfs = {null,null,null,null,null};
     private JButton[] but = { null, null, null };
+    private int prevState;
     // private HashMap<String,String> hmRezgeb = null;
     DecimalFormat dcf = new DecimalFormat("#########0.00");
     ButtonGroup bg = new ButtonGroup();
@@ -193,7 +200,7 @@ public class AbrechnungPrivat extends JXDialog
         content = new JXPanel(new BorderLayout());
         content.add(getFields(), BorderLayout.CENTER);
         content.add(getButtons(), BorderLayout.SOUTH);
-        content.addKeyListener(this);
+        content.addKeyListener(keyListener);
         return content;
     }
 
@@ -302,13 +309,13 @@ public class AbrechnungPrivat extends JXDialog
         pan.setLayout(lay);
         CellConstraints cc = new CellConstraints();
         pan.add((but[0] = macheBut("Ok", "ok")), cc.xy(3, 3));
-        but[0].addKeyListener(this);
+        but[0].addKeyListener(keyListener);
 
         pan.add((but[1] = macheBut("Korrektur", "korrektur")), cc.xy(5, 3));
-        but[1].addKeyListener(this);
+        but[1].addKeyListener(keyListener);
 
         pan.add((but[2] = macheBut("abbrechen", "abbrechen")), cc.xy(7, 3));
-        but[2].addKeyListener(this);
+        but[2].addKeyListener(keyListener);
         return pan;
     }
 
@@ -355,6 +362,9 @@ public class AbrechnungPrivat extends JXDialog
 
         if (!Reha.instance.patpanel.patDaten.get(5)
                                             .equals("T")) {
+            logger.debug("In hole-Privat:");
+            logger.debug("hmAdr=" + hmAdresse);
+            logger.debug("hmrAdrPDaten: " + SystemConfig.hmAdrPDaten);
             hmAdresse.put("<pri1>", SystemConfig.hmAdrPDaten.get("<Panrede>"));
             hmAdresse.put("<pri2>", SystemConfig.hmAdrPDaten.get("<Padr1>"));
             hmAdresse.put("<pri3>", SystemConfig.hmAdrPDaten.get("<Padr2>"));
@@ -1356,43 +1366,7 @@ public class AbrechnungPrivat extends JXDialog
 
     }
 
-    @Override
-    public void keyPressed(KeyEvent arg0) {
-        if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-            this.rueckgabe = -1;
-            FensterSchliessen("dieses");
-            return;
-        }
-        if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-            if (((JComponent) arg0.getSource()) instanceof JButton) {
-                if (((JComponent) arg0.getSource()).getName()
-                                                   .equals("abbrechen")) {
-                    this.rueckgabe = -1;
-                    FensterSchliessen("dieses");
-                    return;
-                } else if (((JComponent) arg0.getSource()).getName()
-                                                          .equals("korrektur")) {
-                    doKorrektur();
-                    return;
-                } else if (((JComponent) arg0.getSource()).getName()
-                                                          .equals("ok")) {
-                    this.rueckgabe = 0;
-                    doRgRechnungPrepare();
-                }
-            }
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent arg0) {
-
-    }
-
-    @Override
-    public void keyTyped(KeyEvent arg0) {
-
-    }
-
+    
     @Override
     public void rehaTPEventOccurred(RehaTPEvent evt) {
         FensterSchliessen("dieses");
@@ -1400,10 +1374,11 @@ public class AbrechnungPrivat extends JXDialog
     }
 
     public void FensterSchliessen(String welches) {
-        this.jtp.removeMouseListener(this.mymouse);
-        this.jtp.removeMouseMotionListener(this.mymouse);
+        removeAllKeyMouseListeners(this);
+        // this.jtp.removeMouseListener(this.mymouse);
+        // this.jtp.removeMouseMotionListener(this.mymouse);
         this.jcmb.removeActionListener(this);
-        this.content.removeKeyListener(this);
+        // this.content.removeKeyListener(keyListener);
         this.originalPos.clear();
         this.originalPos = null;
         this.originalAnzahl.clear();
@@ -1421,7 +1396,7 @@ public class AbrechnungPrivat extends JXDialog
         this.hmAdresse = null;
         for (int i = 0; i < 3; i++) {
             but[i].removeActionListener(this);
-            but[i].removeKeyListener(this);
+            // but[i].removeKeyListener(keyListener);
             but[i] = null;
         }
         this.mymouse = null;
@@ -1620,6 +1595,75 @@ public class AbrechnungPrivat extends JXDialog
         }
     }
     
+    /**
+     * Helper to react on pressed keys.
+     * Currently handles escape + enter keys
+     */
+    KeyListener keyListener = new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent arg0) {
+            logger.debug("Key pressed: " + arg0.toString());
+            if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                rueckgabe = -1;
+                FensterSchliessen("dieses");
+                return;
+            }
+            if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
+                if (((JComponent) arg0.getSource()) instanceof JButton) {
+                    if (((JComponent) arg0.getSource()).getName()
+                                                       .equals("abbrechen")) {
+                        rueckgabe = -1;
+                        FensterSchliessen("dieses");
+                        return;
+                    } else if (((JComponent) arg0.getSource()).getName()
+                                                              .equals("korrektur")) {
+                        doKorrektur();
+                        return;
+                    } else if (((JComponent) arg0.getSource()).getName()
+                                                              .equals("ok")) {
+                        rueckgabe = 0;
+                        doRgRechnungPrepare();
+                    }
+                }
+            }
+        }
+    };
+    
+    /**
+     * Recursively remove Key-,Mouse- & MouseMotionListeners from all components and children
+     * 
+     * @param component to start recursion at
+     */
+    private void removeAllKeyMouseListeners(Component c) {
+        for (KeyListener kl : c.getKeyListeners()) {
+            c.removeKeyListener(kl);
+            logger.debug("Removed KL " + kl.toString());
+        }
+        for (MouseListener ml : c.getMouseListeners()) {
+            c.removeMouseListener(ml);
+            logger.debug("Removed ML " + ml.toString());
+        }
+        for (MouseMotionListener mml : c.getMouseMotionListeners()) {
+            c.removeMouseMotionListener(mml);
+            logger.debug("Removed MML " + mml.toString());
+        }
+        
+        if (c instanceof Container) {
+            // logger.debug("Container - calling rec");
+            final Container cont = (Container)c;
+            // Scheint sich erst bei grossen Fenstern zu lohnen
+            //   hier schiesst er die Komponenten schneller ab, als das ich die Listener entfernen kann...
+//            new SwingWorker<Void,Void>(){
+//                @Override protected Void doInBackground() throws Exception {
+                    for ( Component child : cont.getComponents()) {
+                        removeAllKeyMouseListeners(child);
+                    }
+//                    return null;
+//                }
+//            }.execute();
+        }
+    }
+    
     /*
      * Actions
      */
@@ -1638,10 +1682,16 @@ public class AbrechnungPrivat extends JXDialog
 
     @Override
     public void stateChanged(ChangeEvent arg0) {
-        if (jrb[0].isSelected()) {
-            reglePrivat();
-        } else {
-            regleBGE();
+        logger.debug("State changed: " + arg0.toString());
+        // Lousy hack, since it's not per component - but spares us a lot of calls during mouse traversal on the same
+        //  component...
+        if ( prevState != arg0.hashCode()) {
+            prevState = arg0.hashCode();
+            if (jrb[0].isSelected()) {
+                reglePrivat();
+            } else {
+                regleBGE();
+            }
         }
     }
 
