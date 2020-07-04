@@ -198,8 +198,6 @@ public class AbrechnungPrivat extends JXDialog
         this.rtp = new RehaTPEventClass();
         this.rtp.addRehaTPEventListener(this);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        // Bloody dirty, but seems to work...
-        // addESCKeyListenerToAllComponents(this);
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke("ESCAPE"), "escGedrueckt");
         getRootPane().getActionMap().put("escGedrueckt", escaped);
@@ -1633,29 +1631,6 @@ public class AbrechnungPrivat extends JXDialog
             }
         }
     };
-    KeyListener keyListenerESC = new KeyAdapter() {
-        @Override
-        public void keyPressed(KeyEvent arg0) {
-            logger.debug("Key pressed: " + arg0.toString());
-            if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                rueckgabe = -1;
-                if (!closing) {
-                    closing=true;
-                    FensterSchliessen("dieses");
-                }
-                return;
-            }
-        }
-    };
-    private void addESCKeyListenerToAllComponents(Component c) {
-        c.addKeyListener(keyListenerESC);
-        if (c instanceof Container) {
-            final Container cont = (Container)c;
-            for ( Component child : cont.getComponents()) {
-                addESCKeyListenerToAllComponents(child);
-            }
-        }
-    }
     
     /**
      * Recursively remove Key-,Mouse- & MouseMotionListeners from all components and children
