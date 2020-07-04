@@ -102,6 +102,7 @@ public class AbrechnungPrivat extends JXDialog
     // private JRtaTextField[] tfs = {null,null,null,null,null};
     private JButton[] but = { null, null, null };
     private int prevState;
+    private boolean closing = false;
     // private HashMap<String,String> hmRezgeb = null;
     DecimalFormat dcf = new DecimalFormat("#########0.00");
     ButtonGroup bg = new ButtonGroup();
@@ -194,8 +195,8 @@ public class AbrechnungPrivat extends JXDialog
         this.rtp = new RehaTPEventClass();
         this.rtp.addRehaTPEventListener(this);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        // Bloddy dirty, but seems to work...
-        addKeyListenerToAllComponents(this);
+        // Bloody dirty, but seems to work...
+        addESCKeyListenerToAllComponents(this);
     }
 
     private JXPanel getContent() {
@@ -1605,11 +1606,6 @@ public class AbrechnungPrivat extends JXDialog
         @Override
         public void keyPressed(KeyEvent arg0) {
             logger.debug("Key pressed: " + arg0.toString());
-            if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                rueckgabe = -1;
-                FensterSchliessen("dieses");
-                return;
-            }
             if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
                 if (((JComponent) arg0.getSource()) instanceof JButton) {
                     if (((JComponent) arg0.getSource()).getName()
@@ -1630,12 +1626,26 @@ public class AbrechnungPrivat extends JXDialog
             }
         }
     };
-    private void addKeyListenerToAllComponents(Component c) {
-        c.addKeyListener(keyListener);
+    KeyListener keyListenerESC = new KeyAdapter() {
+        @Override
+        public void keyPressed(KeyEvent arg0) {
+            logger.debug("Key pressed: " + arg0.toString());
+            if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                rueckgabe = -1;
+                if (!closing) {
+                    closing=true;
+                    FensterSchliessen("dieses");
+                }
+                return;
+            }
+        }
+    };
+    private void addESCKeyListenerToAllComponents(Component c) {
+        c.addKeyListener(keyListenerESC);
         if (c instanceof Container) {
             final Container cont = (Container)c;
             for ( Component child : cont.getComponents()) {
-                addKeyListenerToAllComponents(child);
+                addESCKeyListenerToAllComponents(child);
             }
         }
     }
