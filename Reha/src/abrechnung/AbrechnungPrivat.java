@@ -100,7 +100,6 @@ public class AbrechnungPrivat extends JXDialog
     // private JRtaTextField[] tfs = {null,null,null,null,null};
     private JButton[] but = { null, null, null };
     private int prevState;
-    private boolean closing = false;
     // private HashMap<String,String> hmRezgeb = null;
     DecimalFormat dcf = new DecimalFormat("#########0.00");
     ButtonGroup bg = new ButtonGroup();
