@@ -320,32 +320,21 @@ public class AbrechnungPrivat extends JXDialog
                 "5dlu,fill:0:grow(0.5),p,fill:0:grow(0.5),5dlu");
         pan.setLayout(lay);
         CellConstraints cc = new CellConstraints();
-        pan.add((but[0] = macheBut("Ok", "ok")), cc.xy(3, 3));
-        // but[0].addKeyListener(keyListener);
-        but[0].getInputMap(JComponent.WHEN_FOCUSED).put(
-                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
-        but[0].getActionMap().put("enterGedrueckt", tueEs);
-
-        pan.add((but[1] = macheBut("Korrektur", "korrektur")), cc.xy(5, 3));
-        // but[1].addKeyListener(keyListener);
-        but[1].getInputMap(JComponent.WHEN_FOCUSED).put(
-                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
-        but[1].getActionMap().put("enterGedrueckt", korrektur);
-
-        pan.add((but[2] = macheBut("abbrechen", "abbrechen")), cc.xy(7, 3));
-        // but[2].addKeyListener(keyListener);
-        but[2].getInputMap(JComponent.WHEN_FOCUSED).put(
-                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
-        but[2].getActionMap().put("enterGedrueckt", escaped);
+        pan.add((but[0] = macheBut("Ok", tueEs)), cc.xy(3, 3));        
+        pan.add((but[1] = macheBut("Korrektur", korrektur)), cc.xy(5, 3));
+        pan.add((but[2] = macheBut("abbrechen", escaped)), cc.xy(7, 3));
         
         return pan;
     }
 
-    private JButton macheBut(String titel, String cmd) {
+    private JButton macheBut(String titel, Action action) {
         JButton but = new JButton(titel);
-        but.setName(cmd);
-        but.setActionCommand(cmd);
-        but.addActionListener(this);
+        but.setName(titel.toLowerCase());
+        // but.setActionCommand(titel.toLowerCase());
+        but.addActionListener(action);
+        but.getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        but.getActionMap().put("enterGedrueckt", action);
         return but;
     }
 
@@ -1342,7 +1331,7 @@ public class AbrechnungPrivat extends JXDialog
             doNeuerTarif();
             return;
         }
-        */
+        *
         if (cmd.equals("korrektur")) {
             this.rueckgabe = -2;
             // doKorrektur();
@@ -1357,6 +1346,7 @@ public class AbrechnungPrivat extends JXDialog
             this.rueckgabe = 0;
             doRgRechnungPrepare();
         }
+        */
     }
 
     @Override
