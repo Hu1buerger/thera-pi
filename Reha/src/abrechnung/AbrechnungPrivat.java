@@ -992,7 +992,11 @@ public class AbrechnungPrivat extends JXDialog
         String preisAlt = "", preisNeu = "";
         int test = 0;
         /*************************************************/
+        // delete me once done with Rezepte
         int testanzahl = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(3));
+        logger.debug("testanzahl vec: " + testanzahl);
+        testanzahl = rez.getBehAnzahl1();
+        logger.debug("testanzahl rez: " + testanzahl);
         if (testanzahl != (splitpreise[0] + splitpreise[1])) {
             JOptionPane.showMessageDialog(null,
                     "Die Anwendungsregel dieser Tarifgruppe ist Splitting!!!\nBei dieser Regel m\u00fcssen die Behandlungstage mit der Anzahl der Behandlungen im Rezept \u00fcbereinstimmen!");

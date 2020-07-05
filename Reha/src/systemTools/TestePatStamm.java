@@ -12,9 +12,9 @@ public class TestePatStamm {
         if (patient == null) {
             return "";
         }
-        if (!(Reha.instance.patpanel.vecaktrez == null)) {
-            if (Reha.instance.patpanel.vecaktrez.size() > 0) {
-                return Reha.instance.patpanel.vecaktrez.get(16);
+        if (!(Reha.instance.patpanel.rezAktRez == null)) {
+            if (Reha.instance.patpanel.rezAktRez.getArztId() > 0) {
+                return String.valueOf(Reha.instance.patpanel.rezAktRez.getArztId());
             }
         }
         if (!(Reha.instance.patpanel.patDaten == null)) {

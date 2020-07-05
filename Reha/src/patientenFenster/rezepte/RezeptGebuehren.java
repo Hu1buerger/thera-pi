@@ -468,7 +468,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                                         + "Der Wert der HashMap hat aktuell: "
                                         + SystemConfig.hmAdrRDaten.get("<Rendbetrag>") + "\n"
                                         + "Der Wert f\u00fcr Rezeptnummer ist aktuell: "
-                                        + Reha.instance.patpanel.vecaktrez.get(1) + "\n" + "\nSql-Befehl = " + cmd
+                                        + Reha.instance.patpanel.rezAktRez.getRezNr() + "\n" + "\nSql-Befehl = " + cmd
                                         + "\n\n"
                                         + "Bitte notieren Sie diese Fehlermeldung und informieren Sie den Administrator umgehend.");
                         new ErrorMail(
@@ -481,7 +481,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                 } catch (Exception ex3) {
                     JOptionPane.showMessageDialog(null, "Fehler-Nr. 2.1 beim einstellen der Rezeptgeb\u00fchr im Rezept\n\n"
                             + "Der Wert der HashMap hat aktuell: " + SystemConfig.hmAdrRDaten.get("<Rendbetrag>") + "\n"
-                            + "Der Wert f\u00fcr Rezeptnummer ist aktuell: " + Reha.instance.patpanel.vecaktrez.get(1) + "\n"
+                            + "Der Wert f\u00fcr Rezeptnummer ist aktuell: " + Reha.instance.patpanel.rezAktRez.getRezNr() + "\n"
                             + "\nSql-Befehl = " + cmd + "\n\n"
                             + "Bitte notieren Sie diese Fehlermeldung und informieren Sie den Administrator umgehend.");
                 }
@@ -489,7 +489,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
             } catch (Exception ex2) {
                 JOptionPane.showMessageDialog(null, "Fehler-Nr. 3 beim einstellen der Rezeptgeb\u00fchr im Rezept\n\n"
                         + "Der Wert der HashMap hat aktuell: " + SystemConfig.hmAdrRDaten.get("<Rendbetrag>") + "\n"
-                        + "Der Wert f\u00fcr Rezeptnummer ist aktuell: " + Reha.instance.patpanel.vecaktrez.get(1) + "\n"
+                        + "Der Wert f\u00fcr Rezeptnummer ist aktuell: " + Reha.instance.patpanel.rezAktRez.getRezNr() + "\n"
                         + "\nSql-Befehl = " + cmd + "\n\n"
                         + "Bitte notieren Sie diese Fehlermeldung und informieren Sie den Administrator umgehend.");
                 new ErrorMail(
