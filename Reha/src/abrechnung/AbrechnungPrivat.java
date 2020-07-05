@@ -198,17 +198,21 @@ public class AbrechnungPrivat extends JXDialog
         this.rtp = new RehaTPEventClass();
         this.rtp.addRehaTPEventListener(this);
         this.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        // Lets make sure ESC-key works from anywhere..
         getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
                 KeyStroke.getKeyStroke("ESCAPE"), "escGedrueckt");
         getRootPane().getActionMap().put("escGedrueckt", escaped);
-        
+        // Pressing Enter will complete the dialog
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        getRootPane().getActionMap().put("enterGedrueckt", tueEs);
     }
 
     private JXPanel getContent() {
         content = new JXPanel(new BorderLayout());
         content.add(getFields(), BorderLayout.CENTER);
         content.add(getButtons(), BorderLayout.SOUTH);
-        content.addKeyListener(keyListener);
+//        content.addKeyListener(keyListener);
         return content;
     }
 
@@ -317,13 +321,23 @@ public class AbrechnungPrivat extends JXDialog
         pan.setLayout(lay);
         CellConstraints cc = new CellConstraints();
         pan.add((but[0] = macheBut("Ok", "ok")), cc.xy(3, 3));
-        but[0].addKeyListener(keyListener);
+        // but[0].addKeyListener(keyListener);
+        but[0].getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        but[0].getActionMap().put("enterGedrueckt", tueEs);
 
         pan.add((but[1] = macheBut("Korrektur", "korrektur")), cc.xy(5, 3));
-        but[1].addKeyListener(keyListener);
+        // but[1].addKeyListener(keyListener);
+        but[1].getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        but[1].getActionMap().put("enterGedrueckt", korrektur);
 
         pan.add((but[2] = macheBut("abbrechen", "abbrechen")), cc.xy(7, 3));
-        but[2].addKeyListener(keyListener);
+        // but[2].addKeyListener(keyListener);
+        but[2].getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        but[2].getActionMap().put("enterGedrueckt", escaped);
+        
         return pan;
     }
 
@@ -1279,10 +1293,6 @@ public class AbrechnungPrivat extends JXDialog
     /******************************************************************/
 
     /******************************************************************/
-    private void doKorrektur() {
-
-    }
-
     @Override
     public void focusGained(FocusEvent arg0) {
 
@@ -1602,36 +1612,7 @@ public class AbrechnungPrivat extends JXDialog
              */
         }
     }
-    
-    /**
-     * Helper to react on pressed keys.
-     * Currently handles escape + enter keys
-     */
-    KeyListener keyListener = new KeyAdapter() {
-        @Override
-        public void keyPressed(KeyEvent arg0) {
-            logger.debug("Key pressed: " + arg0.toString());
-            if (arg0.getKeyCode() == KeyEvent.VK_ENTER) {
-                if (((JComponent) arg0.getSource()) instanceof JButton) {
-                    if (((JComponent) arg0.getSource()).getName()
-                                                       .equals("abbrechen")) {
-                        rueckgabe = -1;
-                        FensterSchliessen("dieses");
-                        return;
-                    } else if (((JComponent) arg0.getSource()).getName()
-                                                              .equals("korrektur")) {
-                        doKorrektur();
-                        return;
-                    } else if (((JComponent) arg0.getSource()).getName()
-                                                              .equals("ok")) {
-                        rueckgabe = 0;
-                        doRgRechnungPrepare();
-                    }
-                }
-            }
-        }
-    };
-    
+        
     /**
      * Recursively remove Key-,Mouse- & MouseMotionListeners from all components and children
      * 
@@ -1676,18 +1657,29 @@ public class AbrechnungPrivat extends JXDialog
         doNeuerTarif();
         return;
     }
-    private void actionKorrektur(ActionEvent arg0) {
-        this.rueckgabe = -2;
-        // doKorrektur();
-        FensterSchliessen("dieses");
-        return;
-    }
+    Action korrektur = new AbstractAction() {
+        static final long serialVersionUID = 1L;
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            logger.debug("Enter on korrektur");
+            rueckgabe = -2;
+            FensterSchliessen("SuchDirEinsAus");
+        }
+    };
     Action escaped = new AbstractAction() {
         static final long serialVersionUID = 1L;
         @Override
         public void actionPerformed(ActionEvent arg0) {
             rueckgabe = -1;
-            FensterSchliessen("SuchDirEinsAus");
+            FensterSchliessen("Alle");
+        }
+    };
+    Action tueEs = new AbstractAction() {
+        static final long serialVersionUID = 1L;
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            rueckgabe = 0;
+            doRgRechnungPrepare();
         }
     };
 
