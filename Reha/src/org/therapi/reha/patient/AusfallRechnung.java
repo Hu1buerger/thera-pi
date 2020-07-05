@@ -47,6 +47,7 @@ import environment.Path;
 import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import hauptFenster.Reha;
+import javafx.scene.input.KeyCode;
 import oOorgTools.OOTools;
 import rezept.Money;
 import systemEinstellungen.SystemConfig;
@@ -125,7 +126,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         pb.getPanel()
           .setOpaque(false);
 
-        pb.addLabel("Bitte die Positionen auswählen die Sie berechnen wollen", cc.xyw(2, 2, 4));
+        pb.addLabel("Bitte die Positionen ausw\u00e4hlen die Sie berechnen wollen", cc.xyw(2, 2, 4));
 
         pb.addLabel("Heilmittel 1", cc.xy(3, 4));
      // TODO: delete me once Rezepte have been sorted
@@ -317,7 +318,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
 
     private void macheMemoEintrag() {
         StringBuffer sb = new StringBuffer();
-        sb.append(DatFunk.sHeute() + " - unentschuldigt oder zu spät abgesagt - Rechnung!! - Rechnung-Nr.: "
+        sb.append(DatFunk.sHeute() + " - unentschuldigt oder zu sp\u00e4t abgesagt - Rechnung!! - Rechnung-Nr.: "
                 + SystemConfig.hmAdrAFRDaten.get("<AFRnummer>") + " - erstellt von: " + Reha.aktUser + "\n");
         sb.append(Reha.instance.patpanel.pmemo[1].getText());
         Reha.instance.patpanel.pmemo[1].setText(sb.toString());
@@ -410,14 +411,14 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
 
         }
         SystemConfig.hmAdrAFRDaten.put("<AFRgesamt>", df.format(dGesamt));
-        /// Hier muß noch die Rechnungsnummer bezogen und eingetragen werden
+        /// Hier muss noch die Rechnungsnummer bezogen und eingetragen werden
         afrNummer = "AFR-" + Integer.toString(SqlInfo.erzeugeNummer("afrnr"));
         SystemConfig.hmAdrAFRDaten.put("<AFRnummer>", afrNummer);
     }
 
     @Override
     public void keyPressed(KeyEvent event) {
-        if (event.getKeyCode() == 10) {
+        if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             event.consume();
             if (((JComponent) event.getSource()).getName()
                                                 .equals("uebernahme")) {
@@ -428,9 +429,9 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
                 this.dispose();
             }
 
-            // System.out.println("Return Gedrückt");
+            // System.out.println("Return Gedrueckt");
         }
-        if (event.getKeyCode() == 27) {
+        if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
             this.dispose();
         }
     }
