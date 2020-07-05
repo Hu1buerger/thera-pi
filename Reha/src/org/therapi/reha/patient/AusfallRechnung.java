@@ -5,8 +5,6 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.text.DecimalFormat;
 import java.util.Iterator;
@@ -367,8 +365,8 @@ public class AusfallRechnung extends RehaSmartDialog {
              // TODO: delete me once Rezepte have been sorted
                 Double dPreis = new Double(Reha.instance.patpanel.vecaktrez.get(18 + i));
                 logger.debug("Vec: preis=" + dPreis);
-                Money preis = Reha.instance.patpanel.rezAktRez.getPreis(i);
-                String s = df.format(preis);
+                Money preis = Reha.instance.patpanel.rezAktRez.getPreis(i+1);
+                String s = preis.toString();
                 SystemConfig.hmAdrAFRDaten.put(mappos, leistung[i].getText());
                 SystemConfig.hmAdrAFRDaten.put(mappreis, s);
                 dGesamt = dGesamt + dPreis;
@@ -380,7 +378,7 @@ public class AusfallRechnung extends RehaSmartDialog {
                 spos = Reha.instance.patpanel.vecaktrez.get(8 + i);
                 logger.debug("Vec: spos= " + spos);
                 // Q&D - should rather do proper to-int conversion of the code
-                spos = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
+                spos = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i+1));
                 logger.debug("Rez: spos= " + spos);
                 sart = Reha.instance.patpanel.vecaktrez.get(1);
                 logger.debug("Vec: sart= " + sart);
@@ -405,7 +403,7 @@ public class AusfallRechnung extends RehaSmartDialog {
                 spos = Reha.instance.patpanel.vecaktrez.get(8 + i);
                 logger.debug("Vec: spos= " + spos);
                 // Q&D - should rather do proper to-int conversion of the code
-                spos = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
+                spos = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i+1));
                 logger.debug("Rez: spos= " + spos);
                 sart = Reha.instance.patpanel.vecaktrez.get(1);
                 logger.debug("Vec: sart= " + sart);
