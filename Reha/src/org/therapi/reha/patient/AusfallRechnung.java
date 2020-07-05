@@ -13,11 +13,14 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import javax.swing.AbstractAction;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
@@ -47,13 +50,12 @@ import environment.Path;
 import events.RehaTPEvent;
 import events.RehaTPEventClass;
 import hauptFenster.Reha;
-import javafx.scene.input.KeyCode;
 import oOorgTools.OOTools;
 import rezept.Money;
 import systemEinstellungen.SystemConfig;
 import systemTools.LeistungTools;
 
-public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
+public class AusfallRechnung extends RehaSmartDialog {
     /**
      *
      */
@@ -111,6 +113,14 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         rtp.addRehaTPEventListener(this);
 
         pack();
+        // Lets make sure ESC-key works from anywhere..
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke("ESCAPE"), "escGedrueckt");
+        getRootPane().getActionMap().put("escGedrueckt", escaped);
+        // Pressing Enter will complete the dialog
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        getRootPane().getActionMap().put("enterGedrueckt", tueEs);
 
     }
 
@@ -200,14 +210,20 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
 
         uebernahme = new JButton("drucken & buchen");
         uebernahme.setActionCommand("uebernahme");
-        uebernahme.addActionListener(this);
-        uebernahme.addKeyListener(this);
+        uebernahme.addActionListener(e -> actionUebernahme(e));
+        // uebernahme.addKeyListener(this);
+        uebernahme.getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        uebernahme.getActionMap().put("enterGedrueckt", tueEs);
         pb.add(uebernahme, cc.xy(3, 14));
 
         abbrechen = new JButton("abbrechen");
         abbrechen.setActionCommand("abbrechen");
-        abbrechen.addActionListener(this);
-        abbrechen.addKeyListener(this);
+        abbrechen.addActionListener(e -> actionExit());
+        // abbrechen.addKeyListener(this);
+        abbrechen.getInputMap(JComponent.WHEN_FOCUSED).put(
+                KeyStroke.getKeyStroke("ENTER"), "enterGedrueckt");
+        abbrechen.getActionMap().put("enterGedrueckt", escaped);
         pb.add(abbrechen, cc.xy(5, 14));
 
         pb.getPanel()
@@ -253,6 +269,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
 
     }
 
+    /*
     @Override
     public void actionPerformed(ActionEvent arg0) {
 
@@ -283,7 +300,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
              * @Override protected Void doInBackground() throws Exception {
              * if(leistung[4].isSelected()){ macheMemoEintrag(); } return null; }
              * }.execute(); this.dispose();
-             */
+             * /
         }
         if (arg0.getActionCommand()
                 .equals("abbrechen")) {
@@ -291,6 +308,7 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         }
 
     }
+    */
 
     private AusfallRechnung getInstance() {
         return this;
@@ -416,13 +434,14 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         SystemConfig.hmAdrAFRDaten.put("<AFRnummer>", afrNummer);
     }
 
+    /*
     @Override
     public void keyPressed(KeyEvent event) {
         if (event.getKeyCode() == KeyEvent.VK_ENTER) {
             event.consume();
             if (((JComponent) event.getSource()).getName()
                                                 .equals("uebernahme")) {
-                // doUebernahme();
+                // doUebernahme();  // Why was this disabled? It's still in actioncommands...
             }
             if (((JComponent) event.getSource()).getName()
                                                 .equals("abbrechen")) {
@@ -431,10 +450,13 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
 
             // System.out.println("Return Gedrueckt");
         }
+        /*
         if (event.getKeyCode() == KeyEvent.VK_ESCAPE) {
             this.dispose();
         }
+        * /
     }
+    */
 
     public static void starteAusfallRechnung(String url) {
         IDocumentService documentService = null;
@@ -507,6 +529,57 @@ public class AusfallRechnung extends RehaSmartDialog implements ActionListener {
         }
 
     }
+    
+    /*
+     * Actions
+     */
+    /**
+     * Used when the ESC-Key is pressed somewhere
+     */
+    Action escaped = new AbstractAction() {
+        static final long serialVersionUID = 1L;
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            actionExit();
+        }
+    };
+    Action tueEs = new AbstractAction() {
+        static final long serialVersionUID = 1L;
+        @Override
+        public void actionPerformed(ActionEvent arg0) {
+            actionUebernahme();
+        }
+    };
+    private void actionExit() {
+        this.dispose();
+    }
+    // From original Keylistener
+    private void actionUebernahme() {
+        // doUebernahme();
+    }
+    // From original ActionListener
+    private void actionUebernahme(ActionEvent arg0) {
+        macheAFRHmap();
+        new SwingWorker<Void, Void>() {
+            @Override
+            protected Void doInBackground() throws Exception {
+                try {
+                    starteAusfallRechnung(
+                            Path.Instance.getProghome() + "vorlagen/" + Reha.getAktIK() + "/AusfallRechnung.ott");
+                    doBuchen();
+                    if (leistung[4].isSelected()) {
+                        macheMemoEintrag();
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                    JOptionPane.showMessageDialog(null, "Fehler bei der Erstellung der Ausfallrechnung");
+                }
+                getInstance().dispose();
+                return null;
+            }
+        }.execute();
+    }
+
 
 }
 
