@@ -83,7 +83,7 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
 public class AbrechnungPrivat extends JXDialog
-        implements FocusListener, ActionListener, MouseListener, RehaTPEventListener, ChangeListener {
+        implements FocusListener, ActionListener, MouseListener, RehaTPEventListener {
     /**
      *
      */
@@ -248,10 +248,10 @@ public class AbrechnungPrivat extends JXDialog
         jcmb.addActionListener(e -> actionNeuerTarif(e));
         pan.add(jcmb, cc.xy(3, 8));
         jrb[0] = new JRtaRadioButton("Formular f\u00fcr Privatrechnung verwenden");
-        jrb[0].addChangeListener(this);
+        jrb[0].addChangeListener(e -> actionChangePrivat(e));
         pan.add(jrb[0], cc.xy(3, 10));
         jrb[1] = new JRtaRadioButton("Formular f\u00fcr Kostentr\u00e4ger Rechnung verwenden");
-        jrb[1].addChangeListener(this);
+        jrb[1].addChangeListener(e -> actionChangeKTraeger(e));
         pan.add(jrb[1], cc.xy(3, 12));
         bg.add(jrb[0]);
         bg.add(jrb[1]);
@@ -1672,7 +1672,28 @@ public class AbrechnungPrivat extends JXDialog
             doRgRechnungPrepare();
         }
     };
+    private void actionChangePrivat(ChangeEvent arg0) {
+        logger.debug("In priv-change");
+        if ( prevState != arg0.hashCode()) {
+            logger.debug("In priv-changed");
+            prevState = arg0.hashCode();
+            if (jrb[0].isSelected()) {
+                reglePrivat();
+            }
+        }
+    }
+    private void actionChangeKTraeger(ChangeEvent arg0) {
+        logger.debug("In kt-change");
+        if ( prevState != arg0.hashCode()) {
+            logger.debug("In kt-changed");
+            prevState = arg0.hashCode();
+            if (jrb[1].isSelected()) {
+                regleBGE();
+            }
+        }
+    }
 
+    /*
     @Override
     public void stateChanged(ChangeEvent arg0) {
         logger.debug("State changed: " + arg0.toString());
@@ -1687,5 +1708,6 @@ public class AbrechnungPrivat extends JXDialog
             }
         }
     }
+    */
 
 }
