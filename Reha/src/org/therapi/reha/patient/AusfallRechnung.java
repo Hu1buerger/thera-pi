@@ -126,7 +126,7 @@ public class AusfallRechnung extends RehaSmartDialog {
 
     private JPanel getGebuehren() { // 1 2 3 4 5 6 7
         FormLayout lay = new FormLayout("10dlu,fill:0:grow(0.50),right:80dlu,10dlu,80dlu,fill:0:grow(0.50),10dlu",
-                // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
+                // 1...2..3....4..5...6..7...8..9...10.11....12...13.....14..15
                 "15dlu,p,10dlu,p,2dlu,p,2dlu,p,2dlu,p, 10dlu, p,  20dlu, p ,20dlu");
         PanelBuilder pb = new PanelBuilder(lay);
         CellConstraints cc = new CellConstraints();
@@ -160,9 +160,7 @@ public class AusfallRechnung extends RehaSmartDialog {
         logger.debug("Vec: lab=" + lab);
         leistung[1] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[1].setOpaque(false);
-        if (!lab.equals("")) {
-
-        } else {
+        if (lab.isEmpty()) {
             leistung[1].setSelected(false);
             leistung[1].setEnabled(false);
         }
@@ -176,9 +174,7 @@ public class AusfallRechnung extends RehaSmartDialog {
         logger.debug("Vec: lab=" + lab);
         leistung[2] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[2].setOpaque(false);
-        if (!lab.equals("")) {
-
-        } else {
+        if (lab.isEmpty()) {
             leistung[2].setSelected(false);
             leistung[2].setEnabled(false);
         }
@@ -192,9 +188,7 @@ public class AusfallRechnung extends RehaSmartDialog {
         logger.debug("Vec: lab=" + lab);
         leistung[3] = new JRtaCheckBox((lab.equals("") ? "----" : lab));
         leistung[3].setOpaque(false);
-        if (!lab.equals("")) {
-
-        } else {
+        if (lab.isEmpty()) {
             leistung[3].setSelected(false);
             leistung[3].setEnabled(false);
         }
