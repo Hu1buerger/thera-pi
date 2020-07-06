@@ -1881,7 +1881,7 @@ public class RezTools {
     }
 
     /**
-     * Hmm, sollte Vec<Vec<String>> nicht "eine Liste" von Rezepten sein, ich sehe hier nur die Abarbeitung des
+     * Hmm, sollte Vec<Vec<String>> nicht "eine Liste" von Rezepten sein? Ich sehe hier nur die Abarbeitung des
      *   ersten in der Liste gespeicherten Rezepts (vec.get[0].get[irgendwas])...
      * @param vec
      * @param tag
@@ -1916,7 +1916,7 @@ public class RezTools {
         // 1. Termine aus Rezept holen
         String bestaetigte = vec.get(0)
                                 .get(34);
-        // 2. Testen ob der Tag erfa\u00dft wenn nicht weiter mit der vollen Packung +
+        // 2. Testen ob der Tag erfasst wenn nicht weiter mit der vollen Packung +
         // Fehlerstufe 1
         if (!termine.contains(tag)) {
             fehlerstufe = 1;
@@ -1932,7 +1932,7 @@ public class RezTools {
             }
 
         }
-        // 4. \u00dcberpr\u00fcfen ob die Positionen in der Tarifgruppe existieren,
+        // 4. Ueberpruefen ob die Positionen in der Tarifgruppe existieren,
         // sofern nicht, Preise und Positionen aus Rezept entnehmen, also volle Packung
         // + Fehlerstufe 3
         if (fehlerstufe == 0) {
