@@ -20,6 +20,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -60,6 +62,7 @@ public class Beteiligung extends JXPanel {
      *
      */
     private static final long serialVersionUID = -5302438379722827660L;
+    private static Logger logger = LoggerFactory.getLogger(Beteiligung.class);
 
     JBeteiligungInternal internal = null;
     JRtaComboBox jcmb = null;
@@ -604,8 +607,12 @@ public class Beteiligung extends JXPanel {
 
     private void doAnteilBerechnen(Vector<Vector<String>> rezvec, boolean history, String datum, String name)
             throws UnknownPropertyException, PropertyVetoException, IllegalArgumentException, WrappedTargetException {
+        // TODO: integrate Rezept-Class
         Vector<String> calczeile = RezTools.macheUmsatzZeile(rezvec, datum, jcmb.getSelectedItem()
                                                                                 .toString());
+        logger.debug("Calc from Vec: " + calczeile.toString());
+        // calczeile = RezTools.macheUmsatzZeile(rez, datum, jcmb.getSelectedItem().toString());
+        // logger.debug("Calc from rez not implemented yet");
         // System.outprintln(calczeile);
         try {
             OOTools.doCellValue(cellCursor, 0, calcrow, name.replace(copyright, ""));
