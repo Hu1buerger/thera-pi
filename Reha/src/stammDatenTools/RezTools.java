@@ -337,6 +337,7 @@ public class RezTools {
         return retobj;
     }
 
+    // Dead meat
     public static String holeErstenTermin(String xreznr, String termine) {
         try {
             Vector<String> xvec = null;
@@ -1270,11 +1271,11 @@ public class RezTools {
             // TODO: delete me once Rezepte have been sorted
             anzahl[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 3));
             logger.debug("Vec: anzahl[" + i + "]=" + anzahl[i]);
-            anzahl[i] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
+            anzahl[i] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i+1);
             logger.debug("Rez: anzahl[" + i + "]=" + anzahl[i]);
             artdbeh[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 8));
             logger.debug("Vec: artdbeh[" + i + "]=" + artdbeh[i]);
-            artdbeh[i] = Integer.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
+            artdbeh[i] = Integer.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i+1));
             logger.debug("Rez: artdbeh[" + i + "]=" + artdbeh[i]);
             if (!neuerpreis) {
                 if (artdbeh[i] > 0) {
@@ -1289,7 +1290,7 @@ public class RezTools {
                     if (artdbeh[i] > 0) {
                         preistest = BigDecimal.valueOf(new Double(Reha.instance.patpanel.vecaktrez.get(i + 18)));
                         logger.debug("Vec: preistest=" + preistest);
-                        Money mPreisTest= Reha.instance.patpanel.rezAktRez.getPreis(i);
+                        Money mPreisTest= Reha.instance.patpanel.rezAktRez.getPreis(i+1);
                         logger.debug("Rez: mPreisTest=" + mPreisTest);
                         preise[i] = BigDecimal.valueOf(
                                 new Double(RezTools.getPreisAktFromID(Integer.toString(artdbeh[i]),
@@ -1299,9 +1300,9 @@ public class RezTools {
                         if ((preise[i].compareTo(new BigDecimal(mPreisTest.toString())) != 0)) {
                             meldung = "Achtung Unterschiedliche Preise!!!\n\n"
                                     + "Im Rezept gespeicherter Preis f\u00fcr Position "
-                                    + Reha.instance.patpanel.rezAktRez.getHMPos(i) + " = " + mPreisTest.toString()
+                                    + Reha.instance.patpanel.rezAktRez.getHMPos(i+1) + " = " + mPreisTest.toString()
                                     + "\n" + "In der Preisliste gespeicherter Preis f\u00fcr Position "
-                                    + Reha.instance.patpanel.rezAktRez.getHMPos(i) + " = " + dfx.format(preise[i])
+                                    + Reha.instance.patpanel.rezAktRez.getHMPos(i+1) + " = " + dfx.format(preise[i])
                                     + "\n\n"
                                     + "Vermutete Ursache: Die Preisliste wurde nach der Rezeptanlage aktualisiert\n"
                                     + "Berechung erfolgt mit dem Preis aus der Preisliste, Rezept wird aktualisiert!";
@@ -1317,7 +1318,7 @@ public class RezTools {
                         preise[i] = BigDecimal.valueOf(new Double("0.00"));
                     }
                 } catch (Exception ex) {
-                    preise[i] = new BigDecimal(Reha.instance.patpanel.rezAktRez.getPreis(i).toString());
+                    preise[i] = new BigDecimal(Reha.instance.patpanel.rezAktRez.getPreis(i+1).toString());
                 }
 
             }
@@ -1342,7 +1343,7 @@ public class RezTools {
              */
             if (artdbeh[i] > 0) {
                 SystemConfig.hmAdrRDaten.put("<Rposition" + (i + 1) + ">",
-                        Reha.instance.patpanel.rezAktRez.getHMPos(i));
+                        Reha.instance.patpanel.rezAktRez.getHMPos(i+1));
 
                 SystemConfig.hmAdrRDaten.put("<Rpreis" + (i + 1) + ">", dfx.format(preise[i]));
 
@@ -1422,18 +1423,18 @@ public class RezTools {
 
                     BigDecimal dummyproz = null;
                     BigDecimal roundproz = null;
-                    for (int i = 0; i < 4; i++) {
+                    for (int i = 1; i <= 4; i++) {
                      // TODO: delete me once Rezepte have been sorted
-                        id = Reha.instance.patpanel.vecaktrez.get(8 + i);
+                        id = Reha.instance.patpanel.vecaktrez.get(7 + i);
                         logger.debug("Vec: id(ArtDBeh[" + i + "])=" + id);
                         id = String.valueOf(Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i));
                         logger.debug("Vec: id(ArtDBeh[" + i + "])=" + id);
-                        SystemConfig.hmAdrRDaten.put("<Rposition" + (i + 1) + ">",
+                        SystemConfig.hmAdrRDaten.put("<Rposition" + i + ">",
                                 Reha.instance.patpanel.rezAktRez.getHMPos(i));
-                        SystemConfig.hmAdrRDaten.put("<Rpreis" + (i + 1) + ">",
+                        SystemConfig.hmAdrRDaten.put("<Rpreis" + i + ">",
                                 Reha.instance.patpanel.rezAktRez.getPreis(i).toString()
                                                                 .replace(".", ","));
-                        SystemConfig.hmAdrRDaten.put("<Ranzahl" + (i + 1) + ">", String.valueOf(
+                        SystemConfig.hmAdrRDaten.put("<Ranzahl" + i + ">", String.valueOf(
                                 Reha.instance.patpanel.rezAktRez.getBehAnzahl(i)));
                         // SystemConfig.hmAdrRDaten.put("<Rgesamt"+(i+1)+">", df.format(
                         // ((BigDecimal)BigDecimal.valueOf(Double.valueOf(SystemConfig.hmAdrRDaten.get("<Ranzahl"+(i+1)+">"))).multiply(BigDecimal.valueOf(Double.valueOf(SystemConfig.hmAdrRDaten.get("<Rpreis"+(i+1)+">").replace(",","."))))).doubleValue()
@@ -1441,21 +1442,21 @@ public class RezTools {
                         dummyproz = BigDecimal.valueOf(Double.valueOf(Reha.instance.patpanel.rezAktRez.getPreis(i).toString()))
                                               .divide(BigDecimal.valueOf(new Double(10.000)));
                         roundproz = dummyproz.setScale(2, BigDecimal.ROUND_HALF_UP);
-                        SystemConfig.hmAdrRDaten.put("<Rgesamt" + (i + 1) + ">",
+                        SystemConfig.hmAdrRDaten.put("<Rgesamt" + i + ">",
                                 df.format(roundproz
                                                    .multiply(BigDecimal.valueOf(Double.valueOf(
-                                                           SystemConfig.hmAdrRDaten.get("<Ranzahl" + (i + 1) + ">"))))
+                                                           SystemConfig.hmAdrRDaten.get("<Ranzahl" + i + ">"))))
                                                    .doubleValue()));
                         if (!id.equals("0")) {
-                            SystemConfig.hmAdrRDaten.put("<Rkuerzel" + (i + 1) + ">",
+                            SystemConfig.hmAdrRDaten.put("<Rkuerzel" + i + ">",
                                     RezTools.getKurzformFromID(id, SystemPreislisten.hmPreise.get(diszi)
                                                                                              .get(pg)));
-                            SystemConfig.hmAdrRDaten.put("<Rlangtext" + (i + 1) + ">",
+                            SystemConfig.hmAdrRDaten.put("<Rlangtext" + i + ">",
                                     RezTools.getLangtextFromID(id, "", SystemPreislisten.hmPreise.get(diszi)
                                                                                                  .get(pg)));
                         } else {
-                            SystemConfig.hmAdrRDaten.put("<Rkuerzel" + (i + 1) + ">", "");
-                            SystemConfig.hmAdrRDaten.put("<Rlangtext" + (i + 1) + ">", "");
+                            SystemConfig.hmAdrRDaten.put("<Rkuerzel" + i + ">", "");
+                            SystemConfig.hmAdrRDaten.put("<Rlangtext" + i + ">", "");
                         }
                     }
                     // Hausbesuche
@@ -1504,12 +1505,12 @@ public class RezTools {
                                                                             .format(DateTimeFormatters.ddMMYYYYmitPunkt));
         SystemConfig.hmAdrRDaten.put("<Rpatid>", String.valueOf(Reha.instance.patpanel.rezAktRez.getPatIntern()));
         SystemConfig.hmAdrRDaten.put("<Rpauschale>", "0,00");
-        for (int i = 0; i < 5; i++) {
-            SystemConfig.hmAdrRDaten.put("<Rposition" + (i + 1) + ">", "----");
-            SystemConfig.hmAdrRDaten.put("<Rpreis" + (i + 1) + ">", "0,00");
-            SystemConfig.hmAdrRDaten.put("<Rproz" + (i + 1) + ">", "0,00");
-            SystemConfig.hmAdrRDaten.put("<Rgesamt" + (i + 1) + ">", "0,00");
-            SystemConfig.hmAdrRDaten.put("<Ranzahl" + (i + 1) + ">", "----");
+        for (int i = 1; i <= 5; i++) {
+            SystemConfig.hmAdrRDaten.put("<Rposition" + i + ">", "----");
+            SystemConfig.hmAdrRDaten.put("<Rpreis" + i + ">", "0,00");
+            SystemConfig.hmAdrRDaten.put("<Rproz" + i + ">", "0,00");
+            SystemConfig.hmAdrRDaten.put("<Rgesamt" + i + ">", "0,00");
+            SystemConfig.hmAdrRDaten.put("<Ranzahl" + i + ">", "----");
         }
         SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
         SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
@@ -1570,41 +1571,41 @@ public class RezTools {
         SystemConfig.hmAdrRDaten.put("<Rnummer>", Reha.instance.patpanel.rezAktRez.getRezNr());
         SystemConfig.hmAdrRDaten.put("<Rdatum>", Reha.instance.patpanel.rezAktRez.getRezDatum()
                                                                             .format(DateTimeFormatters.yyyyMMddmitBindestrich));
-        for (i = 0; i < 4; i++) {
+        for (i = 1; i <= 4; i++) {
          // TODO: delete me once Rezepte have been sorted
-            gesanzahl[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 3));
-            logger.debug("Vec: gesanzahl[" + i + "]=" + gesanzahl[i]);
-            gesanzahl[i] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
-            logger.debug("Rez: gesanzahl[" + i + "]=" + gesanzahl[i]);
+            gesanzahl[i-1] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 2));
+            logger.debug("Vec: gesanzahl[" + i + "]=" + gesanzahl[i-1]);
+            gesanzahl[i-1] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
+            logger.debug("Rez: gesanzahl[" + i + "]=" + gesanzahl[i-1]);
             // Why not anzahl[i] = gesanzahl[i] ??
-            anzahl[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 3));
-            logger.debug("Vec: anzahl[" + i + "]=" + anzahl[i]);
-            anzahl[i] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
-            logger.debug("Rez: anzahl[" + i + "]=" + anzahl[i]);
-            if (!(anzahl[i] < zm.gesamtZahl)) {
-                anzahl[i] = Integer.valueOf(zm.gesamtZahl);
+            anzahl[i-1] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 2));
+            logger.debug("Vec: anzahl[" + i + "]=" + anzahl[i-1]);
+            anzahl[i-1] = Reha.instance.patpanel.rezAktRez.getBehAnzahl(i);
+            logger.debug("Rez: anzahl[" + i + "]=" + anzahl[i-1]);
+            if (!(anzahl[i-1] < zm.gesamtZahl)) {
+                anzahl[i-1] = Integer.valueOf(zm.gesamtZahl);
             }
-            artdbeh[i] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 8));
-            logger.debug("Vec: artdbeh[" + i + "]=" + artdbeh[i]);
-            artdbeh[i] = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i);
-            logger.debug("Rez: artdbeh[" + i + "]=" + artdbeh[i]);
+            artdbeh[i-1] = Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(i + 7));
+            logger.debug("Vec: artdbeh[" + i + "]=" + artdbeh[i-1]);
+            artdbeh[i-1] = Reha.instance.patpanel.rezAktRez.getArtDerBehandlung(i);
+            logger.debug("Rez: artdbeh[" + i + "]=" + artdbeh[i-1]);
             /****/
             if (!neuerpreis) {
-                if (artdbeh[i] > 0) {
-                    preise[i] = BigDecimal.valueOf(new Double(RezTools.getPreisAltFromID(Integer.toString(artdbeh[i]),
+                if (artdbeh[i-1] > 0) {
+                    preise[i-1] = BigDecimal.valueOf(new Double(RezTools.getPreisAltFromID(Integer.toString(artdbeh[i-1]),
                             Integer.toString(xpreisgr), SystemPreislisten.hmPreise.get(xdiszi)
                                                                                   .get(xpreisgr))));
                 } else {
-                    preise[i] = BigDecimal.valueOf(new Double("0.00"));
+                    preise[i-1] = BigDecimal.valueOf(new Double("0.00"));
                 }
             } else {
-                preise[i] = BigDecimal.valueOf(new Double(Reha.instance.patpanel.vecaktrez.get(i + 18)));
-                logger.debug("Vec: preise[" + i + "]=" + preise[i]);
-                preise[i] = new BigDecimal(Reha.instance.patpanel.rezAktRez.getPreis(i).toString());
-                logger.debug("Rez: preise[" + i + "]=" + preise[i]);
+                preise[i-1] = BigDecimal.valueOf(new Double(Reha.instance.patpanel.vecaktrez.get(i + 18)));
+                logger.debug("Vec: preise[" + i + "]=" + preise[i-1]);
+                preise[i-1] = new BigDecimal(Reha.instance.patpanel.rezAktRez.getPreis(i).toString());
+                logger.debug("Rez: preise[" + i + "]=" + preise[i-1]);
             }
-            // preise[i] = BigDecimal.valueOf(new
-            // Double((String)Reha.instance.patpanel.vecaktrez.get(i+18)));
+            // preise[i-1] = BigDecimal.valueOf(new
+            // Double((String)Reha.instance.patpanel.vecaktrez.get(i+17)));
             /****/
         }
         // TODO: Magic number fixed Rezeptgebuehr!!
@@ -1632,7 +1633,7 @@ public class RezTools {
              */
             if (artdbeh[i] > 0) {
                 SystemConfig.hmAdrRDaten.put("<Rposition" + (i + 1) + ">",
-                        Reha.instance.patpanel.rezAktRez.getHMPos(i));
+                        Reha.instance.patpanel.rezAktRez.getHMPos(i+1));
                 SystemConfig.hmAdrRDaten.put("<Rpreis" + (i + 1) + ">", dfx.format(preise[i]));
 
                 einzelpreis = preise[i].divide(BigDecimal.valueOf(new Double(10.000)));
@@ -1879,6 +1880,14 @@ public class RezTools {
         return retobj;
     }
 
+    /**
+     * Hmm, sollte Vec<Vec<String>> nicht "eine Liste" von Rezepten sein, ich sehe hier nur die Abarbeitung des
+     *   ersten in der Liste gespeicherten Rezepts (vec.get[0].get[irgendwas])...
+     * @param vec
+     * @param tag
+     * @param kaluser
+     * @return
+     */
     public static Vector<String> macheUmsatzZeile(Vector<Vector<String>> vec, String tag, String kaluser) {
         Vector<String> retvec = new Vector<String>();
         for (int i = 0; i < 13; i++) {
@@ -2014,6 +2023,185 @@ public class RezTools {
                                                                    .get(3);
                         wgkm = Double.parseDouble(vec.get(0)
                                                      .get(7));
+
+                        if (kmBesserAlsPauschale(pospauschale, pos, wgkm, preisgruppe, disziplin)) {
+                            // if( (wgkm=Double.parseDouble(vec.get(0).get(7))) > 7 ){
+                            // Kilometer verwenden
+                            //// System.out.println("Kilometer verwenden...");
+                            pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                              .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                              .get(2);
+                            preis = RezTools.getPreisAktFromPos(pos, Integer.toString(preisgruppe),
+                                    SystemPreislisten.hmPreise.get(disziplin)
+                                                              .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                            BigDecimal kms = BigDecimal.valueOf(Double.parseDouble(preis))
+                                                       .multiply(BigDecimal.valueOf(wgkm));
+                            retvec.set(5, pos);
+                            retvec.set(11, Double.toString(kms.doubleValue()));
+                            //// System.out.println("Pos = "+pos);
+                            //// System.out.println("Preis = "+preis);
+                        } else {
+                            // Pauschale verwenden
+                            //// System.out.println("Pauschale verwenden....");
+                            pospauschale = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                                       .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                                       .get(3);
+                            preis = RezTools.getPreisAktFromPos(pospauschale, Integer.toString(preisgruppe),
+                                    SystemPreislisten.hmPreise.get(disziplin)
+                                                              .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                            // System.out.println("Pos = "+pos);
+                            // System.out.println("Preis = "+preis);
+                            retvec.set(5, pospauschale);
+                            retvec.set(11, preis);
+                        }
+                    } else {
+                        // System.out.println("Kann Weggeb\u00fchrmodalit\u00e4t nicht ermitteln....");
+                    }
+
+                } else {
+                    // System.out.println("Kasse kennt keine Weggeb\u00fchr....");
+                    retvec.set(5, "-----");
+                    retvec.set(11, "0.00");
+                }
+            } else {
+                // Hausbesuch mit
+                pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                  .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                  .get(1);
+                preis = RezTools.getPreisAktFromPos(pos, Integer.toString(preisgruppe),
+                        SystemPreislisten.hmPreise.get(disziplin)
+                                                  .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                retvec.set(4, pos);
+                retvec.set(10, preis);
+                retvec.set(5, "-----");
+                retvec.set(11, "0.00");
+            }
+        } else {
+            retvec.set(4, "-----");
+            retvec.set(10, "0.00");
+            retvec.set(5, "-----");
+            retvec.set(11, "0.00");
+        }
+        return retvec;
+    }
+
+    public static Vector<String> macheUmsatzZeile(Rezept rez, String tag, String kaluser) {
+        Vector<String> retvec = new Vector<String>();
+        for (int i = 0; i < 13; i++) {
+            retvec.add("");
+        }
+
+        String disziplin = getDisziplinFromRezNr(rez.getRezNr());
+        String pos = "";
+        String preis = "";
+        String pospauschale = "";
+
+        String preispauschale = "";
+        int preisgruppe = rez.getPreisGruppe();
+        String termine = rez.getTermine();
+        boolean rezept = false;
+        Double wgkm;
+        int fehlerstufe = 0;
+        int ipos = 0;
+        String kform = "";
+        String[] posbestaetigt = null;
+        Object[][] preisobj = { { null, null, null, null }, { null, null, null, null } };
+        /************************/
+        // 1. Termine aus Rezept holen
+        String bestaetigte = rez.getTermine();
+        // 2. Testen ob der Tag erfasst wenn nicht weiter mit der vollen Packung +
+        // Fehlerstufe 1
+        if (!termine.contains(tag)) {
+            fehlerstufe = 1;
+        } else {
+            // 3. Sofern der Tagin der Termintabelle vorhanden ist,
+            // die Positionen ermitteln
+            // wenn keine Positionen vorhanden, weiter mit voller Packung + Fehlerstufe 2
+            posbestaetigt = bestaetigte.substring(bestaetigte.indexOf(tag))
+                                       .split("@")[3].split(",");
+            if (posbestaetigt[0].trim()
+                                .equals("")) {
+                fehlerstufe = 2;
+            }
+
+        }
+        // 4. Ueberpruefen ob die Positionen in der Tarifgruppe existieren,
+        // sofern nicht, Preise und Positionen aus Rezept entnehmen, also volle Packung
+        // + Fehlerstufe 3
+        if (fehlerstufe == 0) {
+            for (int j = 0; j < posbestaetigt.length; j++) {
+                if (!posbestaetigt[j].trim()
+                                     .equals("")) {
+                    if ((kform = RezTools.getKurzformFromPos(posbestaetigt[j].trim(), Integer.toString(preisgruppe),
+                            SystemPreislisten.hmPreise.get(disziplin)
+                                                      .get((preisgruppe == 0 ? 0 : preisgruppe - 1)))).equals("")) {
+                        fehlerstufe = 3;
+                        break;
+                    }
+                    preisobj[0][j] = kform;
+                    preisobj[1][j] = RezTools.getPreisAktFromPos(posbestaetigt[j], Integer.toString(preisgruppe),
+                            SystemPreislisten.hmPreise.get(disziplin)
+                                                      .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                }
+            }
+        }
+
+        if (fehlerstufe == 0) {
+            // 5. Wenn hier angekommen die Preise und Positionen aus der Preisliste
+            // entnehmen
+            for (int j = 0; j < 4; j++) {
+                retvec.set(j, String.valueOf(preisobj[0][j] != null ? preisobj[0][j] : "-----"));
+                retvec.set(j + 6, String.valueOf(preisobj[1][j] != null ? preisobj[1][j] : "0.00"));
+            }
+            retvec.set(12, "0");
+        } else {
+            for (int i = 0; i < 4; i++) {
+                if (rez.getArtDerBehandlung(i+1) != 0) {
+                    pos = RezTools.getKurzformFromID(String.valueOf(rez.getArtDerBehandlung(i+1)),
+                            SystemPreislisten.hmPreise.get(disziplin)
+                                                      .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                    if (pos.trim()
+                           .equals("")) {
+                        pos = RezTools.getKurzformFromPos(rez.getHMPos(i+1).trim(),
+                                Integer.toString(preisgruppe), SystemPreislisten.hmPreise.get(disziplin)
+                                                                                         .get((preisgruppe == 0 ? 0
+                                                                                                 : preisgruppe - 1)));
+                    }
+                    retvec.set(i, pos);
+                    retvec.set(i + 6, rez.getPreis(i+1).toString().trim());
+                } else {
+                    retvec.set(i, "-----");
+                    retvec.set(i + 6, "0.00");
+                }
+            }
+            retvec.set(12, Integer.toString(fehlerstufe));
+        }
+        /************************/
+        // mit Hausbesuch?
+        if (rez.isHausBesuch()) {
+            // Hausbesuch einzeln?
+            if (rez.isHbVoll()) {
+                pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                  .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                  .get(0);
+                preis = RezTools.getPreisAktFromPos(pos, Integer.toString(preisgruppe),
+                        SystemPreislisten.hmPreise.get(disziplin)
+                                                  .get((preisgruppe == 0 ? 0 : preisgruppe - 1)));
+                retvec.set(4, pos);
+                retvec.set(10, preis);
+
+                if (!keineWeggebuehrBeiHB(disziplin, Integer.toString((preisgruppe == 0 ? 1 : preisgruppe)))) {
+                    //// System.out.println("Kasse kennt Weggeb\u00fchr...");
+                    if (zweiPositionenBeiHB(disziplin, Integer.toString((preisgruppe == 0 ? 1 : preisgruppe)))) {
+                        // Weggebuehr und pauschale
+                        //// System.out.println("Kasse kennt km und Pauschale...");
+                        pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                          .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                          .get(2);
+                        pospauschale = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                                   .get((preisgruppe == 0 ? 0 : preisgruppe - 1))
+                                                                   .get(3);
+                        wgkm = rez.getAnzahlKM().doubleValue();
 
                         if (kmBesserAlsPauschale(pospauschale, pos, wgkm, preisgruppe, disziplin)) {
                             // if( (wgkm=Double.parseDouble(vec.get(0).get(7))) > 7 ){
