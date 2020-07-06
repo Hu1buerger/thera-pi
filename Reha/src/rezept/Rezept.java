@@ -325,7 +325,7 @@ public class Rezept {
         case 4:
             return getArtDerBeh4();
         default:
-            logger.error("Rezept-Class Invalid ArtDerBehandlungindex requested - only 1-4 are impl. so far");
+            logger.error("Index " + i + " ist ungueltig. - only 1-4 are impl. so far");
             return -1;
         
         }
@@ -612,7 +612,7 @@ public class Rezept {
                 setArtDerBeh4(value);
                 break;
             default:
-                logger.error("Can only set ArtDerBehandlungen 1-4");
+                logger.error("Index " + idx + " ist ungueltig. Can only set ArtDerBehandlungen 1-4");
                 
         }
     }
@@ -1432,7 +1432,7 @@ public class Rezept {
             case 4:
                 return getHMPos4();
             default:
-                logger.error("Invalid index received. Es sind nur HM-Positionen 1-4 setzbar");
+                logger.error("Index " + idx + " ist ungueltig. Es sind nur HM-Positionen 1-4 setzbar");
                 return "";
         }
     }
@@ -1457,7 +1457,7 @@ public class Rezept {
                 setHMPos4(value);
                 break;
             default:
-                logger.error("Invalid index received. Es sind nur HM-Positionen 1-4 setzbar");
+                logger.error("Index " + idx + " ist ungueltig. Es sind nur HM-Positionen 1-4 setzbar");
         }
     }
     
@@ -1670,7 +1670,7 @@ public class Rezept {
             case 6:
                 return getHMKuerzel6();
             default:
-                logger.error("Invalid index received upon get (HM-)Kuerzel. Only 1-6 are available.");
+                logger.error("Index " + idx + " ist ungueltig. Nur (HM-)Kuerzel 1-6.");
                 return "";
         }
     }
@@ -1703,7 +1703,7 @@ public class Rezept {
                 setHMKuerzel6(value);
                 break;
             default:
-                logger.error("Invalid index received upon change Kuerzel");
+                logger.error("Index " + idx + " ist ungueltig. Nur 1-6 sind Kuerzel");
         }
     }
    
