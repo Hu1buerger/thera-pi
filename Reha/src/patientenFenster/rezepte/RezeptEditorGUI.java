@@ -176,10 +176,16 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
     private ArrayList<String> farbcodes = new ArrayList<>();
     private String rezKlasse = null;
     
-    public RezeptEditorGUI(Rezept Rez, Boolean Neu, Mandant Mand){
+    /**
+     * 
+     * @param rezept
+     * @param Neu
+     * @param Mand
+     */
+    public RezeptEditorGUI(Rezept rezept, Boolean Neu, Mandant Mand){
         super();
         
-        rez=Rez;
+        rez=rezept;
         neu = Neu;
         mand = Mand;
         // FIXME: This is a Q&D to bring popups to front - at least it works for "own" popups,
