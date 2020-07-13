@@ -1047,7 +1047,7 @@ public class RezepteHistorisch extends JXPanel implements ActionListener {
                         if ((getActiveRezNr()) == null) {
                             return null;
                         }
-                        Reha.instance.patpanel.aktRezept.neuanlageRezept(true, "", RezepteAktuell.REZEPTKOPIERE_HISTORIENREZEPT);
+                        Reha.instance.patpanel.aktRezept.neuanlageRezept(true, RezepteAktuell.REZEPTKOPIERE_HISTORIENREZEPT);
                         Reha.instance.patpanel.multiTab.setSelectedIndex(0);
                     } catch (Exception ex) {
                         ex.printStackTrace();
