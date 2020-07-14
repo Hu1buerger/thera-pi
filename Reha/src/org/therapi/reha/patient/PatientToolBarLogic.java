@@ -19,6 +19,9 @@ import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import CommonTools.StringTools;
 import dialoge.EmailDialog;
 import dialoge.SMSDialog;
@@ -36,6 +39,8 @@ import systemTools.IconListRenderer;
 import terminKalender.iCalRehaExporter;
 
 public class PatientToolBarLogic {
+    private static final Logger logger = LoggerFactory.getLogger(PatientToolBarLogic.class);
+    
     PatientHauptPanel patientHauptPanel = null;
     PatientToolBarPanel patientToolBarPanel = null;
 
@@ -128,52 +133,54 @@ public class PatientToolBarLogic {
 
     public void reactOnAction(ActionEvent arg0) {
         String cmd = arg0.getActionCommand();
-        if (cmd.equals("neu")) {
-            patientHauptPanel.getLogic()
-                             .patNeu();
-        }
-        if (cmd.equals("edit")) {
-            patientHauptPanel.getLogic()
-                             .patEdit();
-        }
-        if (cmd.equals("delete")) {
-            patientHauptPanel.getLogic()
-                             .patDelete();
-        }
-        if (cmd.equals("formulare")) {
-            patientHauptPanel.getLogic()
-                             .patStarteFormulare();
-            // patientHauptPanel.getLogic().setzeFocus();
-        }
-        if (cmd.equals("email")) {
-            patientHauptPanel.getLogic()
-                             .setzeFocus();
-        }
-        if (cmd.equals("sms")) {
-            // new SMS();
-            patientHauptPanel.getLogic()
-                             .setzeFocus();
-        }
-        if (cmd.equals("werkzeuge")) {
-            new ToolsDlgPatient("", patientHauptPanel.jbut[4].getLocationOnScreen());
-            // patientHauptPanel.getLogic().setzeFocus();
-        }
-        if (cmd.equals("comboBoxChanged")) {
-            if (patientHauptPanel.patToolBarPanel.getSucheOhneEingabe(patientHauptPanel.jcom.getSelectedIndex())) {
-                // Eingabe sperren
-//                patientHauptPanel.tfsuchen.setDisabledTextColor(Color.red);
-                patientHauptPanel.tfsuchen.setBackground(Color.lightGray);
-                patientHauptPanel.tfsuchen.setForeground(Color.red);
-                patientHauptPanel.tfsuchen.setOpaque(true);
-//                patientHauptPanel.tfsuchen.setEnabled(false);
-                patientHauptPanel.tfsuchen.setEditable(false);
-            } else {
-                // Eingabe freigeben
-                patientHauptPanel.tfsuchen.setForeground(Color.gray);
-                patientHauptPanel.tfsuchen.setOpaque(false);
-//                patientHauptPanel.tfsuchen.setEnabled(true);
-                patientHauptPanel.tfsuchen.setEditable(true);
-            }
+        switch (cmd) {
+            case "neu":
+                patientHauptPanel.getLogic()
+                                 .patNeu();
+                break;
+            case "edit":
+                patientHauptPanel.getLogic()
+                                 .patEdit();
+                break;
+            case "delete":
+                patientHauptPanel.getLogic()
+                                 .patDelete();
+                break;
+            case "formulare":
+                patientHauptPanel.getLogic()
+                                 .patStarteFormulare();
+                break;
+            case "email":
+                patientHauptPanel.getLogic()
+                                 .setzeFocus();
+                break;
+            case "sms":
+                // new SMS();
+                patientHauptPanel.getLogic()
+                                 .setzeFocus();
+                break;
+            case "werkzeuge":
+                new ToolsDlgPatient("", patientHauptPanel.jbut[4].getLocationOnScreen());
+                break;
+            case "comboBoxChanged":
+                if (patientHauptPanel.patToolBarPanel.getSucheOhneEingabe(patientHauptPanel.jcom.getSelectedIndex())) {
+                    // Eingabe sperren
+    //                patientHauptPanel.tfsuchen.setDisabledTextColor(Color.red);
+                    patientHauptPanel.tfsuchen.setBackground(Color.lightGray);
+                    patientHauptPanel.tfsuchen.setForeground(Color.red);
+                    patientHauptPanel.tfsuchen.setOpaque(true);
+    //                patientHauptPanel.tfsuchen.setEnabled(false);
+                    patientHauptPanel.tfsuchen.setEditable(false);
+                } else {
+                    // Eingabe freigeben
+                    patientHauptPanel.tfsuchen.setForeground(Color.gray);
+                    patientHauptPanel.tfsuchen.setOpaque(false);
+    //                patientHauptPanel.tfsuchen.setEnabled(true);
+                    patientHauptPanel.tfsuchen.setEditable(true);
+                }
+                break;
+            default:
+                logger.error("Unhandled action: " + arg0);
         }
     }
 
