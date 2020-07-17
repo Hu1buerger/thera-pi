@@ -3269,6 +3269,12 @@ public class RezepteAktuell extends JXPanel implements ListSelectionListener, Ta
                 neuRez.setLocationRelativeTo(null);
                 neuRez.pack();
                 neuRez.setVisible(true);
+                neuRez.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
+                    public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                        holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                    }
+                });
 
                 neuRez.dispose();
                 neuRez = null;
@@ -3926,6 +3932,17 @@ class RezNeuDlg extends RehaSmartDialog {
         try {
             if (evt.getDetails()[0] != null) {
                 logger.debug("rehaTPEvent: " + evt.toString());
+                if (evt.getSource().equals(RezeptEditorGUI.class)) {
+                    logger.debug("From EditorGUI-Class");
+                    switch (evt.getDetails()[0]) {
+                        case "GESPEICHERT":
+                            logger.debug("Gespeichert: " + evt.getDetails()[1]);
+                            // holeRezepte();
+                            break;
+                        default:
+                            logger.debug("Unknown exit-status from RezeptEditorGui: " + evt.getDetails()[0]);
+                    }
+                }
                 logger.debug("This-name: " + this.getName() + " evt-name: " + evt.getDetails()[0].toString());
                 for ( String detail : evt.getDetails()) {
                     logger.debug("Detail: " + detail);

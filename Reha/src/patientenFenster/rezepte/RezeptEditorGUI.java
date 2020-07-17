@@ -989,9 +989,11 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
             } else {
                 rezDat = LocalDate.parse(jtfREZDAT.getText().trim(), DateTimeFormatters.dMYYYYmitPunkt);
             }
-            
+            logger.debug("Rez from patPanel: " + Reha.instance.patpanel.rezAktRez + "\nthisRezept: " + thisRezept);
+            // Original code handed in Rezept from Reha.instance.patpanel.rezAktRez - hope thisRezept has been filled enough
+            // so that we can use it here...
             boolean neuerpreis = RezTools.neuePreisNachRezeptdatumOderStichtag(aktuelleDisziplin, preisgruppe,
-                    String.valueOf(stest), false, Reha.instance.patpanel.rezAktRez);
+                    String.valueOf(stest), false, thisRezept);
             if (withSanity) {
                     thisRezept.setRezDatum(rezDat);
                     setRezDatInTable(stest);
@@ -1066,7 +1068,8 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
  
             thisRezept.setBarcodeform(jcmbBARCOD.getSelectedIndex());
             thisRezept.setAngelegtVon(jtfANGEL.getText());
-            thisRezept.setPreisGruppe(Integer.parseInt(jtfPREISGR.getText()));
+            //TODO: check empty PG is really supposed to be "-1"
+            thisRezept.setPreisGruppe(jtfPREISGR.getText().isEmpty() ? -1 : Integer.parseInt(jtfPREISGR.getText()));
  
             if (jcmbFARBCOD.getSelectedIndex() > 0) {
                 thisRezept.setFarbcode(13 + jcmbFARBCOD.getSelectedIndex());
@@ -2028,7 +2031,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                String sEvent = getName();
                RehaTPEvent rEvt = new RehaTPEvent(RezeptEditorGUI.class);
                rEvt.setRehaEvent("RezeptEditorGUIEvent");
-               rEvt.setDetails(sEvent, "GESPEICHERT");
+               rEvt.setDetails("GESPEICHERT", rez.getRezNr());
                RehaTPEventClass.fireRehaTPEvent(rEvt);
                return;
 
