@@ -3932,6 +3932,7 @@ class RezNeuDlg extends RehaSmartDialog {
         try {
             if (evt.getDetails()[0] != null) {
                 logger.debug("rehaTPEvent: " + evt.toString());
+                /*
                 if (evt.getSource().equals(RezeptEditorGUI.class)) {
                     logger.debug("From EditorGUI-Class");
                     switch (evt.getDetails()[0]) {
@@ -3947,6 +3948,7 @@ class RezNeuDlg extends RehaSmartDialog {
                 for ( String detail : evt.getDetails()) {
                     logger.debug("Detail: " + detail);
                 }
+                */
                 // Talking to myself? Time for seppuku...
                 if (evt.getDetails()[0].equals(this.getName())) {
                     this.setVisible(false);

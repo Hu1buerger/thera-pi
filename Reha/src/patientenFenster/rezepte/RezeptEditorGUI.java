@@ -2005,7 +2005,7 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                            logger.error("Couldn't find valid Disziplin to base new RezNr on");
                        }
                        // What's this ?? - better create a call-refresh or something...
-                       Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rez.getRezNr());
+                       // Reha.instance.patpanel.aktRezept.setzeRezeptNummerNeu(rez.getRezNr());
                    } else {
                        copyFormToRez(rez, true);
                    }
@@ -2027,12 +2027,13 @@ public class RezeptEditorGUI extends JXPanel implements FocusListener, RehaTPEve
                                        + "RezeptNummer: " + rez.getRezNr() + "<br><br></html>";
                    JOptionPane.showMessageDialog(popupDialog, fehlerMeldung);
                }
-               
+               /*
                String sEvent = getName();
                RehaTPEvent rEvt = new RehaTPEvent(RezeptEditorGUI.class);
                rEvt.setRehaEvent("RezeptEditorGUIEvent");
                rEvt.setDetails("GESPEICHERT", rez.getRezNr());
                RehaTPEventClass.fireRehaTPEvent(rEvt);
+               */
                return;
 
            }
