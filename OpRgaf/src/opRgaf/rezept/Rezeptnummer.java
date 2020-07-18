@@ -33,9 +33,9 @@ public class Rezeptnummer {
         disziplin = Disziplin.INV;
         if ( rezNr == null || rezNr == "" )
             return;
-        String diszi2check = rezNr.replaceAll("[0-9]", "");
+        String diszi2check = rezNr.substring(0, 2);
         disziplin = ofShort(diszi2check);
-        String rezNrDigits = rezNr.replaceAll("[a-zA-Z]", "");
+        String rezNrDigits = rezNr.replaceAll("[^0-9]", "");
 
         this.rezeptZiffern = Integer.parseInt(rezNrDigits);
     }
