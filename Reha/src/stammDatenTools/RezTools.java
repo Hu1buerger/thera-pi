@@ -3154,7 +3154,7 @@ public class RezTools {
         return 2;
     }
 
-    /*
+    /**
      * pruefen, ob Rezept dringend abgerechnet werden sollte (Jahresfrist nach
      * letzter Behandlung)
      */
