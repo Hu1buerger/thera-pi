@@ -3,6 +3,7 @@ package stammDatenTools;
 import java.awt.Point;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -3169,6 +3170,99 @@ public class RezTools {
             return true;
         }
         return false;
+    }
+    
+    public static Vector<Vector<String>> Rez2Vec(Rezept rez) {
+        Vector<Vector<String>> vecRezList = new Vector<Vector<String>>();
+        Vector<String> vr = new Vector<String>();
+        
+        vr.add(gimmeVal(rez.getPatIntern()));
+        vr.add(gimmeVal(rez.getRezNr()));
+        vr.add(gimmeVal(rez.getRezDatum()));
+        for (int i=1;i<=4;i++) {
+            vr.add(gimmeVal(rez.getBehAnzahl(i)));
+        }
+        vr.add(gimmeVal(rez.getAnzahlKM()));
+        for (int i=1;i<=4;i++) {
+            vr.add(gimmeVal(rez.getArtDerBehandlung(i)));
+        }
+        vr.add(gimmeVal(rez.getBefr() ));  
+        vr.add(gimmeVal(rez.getRezGeb()));
+        vr.add(gimmeVal(rez.getRezBez()));
+        vr.add(gimmeVal(rez.getArzt() ));  
+        vr.add(gimmeVal(rez.getArztId()));
+        vr.add(gimmeVal(rez.getAerzte() ));
+        for (int i=1;i<=4;i++) {
+            vr.add(gimmeVal(rez.getPreis(i)));
+        }
+        vr.add(gimmeVal(rez.getErfassungsDatum()));     
+        vr.add(gimmeVal(rez.getDiagnose()  ));
+        vr.add(gimmeVal(rez.getHeimbewohn()));
+        vr.add(gimmeVal(rez.getVeraenderD()));
+        vr.add(gimmeVal(rez.getVeraenderA()));
+        vr.add(gimmeVal(rez.getRezeptArt() )); 
+        vr.add(gimmeVal(rez.getLogfrei1()  ));
+        vr.add(gimmeVal(rez.getLogfrei2()  ));
+        vr.add(gimmeVal(rez.getNumfrei1()  ));
+        vr.add(gimmeVal(rez.getNumfrei2()  ));
+        vr.add(gimmeVal(rez.getCharfrei1() ));
+        vr.add(gimmeVal(rez.getCharfrei2() ));
+        vr.add(gimmeVal(rez.getTermine()    ));
+        vr.add(gimmeVal(rez.getId()         ));
+        vr.add(gimmeVal(rez.getKTraegerName()));
+        vr.add(gimmeVal(rez.getkId()        ));
+        vr.add(gimmeVal(rez.getPatId()      ));
+        vr.add(gimmeVal(rez.getZZStatus()   ));
+        vr.add(gimmeVal(rez.getLastDate()   ));
+        vr.add(gimmeVal(rez.getPreisGruppe()));
+        vr.add(gimmeVal(rez.getBegruendADR()));
+        vr.add(gimmeVal(rez.getHausBesuch() ));
+        vr.add(gimmeVal(rez.getIndikatSchl()));
+        vr.add(gimmeVal(rez.getAngelegtVon()));
+        vr.add(gimmeVal(rez.getBarcodeform()));
+        vr.add(gimmeVal(rez.getDauer()      ));
+        for (int i=1;i<=4;i++) {
+            vr.add(gimmeVal(rez.getHMPos(i)));
+        }
+        vr.add(gimmeVal(rez.getFrequenz   ()));
+        vr.add(gimmeVal(rez.getLastEditor ()));
+        vr.add(gimmeVal(rez.getBerId      ()));
+        vr.add(gimmeVal(rez.getArztBericht()));
+        vr.add(gimmeVal(rez.getLastEdDate ()));
+        vr.add(gimmeVal(rez.getFarbcode   ()));
+        vr.add(gimmeVal(rez.getRSplit     ()));
+        vr.add(gimmeVal(rez.getJahrfrei   ()));
+        vr.add(gimmeVal(rez.getUnter18    ()));
+        vr.add(gimmeVal(rez.getHbVoll     ()));
+        vr.add(gimmeVal(rez.getAbschluss  ()));
+        vr.add(gimmeVal(rez.getZZRegel    ()));
+        vr.add(gimmeVal(rez.getAnzahlHb   ()));
+        for (int i=1;i<=6;i++) {
+            vr.add(gimmeVal(rez.getHMKuerzel(i)));
+        }
+        vr.add(gimmeVal(rez.getIcd10    ()));
+        vr.add(gimmeVal(rez.getIcd10_2  ()));
+        vr.add(gimmeVal(rez.getPauschale()));
+        
+        vecRezList.add(vr);
+        
+        return vecRezList;
+    }
+    
+    private static String gimmeVal(int val) {
+        return String.valueOf(val);
+    }
+    private static String gimmeVal(String val) {
+        return val == null ? "" : val;
+    }
+    private static String gimmeVal(BigDecimal val) {
+        return val == null ? "0" : String.valueOf(val);
+    }
+    private static String gimmeVal(Money val) {
+        return val == null ? "0.00" : String.valueOf(val);
+    }
+    private static String gimmeVal(LocalDate val) {
+        return val == null ? "" : val.format(DateTimeFormatters.yyyyMMddmitBindestrich);
     }
 
 }
