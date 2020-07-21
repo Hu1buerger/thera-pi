@@ -90,7 +90,7 @@ public class OffenepostenPanel extends JXPanel implements TableModelListener {
     String[] spalten = { "Rechn.Nr.", "R.Datum", "Kasse", "Name/Notiz", "Sparte", "Gesamtbetrag", "Offen", "bezahlt am",
             "Zuzahlung", "1.Mahnung", "2.Mahnung", "3.Mahnung", "Mahnsperre", "Pat.Nr.", "IK Kostentr.", "id", "IK" };
     String[] colnamen = { "r_nummer", "r_datum", "r_kasse", "r_name", "r_klasse", "r_betrag", "r_offen", "r_bezdatum",
-            "r_zuzahl", "r_mahndat1", "r_mahndat2", "r_mahndat3", "mahnsperr", "pat_intern", "ikktraeger", "id", "ik" };
+            "r_zuzahl", "mahndat1", "mahndat2", "mahndat3", "mahnsperr", "pat_intern", "ikktraeger", "id", "ik" };
     OffenepostenTab eltern = null;
 
     private OpShowGesamt sumPan;
