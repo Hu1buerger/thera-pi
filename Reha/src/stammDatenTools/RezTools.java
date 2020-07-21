@@ -3172,6 +3172,13 @@ public class RezTools {
         return false;
     }
     
+    /**
+     * This will transform a Rezept-class Rezept into the a vector-based Rezept.
+     * Use it e.g. where you want to replace code that grabs a vec from DB or expects a vec-based Rezept
+     * 
+     * @param rez   the Rezept-class based Rezept
+     * @return      a vec<vec<string>> based rezept
+     */
     public static Vector<Vector<String>> Rez2Vec(Rezept rez) {
         Vector<Vector<String>> vecRezList = new Vector<Vector<String>>();
         Vector<String> vr = new Vector<String>();
