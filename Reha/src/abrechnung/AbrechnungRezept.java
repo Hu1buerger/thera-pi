@@ -3569,7 +3569,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             }
 
         } catch (NullPointerException ex) {
-            JOptionPane.showMessageDialog(null, "Fehler bei der Erstellung des Behanlungstages");
+            JOptionPane.showMessageDialog(null, "Fehler bei der Erstellung des Behandlungstages");
             ex.printStackTrace();
         }
         return node;
@@ -4472,29 +4472,6 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     }
 }
 
-class MyDateCellEditor extends AbstractCellEditor implements TableCellEditor {
-    private static final long serialVersionUID = 1L;
-    JComponent component = new JXDatePicker();
-    SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
 
-    // This method is called when a cell value is edited by the user.
-    @Override
-    public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int rowIndex,
-            int vColIndex) {
-        if (isSelected) {
-            ((JXDatePicker) component).getEditor()
-                                      .setEditable(false);
-            ((JXDatePicker) component).setDate((Date) value);
-            ((JXDatePicker) component).setVisible(true);
-            return component;
-        }
-        return null;
 
-    }
-
-    @Override
-    public Object getCellEditorValue() {
-        return ((JXDatePicker) component).getDate();
-    }
-}
 

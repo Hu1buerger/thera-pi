@@ -367,9 +367,8 @@ public class TherapieBerichte extends JXPanel implements ListSelectionListener, 
             public void mouseClicked(MouseEvent arg0) {
 
                 if (arg0.getClickCount() == 2) {
-                    // hier pr�fen welcher Berichtstyp und dementsprechend das Berichtsfenster
-                    // �ffnen
-                    /// neuanlageRezept(false,"");
+                    // hier prüfen welcher Berichtstyp und dementsprechend das Berichtsfenster
+                    // öffnen
                     int wahl = tabbericht.getSelectedRow();
                     if (wahl < 0) {
                         return;

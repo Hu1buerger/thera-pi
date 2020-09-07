@@ -152,8 +152,7 @@ public class Gutachten extends JXPanel implements ActionListener, TableModelList
                         return;
                     }
                     // hier prüfen welcher Berichtstyp und dementsprechend das Berichtsfenster
-                    // �ffnen
-                    /// neuanlageRezept(false,"");
+                    // öffnen
                     int wahl = tabbericht.getSelectedRow();
                     if (wahl < 0) {
                         return;
