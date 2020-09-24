@@ -594,14 +594,20 @@ class OpRgafMahnungen extends JXPanel implements RgAfVk_IfCallBack {
                 rsMetaData = rs.getMetaData();
                 int numberOfColumns = rsMetaData.getColumnCount() + 1;
                 for (int i = 1; i < numberOfColumns; i++) {
-                    if (rsMetaData.getColumnClassName(i).toString().equals("java.lang.String")) {
+                    String colClassName = rsMetaData.getColumnClassName(i)
+                            .toString();
+                    if (colClassName.equals("java.lang.String")) {
                         vec.add((rs.getString(i) == null ? "" : rs.getString(i)));
-                    } else if (rsMetaData.getColumnClassName(i).toString().equals("java.math.BigDecimal")) {
+                    } else if (colClassName.equals("java.math.BigDecimal")) {
                         vec.add(rs.getBigDecimal(i).doubleValue());
-                    } else if (rsMetaData.getColumnClassName(i).toString().equals("java.sql.Date")) {
+                    } else if (colClassName.equals("java.sql.Date")) {
                         vec.add(rs.getDate(i));
-                    } else if (rsMetaData.getColumnClassName(i).toString().equals("java.lang.Integer")) {
+                    } else if (colClassName.equals("java.lang.Integer")) {
                         vec.add(rs.getInt(i));
+                    } else if (colClassName.equals("[B")) {
+                        vec.add((rs.getString(i) == null ? "" : rs.getString(i)));
+                    } else {
+                        logger.error("unexpected ColumnClassName '" + colClassName + "' at column " + i);                        
                     }
                 }
                 tabmod.addRow((Vector<?>) vec.clone());

@@ -666,27 +666,29 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                 rsMetaData = rs.getMetaData();
                 int numberOfColumns = rsMetaData.getColumnCount() + 1;
                 for (int i = 1; i < numberOfColumns; i++) {
-                    if (rsMetaData.getColumnClassName(i)
-                                  .toString()
-                                  .equals("java.lang.String")) {
+                    String colClassName = rsMetaData.getColumnClassName(i)
+                                                    .toString();
+                    if (colClassName.equals("java.lang.String")) {
                         vec.add((rs.getString(i) == null ? "" : rs.getString(i)));
-                    } else if (rsMetaData.getColumnClassName(i)
-                                         .toString()
-                                         .equals("java.math.BigDecimal")) {
+                    } else if (colClassName.equals("java.math.BigDecimal")) {
                         vec.add(rs.getBigDecimal(i)
                                   .doubleValue());
-                    } else if (rsMetaData.getColumnClassName(i)
-                                         .toString()
-                                         .equals("java.sql.Date")) {
+                    } else if (colClassName.equals("java.sql.Date")) {
                         try {
                             vec.add(rs.getDate(i));
                         } catch (SQLException e) {
                             vec.add(null);
                         }
-                    } else if (rsMetaData.getColumnClassName(i)
-                                         .toString()
-                                         .equals("java.lang.Integer")) {
+                    } else if (colClassName.equals("java.lang.Integer")) {
                         vec.add(rs.getInt(i));
+                    } else if (colClassName.equals("[B")) {
+                        try {
+                            vec.add(rs.getString(i));
+                        } catch (SQLException e) {
+                            vec.add(null);
+                        }
+                    } else {
+                        logger.error("unexpected ColumnClassName '" + colClassName + "' at column " + i);                        
                     }
                 }
 
@@ -857,7 +859,7 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                     geldeingangTf.setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen)));
                 }
             } catch (Exception ex) {
-                logger.error("Fehler ind der Dateneingabe", ex);
+                logger.error("Fehler in der Dateneingabe", ex);
                 JOptionPane.showMessageDialog(null, "Fehler in der Dateneingabe");
             }
         }
