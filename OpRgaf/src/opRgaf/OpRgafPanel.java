@@ -361,15 +361,11 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                 @Override
                 protected Void doInBackground() throws Exception {
                     try {
-                        // System.out.println("in Ausfallrechnung");
                         String id = tab.getValueAt(tab.getSelectedRow(), 11)
                                        .toString();
-                        String rez_nr = SqlInfo.holeEinzelFeld(
-                                "select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
-                        String pat_intern = SqlInfo.holeEinzelFeld(
-                                "select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
-                        String rdatum = SqlInfo.holeEinzelFeld(
-                                "select rdatum from rgaffaktura where id='" + id + "' LIMIT 1");
+                        String rez_nr = getFieldFromRgaffAtId ("reznr", id);
+                        String pat_intern = getFieldFromRgaffAtId ("pat_intern", id);
+                        String rdatum = getFieldFromRgaffAtId ("rdatum", id);
                         AusfallRechnung ausfall = new AusfallRechnung(pat_intern, rez_nr,
                                 rnr, rdatum, OpRgafPanel.this.ik);
                         ausfall.setModal(true);
@@ -750,13 +746,10 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                                        .toString();
                         String rnr = tab.getValueAt(i, 1)
                                         .toString();
-                        String rez_nr = SqlInfo.holeEinzelFeld(
-                                "select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
-                        String pat_intern = SqlInfo.holeEinzelFeld(
-                                "select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
+                        String rez_nr = getFieldFromRgaffAtId ("reznr", id);
+                        String pat_intern = getFieldFromRgaffAtId ("pat_intern", id);
                         new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
                                 "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + rez_nr);
-                        // System.out.println("Satz "+i);
 
                         if (rnr.startsWith("VR-")) { // test ob VR -> bar ausbuchen enabled/disabled
                             if (!iniOpRgAf.getVrCashAllowed()) {
@@ -782,10 +775,17 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
         }
     }
 
+    private String getFieldFromRgaffAtId (String field, String id) {
+        String data = SqlInfo.holeEinzelFeld(
+                "select " + field + " from rgaffaktura where id='" + id + "' LIMIT 1");
+        return data;
+    }
+
+
     @Override
     public void tableChanged(TableModelEvent arg0) {
         if (arg0.getType() == TableModelEvent.INSERT) {
-            System.out.println("Insert");
+            logger.info("Insert");
             return;
         }
         if (arg0.getType() == TableModelEvent.UPDATE) {
@@ -833,7 +833,7 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                         String cmd = "update verkliste set " + hmMap2VerkListe.get(colname) + " ="
                                 + (value != null ? "'" + value + "'" : "null") + " where verklisteID='" + id
                                 + "' LIMIT 1";
-                        System.out.println(cmd);
+                        logger.info(cmd);
                         SqlInfo.sqlAusfuehren(cmd);
                     } else {
                         new SwingWorker<Void, Void>() {
@@ -854,7 +854,6 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                 } else {
                     String cmd = "update rgaffaktura set " + colname + "="
                             + (value != null ? "'" + value + "'" : "null") + " where id='" + id + "' LIMIT 1";
-                    // System.out.println(cmd);
                     SqlInfo.sqlAusfuehren(cmd);
                     geldeingangTf.setText(dcf.format(tabmod.getValueAt(tab.convertRowIndexToModel(row), IdxCol.Offen)));
                 }
@@ -874,13 +873,13 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                        .toString();
         String rgnr = tab.getValueAt(tab.getSelectedRow(), 1)
                          .toString();
-        String rez_nr = SqlInfo.holeEinzelFeld("select reznr from rgaffaktura where id='" + id + "' LIMIT 1");
-        String pat_intern = SqlInfo.holeEinzelFeld("select pat_intern from rgaffaktura where id='" + id + "' LIMIT 1");
-        String rdatum = SqlInfo.holeEinzelFeld("select rdatum from rgaffaktura where id='" + id + "' LIMIT 1");
-        String rezgeb = SqlInfo.holeEinzelFeld("select rgbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
-        String pauschale = SqlInfo.holeEinzelFeld("select rpbetrag from rgaffaktura where id='" + id + "' LIMIT 1");
-        String gesamt = SqlInfo.holeEinzelFeld("select rgesamt from rgaffaktura where id='" + id + "' LIMIT 1");
-        // System.out.println("Rezeptnummer = "+rez_nr);
+        String rez_nr = getFieldFromRgaffAtId ("reznr", id);
+        String pat_intern = getFieldFromRgaffAtId ("pat_intern", id);
+        String rdatum = getFieldFromRgaffAtId ("rdatum", id);
+        String rezgeb = getFieldFromRgaffAtId ("rgbetrag", id);
+        String pauschale = getFieldFromRgaffAtId ("rpbetrag", id);
+        String gesamt = getFieldFromRgaffAtId ("rgesamt", id);
+        logger.info("RezeptGebKopie = "+rez_nr);
         new InitHashMaps();
 
         String test = SqlInfo.holeEinzelFeld("select id from verordn where rez_nr = '" + rez_nr + "' LIMIT 1");
