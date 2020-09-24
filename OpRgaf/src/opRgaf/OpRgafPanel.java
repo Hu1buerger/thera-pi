@@ -746,12 +746,17 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                                        .toString();
                         String rnr = tab.getValueAt(i, 1)
                                         .toString();
-                        String rez_nr = getFieldFromRgaffAtId ("reznr", id);
-                        String pat_intern = getFieldFromRgaffAtId ("pat_intern", id);
-                        new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
-                                "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + rez_nr);
 
                         if (rnr.startsWith("VR-")) { // test ob VR -> bar ausbuchen enabled/disabled
+                            String pat_intern = SqlInfo.holeEinzelFeld(
+                                    "select pat_id from verkliste where verklisteID='" + id + "' LIMIT 1");
+                            int patId = Integer.parseInt(pat_intern);
+                            if (patId > 0) {
+                                new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
+                                        "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + "0");
+                            } else { // VR ist keinem Pat. zugeordnet (Kasse oder Adr. v. Hd. eingegeben)
+                                //FIXME: Pat-Panel auf init-Zustand (= kein Pat angezeigt) setzen?
+                            }
                             if (!iniOpRgAf.getVrCashAllowed()) {
                                 bar.setEnabled(false);
                                 bar.setToolTipText("not allowed for VR (see System-Init)");
@@ -761,6 +766,10 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
                                 }
                             }
                         } else {
+                            String rez_nr = getFieldFromRgaffAtId ("reznr", id);
+                            String pat_intern = getFieldFromRgaffAtId ("pat_intern", id);
+                            new SocketClient().setzeRehaNachricht(OpRgaf.rehaReversePort,
+                                    "OpRgaf#" + RehaIOMessages.MUST_PATANDREZFIND + "#" + pat_intern + "#" + rez_nr);
                             bar.setEnabled(true);
                             bar.setToolTipText("");
                             if (barWasSelected) { // Status 'bar in Kasse' wieder herstellen
