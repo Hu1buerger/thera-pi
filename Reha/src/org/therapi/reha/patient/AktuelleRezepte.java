@@ -1402,7 +1402,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 "SB7", "PS1", "PS2", "PS3", "PS4", "PS5", "k.A." };
         indlogo = new String[] { "kein IndiSchl.", "RE1", "RE2", "SC1", "SC2", "SF", "SP1", "SP2", "SP3", "SP4", "SP5",
                 "SP6", "ST1", "ST2", "ST3", "ST4", "SPZ", "SCZ", "OFZ", "k.A." };
-        indpodo = new String[] { "kein IndiSchl.", "DFa", "DFb", "DFc", "k.A." };
+        indpodo = new String[] { "kein IndiSchl.", "DFa", "DFb", "DFc", "NF", "QF", "k.A." };
 
     }
 
