@@ -30,6 +30,7 @@ public class DueUpdates {
     public void init() {
 
         add(new VerkaufsTabellenUpdate());
+        add(new DB_Update_024());
 
     }
 
