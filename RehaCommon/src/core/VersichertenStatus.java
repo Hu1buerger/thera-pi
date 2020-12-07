@@ -9,6 +9,7 @@ public enum VersichertenStatus {
     INVALID(-1);
 
 
+
     private int nummer;
 
     VersichertenStatus(int i) {
@@ -30,8 +31,7 @@ public enum VersichertenStatus {
             if (ziffer == status.nummer)
                 return status;
         }
-
-        throw new IllegalArgumentException("unbekannte status Ziffer " + ziffer);
-    }
+        return INVALID;
+   }
 
 }
