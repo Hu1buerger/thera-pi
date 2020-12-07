@@ -217,6 +217,7 @@ public class SystemConfig {
 
     public static Vector<Vector<String>> vUserTasks = new Vector<Vector<String>>();
     private static final Logger logger = LoggerFactory.getLogger(SystemConfig.class);
+    private static EnumSet<Disziplin> aktiveDisziplinen;
 
     public SystemConfig() {
 
@@ -1235,6 +1236,7 @@ public class SystemConfig {
             rezeptKlassenAktiv = new Vector<Vector<String>>();
 
             int aktiv;
+            aktiveDisziplinen = EnumSet.noneOf(Disziplin.class);
             for (int i = 0; i < rezeptKlassenAnzahl; i++) {
                 final Vector<String> vec = new Vector<String>();
                 try {
@@ -1246,16 +1248,26 @@ public class SystemConfig {
                     aktiv = inif.getIntegerProperty("RezeptKlassen", "KlasseAktiv" + Integer.valueOf(i + 1)
                                                                                             .toString());
                     if (aktiv > 0) {
-                        vec.clear();
+                        Vector<String> vec = new Vector<String>();
                         vec.add(String.valueOf(rezeptKlassen[i]));
-                        vec.add(inif.getStringProperty("RezeptKlassen", "KlasseKurz" + Integer.valueOf(i + 1)
-                                                                                              .toString()));
+                        String klassekurz = inif.getStringProperty("RezeptKlassen",
+                                "KlasseKurz" + Integer.valueOf(i + 1)
+                                                      .toString());
+                        vec.add(klassekurz);
+                        try {
+                            aktiveDisziplinen.add(Disziplin.valueOf(klassekurz));
+                        } catch (Exception e) {
+                            logger.debug("could not evaluate " + klassekurz + " as Disziplin");
+                        }
                         rezeptKlassenAktiv.add(vec);
                     }
                 } catch (final Exception ex) {
                     logger.info("Fehler bei Rezeptklasse " + i, ex);
                 }
             }
+
+            logger.debug("aktive Rezeptklassen: " + rezeptKlassenAktiv);
+            Betriebsumfeld.umfeld.mandant(). disziplinen(aktiveDisziplinen);
             rezGebDrucker = inif.getStringProperty("DruckOptionen", "RezGebDrucker");
             rezGebVorlageNeu = Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/"
                     + inif.getStringProperty("Vorlagen", "RezGebVorlageNeu");

@@ -1,12 +1,16 @@
 package mandant;
 
+import java.util.EnumSet;
 import java.util.Objects;
+
+import core.Disziplin;
 
 public class Mandant {
 
     private IK ik;
     private String name;
     public final static Mandant nullMandant = new Mandant("000000000", "Übungs-Mandant");
+    private EnumSet<Disziplin> aktiveDisziplinen = EnumSet.noneOf(Disziplin.class);
 
     public Mandant(String ik, String name) {
         this.ik = new IK(ik);
@@ -46,6 +50,14 @@ public class Mandant {
 
     public IK ik() {
         return ik;
+    }
+
+    public void disziplinen(EnumSet<Disziplin> aktiveDisziplinen) {
+        this.aktiveDisziplinen = aktiveDisziplinen;
+    }
+
+    public EnumSet<Disziplin> disziplinen() {
+        return aktiveDisziplinen;
     }
 
 }
