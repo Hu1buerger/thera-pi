@@ -320,7 +320,6 @@ public class Reha implements RehaEventListener , Monitor{
                     inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + DefaultMandant));
         }
 
-         new Betriebsumfeld(mainMandant);
 
         new Reha().startWithMandantSet(mainMandant);
 
@@ -331,7 +330,7 @@ public class Reha implements RehaEventListener , Monitor{
         logger = LoggerFactory.getLogger(Reha.class);
     }
     public void startWithMandantSet(Mandant mandant) {
-
+        new Betriebsumfeld(mandant);
         logger.info("Thera-Pi Version: " + new Version().number());
         logger.info("Java Version:     " + System.getProperty("java.version"));
 

@@ -87,7 +87,7 @@ public class TheraPi {
         Reha.initializeLogging();
         Reha reha = new Reha();
 
-        new Betriebsumfeld(mandant);
+
 
         reha.startWithMandantSet(mandant);
     }
