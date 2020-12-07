@@ -145,7 +145,7 @@ public class BerichtArztAuswahl extends JXPanel implements ActionListener, KeyLi
     }
 
     private void ladeTabelle() {
-        String test = Reha.instance.patpanel.patDaten.get(63);
+        String test = Reha.instance.patpanel.getPatDaten().get(63);
         if (test.trim()
                 .equals("")) {
             JOptionPane.showMessageDialog(null, "Mit der Arztliste dieses Patienten läuft etwas schief....");
@@ -247,7 +247,7 @@ public class BerichtArztAuswahl extends JXPanel implements ActionListener, KeyLi
                     "select nachname,vorname,strasse,ort,arztnum,bsnr,id from arzt where id = '" + tf[2].getText()
                             + "' LIMIT 1");
             if (vec.size() > 0) {
-                String test = Reha.instance.patpanel.patDaten.get(63);
+                String test = Reha.instance.patpanel.getPatDaten().get(63);
                 if (!test.contains("@" + tf[2].getText()
                                               .trim()
                         + "@")) {
@@ -263,7 +263,7 @@ public class BerichtArztAuswahl extends JXPanel implements ActionListener, KeyLi
                         test = test + "@" + tf[2].getText()
                                                  .trim()
                                 + "@\n";
-                        Reha.instance.patpanel.patDaten.set(63, test);
+                        Reha.instance.patpanel.getPatDaten().set(63, test);
                         String cmd = "update pat5 set aerzte='" + test + "' where pat_intern='"
                                 + Reha.instance.patpanel.aktPatID + "' LIMIT 1";
                         new ExUndHop().setzeStatement(cmd);

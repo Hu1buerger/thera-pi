@@ -1080,7 +1080,7 @@ public class AbrechnungReha extends JXPanel {
                 // hier die VSNR ermitteln
 
                 Vector<Vector<String>> vecvsnr = SqlInfo.holeFelder(
-                        "select berichtid from berhist where pat_intern = '" + Reha.instance.patpanel.patDaten.get(29)
+                        "select berichtid from berhist where pat_intern = '" + Reha.instance.patpanel.getPatDaten().get(29)
                                 + "' and bertitel like 'Reha-Ent%' order by id DESC LIMIT 1");
                 String vsnr = SqlInfo.holeEinzelFeld("select vnummer from bericht2 where berichtid = '" + vecvsnr.get(0)
                                                                                                                  .get(0)

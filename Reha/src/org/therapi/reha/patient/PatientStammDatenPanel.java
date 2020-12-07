@@ -183,29 +183,29 @@ public class PatientStammDatenPanel extends JXPanel {
             }
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(0)
+            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(0)
                                                                               .trim()),
                     "ANREDE") + " "
-                    + makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(1)
+                    + makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(1)
                                                                             .trim()),
                             "TITEL"));
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte3\" align=\"left\">");
             buf1.append("<b><font color=#000000>"
-                    + makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(2)), "N_NAME") + ", "
-                    + makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(3)), "V_NAME") + "</font></b>");
+                    + makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(2)), "N_NAME") + ", "
+                    + makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(3)), "V_NAME") + "</font></b>");
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
             buf1.append("geb.: " + "<b><font color=#000000>"
-                    + makeLink(DatFunk.sDatInDeutsch(patientHauptPanel.patDaten.get(4)), "GEBOREN") + "</font></b>");
+                    + makeLink(DatFunk.sDatInDeutsch(patientHauptPanel.getPatDaten().get(4)), "GEBOREN") + "</font></b>");
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(21)), "STRASSE"));
+            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(21)), "STRASSE"));
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink(patientHauptPanel.patDaten.get(23), "PLZ") + " "
-                    + makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(24)), "ORT"));
+            buf1.append(makeLink(patientHauptPanel.getPatDaten().get(23), "PLZ") + " "
+                    + makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(24)), "ORT"));
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
@@ -213,19 +213,19 @@ public class PatientStammDatenPanel extends JXPanel {
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink("Tel.(p): " + StringTools.EGross(patientHauptPanel.patDaten.get(18)), "TELEFONP"));
+            buf1.append(makeLink("Tel.(p): " + StringTools.EGross(patientHauptPanel.getPatDaten().get(18)), "TELEFONP"));
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink("Tel.(g): " + StringTools.EGross(patientHauptPanel.patDaten.get(19)), "TELEFONG"));
+            buf1.append(makeLink("Tel.(g): " + StringTools.EGross(patientHauptPanel.getPatDaten().get(19)), "TELEFONG"));
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink("Mobil: " + StringTools.EGross(patientHauptPanel.patDaten.get(20)), "TELEFONM"));
+            buf1.append(makeLink("Mobil: " + StringTools.EGross(patientHauptPanel.getPatDaten().get(20)), "TELEFONM"));
             buf1.append("</td></tr>");
 
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink("Email: " + patientHauptPanel.patDaten.get(50)
+            buf1.append(makeLink("Email: " + patientHauptPanel.getPatDaten().get(50)
                                                                        .toLowerCase(),
                     "EMAILA"));
             buf1.append("</td></tr>");
@@ -240,10 +240,10 @@ public class PatientStammDatenPanel extends JXPanel {
                     + "icons/system-users.png' width=30 height=30 border=0>");
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.patDaten.get(13)), "KASSE"));
+            buf1.append(makeLink(StringTools.EGross(patientHauptPanel.getPatDaten().get(13)), "KASSE"));
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf1.append(makeLink("Hausarzt: " + StringTools.EGross(patientHauptPanel.patDaten.get(25)), "ARZT"));
+            buf1.append(makeLink("Hausarzt: " + StringTools.EGross(patientHauptPanel.getPatDaten().get(25)), "ARZT"));
             buf1.append("</td></tr>");
             buf1.append("<tr><td class=\"spalte1\" align=\"left\">");
             buf1.append("&nbsp;");
@@ -285,16 +285,16 @@ public class PatientStammDatenPanel extends JXPanel {
         buf2.trimToSize();
         String dummy;
         buf2.append("<tr><td class=\"spalte1\" align=\"left\">");
-        dummy = patientHauptPanel.patDaten.get(56)
+        dummy = patientHauptPanel.getPatDaten().get(56)
                                           .trim()
                                           .replace("<", "&#60;");
         buf2.append(makeLink("Therapeut: " + (dummy.equals("") ? "<font color=#FF0000>k.A.</font>" : dummy.toString()),
                 "THERAPEUT"));
         buf2.append("</td></tr>");
-        if (patientHauptPanel.patDaten.get(33)
+        if (patientHauptPanel.getPatDaten().get(33)
                                       .equals("T")) {
             buf2.append("<tr><td class=\"spalte1\" align=\"left\">");
-            dummy = patientHauptPanel.patDaten.get(46)
+            dummy = patientHauptPanel.getPatDaten().get(46)
                                               .trim()
                                               .replace("<", "&#60;");
             buf2.append(makeLink(
@@ -307,23 +307,23 @@ public class PatientStammDatenPanel extends JXPanel {
             buf2.append(makeLink("Akutpat.: Nein", "AKUTBIS"));
             buf2.append("</td></tr>");
         }
-        if (!patientHauptPanel.patDaten.get(36)
+        if (!patientHauptPanel.getPatDaten().get(36)
                                        .trim()
                                        .equals("")) {
             buf2.append("<tr><td class=\"spalte1\" align=\"left\">");
             buf2.append("<u><i>Terminwünsche</i></u>");
             buf2.append("</td></tr>");
             buf2.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf2.append(makeLink(patientHauptPanel.patDaten.get(36)
+            buf2.append(makeLink(patientHauptPanel.getPatDaten().get(36)
                                                            .replace("<", "&#60;"),
                     "TERMINE1"));
             buf2.append("</td></tr>");
         }
-        if (!patientHauptPanel.patDaten.get(37)
+        if (!patientHauptPanel.getPatDaten().get(37)
                                        .trim()
                                        .equals("")) {
             buf2.append("<tr><td class=\"spalte1\" align=\"left\">");
-            buf2.append(makeLink(patientHauptPanel.patDaten.get(37)
+            buf2.append(makeLink(patientHauptPanel.getPatDaten().get(37)
                                                            .replace("<", "&#60;"),
                     "TERMINE2"));
             buf2.append("</td></tr>");
@@ -336,7 +336,7 @@ public class PatientStammDatenPanel extends JXPanel {
         buf3.trimToSize();
         String dummy;
         buf3.append("<tr><td class=\"spalte1\" align=\"left\">");
-        dummy = patientHauptPanel.patDaten.get(31)
+        dummy = patientHauptPanel.getPatDaten().get(31)
                                           .trim();
         if (dummy.length() == 10) {
             buf3.append("<tr><td class=\"spalte1\" align=\"left\">");
@@ -345,7 +345,7 @@ public class PatientStammDatenPanel extends JXPanel {
                             "AKUT_DAT"));
             buf3.append("</td></tr>");
         }
-        dummy = patientHauptPanel.patDaten.get(69)
+        dummy = patientHauptPanel.getPatDaten().get(69)
                                           .trim();
         if (!dummy.equals("")) {
             buf3.append("<tr><td class=\"spalte1\" align=\"left\">");

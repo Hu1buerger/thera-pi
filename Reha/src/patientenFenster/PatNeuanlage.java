@@ -446,9 +446,9 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                  */
                 arztbisher = jtf[17].getText();
                 kassebisher = jtf[12].getText();
-                kassenid = Reha.instance.patpanel.patDaten.get(68);
-                befreitdatum = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(31));
-                freizumstart = (Reha.instance.patpanel.patDaten.get(30)
+                kassenid = Reha.instance.patpanel.getPatDaten().get(68);
+                befreitdatum = DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(31));
+                freizumstart = (Reha.instance.patpanel.getPatDaten().get(30)
                                                                .equals("T") ? true : false);
                 if (!jtf[35].getText()
                             .trim()
@@ -600,7 +600,7 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
                                     "Dann eben nicht!\nVergessen Sie aber nicht den Befreiungsstatus der Rezepte von Hand zu ändern");
                         } else if (frage == JOptionPane.YES_OPTION) {
                             String pat_intern = Reha.instance.patpanel.aktPatID;
-                            String geboren = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
+                            String geboren = DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4));
                             String befreit = (freibeimspeichern ? "T" : "F");
 
                             String datum = (freibeimspeichern ? ""
@@ -1524,7 +1524,7 @@ public class PatNeuanlage extends JXPanel implements RehaTPEventListener, Action
         if (this.inNeu) {
             return;
         }
-        String aerzte = Reha.instance.patpanel.patDaten.get(63);
+        String aerzte = Reha.instance.patpanel.getPatDaten().get(63);
         String[] einzelarzt = null;
         String[] arztdaten = null;
         Vector<?> arztvec = null;
@@ -2256,6 +2256,6 @@ class ArztListeSpeichern {
         }
         SqlInfo.aktualisiereSaetze("pat5", "aerzte='" + aliste + "'", "pat_intern='" + xpatintern + "'");
         new ExUndHop().setzeStatement(cmd);
-        Reha.instance.patpanel.patDaten.set(63, aliste);
+        Reha.instance.patpanel.getPatDaten().set(63, aliste);
     }
 }

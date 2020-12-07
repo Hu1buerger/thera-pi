@@ -152,8 +152,8 @@ public class AbrechnungPrivat extends JXDialog {
                 Reha.instance.patpanel.vecaktrez.get(1),
                 SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1)))
                                           .get(preisgruppe - 1),
-                Reha.instance.patpanel.patDaten.get(5), Reha.instance.patpanel.patDaten.get(66),
-                Reha.instance.patpanel.vecaktrez, Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(),
+                Reha.instance.patpanel.getPatDaten().get(5), Reha.instance.patpanel.getPatDaten().get(66),
+                Reha.instance.patpanel.vecaktrez, Reha.instance.patpanel.getPatDaten(), Betriebsumfeld.getAktIK(),
                 SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung);
     }
 

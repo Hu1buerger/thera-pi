@@ -17,9 +17,9 @@ public class TestePatStamm {
                 return Reha.instance.patpanel.vecaktrez.get(16);
             }
         }
-        if (!(Reha.instance.patpanel.patDaten == null)) {
-            if (Reha.instance.patpanel.patDaten.size() > 0) {
-                return Reha.instance.patpanel.patDaten.get(67);
+        if (!(Reha.instance.patpanel.getPatDaten() == null)) {
+            if (Reha.instance.patpanel.getPatDaten().size() > 0) {
+                return Reha.instance.patpanel.getPatDaten().get(67);
             }
         } else {
             return "";
@@ -38,9 +38,9 @@ public class TestePatStamm {
                 return Reha.instance.patpanel.vecaktrez.get(37);
             }
         }
-        if (!(Reha.instance.patpanel.patDaten == null)) {
-            if (Reha.instance.patpanel.patDaten.size() > 0) {
-                return Reha.instance.patpanel.patDaten.get(68);
+        if (!(Reha.instance.patpanel.getPatDaten() == null)) {
+            if (Reha.instance.patpanel.getPatDaten().size() > 0) {
+                return Reha.instance.patpanel.getPatDaten().get(68);
             }
         } else {
             return "";

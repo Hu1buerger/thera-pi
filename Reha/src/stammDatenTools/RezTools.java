@@ -889,11 +889,11 @@ public class RezTools {
         ZuzahlModell zm = new ZuzahlModell();
         Rezeptvector myRezept = new Rezeptvector();
         myRezept.setVec_rez(Reha.instance.patpanel.vecaktrez);
-        String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
-        boolean warImVorjahrBefreit = Reha.instance.patpanel.patDaten.get(69)
+        String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4));
+        boolean warImVorjahrBefreit = Reha.instance.patpanel.getPatDaten().get(69)
                                                                      .trim()
                                                                      .equals(SystemConfig.vorJahr);
-        boolean istBefreit = "T".equals(Reha.instance.patpanel.patDaten.get(30));
+        boolean istBefreit = "T".equals(Reha.instance.patpanel.getPatDaten().get(30));
 
         // 1. Schritt haben wir bereits Termineintr�ge die man auswerten kann
         if (!(vAktTermine = holeEinzelTermineAusRezept("", termine)).isEmpty()) {
@@ -1062,8 +1062,8 @@ public class RezTools {
 
         zm.hausbesuch = "T".equals(Reha.instance.patpanel.vecaktrez.get(43));
         zm.hbvoll = "T".equals(Reha.instance.patpanel.vecaktrez.get(61));
-        zm.hbheim = "T".equals(Reha.instance.patpanel.patDaten.get(44));
-        zm.km = StringTools.ZahlTest(Reha.instance.patpanel.patDaten.get(48));
+        zm.hbheim = "T".equals(Reha.instance.patpanel.getPatDaten().get(44));
+        zm.km = StringTools.ZahlTest(Reha.instance.patpanel.getPatDaten().get(48));
         zm.preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41));
         zm.gesamtZahl = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(64));
         if (iret == 0) {

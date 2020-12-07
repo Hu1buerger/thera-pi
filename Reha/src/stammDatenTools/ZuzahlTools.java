@@ -97,7 +97,7 @@ public class ZuzahlTools {
         String aktzzregel = Reha.instance.patpanel.vecaktrez.get(63);
         if (unter18.equals("T") && (!aktzzregel.equals("0"))) {
             String stichtag = "";
-            String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4));
+            String geburtstag = DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4));
             String gebtag = (DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(22))).substring(0, 6)
                     + Integer.valueOf(Integer.valueOf(SystemConfig.aktJahr) - 18)
                              .toString();

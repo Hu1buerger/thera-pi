@@ -74,7 +74,7 @@ public class PatientHauptPanel extends JXPanel {
 
     ImageIcon[] imgzuzahl = new ImageIcon[4];
     ImageIcon[] imgrezstatus = new ImageIcon[2];
-    public Vector<String> patDaten = new Vector<String>();
+    private Vector<String> patDaten = new Vector<String>();
     public Vector<String> vecaktrez = null;
     public Vector<String> vecakthistor = null;
 
@@ -381,6 +381,14 @@ public class PatientHauptPanel extends JXPanel {
             patDatenOk = false;
             getStammDaten().parseHTML(false);
         }
+    }
+
+    public Vector<String> getPatDaten() {
+        return patDaten;
+    }
+
+    public void setPatDaten(Vector<String> patDaten) {
+        this.patDaten = patDaten;
     }
 }
 

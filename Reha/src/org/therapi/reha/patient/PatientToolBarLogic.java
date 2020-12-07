@@ -190,10 +190,10 @@ public class PatientToolBarLogic {
                     if ("".equals(patientHauptPanel.aktPatID)) {
                         return;
                     }
-                    String spat_intern = patientHauptPanel.patDaten.get(29);
+                    String spat_intern = patientHauptPanel.getPatDaten().get(29);
                     String srez_nr = "-1";
-                    String sbetreff = "Patient(in): " + StringTools.EGross(patientHauptPanel.patDaten.get(2)) + ", "
-                            + StringTools.EGross(patientHauptPanel.patDaten.get(3)) + " PatID: " + spat_intern;
+                    String sbetreff = "Patient(in): " + StringTools.EGross(patientHauptPanel.getPatDaten().get(2)) + ", "
+                            + StringTools.EGross(patientHauptPanel.getPatDaten().get(3)) + " PatID: " + spat_intern;
                     if (AktuelleRezepte.tabelleaktrez.getRowCount() > 0) {
                         srez_nr = Reha.instance.patpanel.vecaktrez.get(1);
                     }
@@ -249,7 +249,7 @@ public class PatientToolBarLogic {
                 }
 
             }
-            final String spat_intern = patientHauptPanel.patDaten.get(29);
+            final String spat_intern = patientHauptPanel.getPatDaten().get(29);
             final String xsrez_nr = srez_nr;
             new Thread() {
                 @Override
@@ -273,14 +273,14 @@ public class PatientToolBarLogic {
                             && (SystemConfig.hmSMS.get("SMS")
                                                   .equals("1"))) {
                         // nur wenn einen Mobilfunknummer eingetragen ist
-                        if (!patientHauptPanel.patDaten.get(20)
+                        if (!patientHauptPanel.getPatDaten().get(20)
                                                        .isEmpty()) {
                             Point pt = patientHauptPanel.jbut[4].getLocationOnScreen();
                             String stitel = ("SMS für Patient erstellen");
                             final SMSDialog smsDlg = new SMSDialog(Reha.getThisFrame(), stitel,
                                     PatientToolBarLogic.this, true, "SMS über " + SystemConfig.hmSMS.get("NAME")
-                                            + " an " + patientHauptPanel.patDaten.get(20),
-                                    patientHauptPanel.patDaten.get(20));
+                                            + " an " + patientHauptPanel.getPatDaten().get(20),
+                                    patientHauptPanel.getPatDaten().get(20));
                             smsDlg.setPreferredSize(new Dimension(475, 200));
                             smsDlg.setLocation(pt.x - 350, pt.y + 100);
                             smsDlg.pack();
@@ -321,7 +321,7 @@ public class PatientToolBarLogic {
                     // nur wenn SMS-Service aktiviert ist
 
                     // nur wenn einen Mobilfunknummer eingetragen ist
-                    if (patientHauptPanel.patDaten.size() > 0) {
+                    if (patientHauptPanel.getPatDaten().size() > 0) {
                         Point pt = patientHauptPanel.jbut[4].getLocationOnScreen();
                         String stitel = ("");
                         String mailtext = SystemConfig.hmAdrPDaten.get("<Pbanrede>")
@@ -339,7 +339,7 @@ public class PatientToolBarLogic {
                                                              .equals("") ? ""
                                                                      : "Internet: " + SystemConfig.hmFirmenDaten.get(
                                                                              "Internet"));
-                        String recipient = Reha.instance.patpanel.patDaten.get(50);
+                        String recipient = Reha.instance.patpanel.getPatDaten().get(50);
                         // +((Boolean) SystemConfig.hmIcalSettings.get("aufeigeneemail") ?
                         // ","+SystemConfig.hmEmailExtern.get("SenderAdresse") : "");
                         final EmailDialog emlDlg = new EmailDialog(Reha.getThisFrame(), stitel, recipient, "", mailtext,

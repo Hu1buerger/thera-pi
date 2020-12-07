@@ -286,9 +286,9 @@ public class HistorDaten extends JXPanel {
         reznum.addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                draghandler.setText(Reha.instance.patpanel.patDaten.get(0)
+                draghandler.setText(Reha.instance.patpanel.getPatDaten().get(0)
                                                                    .substring(0, 1)
-                        + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3)
+                        + "-" + Reha.instance.patpanel.getPatDaten().get(2) + "," + Reha.instance.patpanel.getPatDaten().get(3)
                         + "°" + reznum.getText() + "°" + rezlabs[14].getText());
                 JComponent c = draghandler;
                 TransferHandler th = c.getTransferHandler();

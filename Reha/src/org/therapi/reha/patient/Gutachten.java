@@ -483,7 +483,7 @@ public class Gutachten extends JXPanel implements ActionListener, TableModelList
             Reha.instance.patpanel.getTab()
                                   .setTitleAt(4, macheHtmlTitel(uebrig, "Gutachten"));
             if (uebrig <= 0) {
-                holeGutachten(Reha.instance.patpanel.patDaten.get(29), "");
+                holeGutachten(Reha.instance.patpanel.getPatDaten().get(29), "");
             } else {
             }
 
@@ -675,7 +675,7 @@ public class Gutachten extends JXPanel implements ActionListener, TableModelList
                 + tabbericht.getValueAt(row, 0)
                             .toString()
                 + " " + SystemConfig.PDFformularPfad + " " + Path.Instance.getProghome() + "ini/" + Betriebsumfeld.getAktIK()
-                + "/fremdprog.ini" + " " + Reha.instance.patpanel.patDaten.get(29) + " " + Path.Instance.getProghome()
+                + "/fremdprog.ini" + " " + Reha.instance.patpanel.getPatDaten().get(29) + " " + Path.Instance.getProghome()
                 + "ini/" + Betriebsumfeld.getAktIK() + "/rehajava.ini");
     }
 

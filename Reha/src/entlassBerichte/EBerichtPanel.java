@@ -1459,7 +1459,7 @@ public class EBerichtPanel extends JXPanel implements ChangeListener, RehaEventL
             } else {
                 entlassform = "nicht relevant";
             }
-            if (Reha.instance.patpanel.patDaten.get(0)
+            if (Reha.instance.patpanel.getPatDaten().get(0)
                                                .toString()
                                                .trim()
                                                .equalsIgnoreCase("Herr")) {

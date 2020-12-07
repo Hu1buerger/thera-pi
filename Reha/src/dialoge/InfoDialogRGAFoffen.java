@@ -134,7 +134,7 @@ public class InfoDialogRGAFoffen extends InfoDialog {
         bdata.append("<span " + getSpanStyle("14", "") + "Merkmale für diesen Patient</span><br>\n");
         int durchlauf = 0;
         for (int i = 62; i > 56; i--) {
-            if (Reha.instance.patpanel.patDaten.get(i)
+            if (Reha.instance.patpanel.getPatDaten().get(i)
                                                .equals("T")) {
                 /*
                  * vPatMerker.add(inif.getStringProperty("Kriterien", "Krit"+i)); String simg =

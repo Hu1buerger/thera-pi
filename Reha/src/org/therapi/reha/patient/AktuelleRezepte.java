@@ -48,7 +48,6 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.renderer.IconValues;
 import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -71,6 +70,7 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
+import core.Feature;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -83,6 +83,9 @@ import gui.Cursors;
 import hauptFenster.AktiveFenster;
 import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
+import hmv.Context;
+import hmv.HmvFrame;
+import hmv.User;
 import jxTableTools.MyTableStringDatePicker;
 import jxTableTools.TableTool;
 import krankenKasse.KassenFormulare;
@@ -153,6 +156,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private JButton deleteButton;
     private JButton printButton;
     private JButton arztBerichtButton;
+
+    private JButton hmr2020neu = new JButton("neu");
 
     private JButton rezeptGebuehrkassierenBtn = new JButton();
     private JButton rezeptgebuehrrechnungerstellenBtn = new JButton();
@@ -265,6 +270,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
         }.start();
 
+        if(new Feature("hmr2020").isEnabled()) {
+            hmr2020neu.addActionListener(e-> neueHmv2020());
+            LoggerFactory.getLogger(AktuelleRezepte.class).debug("enable listerner for hmr2020");
+
+        } else {
+            LoggerFactory.getLogger(AktuelleRezepte.class).debug("meeeeeeh");
+        }
+
+    }
+
+    private Object neueHmv2020() {
+   //     Context context = new Context(Betriebsumfeld.getAktMandant(), new User(Reha.aktUser), disziplinen, patient)
+        LoggerFactory.getLogger(AktuelleRezepte.class).debug("hmr2020 requested");
+
+          new   HmvFrame().setVisible(true);
+
+        return null;
     }
 
     private void ausfallrechnungerstellen() {
@@ -341,8 +363,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     @Override
                     protected Void doInBackground() throws Exception {
                         RezTools.constructRawHMap();
-                        RehaOOTools.starteStandardFormular(Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK()
-                                + "/" + formular.get(iformular), null, Reha.instance);
+                        RehaOOTools.starteStandardFormular(Path.Instance.getProghome() + "vorlagen/"
+                                + Betriebsumfeld.getAktIK() + "/" + formular.get(iformular), null, Reha.instance);
                         return null;
                     }
                 }.execute();
@@ -378,6 +400,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         neuButton.setEnabled(false);
         editButton.setEnabled(false);
         deleteButton.setEnabled(false);
+
+        hmr2020neu.setEnabled(false);
+
         arztBerichtButton.setEnabled(false);
         printButton.setEnabled(false);
         rezeptGebuehrkassierenBtn.setEnabled(false);
@@ -397,6 +422,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         neuButton.setEnabled(true);
         editButton.setEnabled(true);
         deleteButton.setEnabled(true);
+
+        hmr2020neu.setEnabled(true);
+
         arztBerichtButton.setEnabled(true);
         printButton.setEnabled(true);
         rezeptGebuehrkassierenBtn.setEnabled(true);
@@ -455,7 +483,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         deleteButton.setActionCommand("rezdelete");
         deleteButton.addActionListener(this);
         jtb.add(deleteButton);
-        jtb.addSeparator(new Dimension(30, 0));
+
+        if (new Feature("hmr2020").isEnabled()) {
+            jtb.add(hmr2020neu);
+            jtb.addSeparator(new Dimension(30, 0));
+        }
 
         printButton = new JButton();
         printButton.setIcon(SystemConfig.hmSysIcons.get("print"));
@@ -1115,7 +1147,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     public void setzeKarteiLasche() {
         if (tabelleaktrez.getRowCount() == 0) {
-            holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+            holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
             Reha.instance.patpanel.multiTab.setTitleAt(0,
                     macheHtmlTitel(tabelleaktrez.getRowCount(), "aktuelle Rezepte"));
         } else {
@@ -1417,7 +1449,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     }
                     ZuzahlTools.unter18TestDirekt(tage, true, false);
                 }
-                if (!Reha.instance.patpanel.patDaten.get(69)
+                if (!Reha.instance.patpanel.getPatDaten().get(69)
                                                     .equals("")) {
                     ZuzahlTools.jahresWechselTest(Reha.instance.patpanel.vecaktrez.get(1), true, false);
                 }
@@ -1508,12 +1540,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         }
         return true;
     }
-    static final List<String> dentistIndikation = new ArrayList<String>(Arrays.asList(new String[] { "CD1 a", "CD1 b", "CD1 c", "CD1 d", "CD2 a", "CD2 b", "CD2 c", "CD2 d", "ZNSZ", "CSZ a",
-            "CSZ b", "CSZ c", "LYZ1", "LYZ2", "SPZ", "SCZ", "OFZ" }));
 
+    static final List<String> dentistIndikation = new ArrayList<String>(
+            Arrays.asList(new String[] { "CD1 a", "CD1 b", "CD1 c", "CD1 d", "CD2 a", "CD2 b", "CD2 c", "CD2 d", "ZNSZ",
+                    "CSZ a", "CSZ b", "CSZ c", "LYZ1", "LYZ2", "SPZ", "SCZ", "OFZ" }));
 
     public static boolean isDentist(String sindi) {
-
 
         return dentistIndikation.contains(sindi);
     }
@@ -1698,7 +1730,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             break;
         case "rezneu":
-           LoggerFactory.getLogger(AktuelleRezepte.class).debug("rezneu by deprecated call");
+            LoggerFactory.getLogger(AktuelleRezepte.class)
+                         .debug("rezneu by deprecated call");
             break;
         case "rezedit":
             if (aktPanel.equals("leerPanel")) {
@@ -1746,7 +1779,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             anzahlRezepte.setText("Anzahl Rezepte: " + Integer.toString(uebrig));
             Reha.instance.patpanel.multiTab.setTitleAt(0, macheHtmlTitel(uebrig, "aktuelle Rezepte"));
             if (uebrig <= 0) {
-                holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
             } else {
             }
             break;
@@ -2185,39 +2218,39 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             int dummypeisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
 
-            if (Reha.instance.patpanel.patDaten.get(23)
+            if (Reha.instance.patpanel.getPatDaten().get(23)
                                                .trim()
                                                .length() != 5) {
                 JOptionPane.showMessageDialog(null, "Die im Patientenstamm zugewiesene Postleitzahl ist fehlerhaft");
                 return;
             }
-            if (Reha.instance.patpanel.patDaten.get(14)
+            if (Reha.instance.patpanel.getPatDaten().get(14)
                                                .trim()
                                                .equals("")) {
                 JOptionPane.showMessageDialog(null,
                         "Die im Patientenstamm zugewiesene Krankenkasse hat keine Kassennummer");
                 return;
             }
-            if (Reha.instance.patpanel.patDaten.get(15)
+            if (Reha.instance.patpanel.getPatDaten().get(15)
                                                .trim()
                                                .equals("")) {
                 JOptionPane.showMessageDialog(null, "Der Mitgliedsstatus fehlt im Patientenstamm, bitte eintragen");
                 return;
             }
-            if ("135".indexOf(Reha.instance.patpanel.patDaten.get(15)
+            if ("135".indexOf(Reha.instance.patpanel.getPatDaten().get(15)
                                                              .substring(0, 1)) < 0) {
                 JOptionPane.showMessageDialog(null, "Der im Patientenstamm vermerkte Mitgliedsstatus ist ungültig\n\n"
-                        + "Fehlerhafter Status = " + Reha.instance.patpanel.patDaten.get(15) + "\n");
+                        + "Fehlerhafter Status = " + Reha.instance.patpanel.getPatDaten().get(15) + "\n");
                 return;
             }
-            if (Reha.instance.patpanel.patDaten.get(16)
+            if (Reha.instance.patpanel.getPatDaten().get(16)
                                                .trim()
                                                .equals("")) {
                 JOptionPane.showMessageDialog(null,
                         "Die Krankenkassen-Mitgliedsnummer fehlt im Patientenstamm, bitte eintragen");
                 return;
             }
-            if (!Reha.instance.patpanel.patDaten.get(68)
+            if (!Reha.instance.patpanel.getPatDaten().get(68)
                                                 .trim()
                                                 .equals(Reha.instance.patpanel.vecaktrez.get(37))) {
                 JOptionPane.showMessageDialog(null,
@@ -2762,7 +2795,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
             return;
         }
-        if (DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)))) {
+        if (DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4)))) {
             JOptionPane.showMessageDialog(null,
                     "Stand heute ist der Patient noch nicht Volljährig - Zuzahlung deshalb (bislang) noch nicht erforderlich");
             return;
@@ -2847,7 +2880,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         SystemConfig.hmAdrRDaten.put("<Bnr>", SystemConfig.hmAdrRDaten.get("<Rnummer>"));
         SystemConfig.hmAdrRDaten.put("<Buser>", Reha.aktUser);
         SystemConfig.hmAdrRDaten.put("<Rpatid>", Reha.instance.patpanel.vecaktrez.get(0));
-        RehaOOTools.starteBacrodeFormular(Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/" + url,
+        RehaOOTools.starteBacrodeFormular(
+                Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/" + url,
                 SystemConfig.rezBarcodeDrucker, Reha.instance);
 
     }
@@ -3024,14 +3058,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } else {
                     if (aktPanel.equals("leerPanel")) {
                         try {
-                            holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                            holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             JOptionPane.showMessageDialog(null, "Fehler in holeRezepte\n" + ex.getMessage());
                         }
                     } else {
                         try {
-                            holeRezepte(Reha.instance.patpanel.patDaten.get(29), this.sRezNumNeu);
+                            holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), this.sRezNumNeu);
                         } catch (Exception ex) {
                             ex.printStackTrace();
                             JOptionPane.showMessageDialog(null, "Fehler in holeRezepte\n" + ex.getMessage());
@@ -3067,13 +3101,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
                         Arrays.asList(new String[] { "id" }));
                 SqlInfo.sqlAusfuehren("delete from verordn where rez_nr='" + rez_nr + "'");
-                Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
                 final String xrez_nr = String.valueOf(rez_nr);
 
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        Reha.instance.patpanel.historie.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                        Reha.instance.patpanel.historie.holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
                         SqlInfo.sqlAusfuehren("delete from fertige where rez_nr='" + xrez_nr + "'");
                         RezTools.loescheRezAusVolleTabelle(xrez_nr);
                         if (Reha.instance.abrechnungpanel != null) {
@@ -3177,7 +3211,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
                 return;
             }
-            if (DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)))) {
+            if (DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4)))) {
                 JOptionPane.showMessageDialog(null,
                         "Stand heute ist der Patient noch nicht Volljährig - Zuzahlung deshalb (bislang) noch nicht erforderlich");
                 return;

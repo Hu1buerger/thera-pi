@@ -498,7 +498,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
         double gesamtumsatz = gesamtHistor + gesamtAkt;
         DecimalFormat dfx = new DecimalFormat("0.00");
         String msg = "<html><font font-family='Courier New'>Gesamtumsatz von Patient --> "
-                + Reha.instance.patpanel.patDaten.get(2) + ", " + Reha.instance.patpanel.patDaten.get(3)
+                + Reha.instance.patpanel.getPatDaten().get(2) + ", " + Reha.instance.patpanel.getPatDaten().get(3)
                 + "&nbsp;&nbsp;&nbsp;&nbsp;" + "<br><br>Historie&nbsp;=&nbsp;" + dfx.format(gesamtHistor) + " EUR"
                 + "<br>Aktuell&nbsp;&nbsp;=&nbsp;" + dfx.format(gesamtAkt) + " EUR"
                 + "<br><br><p><b>Gesamt = <font align='center' color='#FF0000'>" + dfx.format(gesamtumsatz)
@@ -856,7 +856,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                 // new sqlTools.ExUndHop().setzeStatement("delete from faktura where
                 // rez_nr='"+rez_nr+"'");
                 setzeKarteiLasche();
-                Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+                Reha.instance.patpanel.aktRezept.holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -869,7 +869,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
 
     public void setzeKarteiLasche() {
         if (tabhistorie.getRowCount() == 0) {
-            holeRezepte(Reha.instance.patpanel.patDaten.get(29), "");
+            holeRezepte(Reha.instance.patpanel.getPatDaten().get(29), "");
             Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabhistorie.getRowCount(), "Rezept-Historie"));
         } else {
             Reha.instance.patpanel.multiTab.setTitleAt(1, macheHtmlTitel(tabhistorie.getRowCount(), "Rezept-Historie"));

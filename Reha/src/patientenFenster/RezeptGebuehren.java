@@ -515,7 +515,7 @@ public class RezeptGebuehren extends RehaSmartDialog implements ActionListener {
                 cmd = "insert into kasse set einnahme='" + SystemConfig.hmAdrRDaten.get("<Rendbetrag>")
                                                                                    .replaceAll(",", ".")
                         + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='"
-                        + Reha.instance.patpanel.patDaten.get(2) + "," + SystemConfig.hmAdrRDaten.get("<Rnummer>")
+                        + Reha.instance.patpanel.getPatDaten().get(2) + "," + SystemConfig.hmAdrRDaten.get("<Rnummer>")
                         + "', " + "pat_intern='" + SystemConfig.hmAdrRDaten.get("<Rpatid>") + "', " + "rez_nr='"
                         + SystemConfig.hmAdrRDaten.get("<Rnummer>") + "' ," + "user='" + Reha.aktUser + "'," + "ik='"
                         + Betriebsumfeld.getAktIK() + "'";

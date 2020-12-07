@@ -79,9 +79,9 @@ public class EBerichtTab {
         bisher = bisher.replaceAll("<html>", "");
         String titel = "";
         titel = titel + bisher;
-        titel = titel + "  [Patient: " + Reha.instance.patpanel.patDaten.get(2) + ", "
-                + Reha.instance.patpanel.patDaten.get(3) + " geb. am:"
-                + DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4))
+        titel = titel + "  [Patient: " + Reha.instance.patpanel.getPatDaten().get(2) + ", "
+                + Reha.instance.patpanel.getPatDaten().get(3) + " geb. am:"
+                + DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4))
                 + (eltern.neu ? "   (Neuanlage)]" : "   (Bericht-ID:" + eltern.berichtid + ")]");
         eltern.jry.setTitle(titel);
 

@@ -686,7 +686,7 @@ public class ThTextBlock extends RehaSmartDialog {
     private String testeAufSysVars(String text) {
         String replacement = "";
         String origtext = "";
-        boolean frau = (Reha.instance.patpanel.patDaten.get(0)
+        boolean frau = (Reha.instance.patpanel.getPatDaten().get(0)
                                                        .equalsIgnoreCase("FRAU") ? true : false);
         origtext = text;
         try {

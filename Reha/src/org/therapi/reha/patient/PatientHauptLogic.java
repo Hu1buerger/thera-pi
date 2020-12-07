@@ -18,6 +18,8 @@ import java.util.Vector;
 import javax.swing.*;
 
 import org.jdesktop.swingx.JXPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import CommonTools.DatFunk;
 import CommonTools.JRtaTextField;
@@ -46,6 +48,7 @@ import umfeld.Betriebsumfeld;
 
 public class PatientHauptLogic {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(PatientHauptLogic.class);
     public PatientHauptPanel patientHauptPanel = null;
     private String lastseek = "";
     public boolean neuDlgOffen = false;
@@ -88,8 +91,7 @@ public class PatientHauptLogic {
             @Override
             public synchronized void run() {
                 KeyStroke stroke = KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.ALT_MASK);
-                patientHauptPanel
-                                 .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+                patientHauptPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
                                  .put(stroke, "doSuchen");
                 patientHauptPanel.getActionMap()
                                  .put("doSuchen", new PatientAction());
@@ -133,9 +135,6 @@ public class PatientHauptLogic {
      * SuchenDialog aufrufen
      */
     public void starteSuche() {
-        String sstmt = "", cmd = "", strAnzahl = "", strStamm = "";
-        Statement stmt = null;
-        ResultSet rs = null;
 
         if ("".equals(patientHauptPanel.tfsuchen.getText()
                                                 .trim())) { // Wenn keine Suchvorgaben eingetippt worden sind:
@@ -143,46 +142,26 @@ public class PatientHauptLogic {
             // Lemmi 20101212: Anzahl der zu erwartenden Datensätze eingebaut
             int suchart = patientHauptPanel.patToolBarPanel.suchKrteriumCbBox.getSelectedIndex();
             if (!patientHauptPanel.patToolBarPanel.getSucheOhneEingabe(suchart)) {
-                sstmt = "SELECT COUNT(*) from pat5";
-                strStamm = "Patientenstamm";
-
+                String strAnzahl = "";
+                String sstmt = "SELECT COUNT(*) from pat5";
+                String strStamm = "Patientenstamm";
                 // Lemmi 20101212: Anzahl der zu erwartenden Datensätze ermitteln via DB-Abfrage
-                try {
-                    stmt = Reha.instance.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
-                            ResultSet.CONCUR_UPDATABLE);
-                    try {
-                        rs = stmt.executeQuery(sstmt);
-                        rs.absolute(1); // moves the cursor to the 1st row of rs
-                        strAnzahl = rs.getString(1);
-                    } catch (SQLException ev) {
-                    }
+                try (Statement stmt = Reha.instance.conn.createStatement(ResultSet.TYPE_SCROLL_SENSITIVE,
+                        ResultSet.CONCUR_UPDATABLE); ResultSet rs = stmt.executeQuery(sstmt);) {
+
+                    rs.absolute(1); // moves the cursor to the 1st row of rs
+                    strAnzahl = rs.getString(1);
+
                 } catch (SQLException ex) {
                 }
 
-                finally {
-                    if (rs != null) {
-                        try {
-                            rs.close();
-                        } catch (SQLException sqlEx) {
-                            rs = null;
-                        }
-                    }
-                    if (stmt != null) {
-                        try {
-                            stmt.close();
-                        } catch (SQLException sqlEx) {
-                            stmt = null;
-                        }
-                    }
-                }
-
                 // Lemmi 20101212: Erstellung der Meldung mit Anzahl der Datensätze
-                cmd = "<html>Sie haben <b>kein</b> Suchkriterium eingegeben.<br>"
+                String meldung = "<html>Sie haben <b>kein</b> Suchkriterium eingegeben.<br>"
                         + "Das bedeutet Sie laden den <b>kompletten " + strStamm + "!!!</b><br><br>" + "Es sind <b>"
                         + strAnzahl + " </b>Datensätze zu erwarten.<br>" + "<b>Wollen Sie das wirklich?</b>";
 
                 // Abfrage-Dialog anzeigen und Ergebnis der User-Eingabe abfragen
-                int anfrage = JOptionPane.showConfirmDialog(null, cmd, "Achtung wichtige Benutzeranfrage",
+                int anfrage = JOptionPane.showConfirmDialog(null, meldung, "Achtung wichtige Benutzeranfrage",
                         JOptionPane.YES_NO_OPTION);
                 if (anfrage == JOptionPane.NO_OPTION) {
                     return;
@@ -298,7 +277,8 @@ public class PatientHauptLogic {
                         // nur wenn berechtigt Popup zeigen
                         // Hierher Popupaufruf
                         this.idialnr = Integer.parseInt(vecpos.get(teles.indexOf(feldname)));
-                        if (!(this.sdialnr = patientHauptPanel.patDaten.get(this.idialnr)).equals("")) {
+                        if (!(this.sdialnr = patientHauptPanel.getPatDaten()
+                                                              .get(this.idialnr)).equals("")) {
                             this.xfeldname = feldname;
                             new SwingWorker<Void, Void>() {
                                 @Override
@@ -446,9 +426,8 @@ public class PatientHauptLogic {
                             iformular = Integer.valueOf(formularid.getText());
                             if (iformular >= 0) {
                                 String sdatei = formular.get(iformular);
-                                RehaOOTools.starteStandardFormular(
-                                        Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/" + sdatei,
-                                        null,Reha.instance);
+                                RehaOOTools.starteStandardFormular(Path.Instance.getProghome() + "vorlagen/"
+                                        + Betriebsumfeld.getAktIK() + "/" + sdatei, null, Reha.instance);
                             }
                         }
                         return null;
@@ -655,7 +634,8 @@ public class PatientHauptLogic {
         String sets = "aerzte='" + aliste + "'";
         SqlInfo.aktualisiereSaetze("pat5", sets, "pat_intern='" + xpatintern + "'");
         if (patientHauptPanel.aktPatID.equals(xpatintern)) {
-            patientHauptPanel.patDaten.set(63, aliste);
+            patientHauptPanel.getPatDaten()
+                             .set(63, aliste);
         }
     }
 
@@ -663,7 +643,8 @@ public class PatientHauptLogic {
         String sets = "aerzte='" + aliste + "'";
         SqlInfo.aktualisiereSaetze("pat5", sets, "pat_intern='" + xpatintern + "'");
         if (patientHauptPanel.aktPatID.equals(xpatintern)) {
-            patientHauptPanel.patDaten.set(63, aliste);
+            patientHauptPanel.getPatDaten()
+                             .set(63, aliste);
         }
     }
 
@@ -672,6 +653,9 @@ public class PatientHauptLogic {
             final String xpatint = evt.getDetails()[1].trim();
             final String xrez = evt.getDetails()[2].trim();
             patientHauptPanel.aktPatID = xpatint;
+
+            LOGGER.debug("patient gewechselt pat_inter ist: " + xpatint);
+
             // Anzeigedaten holen
             new Thread() {
                 @Override
@@ -689,10 +673,15 @@ public class PatientHauptLogic {
                                 @Override
                                 public void run() {
                                     try {
-                                        String titel = "Patient: " + patientHauptPanel.patDaten.get(2) + ", "
-                                                + patientHauptPanel.patDaten.get(3) + " geboren am: "
-                                                + DatFunk.sDatInDeutsch(patientHauptPanel.patDaten.get(4)) + " - "
-                                                + "Patienten-ID: " + patientHauptPanel.patDaten.get(29);
+                                        String titel = "Patient: " + patientHauptPanel.getPatDaten()
+                                                                                      .get(2)
+                                                + ", " + patientHauptPanel.getPatDaten()
+                                                                          .get(3)
+                                                + " geboren am: "
+                                                + DatFunk.sDatInDeutsch(patientHauptPanel.getPatDaten()
+                                                                                         .get(4))
+                                                + " - " + "Patienten-ID: " + patientHauptPanel.getPatDaten()
+                                                                                              .get(29);
                                         patientHauptPanel.patientInternal.setzeTitel(titel);
                                         macheAlleHashMaps();
                                     } catch (Exception ex) {
@@ -873,7 +862,7 @@ public class PatientHauptLogic {
             patientHauptPanel.patDatenOk = false;
             Vector<String> patdatenausdb = SqlInfo.holeSatz("pat5", " * ", "PAT_INTERN ='" + patint + "'",
                     Arrays.asList(new String[] {}));
-            patientHauptPanel.patDaten = patdatenausdb;
+            patientHauptPanel.setPatDaten(patdatenausdb);
             String stmt = "select id from rgaffaktura where roffen > '0' and rnr not like 'storno%' and pat_intern = '"
                     + patint + "' LIMIT 1";
 

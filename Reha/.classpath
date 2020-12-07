@@ -77,5 +77,6 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry combineaccessrules="false" kind="src" path="/office"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/hmr"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

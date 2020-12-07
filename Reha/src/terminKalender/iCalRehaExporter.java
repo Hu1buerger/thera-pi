@@ -46,10 +46,10 @@ public class iCalRehaExporter {
                 // ist dies nicht der Fall FrageDialog ob trotzdem ICS produziert werden soll
                 // mit Vor- Und Nachname und Dateiname im Text
                 try {
-                    if ((!inhaber.contains(Reha.instance.patpanel.patDaten.get(2)))
-                            || (!inhaber.contains(Reha.instance.patpanel.patDaten.get(3)))) {
+                    if ((!inhaber.contains(Reha.instance.patpanel.getPatDaten().get(2)))
+                            || (!inhaber.contains(Reha.instance.patpanel.getPatDaten().get(3)))) {
                         String meldung = "<html><b>Achtung!</b><br>Sie versuchen dem Patient<b> -> "
-                                + Reha.instance.patpanel.patDaten.get(2) + ", " + Reha.instance.patpanel.patDaten.get(3)
+                                + Reha.instance.patpanel.getPatDaten().get(2) + ", " + Reha.instance.patpanel.getPatDaten().get(3)
                                 + " <- </b>, einen Rehaplan per Email zu senden<br>mit dem Dateiname: <b>" + inhaber
                                 + " </b></html>";
                         int frage = JOptionPane.showConfirmDialog(null, meldung, "Wichtige Benutzeranfrage",
@@ -59,7 +59,7 @@ public class iCalRehaExporter {
                         }
                     }
                     erzeugeIcs();
-                    String emailaddy = Reha.instance.patpanel.patDaten.get(50);
+                    String emailaddy = Reha.instance.patpanel.getPatDaten().get(50);
 
                     String recipient = emailaddy + ((Boolean) SystemConfig.hmIcalSettings.get("aufeigeneemail")
                             ? "," + SystemConfig.hmEmailExtern.get("SenderAdresse")

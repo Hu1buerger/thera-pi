@@ -384,10 +384,10 @@ class RezeptDaten extends JXPanel implements ActionListener {
                 if (e.getButton() != java.awt.event.MouseEvent.BUTTON3) {
                     int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
                     TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
-                    draghandler.setText("TERMDATEXT" + "°" + Reha.instance.patpanel.patDaten.get(0)
+                    draghandler.setText("TERMDATEXT" + "°" + Reha.instance.patpanel.getPatDaten().get(0)
                                                                                             .substring(0, 1)
-                            + "-" + Reha.instance.patpanel.patDaten.get(2) + ","
-                            + Reha.instance.patpanel.patDaten.get(3) + "°" + String.valueOf(reznum.getText())
+                            + "-" + Reha.instance.patpanel.getPatDaten().get(2) + ","
+                            + Reha.instance.patpanel.getPatDaten().get(3) + "°" + String.valueOf(reznum.getText())
                             + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "°"
                             + dauerLbl.getText());
                     JComponent c = draghandler;
@@ -535,16 +535,16 @@ class RezeptDaten extends JXPanel implements ActionListener {
              .equals("Rezept kopieren")) {
             int farbcode = StringTools.ZahlTest(Reha.instance.patpanel.vecaktrez.get(57));
             TerminFenster.DRAG_MODE = TerminFenster.DRAG_UNKNOWN;
-            String dragText = Reha.instance.patpanel.patDaten.get(0)
+            String dragText = Reha.instance.patpanel.getPatDaten().get(0)
                                                              .substring(0, 1)
-                    + "-" + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3) + "°"
+                    + "-" + Reha.instance.patpanel.getPatDaten().get(2) + "," + Reha.instance.patpanel.getPatDaten().get(3) + "°"
                     + reznum.getText() + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : "") + "°"
                     + dauerLbl.getText();
             Reha.instance.copyLabel.setText(String.valueOf(dragText));
             Reha.instance.bunker.setText("TERMDATEXT" + "°" + String.valueOf(dragText));
-            String[] daten = { (Reha.instance.patpanel.patDaten.get(0)
+            String[] daten = { (Reha.instance.patpanel.getPatDaten().get(0)
                                                                .startsWith("F") ? "F-" : "H-")
-                    + Reha.instance.patpanel.patDaten.get(2) + "," + Reha.instance.patpanel.patDaten.get(3),
+                    + Reha.instance.patpanel.getPatDaten().get(2) + "," + Reha.instance.patpanel.getPatDaten().get(3),
                     Reha.instance.patpanel.vecaktrez.get(1)
                             + (farbcode > 0 ? (String) SystemConfig.vSysColsCode.get(farbcode) : ""),
                     Reha.instance.patpanel.vecaktrez.get(47) };

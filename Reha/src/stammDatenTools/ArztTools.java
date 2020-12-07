@@ -19,7 +19,7 @@ public class ArztTools {
             boolean isherr = false;
             int xid;
             if (id.equals("")) {
-                xid = StringTools.ZahlTest(Reha.instance.patpanel.patDaten.get(67));
+                xid = StringTools.ZahlTest(Reha.instance.patpanel.getPatDaten().get(67));
             } else {
                 xid = Integer.valueOf(id);
             }

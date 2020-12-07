@@ -57,6 +57,7 @@ import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.looks.HeaderStyle;
 import com.jgoodies.looks.Options;
+import com.sun.javafx.application.PlatformImpl;
 import com.sun.star.uno.Exception;
 
 import CommonTools.Colors;
@@ -336,6 +337,15 @@ public class Reha implements RehaEventListener , Monitor{
 
 
         Feature.init(mandant);
+        if(new Feature("hmr2020").isEnabled()) {
+            PlatformImpl.setImplicitExit(false);
+            Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    PlatformImpl.exit();
+                }
+            });
+        }
         DueUpdates du = new DueUpdates(new DatenquellenFactory(Betriebsumfeld.getAktIK()));
         du.init();
         du.execute();

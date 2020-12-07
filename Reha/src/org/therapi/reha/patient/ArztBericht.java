@@ -114,7 +114,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         this.altverfasser = xverfasser;
         this.diag = xdiag;
         this.tblreihe = row;
-        this.pat_intern = Reha.instance.patpanel.patDaten.get(29);
+        this.pat_intern = Reha.instance.patpanel.getPatDaten().get(29);
         /**
          *
          * this.disziplin = this.reznr.substring(0,2); hier den Fall für ohne
@@ -331,11 +331,11 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
         JLabel lab = new JLabel("Arzbericht für Patient:");
         pb.add(lab, cc.xy(2, 2));
 
-        String name = Reha.instance.patpanel.patDaten.get(2) + ", " + Reha.instance.patpanel.patDaten.get(3);
+        String name = Reha.instance.patpanel.getPatDaten().get(2) + ", " + Reha.instance.patpanel.getPatDaten().get(3);
         rlab[0] = new JLabel(name);
         rlab[0].setForeground(Color.BLUE);
         pb.add(rlab[0], cc.xy(2, 4));
-        rlab[1] = new JLabel(DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
+        rlab[1] = new JLabel(DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4)));
         rlab[1].setForeground(Color.BLUE);
         pb.add(rlab[1], cc.xy(2, 6));
 
@@ -359,9 +359,9 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
                 arztid = Integer.valueOf(-1);
             }
         } else if ((this.reznr.equals("")) && (this.aufrufvon < 3)) {
-            name = Reha.instance.patpanel.patDaten.get(25);
+            name = Reha.instance.patpanel.getPatDaten().get(25);
             try {
-                arztid = Integer.valueOf(Reha.instance.patpanel.patDaten.get(26));
+                arztid = Integer.valueOf(Reha.instance.patpanel.getPatDaten().get(26));
             } catch (java.lang.NumberFormatException ex) {
                 arztid = Integer.valueOf(-1);
             }
@@ -603,7 +603,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
     private void doBerichtVorbericht(ActionEvent arg0) {
         vorberichtid = -1;
         vorberichtdiagnose = false;
-        int wieviel = SqlInfo.zaehleSaetze("berhist", "pat_intern='" + Reha.instance.patpanel.patDaten.get(29) + "'");
+        int wieviel = SqlInfo.zaehleSaetze("berhist", "pat_intern='" + Reha.instance.patpanel.getPatDaten().get(29) + "'");
         if (wieviel > 0) {
             // System.out.println("Bericht bereits vorhanden: "+wieviel);
             Point pos = ((JComponent) arg0.getSource()).getLocation();
@@ -804,7 +804,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
 
             // System.out.println("BerichtNr - "+xberichtnr+" - wurde in verordn und lza
             // gespeichert");
-            Reha.instance.patpanel.berichte.holeBerichte(Reha.instance.patpanel.patDaten.get(29), "");
+            Reha.instance.patpanel.berichte.holeBerichte(Reha.instance.patpanel.getPatDaten().get(29), "");
             // return null;
             this.neu = false;
             return true;
@@ -824,7 +824,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
             new ExUndHop().setzeStatement(cmd);
             // System.out.println("BerichtNr - "+xberichtnr+" - wurde nur in lza
             // gespeichert");
-            Reha.instance.patpanel.berichte.holeBerichte(Reha.instance.patpanel.patDaten.get(29), "");
+            Reha.instance.patpanel.berichte.holeBerichte(Reha.instance.patpanel.getPatDaten().get(29), "");
             // return null;
             this.neu = false;
             return true;
@@ -935,7 +935,7 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
-            if (Reha.instance.patpanel.patDaten.get(0)
+            if (Reha.instance.patpanel.getPatDaten().get(0)
                                                .toUpperCase()
                                                .equals("HERR")) {
                 SystemConfig.hmAdrBDaten.put("<Bihrenpat>", "Ihren Patienten");
@@ -972,9 +972,9 @@ public class ArztBericht extends RehaSmartDialog implements ActionListener {
                 }
 
             }
-            SystemConfig.hmAdrBDaten.put("<Bnname>", StringTools.EGross(Reha.instance.patpanel.patDaten.get(2)));
-            SystemConfig.hmAdrBDaten.put("<Bvname>", StringTools.EGross(Reha.instance.patpanel.patDaten.get(3)));
-            SystemConfig.hmAdrBDaten.put("<Bgeboren>", DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
+            SystemConfig.hmAdrBDaten.put("<Bnname>", StringTools.EGross(Reha.instance.patpanel.getPatDaten().get(2)));
+            SystemConfig.hmAdrBDaten.put("<Bvname>", StringTools.EGross(Reha.instance.patpanel.getPatDaten().get(3)));
+            SystemConfig.hmAdrBDaten.put("<Bgeboren>", DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4)));
             SystemConfig.hmAdrBDaten.put("<Brezdatum>", DatFunk.sDatInDeutsch(rezdatum));
             SystemConfig.hmAdrBDaten.put("<Breznr>", reznr);
             String sblock = diagnose.getText()

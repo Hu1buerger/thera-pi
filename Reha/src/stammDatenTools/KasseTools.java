@@ -16,7 +16,7 @@ public class KasseTools {
         try {
             int xid;
             if (id.equals("")) {
-                xid = StringTools.ZahlTest(Reha.instance.patpanel.patDaten.get(68));
+                xid = StringTools.ZahlTest(Reha.instance.patpanel.getPatDaten().get(68));
             } else {
                 xid = Integer.parseInt(id);
             }

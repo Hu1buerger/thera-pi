@@ -2293,7 +2293,7 @@ public class DokumentationPanel extends JXPanel
                                                              .lastIndexOf("/")
                         + 1));
                 ps.setString(4, Reha.aktUser);
-                ps.setInt(5, Integer.parseInt(Reha.instance.patpanel.patDaten.get(29)
+                ps.setInt(5, Integer.parseInt(Reha.instance.patpanel.getPatDaten().get(29)
                                                                              .trim()));
                 ps.setInt(6, (dateiname.endsWith(".odt") ? 1 : 2));
                 ps.setString(7, dateiname.substring(dateiname.replace("\\", "/")
@@ -2308,7 +2308,7 @@ public class DokumentationPanel extends JXPanel
                         + 1));
                 ps.execute();
 
-                holeDokus(Reha.instance.patpanel.patDaten.get(29)
+                holeDokus(Reha.instance.patpanel.getPatDaten().get(29)
                                                          .trim(),
                         "");
 

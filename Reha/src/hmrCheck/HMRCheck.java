@@ -64,7 +64,7 @@ public class HMRCheck {
         preisvec = xpreisvec;
         rezeptart = xrezeptart;
         reznummer = xreznr;
-        unter18 = DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)));
+        unter18 = DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.getPatDaten().get(4)));
         if (reznummer.equals("")) {
             neurezept = true;
         }
@@ -518,7 +518,7 @@ public class HMRCheck {
 
 
             if (Reha.instance.patpanel != null) {
-                patintern = Reha.instance.patpanel.patDaten.get(29);
+                patintern = Reha.instance.patpanel.getPatDaten().get(29);
                 String selFieldsFrom = "select rez_datum,rez_nr,rezeptart,anzahl1,indikatschl,termine,pat_intern from ";
                 String selCond = "where pat_intern = '" + patintern + "'" + " and rez_nr like '"
                         + diszis.getRezClass(disziplin) + "%' and " + mkIndiSearch(aktindischl);
