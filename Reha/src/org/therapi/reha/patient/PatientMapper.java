@@ -18,9 +18,9 @@ public class PatientMapper {
     }
 
     private static final Logger logger =LoggerFactory.getLogger(PatientMapper.class);
-    public  Optional<Patient> findbyPat_intern(String pat_intern, String aktIK) {
+    public  Optional<Patient> findbyPat_intern(String pat_intern) {
 
-        return PatientDTO.findbyPat_intern(pat_intern, aktIK)
+        return PatientDTO.findbyPat_intern(pat_intern, ik.digitString())
                          .map(dto -> of(dto));
     }
 

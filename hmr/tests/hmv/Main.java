@@ -24,9 +24,9 @@ public class Main extends Application implements Closeable{
             FXMLLoader loader = new FXMLLoader(getClass().getResource("HMV13.fxml"));
             EnumSet<Disziplin> disziplinen = EnumSet.of(Disziplin.ER, Disziplin.KG);
             Patient patient = CoreTestDataFactory.createPatientSimonLant();
-            Context context = new Context(new Mandant("123456789", "test"), new User("bob"), disziplinen, patient);
+            Context context = new Context(new Mandant("123456789", "test"), new User("bob"), patient);
             Hmv neueHmv = CoreTestDataFactory.createHmv(context);
-            Hmv13 controller = new Hmv13(neueHmv, context,context.disziplinen);
+            Hmv13 controller = new Hmv13(neueHmv, context);
             loader.setController(controller);
 
             double scaleFactor = 1;

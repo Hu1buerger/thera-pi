@@ -14,15 +14,16 @@ public class Context {
     final EnumSet<Disziplin> disziplinen;
     final Patient patient;
 
-    public Context(Mandant mandant, User user, EnumSet<Disziplin> disziplinen, Patient patient) {
+    public Context(Mandant mandant, User user, Patient patient) {
         super();
-        Contracts.require(mandant != null && user != null && disziplinen != null && patient != null
+        Contracts.require(mandant != null && user != null && mandant.disziplinen() != null && patient != null
 
                 , "no null values!");
         this.mandant = mandant;
         this.user = user;
-        this.disziplinen = disziplinen;
+        this.disziplinen = mandant.disziplinen();
         this.patient = patient;
     }
+
 
 }

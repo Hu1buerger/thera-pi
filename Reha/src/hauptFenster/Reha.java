@@ -87,6 +87,7 @@ import environment.Path;
 import geraeteInit.BarCodeScanner;
 import gui.Cursors;
 import io.RehaIOMessages;
+import javafx.application.Platform;
 import krankenKasse.KassenPanel;
 import logging.Logging;
 import mandant.Mandant;
@@ -330,7 +331,6 @@ public class Reha implements RehaEventListener , Monitor{
         logger = LoggerFactory.getLogger(Reha.class);
     }
     public void startWithMandantSet(Mandant mandant) {
-        new Betriebsumfeld(mandant);
         logger.info("Thera-Pi Version: " + new Version().number());
         logger.info("Java Version:     " + System.getProperty("java.version"));
 
@@ -339,12 +339,14 @@ public class Reha implements RehaEventListener , Monitor{
         if(new Feature("hmr2020").isEnabled()) {
             PlatformImpl.setImplicitExit(false);
             Runtime.getRuntime().addShutdownHook(new Thread() {
+
                 @Override
                 public void run() {
-                    PlatformImpl.exit();
+                    Platform.runLater(()-> Platform.exit());
                 }
             });
         }
+        new Betriebsumfeld(mandant);
         DueUpdates du = new DueUpdates(new DatenquellenFactory(Betriebsumfeld.getAktIK()));
         du.init();
         du.execute();

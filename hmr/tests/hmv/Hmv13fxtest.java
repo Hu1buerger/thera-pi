@@ -22,7 +22,7 @@ public class Hmv13fxtest extends ApplicationTest implements Closeable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        hmv13 = new Hmv13(hmvorig, context, context.disziplinen);
+        hmv13 = new Hmv13(hmvorig, context);
 
 
 

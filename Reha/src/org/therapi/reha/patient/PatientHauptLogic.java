@@ -13,6 +13,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -26,6 +27,7 @@ import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import CommonTools.ini.INITool;
 import CommonTools.ini.Settings;
+import core.Patient;
 import dialoge.PinPanel;
 import dialoge.RehaSmartDialog;
 import environment.Path;
@@ -64,6 +66,8 @@ public class PatientHauptLogic {
     String sdialnr = "";
     String xfeldname = "";
     int idialnr = -1;
+
+
 
     public PatientHauptLogic(PatientHauptPanel patHauptPanel) {
 
@@ -653,8 +657,13 @@ public class PatientHauptLogic {
             final String xpatint = evt.getDetails()[1].trim();
             final String xrez = evt.getDetails()[2].trim();
             patientHauptPanel.aktPatID = xpatint;
-
+            AktuelleRezepte aktRezept = patientHauptPanel.aktRezept;
             LOGGER.debug("patient gewechselt pat_inter ist: " + xpatint);
+            aktRezept.setPatient(new PatientMapper(Betriebsumfeld.umfeld.mandant().ik()).findbyPat_intern(xpatint));
+
+
+
+
 
             // Anzeigedaten holen
             new Thread() {
@@ -712,11 +721,12 @@ public class PatientHauptLogic {
                                     return null;
                                 }
                             }
+
                             if (xrez.contains("#REZHOLEN-")) {
-                                patientHauptPanel.aktRezept.suchePatUeberRez = true;
+                                aktRezept.suchePatUeberRez = true;
                                 rezNb = xrez.split("#REZHOLEN-")[1].trim();
                             }
-                            patientHauptPanel.aktRezept.holeRezepte(xpatint, rezNb);
+                            aktRezept.holeRezepte(xpatint, rezNb);
                             return null;
                         }
                     }.execute();

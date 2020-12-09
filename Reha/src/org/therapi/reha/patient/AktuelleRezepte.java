@@ -18,15 +18,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.EventObject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -48,6 +40,7 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.renderer.IconValues;
 import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -70,7 +63,9 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
+import core.Disziplin;
 import core.Feature;
+import core.Patient;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -110,6 +105,7 @@ import umfeld.Betriebsumfeld;
 public class AktuelleRezepte extends JXPanel implements ListSelectionListener, TableModelListener,
         TableColumnModelExtListener, PropertyChangeListener, ActionListener {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(AktuelleRezepte.class);
     private static final long serialVersionUID = 5440388431022834348L;
     JXPanel leerPanel = null;
     JXPanel vollPanel = null;
@@ -168,8 +164,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private JButton behandlungstageinclipboardBtn = new JButton();
     private JButton rezeptinhistorietransferierenBtn = new JButton();
     private JButton do301FallSteuerungBtn = new JButton();
+    public Optional<Patient> current = Optional.empty();
 
-    public AktuelleRezepte(PatientHauptPanel eltern, Connection connection) {
+    public AktuelleRezepte(final PatientHauptPanel eltern, Connection connection) {
 
         this.connection = connection;
 
@@ -202,7 +199,6 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         add(JCompTools.getTransparentScrollPane(allesrein), BorderLayout.CENTER);
         validate();
-        final PatientHauptPanel xeltern = eltern;
         new SwingWorker<Void, Void>() {
 
             @Override
@@ -245,7 +241,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
                     dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
 
-                    rezDatenPanel = new RezeptDaten(xeltern);
+                    rezDatenPanel = new RezeptDaten(eltern);
                     vollPanel.add(rezDatenPanel, vpcc.xyw(1, 4, 1));
                     indiSchluessel();
                     initOk = true;
@@ -272,20 +268,21 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         if(new Feature("hmr2020").isEnabled()) {
             hmr2020neu.addActionListener(e-> neueHmv2020());
-            LoggerFactory.getLogger(AktuelleRezepte.class).debug("enable listerner for hmr2020");
+            LOGGER.debug("enable listerner for hmr2020");
 
         } else {
-            LoggerFactory.getLogger(AktuelleRezepte.class).debug("meeeeeeh");
+            LOGGER.debug("meeeeeeh");
         }
 
     }
 
     private Object neueHmv2020() {
-   //     Context context = new Context(Betriebsumfeld.getAktMandant(), new User(Reha.aktUser), disziplinen, patient)
-        LoggerFactory.getLogger(AktuelleRezepte.class).debug("hmr2020 requested");
+        if(current.isPresent()) {
+        Context context = new Context(Betriebsumfeld.umfeld.mandant(), new User(Reha.aktUser),  current.get());
+        LOGGER.debug("hmr2020 requested");
 
-          new   HmvFrame().setVisible(true);
-
+          new   HmvFrame(context).setVisible(true);
+        }
         return null;
     }
 
@@ -386,6 +383,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 disableAllButtons();
             }
             neuButton.setEnabled(true);
+            if(new Feature("hmr2020").isEnabled()) {
+                hmr2020neu.setEnabled(true);
+            }
+
         } else {
             if (aktPanel.equals("leerPanel")) {
                 wechselPanel.remove(leerPanel);
@@ -1730,7 +1731,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             break;
         case "rezneu":
-            LoggerFactory.getLogger(AktuelleRezepte.class)
+            LOGGER
                          .debug("rezneu by deprecated call");
             break;
         case "rezedit":
@@ -3388,6 +3389,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
             tDlg = null;
         }
+
+    }
+
+    public void setPatient(Optional<Patient> neuerPatient) {
+
+        current = neuerPatient;
+        LOGGER.debug("patient gewechselt: " +  current.get());
 
     }
 

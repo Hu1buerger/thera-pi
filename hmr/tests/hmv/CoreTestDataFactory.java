@@ -45,7 +45,7 @@ public class CoreTestDataFactory {
 
     public static Context createContext() {
         EnumSet<Disziplin> disziplinen = EnumSet.of(Disziplin.ER, Disziplin.KG);
-        return new Context(new Mandant("123456789", "testmandant"), new User("bob"), disziplinen, createPatientSimonLant());
+        return new Context(new Mandant("123456789", "testmandant"), new User("bob"),  createPatientSimonLant());
     }
 
     static  Hmv createHmv(Context context) {

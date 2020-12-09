@@ -135,6 +135,9 @@ public class Hmv13 {
     TextField therapieFrequenz;
 
     @FXML
+    TextField therapieFrequenzBis;
+
+    @FXML
     TextField dauer;
 
     @FXML
@@ -149,16 +152,17 @@ public class Hmv13 {
 
     @FXML
     Label ik_Erbringer;
+
     private Context context;
     private Hmv hmv;
     private EnumSet<Disziplin> moeglicheDisziplinen = EnumSet.noneOf(Disziplin.class);
     private ObjectProperty<Disziplin> diszi = new SimpleObjectProperty<>();
     private ObjectProperty<String> symptomatik = new SimpleObjectProperty<>();
 
-    public Hmv13(Hmv neueHmv, Context context, EnumSet<Disziplin> disziplinen) {
+    public Hmv13(Hmv neueHmv, Context context) {
         this.hmv = neueHmv;
         this.context = context;
-        moeglicheDisziplinen = disziplinen;
+        moeglicheDisziplinen = context.mandant.disziplinen();
     }
 
     @FXML

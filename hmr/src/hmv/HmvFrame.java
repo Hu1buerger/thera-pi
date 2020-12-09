@@ -1,6 +1,7 @@
 package hmv;
 
 import javax.swing.JFrame;
+import javax.swing.JScrollPane;
 
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
@@ -11,13 +12,13 @@ public class HmvFrame  extends JFrame {
         private static final int WIDTH = 800;
         private static final int HEIGHT = 500;
 
-        public HmvFrame() {
-            initGUI();
+        public HmvFrame(Context context) {
+            initGUI(context);
         }
 
-        public void initGUI() {
-            final HmvswingPanel panel = new HmvswingPanel();
-            this.add(panel);
+        public void initGUI(Context context) {
+            final HmvswingPanel panel = new HmvswingPanel(context);
+            this.add(new JScrollPane( panel));
             this.setTitle("JavaFX in Swing");
             this.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             this.setSize(WIDTH, HEIGHT);
@@ -34,9 +35,7 @@ public class HmvFrame  extends JFrame {
 
 
 
-        public static void main(String[] args) {
-            new HmvFrame();
-        }
+
     }
 
 
