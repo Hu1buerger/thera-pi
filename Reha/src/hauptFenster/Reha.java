@@ -112,7 +112,7 @@ import urlaubBeteiligung.Beteiligung;
 import urlaubBeteiligung.Urlaub;
 import verkauf.VerkaufTab;
 
-public class Reha implements RehaEventListener , Monitor{
+public class Reha implements RehaEventListener, Monitor {
 
     public PatientHauptPanel patpanel = null;
     public EBerichtPanel eberichtpanel = null;
@@ -281,7 +281,6 @@ public class Reha implements RehaEventListener , Monitor{
 
     public static Vector<Vector<List<String>>> terminLookup = new Vector<Vector<List<String>>>();
 
-
     public static Reha instance = new Reha();
     static JXFrame thisFrame;
 
@@ -298,8 +297,6 @@ public class Reha implements RehaEventListener , Monitor{
     }
 
     public Reha() {
-
-
 
         instance = this;
 
@@ -321,7 +318,6 @@ public class Reha implements RehaEventListener , Monitor{
                     inif.getStringProperty("TheraPiMandanten", "MAND-NAME" + DefaultMandant));
         }
 
-
         new Reha().startWithMandantSet(mainMandant);
 
     }
@@ -330,21 +326,28 @@ public class Reha implements RehaEventListener , Monitor{
 
         logger = LoggerFactory.getLogger(Reha.class);
     }
+
     public void startWithMandantSet(Mandant mandant) {
         logger.info("Thera-Pi Version: " + new Version().number());
         logger.info("Java Version:     " + System.getProperty("java.version"));
 
-
         Feature.init(mandant);
-        if(new Feature("hmr2020").isEnabled()) {
+        if (new Feature("hmr2020").isEnabled()) {
             PlatformImpl.setImplicitExit(false);
-            Runtime.getRuntime().addShutdownHook(new Thread() {
+            Runtime.getRuntime()
+                   .addShutdownHook(new Thread() {
 
-                @Override
-                public void run() {
-                    Platform.runLater(()-> Platform.exit());
-                }
-            });
+                       @Override
+                       public void run() {
+
+                           try {
+                               Platform.runLater(() -> Platform.exit());
+                           } catch (IllegalStateException e) {
+                               // happens when javafx hasn't been called yet but
+                               // we are dying anyway
+                           }
+                       }
+                   });
         }
         new Betriebsumfeld(mandant);
         DueUpdates du = new DueUpdates(new DatenquellenFactory(Betriebsumfeld.getAktIK()));
@@ -2250,7 +2253,6 @@ public class Reha implements RehaEventListener , Monitor{
 
     ActionListener actionListener = new MenuActionListener(this);
 
-
     public void activateWebCam() {
 
         new SwingWorker<Void, Void>() {
@@ -2335,16 +2337,14 @@ public class Reha implements RehaEventListener , Monitor{
         return componentListener;
     }
 
-
-
     @Override
     public void statusChange(Object status) {
-        if(status.equals(Monitor.START)) {
+        if (status.equals(Monitor.START)) {
             Reha.getThisFrame()
-            .setCursor(Cursors.wartenCursor);
+                .setCursor(Cursors.wartenCursor);
         } else if (status.equals(Monitor.STOP)) {
             Reha.getThisFrame()
-            .setCursor(Cursors.normalCursor);
+                .setCursor(Cursors.normalCursor);
         }
 
     }
