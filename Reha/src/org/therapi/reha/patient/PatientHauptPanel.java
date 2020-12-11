@@ -143,7 +143,7 @@ public class PatientHauptPanel extends JXPanel {
 
     private UIFSplitPane constructSplitPaneLR(Connection connection) {
         UIFSplitPane jSplitLR = UIFSplitPane.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                getStammDatenPatient(connection), constructSplitPaneOU(connection));
+                getStammDatenPatient(connection), constructSplitPaneOU());
         jSplitLR.setOpaque(false);
         jSplitLR.setDividerSize(7);
         jSplitLR.setDividerBorderVisible(true);
@@ -155,10 +155,10 @@ public class PatientHauptPanel extends JXPanel {
         return jSplitLR;
     }
 
-    private UIFSplitPane constructSplitPaneOU(Connection connection) {
+    private UIFSplitPane constructSplitPaneOU() {
 
         UIFSplitPane jSplitRechtsOU = UIFSplitPane.createStrippedSplitPane(JSplitPane.VERTICAL_SPLIT, getMemosPatient(),
-                getMultiFunctionTab(connection));
+                getMultiFunctionTab());
         jSplitRechtsOU.setOpaque(false);
         jSplitRechtsOU.setDividerSize(7);
         jSplitRechtsOU.setDividerBorderVisible(true);
@@ -186,9 +186,9 @@ public class PatientHauptPanel extends JXPanel {
         return jscr;
     }
 
-    private synchronized JScrollPane getMultiFunctionTab(Connection connection) {
+    private synchronized JScrollPane getMultiFunctionTab() {
 
-        patMultiFunctionPanel = new PatientMultiFunctionPanel(this, connection);
+        patMultiFunctionPanel = new PatientMultiFunctionPanel(this);
         JScrollPane jscr = JCompTools.getTransparentScrollPane(patMultiFunctionPanel);
         jscr.validate();
         return jscr;

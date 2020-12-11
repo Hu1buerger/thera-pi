@@ -2,7 +2,6 @@ package org.therapi.reha.patient;
 
 import java.awt.BorderLayout;
 import java.awt.event.KeyEvent;
-import java.sql.Connection;
 
 import javax.swing.BorderFactory;
 import javax.swing.JTabbedPane;
@@ -18,19 +17,19 @@ public class PatientMultiFunctionPanel extends JXPanel {
     private static final long serialVersionUID = -1284209871875228012L;
     PatientHauptPanel patientHauptPanel = null;
 
-    public PatientMultiFunctionPanel(PatientHauptPanel patHauptPanel, Connection connection) {
+    public PatientMultiFunctionPanel(PatientHauptPanel patHauptPanel) {
         super();
         setLayout(new BorderLayout());
         setOpaque(false);
         this.patientHauptPanel = patHauptPanel;
-        add(getTabs(connection), BorderLayout.CENTER);
+        add(getTabs(), BorderLayout.CENTER);
     }
 
     public void fireAufraeumen() {
         patientHauptPanel = null;
     }
 
-    private synchronized JXPanel getTabs(Connection connection) {
+    private synchronized JXPanel getTabs() {
         JXPanel rechts = new JXPanel(new BorderLayout());
         rechts.setOpaque(false);
         rechts.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
