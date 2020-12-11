@@ -10,14 +10,14 @@ import java.util.Arrays;
 
 import sql.DatenquellenFactory;
 
-public class DB_Update_024 extends Update {
+public class Add_Indischluessel_NF_QF_2_HMRCheck extends Update {
 
 
 
     @Override
     protected boolean postCondition(DatenquellenFactory dq) {
 
-        return !tableStructureIsOk(dq);
+        return !tableContentIsOk(dq);
     }
 
     @Override
@@ -39,10 +39,10 @@ public class DB_Update_024 extends Update {
 
     @Override
     protected boolean preCondition(DatenquellenFactory dq) {
-       return !tableStructureIsOk(dq);
+       return !tableContentIsOk(dq);
     }
 
-    private boolean tableStructureIsOk(DatenquellenFactory dq) {
+    private boolean tableContentIsOk(DatenquellenFactory dq) {
 
         boolean nfIsThere = false;
         boolean qfIsThere = false;
