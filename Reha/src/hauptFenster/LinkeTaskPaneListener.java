@@ -205,7 +205,7 @@ final class LinkeTaskPaneListener implements ActionListener {
                 @Override
                 protected Void doInBackground() throws Exception {
                     Reha.thisFrame.setCursor(Cursors.wartenCursor);
-                    Reha.instance.progLoader.ProgPatientenVerwaltung(1, LinkeTaskPaneListener.this.reha.conn);
+                    Reha.instance.progLoader.ProgPatientenVerwaltung(1);
 
                     Reha.thisFrame.setCursor(Cursors.normalCursor);
                     return null;

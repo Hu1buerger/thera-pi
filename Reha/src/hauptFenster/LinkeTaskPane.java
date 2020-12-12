@@ -785,7 +785,7 @@ public class LinkeTaskPane extends JXPanel {
                 @Override
                 protected Void doInBackground() throws Exception {
                     JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-                    Reha.instance.progLoader.ProgPatientenVerwaltung(1, conn);
+                    Reha.instance.progLoader.ProgPatientenVerwaltung(1);
                     while ((xpatient == null)) {
                         Thread.sleep(20);
                         xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
@@ -813,7 +813,7 @@ public class LinkeTaskPane extends JXPanel {
 
             }.execute();
         } else {
-            Reha.instance.progLoader.ProgPatientenVerwaltung(1, conn);
+            Reha.instance.progLoader.ProgPatientenVerwaltung(1);
             String s1 = "#PATSUCHEN";
             String s2 = pat_int;
             PatStammEvent pEvt = new PatStammEvent(Reha.instance.terminpanel);

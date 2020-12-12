@@ -35,6 +35,7 @@ import rechteTools.Rechte;
 import rehaContainer.RehaTP;
 import rehaInternalFrame.*;
 import roogle.RoogleFenster;
+import sql.DatenquellenFactory;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemInit;
 import systemTools.WinNum;
@@ -923,7 +924,7 @@ public class ProgLoader {
      *
      * @param connection
      ***********************/
-    public void ProgPatientenVerwaltung(int setPos, Connection connection) {
+    public void ProgPatientenVerwaltung(int setPos) {
         try {
             JComponent patient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
             if (patient != null) {
@@ -979,7 +980,7 @@ public class ProgLoader {
             /***************************/
             // Definition der Größe und der Position - Ende
             /***************************/
-            Reha.instance.patpanel = new PatientHauptPanel(name, patjry, connection);
+            Reha.instance.patpanel = new PatientHauptPanel(name, patjry, new DatenquellenFactory(Betriebsumfeld.getAktIK()));
             patjry.setContent(Reha.instance.patpanel);
             patjry.addComponentListener(Reha.instance.getComponentListener());
             patjry.pack();

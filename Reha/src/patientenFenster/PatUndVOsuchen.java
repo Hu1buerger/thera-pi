@@ -16,7 +16,6 @@ import hauptFenster.Reha;
 
 public class PatUndVOsuchen {
     public static void doPatSuchen(String patint, String reznr, Object source, Connection connection) {
-        Connection connection1 = connection;
         String pat_int;
         pat_int = patint;
         JComponent patient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
@@ -28,7 +27,7 @@ public class PatUndVOsuchen {
                 @Override
                 protected Void doInBackground() throws Exception {
                     JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-                    Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection1);
+                    Reha.instance.progLoader.ProgPatientenVerwaltung(1);
                     while ((xpatient == null)) {
                         try {
                             Thread.sleep(20);
@@ -56,7 +55,7 @@ public class PatUndVOsuchen {
 
             }.execute();
         } else {
-            Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection1);
+            Reha.instance.progLoader.ProgPatientenVerwaltung(1);
             String s1 = "#PATSUCHEN";
             String s2 = pat_int;
             PatStammEvent pEvt = new PatStammEvent(source);

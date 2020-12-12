@@ -17,6 +17,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.*;
 
@@ -63,7 +64,6 @@ import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
-import core.Disziplin;
 import core.Feature;
 import core.Patient;
 import dialoge.InfoDialog;
@@ -81,6 +81,7 @@ import hmrCheck.HMRCheck;
 import hmv.Context;
 import hmv.HmvFrame;
 import hmv.User;
+import javafx.embed.swing.JFXPanel;
 import jxTableTools.MyTableStringDatePicker;
 import jxTableTools.TableTool;
 import krankenKasse.KassenFormulare;
@@ -92,6 +93,7 @@ import patientenFenster.RezTestPanel;
 import patientenFenster.RezeptGebuehren;
 import patientenFenster.RezeptVorlage;
 import rechteTools.Rechte;
+import sql.DatenquellenFactory;
 import stammDatenTools.KasseTools;
 import stammDatenTools.RezTools;
 import stammDatenTools.ZuzahlTools;
@@ -146,7 +148,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     InfoDialogTerminInfo infoDlg = null;
     String sRezNumNeu = "";
-    private Connection connection;
+
     private JButton neuButton;
     private JButton editButton;
     private JButton deleteButton;
@@ -165,10 +167,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private JButton rezeptinhistorietransferierenBtn = new JButton();
     private JButton do301FallSteuerungBtn = new JButton();
     public Optional<Patient> current = Optional.empty();
+    private DatenquellenFactory datenquelle;
+    public AktuelleRezepte(final PatientHauptPanel eltern, DatenquellenFactory datenquelle) {
 
-    public AktuelleRezepte(final PatientHauptPanel eltern, Connection connection) {
-
-        this.connection = connection;
+        this.datenquelle = datenquelle;
 
         setOpaque(false);
         setBorder(null);
@@ -199,75 +201,70 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         add(JCompTools.getTransparentScrollPane(allesrein), BorderLayout.CENTER);
         validate();
-        new SwingWorker<Void, Void>() {
 
-            @Override
-            protected Void doInBackground() throws Exception {
-                try {
-                    vollPanel = new JXPanel();
-                    // Lemmi 20110105: Layout etwas dynamischer gestaltet
-                    FormLayout vplay = new FormLayout("fill:0:grow(0.75),5dlu,fill:0:grow(0.25),5dlu",
-                            "13dlu,53dlu,5dlu,fill:0:grow(1.00),0dlu");
-                    // Das soll nicht "dynamische" gestaltet werden sondern genau so belassen werden
-                    // wie es ist! Ansonsten muß bei den meisten Diagnosen gescrollt werden
-                    // und genau das ist Murks in einer View die einem einen schnellen
-                    // Gesamtüberblick verschaffen soll!
-                    // Steinhilber
+        SwingUtilities.invokeLater(new Runnable() {
 
-                    CellConstraints vpcc = new CellConstraints();
-                    vollPanel.setLayout(vplay);
-                    vollPanel.setOpaque(false);
-                    vollPanel.setBorder(null);
-
-                    Font font = new Font("Tahome", Font.PLAIN, 11);
-                    anzahlRezepte = new JLabel("Anzahl Rezepte: 0");
-                    anzahlRezepte.setFont(font);
-                    vollPanel.add(anzahlRezepte, vpcc.xy(1, 1));
-                    vollPanel.add(getTabelle(), vpcc.xywh(1, 2, 1, 1));
-                    anzahlTermine = new JLabel("Anzahl Termine: 0");
-                    anzahlTermine.setFont(font);
-                    anzahlTermine.setOpaque(false);
-                    vollPanel.add(anzahlTermine, vpcc.xywh(3, 1, 1, 1));
-
-                    JXPanel dummy = new JXPanel();
-                    dummy.setOpaque(false);
-                    FormLayout dumlay = new FormLayout(
-                            "fill:0:grow(0.25),p,fill:0:grow(0.25),p,fill:0:grow(0.25),p,fill:0:grow(0.25)",
-                            "fill:0:grow(1.00),2dlu,p,2dlu");
-                    CellConstraints dumcc = new CellConstraints();
-                    dummy.setLayout(dumlay);
-                    vollPanel.add(dummy, vpcc.xywh(3, 2, 1, 3));
-
-                    dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
-                    dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
-
-                    rezDatenPanel = new RezeptDaten(eltern);
-                    vollPanel.add(rezDatenPanel, vpcc.xyw(1, 4, 1));
-                    indiSchluessel();
-                    initOk = true;
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                    initOk = true;
-                }
-                return null;
-            }
-
-        }.execute();
-        new Thread() {
             @Override
             public void run() {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        holeFormulare();
-                        return;
+                {
+                    try {
+                        vollPanel = new JXPanel();
+                        // Lemmi 20110105: Layout etwas dynamischer gestaltet
+                        FormLayout vplay = new FormLayout("fill:0:grow(0.75),5dlu,fill:0:grow(0.25),5dlu",
+                                "13dlu,53dlu,5dlu,fill:0:grow(1.00),0dlu");
+                        // Das soll nicht "dynamische" gestaltet werden sondern genau so belassen werden
+                        // wie es ist! Ansonsten muß bei den meisten Diagnosen gescrollt werden
+                        // und genau das ist Murks in einer View die einem einen schnellen
+                        // Gesamtüberblick verschaffen soll!
+                        // Steinhilber
+
+                        CellConstraints vpcc = new CellConstraints();
+                        vollPanel.setLayout(vplay);
+                        vollPanel.setOpaque(false);
+                        vollPanel.setBorder(null);
+
+                        Font font = new Font("Tahome", Font.PLAIN, 11);
+                        anzahlRezepte = new JLabel("Anzahl Rezepte: 0");
+                        anzahlRezepte.setFont(font);
+                        vollPanel.add(anzahlRezepte, vpcc.xy(1, 1));
+                        vollPanel.add(getTabelle(), vpcc.xywh(1, 2, 1, 1));
+                        anzahlTermine = new JLabel("Anzahl Termine: 0");
+                        anzahlTermine.setFont(font);
+                        anzahlTermine.setOpaque(false);
+                        vollPanel.add(anzahlTermine, vpcc.xywh(3, 1, 1, 1));
+
+                        JXPanel dummy = new JXPanel();
+                        dummy.setOpaque(false);
+                        FormLayout dumlay = new FormLayout(
+                                "fill:0:grow(0.25),p,fill:0:grow(0.25),p,fill:0:grow(0.25),p,fill:0:grow(0.25)",
+                                "fill:0:grow(1.00),2dlu,p,2dlu");
+                        CellConstraints dumcc = new CellConstraints();
+                        dummy.setLayout(dumlay);
+                        vollPanel.add(dummy, vpcc.xywh(3, 2, 1, 3));
+
+                        dummy.add(getTermine(), dumcc.xyw(1, 1, 7));
+                        dummy.add(getTerminToolbar(), dumcc.xyw(1, 3, 7));
+
+                        rezDatenPanel = new RezeptDaten(eltern);
+                        vollPanel.add(rezDatenPanel, vpcc.xyw(1, 4, 1));
+                        indiSchluessel();
+                        initOk = true;
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                        initOk = true;
                     }
-                });
+                }
+
             }
-        }.start();
+        });
+
+
+        holeFormulare();
 
         if(new Feature("hmr2020").isEnabled()) {
             hmr2020neu.addActionListener(e-> neueHmv2020());
+            SwingUtilities.invokeLater(()->new JFXPanel());
+
             LOGGER.debug("enable listerner for hmr2020");
 
         } else {
@@ -526,7 +523,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         ausfallrechnungerstellenBtn.setToolTipText("Ausfallrechnung drucken");
         jtb.add(ausfallrechnungerstellenBtn);
 
-        rezeptAbschliessenBtn.addActionListener((e) -> rezeptAbschliessen(connection));
+        rezeptAbschliessenBtn.addActionListener((e) -> rezeptAbschliessen(datenquelle));
         rezeptAbschliessenBtn.setIcon(SystemConfig.hmSysIcons.get("statusset"));
         rezeptAbschliessenBtn.setToolTipText("Rezept ab-/aufschlie\u00dfen");
         jtb.add(rezeptAbschliessenBtn);
@@ -1973,7 +1970,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             formulareAuswerten();
             break;
         case "rezeptabschliessen":
-            rezeptAbschliessen(connection);
+            rezeptAbschliessen(datenquelle);
             break;
         case "deletebehandlungen":
             doDeleteBehandlungen();
@@ -2129,13 +2126,16 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
 
-    private void rezeptAbschliessen(Connection connection) {
-        try {
+    private void rezeptAbschliessen(DatenquellenFactory datenquelle) {
+        String reznr = Reha.instance.patpanel.vecaktrez.get(1);
+        try (
+                Connection connection =datenquelle.createConnection();
+                ){
             if (this.neuDlgOffen) {
                 return;
             }
             int pghmr = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41));
-            String disziplin = StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1));
+            String disziplin = StringTools.getDisziplin(reznr);
             if (SystemPreislisten.hmHMRAbrechnung.get(disziplin)
                                                  .get(pghmr - 1) < 1) {
                 String meldung = "Die Tarifgruppe dieser Verordnung unterliegt nicht den Heilmittelrichtlinien.\n\n"
@@ -2154,17 +2154,17 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     Reha.instance.abrechnungpanel.einlesenErneuern(null);
                 } else {
                     String aktDisziplin = Reha.instance.abrechnungpanel.disziSelect.getCurrDisziKurz();
-                    if (RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1))
+                    if (RezTools.getDisziplinFromRezNr(reznr)
                                 .equals(aktDisziplin)) {
                         // Rezept gehört zu der Sparte, die gerade im Abrechnungspanel geöffnet ist
-                        Reha.instance.abrechnungpanel.einlesenErneuern(Reha.instance.patpanel.vecaktrez.get(1));
+                        Reha.instance.abrechnungpanel.einlesenErneuern(reznr);
                     } else {
                         Reha.instance.abrechnungpanel.einlesenErneuern(null);
                     }
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            LOGGER.error("abschliessen von Rezept nr: " + reznr, ex);
         }
     }
 
@@ -3000,7 +3000,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     }
 
                     RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecKopiervorlage.clone(), lneu,
-                            connection);
+                            datenquelle.createConnection());
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(rezNeuAn);
                     if (vecKopiervorlage.size() < 1)
@@ -3013,7 +3013,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geöffnet:
                     neuRez.getSmartTitledPanel()
-                          .setContentContainer(new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu, connection));
+                          .setContentContainer(new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu, datenquelle.createConnection()));
                     neuRez.getSmartTitledPanel()
                           .setTitle("editieren Rezept ---> " + Reha.instance.patpanel.vecaktrez.get(1));
                 }
@@ -3270,7 +3270,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         Vector<Vector<String>> adrvec = SqlInfo.holeFelder(cmd);
         String[] adressParams = null;
 
-        abrRez = new AbrechnungRezept(null, connection);
+        Connection createConnection;
+        try {
+            createConnection = datenquelle.createConnection();
+        } catch (SQLException e) {
+            LOGGER.error("connection failed", e);
+            return;
+        }
+        abrRez = new AbrechnungRezept(null, createConnection);
         if (adrvec.get(0)
                   .get(0)
                   .equals("T")) {
@@ -3314,7 +3321,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     /**********************************************/
 
     class ToolsDlgAktuelleRezepte {
-        public ToolsDlgAktuelleRezepte(String command, Point pt, Connection connection) {
+        public ToolsDlgAktuelleRezepte(String command, Point pt, Connection connection,DatenquellenFactory datenquelle) {
             Map<Object, ImageIcon> icons = new HashMap<Object, ImageIcon>();
             icons.put("Rezeptgebühren kassieren", SystemConfig.hmSysIcons.get("rezeptgebuehr"));
             // Lemmi 20101218: angehängt Rezeptgebühr-Rechnung aus dem Rezept heraus
@@ -3368,7 +3375,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     return;
                 } else if (Reha.toolsDlgRueckgabe == 4) {
                     tDlg = null;
-                    rezeptAbschliessen(connection);
+                    rezeptAbschliessen(datenquelle);
                     return;
                 } else if (Reha.toolsDlgRueckgabe == 5) {
                     tDlg = null;
@@ -3398,6 +3405,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         LOGGER.debug("patient gewechselt: " +  current.get());
 
     }
+
 
 }
 

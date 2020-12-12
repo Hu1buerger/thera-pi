@@ -76,7 +76,7 @@ final class MenuActionListener implements ActionListener {
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
-                    reha.progLoader.ProgPatientenVerwaltung(1, reha.conn);
+                    reha.progLoader.ProgPatientenVerwaltung(1);
                     reha.progressStarten(false);
                     return null;
                 }

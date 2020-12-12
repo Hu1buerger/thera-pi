@@ -53,7 +53,7 @@ public class RezeptFahnder {
                 protected Void doInBackground() throws Exception {
                     try {
                         JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-                        Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection);
+                        Reha.instance.progLoader.ProgPatientenVerwaltung(1);
                         while ((xpatient == null)) {
                             Thread.sleep(20);
                             xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
@@ -85,7 +85,7 @@ public class RezeptFahnder {
             }.execute();
         } else {
             try {
-                Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection);
+                Reha.instance.progLoader.ProgPatientenVerwaltung(1);
                 String s1 = "#PATSUCHEN";
                 String s2 = pat_intern;
                 PatStammEvent pEvt = new PatStammEvent(this);

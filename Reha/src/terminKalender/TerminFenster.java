@@ -3624,7 +3624,7 @@ public class TerminFenster implements RehaTPEventListener, ActionListener, DropT
                 @Override
                 protected Void doInBackground() throws Exception {
                     JComponent xpatient = AktiveFenster.getFensterAlle("PatientenVerwaltung");
-                    Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection);
+                    Reha.instance.progLoader.ProgPatientenVerwaltung(1);
                     long whilezeit = System.currentTimeMillis();
                     while (xpatient == null) {
                         Thread.sleep(20);
@@ -3659,7 +3659,7 @@ public class TerminFenster implements RehaTPEventListener, ActionListener, DropT
 
             }.execute();
         } else {
-            Reha.instance.progLoader.ProgPatientenVerwaltung(1, connection);
+            Reha.instance.progLoader.ProgPatientenVerwaltung(1);
             String s1 = "#PATSUCHEN";
             String s2 = pat_int;
             PatStammEvent pEvt = new PatStammEvent(Reha.instance.terminpanel);

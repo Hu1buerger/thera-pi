@@ -44,7 +44,7 @@ import systemTools.ButtonTools;
 public class Anmeldungen extends JXPanel {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -3835067202659704351L;
     JXPanel content = null;
@@ -326,7 +326,7 @@ public class Anmeldungen extends JXPanel {
             // Reha.instance.patpanel.aktRezept.holeRezepte(pat_intern, reznum);
             return;
         } else {
-            Reha.instance.progLoader.ProgPatientenVerwaltung(0, connection);
+            Reha.instance.progLoader.ProgPatientenVerwaltung(0);
             long zeit = System.currentTimeMillis();
             while ((patient = AktiveFenster.getFensterAlle("PatientenVerwaltung")) == null) {
                 try {
@@ -577,7 +577,7 @@ public class Anmeldungen extends JXPanel {
 
     class MyAnmeldeTableModel extends DefaultTableModel {
         /**
-        * 
+        *
         */
         private static final long serialVersionUID = 1L;
 

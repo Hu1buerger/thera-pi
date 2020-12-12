@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.*;
-import java.sql.Connection;
 import java.util.Vector;
 
 import javax.swing.*;
@@ -25,6 +24,7 @@ import events.PatStammEventListener;
 import hauptFenster.Reha;
 import hauptFenster.UIFSplitPane;
 import rehaInternalFrame.JPatientInternal;
+import sql.DatenquellenFactory;
 
 /**
  * @author juergen
@@ -102,7 +102,7 @@ public class PatientHauptPanel extends JXPanel {
 
     private InfoDialogRGAFoffen infoDlg = null;
 
-    public PatientHauptPanel(String name, JPatientInternal internal, Connection connection) {
+    public PatientHauptPanel(String name, JPatientInternal internal, DatenquellenFactory datenquellenFactory) {
         super();
         setName(name);
         setDoubleBuffered(true);
@@ -123,8 +123,8 @@ public class PatientHauptPanel extends JXPanel {
         setLayout(lay);
 
         add(getToolBarPatient(), cc.xyw(1, 2, 3));
-        aktRezept = new AktuelleRezepte(this, connection);
-        add(constructSplitPaneLR(connection), cc.xyw(1, 3, 3));
+        aktRezept = new AktuelleRezepte(this, datenquellenFactory);
+        add(constructSplitPaneLR(datenquellenFactory), cc.xyw(1, 3, 3));
         setVisible(true);
         setzeFocus();
     }
@@ -141,9 +141,9 @@ public class PatientHauptPanel extends JXPanel {
         patientInternal = null;
     }
 
-    private UIFSplitPane constructSplitPaneLR(Connection connection) {
+    private UIFSplitPane constructSplitPaneLR(DatenquellenFactory datenquelle) {
         UIFSplitPane jSplitLR = UIFSplitPane.createStrippedSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-                getStammDatenPatient(connection), constructSplitPaneOU());
+                getStammDatenPatient(datenquelle), constructSplitPaneOU());
         jSplitLR.setOpaque(false);
         jSplitLR.setDividerSize(7);
         jSplitLR.setDividerBorderVisible(true);
@@ -170,8 +170,8 @@ public class PatientHauptPanel extends JXPanel {
         return jSplitRechtsOU;
     }
 
-    private JScrollPane getStammDatenPatient(Connection connection) {
-        stammDatenPanel = new PatientStammDatenPanel(this, connection);
+    private JScrollPane getStammDatenPatient(DatenquellenFactory datenquelle) {
+        stammDatenPanel = new PatientStammDatenPanel(this,  datenquelle);
         JScrollPane jscr = JCompTools.getTransparentScrollPane(stammDatenPanel);
         jscr.validate();
         JScrollPane jscr2 = JCompTools.getTransparent2ScrollPane(jscr);
