@@ -13,7 +13,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -29,11 +28,10 @@ import java.security.SecureRandom;
 import java.security.Security;
 import java.security.SignatureException;
 import java.security.UnrecoverableEntryException;
-import java.security.cert.CertStore;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CollectionCertStoreParameters;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -46,18 +44,26 @@ import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
 
-import org.bouncycastle.asn1.ASN1Object;
+import org.bouncycastle.asn1.ASN1Encoding;
+import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.openssl.PEMReader;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.util.CollectionStore;
+import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 /**
  * This class is intended to store and handle the keys or key pairs in 
@@ -156,7 +162,7 @@ public class NebraskaKeystore {
 
     private int keyLengthOwnCert = NebraskaConstants.KEY_LENGTH;
 
-    private static final Logger logger = LoggerFactory.getLogger(NebraskaKeystore.class);
+//    private static final Logger logger = LoggerFactory.getLogger(NebraskaKeystore.class);
 
     /**
      * Initialize key store for specified principal using specified file. 
@@ -617,8 +623,8 @@ public class NebraskaKeystore {
 
         if (md5Hash != null) {
             CertificationRequestInfo info = request.getCertificationRequestInfo();
-            ASN1Object asno = (ASN1Object) info.getDERObject()
-                                               .toASN1Object();
+            ASN1Primitive asno = (ASN1Primitive) info.toASN1Primitive()
+                                               .toASN1Primitive();
             ASN1Sequence aseq = ASN1Sequence.getInstance(asno);
             SubjectPublicKeyInfo spub = null;
             for (int i = 0; i < aseq.size(); i++) {
@@ -648,7 +654,14 @@ public class NebraskaKeystore {
         }
 
         if (requestStream != null) {
-            byte[] encodedRequest = request.getDEREncoded();
+            byte[] encodedRequest = null;
+            
+            try {
+				encodedRequest = request.getEncoded(ASN1Encoding.DER);
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
 
             try {
                 requestStream.write(encodedRequest);
@@ -755,7 +768,7 @@ public class NebraskaKeystore {
         } catch (FileNotFoundException e) {
             throw new NebraskaFileException(e);
         } catch (IOException e1) {
-            logger.error("closing certstream", e1);
+//            logger.error("closing certstream", e1);
         }
 
     }
@@ -799,12 +812,13 @@ public class NebraskaKeystore {
                 } else {
                     empty = false;
                     certBuf.append(line + separator);
-                }
+                }                
             }
-            if (!empty) {
+            if (!empty) {            	
                 certBuf.append(certTrailer + separator);
                 readAndStoreCert(certBuf);
             }
+            
         } catch (IOException e) {
             throw new NebraskaFileException(e);
         }
@@ -820,16 +834,17 @@ public class NebraskaKeystore {
      */
     private void readAndStoreCert(StringBuffer certBuf) throws NebraskaCryptoException, NebraskaFileException {
         StringReader certBufReader = new StringReader(certBuf.toString());
-        PEMReader pemReader = new PEMReader(certBufReader);
+        PEMParser pemReader = new PEMParser(certBufReader);
         Object o;
         try {
             o = pemReader.readObject();
-            if (o instanceof X509Certificate) {
-                X509Certificate cert = (X509Certificate) o;
+            if (o instanceof X509CertificateHolder) {
+                X509Certificate cert = new JcaX509CertificateConverter().setProvider( NebraskaConstants.SECURITY_PROVIDER )
+                		  .getCertificate( (X509CertificateHolder) o );
                 storeCertificate(cert);
             }
             pemReader.close();
-        } catch (IOException e) {
+        } catch (IOException | CertificateException e) {
             throw new NebraskaFileException(e);
         }
     }
@@ -880,7 +895,7 @@ public class NebraskaKeystore {
         } catch (IOException e) {
             throw new NebraskaFileException(e);
         }
-        PEMWriter pemWriter = new PEMWriter(fWriter, NebraskaConstants.SECURITY_PROVIDER);
+        PEMWriter pemWriter = new PEMWriter(fWriter);
         try {
             pemWriter.writeObject(privateKey);
             pemWriter.close();
@@ -910,8 +925,11 @@ public class NebraskaKeystore {
         KeyPair keyPair = null;
         try {
             fReader = new FileReader(new File(keyFileName));
-            PEMReader pReader = new PEMReader(fReader);
-            keyPair = (KeyPair) pReader.readObject();
+            PEMParser pReader = new PEMParser(fReader);
+            PEMKeyPair      pemPair;
+            pemPair = (PEMKeyPair) pReader.readObject();
+            
+            keyPair = new JcaPEMKeyConverter().setProvider("BC").getKeyPair(pemPair);
             pReader.close();
             fReader.close();
         } catch (FileNotFoundException e) {
@@ -1006,8 +1024,9 @@ public class NebraskaKeystore {
      * @throws NebraskaNotInitializedException if institution ID, institution name
      *                                         or person name is not initialized
      */
-    CertStore getSenderCertChain() throws NebraskaCryptoException, NebraskaNotInitializedException {
+    Store<JcaX509CertificateHolder> getSenderCertChain() throws NebraskaCryptoException, NebraskaNotInitializedException {
         String alias = getKeyCertAlias();
+        CollectionStore<JcaX509CertificateHolder> store = null;
         try {
             Certificate[] certs = keyStore.getCertificateChain(alias);
             Collection<X509Certificate> certColl = new ArrayList<X509Certificate>();
@@ -1017,20 +1036,24 @@ public class NebraskaKeystore {
                     certColl.add((X509Certificate) cert);
                 } else {
                     throw new NebraskaCryptoException(new Exception("certificate is not an X509 certificate"));
-                }
+                }                                             
             }
-            CertStore certStore = CertStore.getInstance(NebraskaConstants.CERTSTORE_TYPE,
-                    new CollectionCertStoreParameters(certColl), NebraskaConstants.SECURITY_PROVIDER);
-            return certStore;
+            
+            Collection<JcaX509CertificateHolder> x509CertificateHolder = new ArrayList<>();
+            for (X509Certificate certificate : certColl) {
+                x509CertificateHolder.add(new JcaX509CertificateHolder(certificate));
+            }
+            
+            store = new CollectionStore<>(x509CertificateHolder);
+            
+            return store;
         } catch (KeyStoreException e) {
             throw new NebraskaCryptoException(e);
-        } catch (InvalidAlgorithmParameterException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (NoSuchAlgorithmException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (NoSuchProviderException e) {
-            throw new NebraskaCryptoException(e);
-        }
+        } catch (CertificateEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return store;
 
     }
 
@@ -1347,10 +1370,10 @@ public class NebraskaKeystore {
             throw new NebraskaCryptoException(e);
         } catch (FileNotFoundException e1) {
             // TODO Auto-generated catch block
-            logger.error("bad things happen here", e1);
+            //logger.error("bad things happen here", e1);
         } catch (IOException e1) {
             // TODO Auto-generated catch block
-            logger.error("bad things happen here", e1);
+            //logger.error("bad things happen here", e1);
         }
     }
 
