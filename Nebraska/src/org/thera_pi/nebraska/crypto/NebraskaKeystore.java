@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 
 import javax.security.auth.x500.X500Principal;
@@ -51,6 +52,7 @@ import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.pkcs.CertificationRequestInfo;
 import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
 import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateHolder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
@@ -59,8 +61,6 @@ import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.PEMParser;
 import org.bouncycastle.openssl.PEMWriter;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
-import org.bouncycastle.util.CollectionStore;
-import org.bouncycastle.util.Store;
 import org.bouncycastle.x509.X509V3CertificateGenerator;
 //import org.slf4j.Logger;
 //import org.slf4j.LoggerFactory;
@@ -929,7 +929,7 @@ public class NebraskaKeystore {
             PEMKeyPair      pemPair;
             pemPair = (PEMKeyPair) pReader.readObject();
             
-            keyPair = new JcaPEMKeyConverter().setProvider("BC").getKeyPair(pemPair);
+            keyPair = new JcaPEMKeyConverter().setProvider(NebraskaConstants.SECURITY_PROVIDER).getKeyPair(pemPair);
             pReader.close();
             fReader.close();
         } catch (FileNotFoundException e) {
@@ -1024,16 +1024,17 @@ public class NebraskaKeystore {
      * @throws NebraskaNotInitializedException if institution ID, institution name
      *                                         or person name is not initialized
      */
-    Store<JcaX509CertificateHolder> getSenderCertChain() throws NebraskaCryptoException, NebraskaNotInitializedException {
+    JcaCertStore getSenderCertChain() throws NebraskaCryptoException, NebraskaNotInitializedException {
         String alias = getKeyCertAlias();
-        CollectionStore<JcaX509CertificateHolder> store = null;
+        JcaCertStore store = null;
+        List<X509Certificate> certList = new ArrayList<X509Certificate>();
         try {
             Certificate[] certs = keyStore.getCertificateChain(alias);
             Collection<X509Certificate> certColl = new ArrayList<X509Certificate>();
             for (int i = 0; i < certs.length; i++) {
                 Certificate cert = certs[i];
                 if (cert instanceof X509Certificate) {
-                    certColl.add((X509Certificate) cert);
+                	certList.add((X509Certificate) cert);
                 } else {
                     throw new NebraskaCryptoException(new Exception("certificate is not an X509 certificate"));
                 }                                             
@@ -1044,7 +1045,7 @@ public class NebraskaKeystore {
                 x509CertificateHolder.add(new JcaX509CertificateHolder(certificate));
             }
             
-            store = new CollectionStore<>(x509CertificateHolder);
+            store = new JcaCertStore(certList);
             
             return store;
         } catch (KeyStoreException e) {

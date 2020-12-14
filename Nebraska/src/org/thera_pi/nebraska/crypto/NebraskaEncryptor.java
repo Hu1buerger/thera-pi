@@ -8,23 +8,39 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
-import java.security.cert.CertStore;
-import java.security.cert.CertStoreException;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
+import java.security.spec.AlgorithmParameterSpec;
+import java.security.spec.MGF1ParameterSpec;
+import java.security.spec.PSSParameterSpec;
 
+import javax.crypto.spec.OAEPParameterSpec;
+import javax.crypto.spec.PSource;
+
+import org.bouncycastle.asn1.DERNull;
+import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
+import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
+import org.bouncycastle.cert.jcajce.JcaCertStore;
+import org.bouncycastle.cms.CMSAlgorithm;
 import org.bouncycastle.cms.CMSEnvelopedData;
 import org.bouncycastle.cms.CMSEnvelopedDataGenerator;
 import org.bouncycastle.cms.CMSException;
-import org.bouncycastle.cms.CMSProcessable;
 import org.bouncycastle.cms.CMSProcessableByteArray;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.CMSSignedDataGenerator;
+import org.bouncycastle.cms.jcajce.JcaSignerInfoGeneratorBuilder;
+import org.bouncycastle.cms.jcajce.JceCMSContentEncryptorBuilder;
+import org.bouncycastle.cms.jcajce.JceKeyTransRecipientInfoGenerator;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.bouncycastle.operator.ContentSigner;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.jcajce.JcaAlgorithmParametersConverter;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 
 /**
  * This object can be used to encrypt data with the certificate of a specified
@@ -46,9 +62,10 @@ public class NebraskaEncryptor {
     private X509Certificate receiverCert;
     private X509Certificate senderCert;
     private PrivateKey senderKey;
-    private CertStore certificateChain;
+    private JcaCertStore certificateChain;
     private boolean encryptToSelf;
     private String signatureAlgorithm2use;
+    private boolean useRSAES;
 
     public boolean isEncryptToSelf() {
         return encryptToSelf;
@@ -75,6 +92,7 @@ public class NebraskaEncryptor {
         senderCert = nebraskaKeystore.getSenderCertificate();
         certificateChain = nebraskaKeystore.getSenderCertChain();
         signatureAlgorithm2use = nebraskaKeystore.getCertSignatureAlgorithm(); 
+        useRSAES = (nebraskaKeystore.getOwnCertLength() >= 4096);
     }
 
     /**
@@ -119,11 +137,8 @@ public class NebraskaEncryptor {
      */
     public void encrypt(InputStream inStream, OutputStream outStream)
             throws NebraskaCryptoException, NebraskaFileException {
-        /*
-         * To get the input as byte array we copy all data to a ByteArrayOutputStream
-         * and retrieve the byte array from it.
-         */
-        Provider provBC = Security.getProvider(NebraskaConstants.SECURITY_PROVIDER);
+    	
+    	Provider provBC = Security.getProvider(NebraskaConstants.SECURITY_PROVIDER);
         Provider bcProvider = null;
 
         if (provBC == null) {
@@ -132,101 +147,31 @@ public class NebraskaEncryptor {
         } else {
             bcProvider = provBC;
         }
-
-        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        CMSProcessable plainContent;
-        try {
-            byte[] buffer = new byte[1024];
-            int len;
-            while ((len = inStream.read(buffer)) > 0) {
-                byteStream.write(buffer, 0, len);
-            }
-            byteStream.flush();
-
-            // generate needs a CMSProcessable
-            plainContent = new CMSProcessableByteArray(byteStream.toByteArray());
-            byteStream.close();
-        } catch (IOException e) {
-            throw new NebraskaFileException(e);
-        }
-
-        // first processing step: sign data
-
-        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
-        String digestOID = (getDigest());
-        switch (signatureAlgorithm2use) {
-        case "SHA1WithRSAEncryption":
-        case "1.3.14.3.2.26":
-        case "SHA256WithRSAEncryption":
-        case "2.16.840.1.101.3.4.2.1":
-            generator.addSigner(senderKey, senderCert, digestOID);
-            break;
-        case "SHA256WithRSAandMGF1":
-        case "1.2.840.113549.1.1.10":
-            generator.addSigner(senderKey, senderCert, CMSSignedDataGenerator.ENCRYPTION_RSA_PSS, digestOID);
-            break;
-        default:
-           System.out.println("NebraskaEncryptor.getDigest: unknown SignatureAlgorithm: " + signatureAlgorithm2use);
-        }
-
-        try {
-            generator.addCertificatesAndCRLs(certificateChain);
-        } catch (CertStoreException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (CMSException e) {
-            throw new NebraskaCryptoException(e);
-        }
-
-        CMSSignedData signedData;
-        try {
-            signedData = generator.generate(plainContent, true, NebraskaConstants.SECURITY_PROVIDER);
-        } catch (NoSuchAlgorithmException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (NoSuchProviderException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (CMSException e) {
-            throw new NebraskaCryptoException(e);
-        }
-
-        // DER encoded output
+        
+        /*
+         * To get the input as byte array we copy all data to a ByteArrayOutputStream
+         * and retrieve the byte array from it.
+         */                
         byte[] encodedSignedData = null;
+        ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
         try {
-            encodedSignedData = signedData.getEncoded();
+        	byte[] buffer = new byte[1024];
+        	int len;
+        	while ((len = inStream.read(buffer)) > 0) {
+        		byteStream.write(buffer, 0, len);
+        	}
+        	byteStream.flush();
+
+            // sign the data
+        	encodedSignedData = this.signData(byteStream.toByteArray());
+        	byteStream.close();
         } catch (IOException e) {
-            throw new NebraskaFileException(e);
+        	throw new NebraskaFileException(e);
         }
 
         // second processing step: encrypt data
-
-        CMSEnvelopedDataGenerator envelopedGenerator = new CMSEnvelopedDataGenerator();
-
-        // the receiver must be able to decrypt the data
-        envelopedGenerator.addKeyTransRecipient(receiverCert);
-
-        // optionally the sender may also decrypt it
-        if (encryptToSelf) {
-            envelopedGenerator.addKeyTransRecipient(senderCert);
-        }
-
-        CMSProcessable signedContent;
-        signedContent = new CMSProcessableByteArray(encodedSignedData);
-        CMSEnvelopedData envelopedData;
-        try {
-            envelopedData = envelopedGenerator.generate(signedContent, CMSEnvelopedDataGenerator.AES256_CBC,
-                    NebraskaConstants.SECURITY_PROVIDER);
-        } catch (NoSuchAlgorithmException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (NoSuchProviderException e) {
-            throw new NebraskaCryptoException(e);
-        } catch (CMSException e) {
-            throw new NebraskaCryptoException(e);
-        }
-        byte[] encodedEnvelopedData;
-        try {
-            encodedEnvelopedData = envelopedData.getEncoded();
-        } catch (IOException e) {
-            throw new NebraskaFileException(e);
-        }
+        byte[] encodedEnvelopedData = null;
+        encodedEnvelopedData = this.encryptData(encodedSignedData);             
 
         // write result to output
         try {
@@ -235,24 +180,102 @@ public class NebraskaEncryptor {
             throw new NebraskaFileException(e);
         }
     }
+    
+    public byte[] encryptData(byte[] content) throws NebraskaCryptoException, NebraskaFileException {
+    	CMSEnvelopedDataGenerator envelopedGenerator = new CMSEnvelopedDataGenerator();              
+        
+    	// specify session key encryption
+        AlgorithmIdentifier algorithmIdentifier;
+		try {
+			// with 4096 keys we use RSAES-OAEP
+			if (useRSAES) {
+				JcaAlgorithmParametersConverter paramsConverter = new JcaAlgorithmParametersConverter();
+		        OAEPParameterSpec oaepSpec = new OAEPParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, PSource.PSpecified.DEFAULT);
+				algorithmIdentifier = paramsConverter.getAlgorithmIdentifier(PKCSObjectIdentifiers.id_RSAES_OAEP, oaepSpec);
+			} else {
+				algorithmIdentifier = new AlgorithmIdentifier(PKCSObjectIdentifiers.rsaEncryption, DERNull.INSTANCE);
+			}
+			
+		} catch (InvalidAlgorithmParameterException e) {
+			throw new NebraskaCryptoException(e);
+		}
+        
+		// define receivers
+        try {
+            // the receiver must be able to decrypt the data
+			envelopedGenerator.addRecipientInfoGenerator(new JceKeyTransRecipientInfoGenerator(receiverCert, algorithmIdentifier).setProvider(NebraskaConstants.SECURITY_PROVIDER));
+			
+			// optionally the sender may also decrypt it
+			if (encryptToSelf) {
+				JceKeyTransRecipientInfoGenerator recipent = new JceKeyTransRecipientInfoGenerator(senderCert,algorithmIdentifier).setProvider(NebraskaConstants.SECURITY_PROVIDER);
+				envelopedGenerator.addRecipientInfoGenerator(recipent);
+			}
+		} catch (CertificateEncodingException e) {
+			throw new NebraskaCryptoException(e);
+		}
+        
+        CMSEnvelopedData envelopedData;
+        
+        byte[] encryptedContent = null;
+        // build everything together and encrypt the content
+		try {
+			envelopedData = envelopedGenerator.generate(
+					new CMSProcessableByteArray(content),                
+			        new JceCMSContentEncryptorBuilder(CMSAlgorithm.AES256_CBC).setProvider(NebraskaConstants.SECURITY_PROVIDER).build()
+			);
+			
+			encryptedContent  = envelopedData.getEncoded();
+		} catch (CMSException e) {
+			throw new NebraskaCryptoException(e);
+		} catch (IOException e) {
+			throw new NebraskaFileException(e);
+		}            
+        
+        return encryptedContent;
+    }
+    
+    public byte[] signData(byte[] signingContent)
+            throws NebraskaCryptoException, NebraskaFileException {
+        // generate needs a CMSProcessable
+         CMSProcessableByteArray plainContent = new CMSProcessableByteArray(signingContent);
 
-    private String getDigest() {
-        String retVal = CMSSignedDataGenerator.DIGEST_SHA256;
-        switch (signatureAlgorithm2use) {
-        case "SHA1WithRSAEncryption":
-        case "1.3.14.3.2.26":
-            retVal = CMSSignedDataGenerator.DIGEST_SHA1;
-            break;
-        case "SHA256WithRSAEncryption":
-        case "2.16.840.1.101.3.4.2.1":
-        case "SHA256WithRSAandMGF1":    // Hash ist auch SHA256
-        case "1.2.840.113549.1.1.10":
-            // default bleibt
-            break;
-        default:
-           System.out.println("NebraskaEncryptor.getDigest: unknown SignatureAlgorithm: " + signatureAlgorithm2use + ", use default");
-        }
-        return retVal;
+        // sign data
+        ContentSigner signer;
+        CMSSignedDataGenerator generator = new CMSSignedDataGenerator();
+		try {
+			JcaContentSignerBuilder signerBuilder = null;
+			// with 4096 keys we use RSAES-PSS
+			if (useRSAES) {
+				AlgorithmParameterSpec sign_params = new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1);	
+				signerBuilder = new JcaContentSignerBuilder("SHA256withRSA", sign_params);
+			} else {
+				signerBuilder = new JcaContentSignerBuilder("SHA256withRSA");
+			}
+			signer = signerBuilder.setProvider(NebraskaConstants.SECURITY_PROVIDER).build(senderKey);
+			generator.addSignerInfoGenerator(
+					new JcaSignerInfoGeneratorBuilder(
+			                new JcaDigestCalculatorProviderBuilder().setProvider(NebraskaConstants.SECURITY_PROVIDER).build())
+			                .build(signer, senderCert)
+			);
+		} catch (OperatorCreationException | CertificateEncodingException e) {
+			throw new NebraskaCryptoException(e);
+		}
+
+		CMSSignedData signedData;
+        byte[] data = null;
+		try {
+            generator.addCertificates(certificateChain);
+            signedData = generator.generate(plainContent, true);
+            
+            data  = signedData.getEncoded();
+        } catch (CMSException e) {
+            throw new NebraskaCryptoException(e);
+        } catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}       
+        
+        return data;
     }
 
 }

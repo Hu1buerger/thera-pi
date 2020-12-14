@@ -70,7 +70,7 @@ public class NebraskaDecryptor {
      * Decrypt data and check signature.
      * 
      * @param inStream  encrypted data stream
-     * @param outStream plain text data stream 
+     * @param outStream plain text data stream
      * @throws NebraskaFileException
      * @throws NebraskaCryptoException
      */
@@ -85,7 +85,7 @@ public class NebraskaDecryptor {
             throw new NebraskaFileException(e);
         }
         RecipientInformationStore recipients = parser.getRecipientInfos();
-
+        //System.out.println("daten "+parser.getContentEncryptionAlgorithm().getAlgorithm());
         Collection<?> c = recipients.getRecipients();
         Iterator<?> it = c.iterator();
 
@@ -93,7 +93,8 @@ public class NebraskaDecryptor {
         while (it.hasNext()) {
             RecipientInformation recipient = (RecipientInformation) it.next();
             KeyTransRecipientId rid = (KeyTransRecipientId)recipient.getRID();
-
+//            System.out.println("session key "+recipient.getKeyEncryptionAlgOID());
+//            System.out.println("session key "+recipient.getKeyEncryptionAlgorithm().getParameters());
             BigInteger serial = rid.getSerialNumber();
 
             NebraskaPrincipal receiverPrincipal = new NebraskaPrincipal(issuer);
@@ -104,8 +105,7 @@ public class NebraskaDecryptor {
                 } catch (CMSException e) {
                     throw new NebraskaCryptoException(e);
                 } catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+                	throw new NebraskaFileException(e);
 				}
                 processSignedData(recData.getContentStream(), outStream);
                 break;
@@ -127,12 +127,9 @@ public class NebraskaDecryptor {
         CMSSignedDataParser parser = null;
         try {
             parser = new CMSSignedDataParser(new JcaDigestCalculatorProviderBuilder().setProvider(NebraskaConstants.SECURITY_PROVIDER).build(), signedContentStream);
-        } catch (CMSException e) {
+        } catch (CMSException | OperatorCreationException e) {
             throw new NebraskaCryptoException(e);
-        } catch (OperatorCreationException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        }
 
         CMSTypedStream signedContent = parser.getSignedContent();
 
@@ -146,38 +143,30 @@ public class NebraskaDecryptor {
             }
             outStream.flush();
 
-        } catch (IOException e) {
-            throw new NebraskaFileException(e);
-        }
-
-        try {
             signedContent.drain();
         } catch (IOException e) {
             throw new NebraskaFileException(e);
         }
 
-        Store<?> certStore;
+        Store<?> certStore;	
+        SignerInformationStore signers;
+        
 		try {
 			certStore = parser.getCertificates();
-		} catch (CMSException e) {
-			throw new NebraskaCryptoException(e);
-		}
-		
-        SignerInformationStore signers;
-		try {
+			
 			signers = parser.getSignerInfos();
 		} catch (CMSException e) {
 			throw new NebraskaCryptoException(e);
 		}
         
-        Collection<SignerInformation>              c = signers.getSigners();
-        Iterator<SignerInformation>                it = c.iterator();
+        Collection<SignerInformation> c = signers.getSigners();
+        Iterator<SignerInformation> it = c.iterator();
 
         while (it.hasNext()) {
-        	SignerInformation   signer = (SignerInformation)it.next();
-        	Collection<?>          certCollection = certStore.getMatches(signer.getSID());
+        	SignerInformation signer = (SignerInformation)it.next();
+        	Collection<?> certCollection = certStore.getMatches(signer.getSID());
             
-        	Iterator<?>        certIt = certCollection.iterator();
+        	Iterator<?> certIt = certCollection.iterator();
         	X509CertificateHolder cert = (X509CertificateHolder)certIt.next();
 
             boolean verified = false;
