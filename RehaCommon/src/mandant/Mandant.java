@@ -12,6 +12,15 @@ public class Mandant {
     public final static Mandant nullMandant = new Mandant("000000000", "Übungs-Mandant");
     private EnumSet<Disziplin> aktiveDisziplinen = EnumSet.noneOf(Disziplin.class);
 
+
+
+    public Mandant(IK ik, String name, EnumSet<Disziplin> aktiveDisziplinen) {
+        super();
+        this.ik = ik;
+        this.name = name;
+        this.aktiveDisziplinen = aktiveDisziplinen;
+    }
+
     public Mandant(String ik, String name) {
         this.ik = new IK(ik);
         this.name = name;

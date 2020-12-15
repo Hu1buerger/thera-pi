@@ -10,10 +10,14 @@ public enum Disziplin {
     PO("Podo", "Podologie-Rezept", "7"),
     RS("Rsport", "Rehasport-Rezept", "8"),
     FT("Ftrain", "Funktionstraining-Rezept", ""),
-    RH("Reha","Reha",""),
+    RH("Reha","Reha","R"),
     COMMON("Common","Common","") ,
     INV("invalid", "invalid", ""),
-    ET("Essen", "Ern\u00e4hrungstherapie", "?");
+    ET("Essen", "Ern\u00e4hrungstherapie", "A"),
+    ST("Sprachtherapie", "Sprachtherapie","4"),
+    KK("Krankenhaus","Krankenhaus","6"),
+    PT("KG Kurort", "Physiotherapie Kurort","8");
+
 
     public final String medium;
     public final String lang;
@@ -58,6 +62,18 @@ public enum Disziplin {
      */
     public EnumSet<Disziplin> ohneReha() { // NO_UCD (unused code)
         return EnumSet.of(KG, MA, ER, LO, PO);
+    }
+
+    public static Disziplin ofKennung(String kennung) {
+        if(kennung == null) {
+            return INV;
+        }
+        for (Disziplin d : Disziplin.values()) {
+            if (d.hmpraefix.toLowerCase().equals(kennung.toLowerCase())) {
+                return d;
+            }
+        }
+        return INV;
     }
 
 
