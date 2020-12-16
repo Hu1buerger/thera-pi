@@ -1,8 +1,10 @@
 package hmv;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public class Icd10 {
+   static private final Icd10 EMPTY = new Icd10("");
     String schluessel;
     String titelzeile;
     String beschreibung;
@@ -32,6 +34,10 @@ public class Icd10 {
     public String toString() {
         return "Icd10 [schluessel=" + schluessel + ", titelzeile=" + titelzeile + ", beschreibung=" + beschreibung
                 + "]";
+    }
+
+    public static Icd10 empty() {
+        return EMPTY;
     }
 
 

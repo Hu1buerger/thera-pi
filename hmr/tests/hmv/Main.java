@@ -13,6 +13,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.transform.Scale;
 import javafx.stage.Stage;
+import mandant.IK;
 import mandant.Mandant;
 import speichern.HmvSaver;
 
@@ -23,9 +24,12 @@ public class Main extends Application implements Closeable{
             stage = primaryStage;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("HMV13.fxml"));
             EnumSet<Disziplin> disziplinen = EnumSet.of(Disziplin.ER, Disziplin.KG);
+            
             Patient patient = CoreTestDataFactory.createPatientSimonLant();
-            Context context = new Context(new Mandant("123456789", "test"), new User("bob"), patient);
-            Hmv neueHmv = CoreTestDataFactory.createHmv(context);
+            Context context = new Context(new Mandant(new IK("123456789"), "test",disziplinen), new User("bob"), patient);
+           
+            Hmv neueHmv = new Hmv(context);
+            
             Hmv13 controller = new Hmv13(neueHmv, context);
             loader.setController(controller);
 

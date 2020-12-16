@@ -70,7 +70,6 @@
     <TextArea fx:id="therapieZiele" layoutX="44.0" layoutY="661.0" prefHeight="146.0" prefWidth="335.0" promptText="Optional, derzeit nicht ausgewertet" />
     <TextField fx:id="therapieFrequenz" layoutX="447.0" layoutY="573.0" prefHeight="25.0" prefWidth="53.0" promptText="pro Woche" />
       <TextField fx:id="dauer" layoutX="447.0" layoutY="602.0" promptText="Dauer" />
-    <TextField fx:id="diagnoseGruppe" layoutX="96.0" layoutY="301.0" prefHeight="25.0" prefWidth="53.0" />
     <RadioButton id="x" layoutX="575.0" layoutY="307.0" mnemonicParsing="false" toggleGroup="$leitsymptomatik_kuerzel" />
     <TextArea fx:id="icd10Code_Text" layoutX="166.0" layoutY="249.0" prefHeight="52.0" prefWidth="430.0" />
     <TextArea fx:id="leitsymptomatik" layoutX="43.0" layoutY="347.0" prefHeight="52.0" prefWidth="553.0" />
@@ -106,5 +105,6 @@
       <TextField fx:id="therapieFrequenzBis" layoutX="528.0" layoutY="573.0" prefHeight="25.0" prefWidth="67.0" />
       <CheckBox layoutX="245.0" layoutY="25.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="133.0" text="Entlassmanagement" textFill="#b50000" />
       <Label layoutX="506.0" layoutY="577.0" text="bis" />
+      <ComboBox fx:id="diagnoseGruppe" editable="true" layoutX="39.0" layoutY="301.0" prefWidth="150.0" />
   </children>
 </AnchorPane>

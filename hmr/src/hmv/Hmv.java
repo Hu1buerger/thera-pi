@@ -22,7 +22,7 @@ public class Hmv  {
     //HMV
     LocalDate ausstellungsdatum;
 
-    Diagnose diag;
+    Diagnose diag = new Diagnose(null, null,DG.INVALID, new Leitsymptomatik(DG.INVALID,"", ""));
 
 
     Behandlung beh;
@@ -37,6 +37,7 @@ public class Hmv  {
         arzt = patient.hauptarzt.orElse(null);
         kv = patient.kv;
         angelegtvon = context.user;
+
     }
 
 

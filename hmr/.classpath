@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry excluding="resources/|resources/" kind="src" path="src"/>
+	<classpathentry excluding="resources/|resources/|resources/" kind="src" path="src"/>
 	<classpathentry kind="src" output="bin-tests" path="tests">
 		<attributes>
 			<attribute name="test" value="true"/>
@@ -23,6 +23,7 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="src/resources/controlsfx-8.40.16.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RehaCommon"/>
 	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/testfx-core-4.0.16-alpha.jar">
 		<attributes>
@@ -34,5 +35,10 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/datenbank"/>
+	<classpathentry kind="lib" path="/Libraries/lib/logging/logback-classic-1.2.3.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/logging/logback-core-1.2.3.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/logging/slf4j-api-1.7.25.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/logging/sysout-over-slf4j-1.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -3,10 +3,15 @@ package hmv;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiPredicate;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 import core.Arzt;
 import core.Disziplin;
@@ -17,6 +22,7 @@ import core.Zuzahlung;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -24,6 +30,8 @@ import javafx.util.StringConverter;
 import specs.Contracts;
 
 public class Hmv13 {
+
+
 
     ActionListener speichernListener = new ActionListener() {
 
@@ -97,7 +105,7 @@ public class Hmv13 {
 
     // this might be a combobox
     @FXML
-    TextField diagnoseGruppe;
+    ComboBox<DG> diagnoseGruppe;
 
     @FXML
     ToggleGroup leitsymptomatik_kuerzel;
@@ -175,6 +183,7 @@ public class Hmv13 {
 
     private void setData() {
 
+        List<DG> alle = java.util.Collections.emptyList();
 
         Patient patient = hmv.patient;
         name.setText(patient.nachname);
@@ -229,8 +238,20 @@ public class Hmv13 {
 
         rezeptDatum.setValue(hmv.ausstellungsdatum);
         dringlich.setValue(hmv.dringlich);
+        diagnoseGruppe.setItems( FXCollections.observableArrayList(alle));
 
-        diagnoseGruppe.setText(hmv.diag.diagnosegruppe);
+diagnoseGruppe.setEditable(false);
+
+   ComboBoxAutoComplete<DG> autocompl = new ComboBoxAutoComplete<>(diagnoseGruppe);
+        BiPredicate<DG,String> searchPredicate = new BiPredicate<DG, String>() {
+
+            @Override
+            public boolean test(DG t, String u) {
+              return  t.gruppe.toLowerCase().contains(u.toLowerCase());
+            }
+        };
+        autocompl.setSearchPredicate(searchPredicate);
+        diagnoseGruppe.setPromptText(hmv.diag.diagnosegruppe.gruppe);
         icd10Code_1.setText(hmv.diag.icd10_1.schluessel);
         icd10Code_2.setText(hmv.diag.icd10_2.schluessel);
         symptomatik.setValue(hmv.diag.leitsymptomatik.kennung);
@@ -386,7 +407,7 @@ public class Hmv13 {
         hmvOut.ausstellungsdatum = rezeptDatum.getValue();
         hmvOut.dringlich = dringlicherBedarf.isSelected();
         hmvOut.diag = new Diagnose(new Icd10(icd10Code_1.getText()), new Icd10(icd10Code_2.getText()),
-                diagnoseGruppe.getText(), new Leitsymptomatik(String.valueOf(leitsymptomatik_kuerzel.getSelectedToggle()
+                diagnoseGruppe.getSelectionModel().getSelectedItem(), new Leitsymptomatik(DG.INVALID, String.valueOf(leitsymptomatik_kuerzel.getSelectedToggle()
                                                                                                     .getUserData()),
                         leitsymptomatik.getText()));
         hmvOut.beh = new Behandlung();

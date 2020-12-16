@@ -1,21 +1,22 @@
 package hmv;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public class Diagnose {
 
     final static String version = "HMR2020";
     final Icd10 icd10_1;
     final Icd10 icd10_2;
-    final String diagnosegruppe;
+    final DG diagnosegruppe;
     final Leitsymptomatik leitsymptomatik; // [a-c|x]
 
-    public Diagnose(Icd10 icd10_1, Icd10 icd10_2, String diagnosegruppe, Leitsymptomatik leitsymptomatik) {
+    public Diagnose(Icd10 icd10_1, Icd10 icd10_2, DG dg, Leitsymptomatik leitsymptomatik) {
         super();
-        this.icd10_1 = icd10_1;
-        this.icd10_2 = icd10_2;
-        this.diagnosegruppe = diagnosegruppe;
-        this.leitsymptomatik = leitsymptomatik;
+        this.icd10_1 = Optional.ofNullable(icd10_1).orElse(Icd10.empty());
+        this.icd10_2 = Optional.ofNullable(icd10_2).orElse(Icd10.empty());
+        this.diagnosegruppe = Optional.ofNullable(dg).orElse(DG.INVALID) ;
+        this.leitsymptomatik = Optional.ofNullable(leitsymptomatik).orElse(Leitsymptomatik.empty());
     }
 
 
