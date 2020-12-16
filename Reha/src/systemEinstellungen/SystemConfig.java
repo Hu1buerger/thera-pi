@@ -10,6 +10,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import CommonTools.SqlInfo;
 import CommonTools.ZeitFunk;
 import CommonTools.ini.INITool;
 import CommonTools.ini.Settings;
+import core.Disziplin;
 import crypt.Verschluesseln;
 import environment.Path;
 import hauptFenster.Reha;
@@ -1238,7 +1240,7 @@ public class SystemConfig {
             int aktiv;
             aktiveDisziplinen = EnumSet.noneOf(Disziplin.class);
             for (int i = 0; i < rezeptKlassenAnzahl; i++) {
-                final Vector<String> vec = new Vector<String>();
+
                 try {
                     rezeptKlassen[i] = inif.getStringProperty("RezeptKlassen", "Klasse" + Integer.valueOf(i + 1)
                                                                                                  .toString());
