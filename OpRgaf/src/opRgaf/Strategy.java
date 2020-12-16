@@ -3,8 +3,10 @@ package opRgaf;
 
 enum Strategy {
     gleich {
+
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
+
             if (first == null) {
                 return second == null;
             }
@@ -13,20 +15,20 @@ enum Strategy {
     },
     kleiner {
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
             return first.compareTo(second) < 0;
         }
     },
     groesser {
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
 
             return first.compareTo(second) > 0;
         }
     },
     kleinerOderGleich {
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
             return first.compareTo(second) <= 0;
         }
     },
@@ -34,16 +36,16 @@ enum Strategy {
 
     {
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
             return first.compareTo(second) >= 0;
         }
     },
     ungleich {
         @Override
-        boolean compare(Comparable first, Comparable second) {
+        <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second) {
             return first.compareTo(second) != 0;
         }
     };
 
-    abstract boolean compare(Comparable first, Comparable second);
+    abstract <T extends Comparable<T>> boolean  compare(Comparable<T> first, T second);
 }
