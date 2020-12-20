@@ -1,5 +1,7 @@
 package hmv;
 
+import java.util.Objects;
+
 import core.Disziplin;
 
 public class Heilmittel{
@@ -28,6 +30,31 @@ public class Heilmittel{
 		this.vorrangig = vorrangig;
 		Maximal = maximal;
 		this.hmr_disziplin = hmr_disziplin;
+	}
+	@Override
+	public String toString() {
+		return "Heilmittel [heilmittel=" + heilmittel + ", heilmittel_beschreibung=" + heilmittel_beschreibung
+				+ ", heilmittelposition=" + heilmittelposition + ", hmr_disziplin=" + hmr_disziplin + "]";
+	}
+	@Override
+	public int hashCode() {
+		return Objects.hash(Dauer_bis, Dauer_von, Maximal, heilmittel, heilmittel_beschreibung, heilmittelposition,
+				hmr_disziplin, vorrangig);
+	}
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof Heilmittel)) {
+			return false;
+		}
+		Heilmittel other = (Heilmittel) obj;
+		return Dauer_bis == other.Dauer_bis && Dauer_von == other.Dauer_von && Maximal == other.Maximal
+				&& Objects.equals(heilmittel, other.heilmittel)
+				&& Objects.equals(heilmittel_beschreibung, other.heilmittel_beschreibung)
+				&& Objects.equals(heilmittelposition, other.heilmittelposition) && hmr_disziplin == other.hmr_disziplin
+				&& vorrangig == other.vorrangig;
 	}
 	
 	

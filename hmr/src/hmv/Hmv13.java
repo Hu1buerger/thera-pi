@@ -6,10 +6,14 @@ import java.time.LocalDate;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.therapi.hmv.dao.DiagnosegruppeDao;
+import org.therapi.hmv.dao.HeilmittelDao;
 import org.therapi.hmv.entities.Diagnosegruppe;
 
 import core.Arzt;
@@ -177,7 +181,8 @@ public class Hmv13 {
 	private EnumSet<Disziplin> moeglicheDisziplinen = EnumSet.noneOf(Disziplin.class);
 	private ObjectProperty<Disziplin> diszi = new SimpleObjectProperty<>();
 	private ObjectProperty<String> symptomatik = new SimpleObjectProperty<>();
-	ObservableList<Diagnosegruppe> alle;
+	ObservableList<Diagnosegruppe> alleDiaGruppen;
+	
 
 	public Hmv13(Hmv neueHmv, Context context) {
 		this.hmv = neueHmv;
@@ -283,8 +288,8 @@ public class Hmv13 {
 		});
 
 		versichertenStatus.getItems().setAll(VersichertenStatus.values());
-		alle = FXCollections.observableList(new DiagnosegruppeDao(context.mandant.ik()).all());
-		availableDiagGruppe = new FilteredList<Diagnosegruppe>(alle);
+		alleDiaGruppen = FXCollections.observableList(new DiagnosegruppeDao(context.mandant.ik()).all());
+		availableDiagGruppe = new FilteredList<Diagnosegruppe>(alleDiaGruppen);
 
 		diagnoseGruppe.setItems(availableDiagGruppe);
 
@@ -293,18 +298,35 @@ public class Hmv13 {
 			@Override
 			public void changed(ObservableValue<? extends Disziplin> observable, Disziplin oldValue,
 					Disziplin newValue) {
-				Predicate<? super Diagnosegruppe> predicate = new Predicate<Diagnosegruppe>() {
+				Predicate<? super Diagnosegruppe> diag_diszi_predicate = new Predicate<Diagnosegruppe>() {
 
 					@Override
 					public boolean test(Diagnosegruppe t) {
 						return t.diszi == newValue;
 					}
 				};
-				availableDiagGruppe.setPredicate(predicate);
+				availableDiagGruppe.setPredicate(diag_diszi_predicate);
+				Predicate<? super Heilmittel> hmDisziPredicate = new Predicate<Heilmittel>() {
+
+					@Override
+					public boolean test(Heilmittel t) {
+						return t.hmr_disziplin == newValue;
+					}
+				};
+				vorangigsHm.setPredicate(hmDisziPredicate);
+				ergaenzend.setPredicate(hmDisziPredicate);
 
 			}
 		});
 
+		Predicate<? super Heilmittel> hmVorangig = new Predicate<Heilmittel>() {
+
+			@Override
+			public boolean test(Heilmittel t) {
+				return t.vorrangig;
+			}
+		};
+		
 		leitsymptomatik_kuerzel.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
 				if (leitsymptomatik_kuerzel.getSelectedToggle() != null) {
@@ -312,7 +334,7 @@ public class Hmv13 {
 					if (selectedItem != null) {
 						String ls = new_toggle.getUserData().toString();
 						System.out.println("Leitsymptomatik" + ls);
-						FilteredList<Diagnosegruppe> result = alle.filtered(t -> t.diszi == diszi.get())
+						FilteredList<Diagnosegruppe> result = alleDiaGruppen.filtered(t -> t.diszi == diszi.get())
 								.filtered(t -> t.diagnosegruppe.equals(selectedItem.diagnosegruppe))
 								.filtered(t -> t.leitsymptomatik.equals(ls.toLowerCase()));
 						System.out.println(result);
@@ -326,6 +348,19 @@ public class Hmv13 {
 				}
 			}
 		});
+		
+		List<Heilmittel> alleHeilmittel= new HeilmittelDao(context.mandant.ik()).all();
+				//new FilteredList<Heilmittel>( FXCollections.observableList(new HeilmittelDao(context.mandant.ik()).all()));
+		Map<Boolean, List<Heilmittel>> vorrang = alleHeilmittel.stream()
+		        .collect(Collectors.partitioningBy(h->h.vorrangig));
+		vorangigsHm = new FilteredList<Heilmittel>( FXCollections.observableList(vorrang.get(true)));
+		ergaenzend = new FilteredList<Heilmittel>( FXCollections.observableList(vorrang.get(true)));
+		hm_1.setItems(vorangigsHm);
+		hm_2.setItems(vorangigsHm);
+		hm_3.setItems(vorangigsHm);
+		hm_ergaenzend.setItems(ergaenzend);
+		
+		
 	}
 
 	private <T extends Enum<T>> void bindTogglegroup(ToggleGroup toggleGroup, ObjectProperty<T> objectProperty,
@@ -402,6 +437,8 @@ public class Hmv13 {
 	}
 
 	private final HashSet<Node> invalidNodes = new HashSet<>();
+	private FilteredList<Heilmittel> vorangigsHm;
+	private FilteredList<Heilmittel> ergaenzend;
 
 	private boolean mustnotbeempty(Node node) {
 		boolean empty = ((TextArea) node).getText().isEmpty();
