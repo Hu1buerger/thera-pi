@@ -23,7 +23,6 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="src/resources/controlsfx-8.40.16.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/RehaCommon"/>
 	<classpathentry kind="lib" path="/Libraries/lib/jna_junit/testfx-core-4.0.16-alpha.jar">
 		<attributes>
@@ -40,5 +39,6 @@
 	<classpathentry kind="lib" path="/Libraries/lib/logging/logback-core-1.2.3.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/logging/slf4j-api-1.7.25.jar"/>
 	<classpathentry kind="lib" path="/Libraries/lib/logging/sysout-over-slf4j-1.0.2.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/javafx/controlsfx-8.40.16.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

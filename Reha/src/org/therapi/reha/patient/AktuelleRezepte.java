@@ -43,6 +43,7 @@ import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.therapi.hmv.config.HMVConfig;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -277,7 +278,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         if(current.isPresent()) {
         Context context = new Context(Betriebsumfeld.umfeld.mandant(), new User(Reha.aktUser),  current.get());
         LOGGER.debug("hmr2020 requested");
-
+        new	HMVConfig().load(context);
           new   HmvFrame(context).setVisible(true);
         }
         return null;

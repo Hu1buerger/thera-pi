@@ -9,10 +9,10 @@ import specs.Contracts;
 
 public class Context {
 
-    final Mandant mandant;
-    final User user;
-    final EnumSet<Disziplin> disziplinen;
-    final Patient patient;
+   public final Mandant mandant;
+   public final User user;
+   public final EnumSet<Disziplin> disziplinen;
+   public final Patient patient;
 
     public Context(Mandant mandant, User user, Patient patient) {
         super();

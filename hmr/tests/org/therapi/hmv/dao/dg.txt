@@ -1,0 +1,236 @@
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","a","Schädigung der Bewegungssegmente","MA"                                                                                                );
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","b","Schädigung/Störung der Muskelfunktion","KG"                                                                                           );
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","x","patientenindividuelle Symptomatik","KG"                                                                                               );
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","a","Schädigung/Störung der Gelenkfunktion","KG"                                                                      );
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","b","Schädigung/Störung der Muskelfunktion","KG"                                                                      );
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","x","patientenindividuelle Symptomatik","KG"                                                                          );
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","a","chronische Schmerzen","KG"                                                                                                    );
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","x","patientenindividuelle Symptomatik","KG"                                                                                       );
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","a","Schädigung/Störung der Bewegungs- und Sinnesfunktion","KG"                       );
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","b","Schädigung/Störung der Muskelfunktion","KG"                                      );
+liste.add(new Diagnosegruppe("DF","diabetische Neuropathie mit oder ohne Angiopathie","a","Hyperkatose (schmerzhaft oder schmerzlos)","PO"                                                            );
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","a","Schädigung/Störung der Bewegungsfunktion","KG"                                                                   );
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","b","Schädigung/Störung der Muskelfunktion","KG"                                                                      );
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","x","patientenindividuelle Symptomatik","KG"                                                                          );
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","x","patientenindividuelle Symptomatik","KG"                                                                                                   );
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","a","Schädigung/Störung der Atmungsfunktion","KG"                                                                                              );
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","b","Schädigung/Störung der Atemmuskulatur (einschließlich Zwerchfell und Atemhilfsmuskulatur)","KG                                            );
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","a","Schmerzen der Extremitäten","KG"                 );
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","x","patientenindividuelle Symptomatik","KG"          );
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","b","Schädigung/Störung der Muskelfunktion","KG"      );
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","KG"                                                                               );
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","b","Schädigung der Haut ( Verdickung von Kutis, Subkutis, trophische Veränderungen der Epidermis)","KG"
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","a","Schädigung/Störung der Defäkationsfunktion","KG"
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","b","Schmerzen","KG"
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","a","Schädigung/Störung der Stuhlkontinenz","KG"
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","b","Schädigung/Störung der Harnkontinenz","KG"
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","a","Schädigung/Störung der vestibulären Funktion","KG"
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","b","Schwindelgefühl, Fallneigung","KG"
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","x","","KG"
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","a","Schädigung/Störung der Blutgefäßfunktion","KG"
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","b","Schädigung des sympathischen Nervensystems","KG"
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","a","Schmerzen","KG"
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","x","patientenindividuelle Symptomatik","KG"
+liste.add(new Diagnosegruppe("DF","diabetische Neuropathie mit oder ohne Angiopathie","b","Pathologisches Nagelwachstum (Verdickung, Tendenz zum Einwachsen)","PO"
+liste.add(new Diagnosegruppe("DF","diabetische Neuropathie mit oder ohne Angiopathie","b","Pathologisches Nagelwachstum (Verdickung, Tendenz zum Einwachsen)","PO"
+liste.add(new Diagnosegruppe("NF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","a","Hyperkeratose (schmerzlos und schmerzhaft)","PO"
+liste.add(new Diagnosegruppe("NF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","b","Pathologisches Nagelwachstum (VerdickungHyperkeratose, Tendenz zum Einwachsen)","PO"
+liste.add(new Diagnosegruppe("NF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","c","Hyperkeratose und pathologisches Nagelwachstum","PO"
+liste.add(new Diagnosegruppe("QF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","a","Hyperkeratose (schmerzlos und schmerzhaft)","PO"
+liste.add(new Diagnosegruppe("QF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","b","Pathologisches Nagelwachstum (VerdickungHyperkeratose, Tendenz zum Einwachsen)","PO"
+liste.add(new Diagnosegruppe("QF","Krankhafte Schädigung am Fuß als Folge einer sensiblen oder sensomotorischen Neuropathie (primär oder sekundär)","c","Hyperkeratose und pathologisches Nagelwachstum","PO"
+liste.add(new Diagnosegruppe("ST1","Organisch bedingte Erkrankungen der Stimme","a","Schädigung der Stimme mit eingeschränkter stimmlicher Belastbarkeit","LO"
+liste.add(new Diagnosegruppe("ST1","Organisch bedingte Erkrankungen der Stimme","x","patientenindividuelle Symtomatik","LO"
+liste.add(new Diagnosegruppe("ST2","Funktionell bedingte Erkrankungen der Stimme","b","Schädigung der Stimme mit Heiserkeit, Beeinträchtigung des Stimmklangs","LO"
+liste.add(new Diagnosegruppe("ST1","Organisch bedingte Erkrankungen der Stimme","b","Schädigung der Stimme mit gestörter Phonationsatmung","LO"
+liste.add(new Diagnosegruppe("ST2","Funktionell bedingte Erkrankungen der Stimme","a","Schädigung der Stimme mit eingeschränkter stimmlicher Belastbarkeit","LO"
+liste.add(new Diagnosegruppe("ST1","Organisch bedingte Erkrankungen der Stimme","b","Schädigung der Stimme mit Heiserkeit, Beeinträchtigung des Stimmklangs","LO"
+liste.add(new Diagnosegruppe("ST2","Funktionell bedingte Erkrankungen der Stimme","c","Schädigung der Stimme mit gestörter Phonationsatmung","LO"
+liste.add(new Diagnosegruppe("ST3","Psychogene Aphonie","a","plötzlich eingetretene Stimmlosigkeit mit tonalem Husten/Räuspern","LO"
+liste.add(new Diagnosegruppe("ST2","Funktionell bedingte Erkrankungen der Stimme","x","patientenindividuelle Symtomatik","LO"
+liste.add(new Diagnosegruppe("ST4","Psychogene Dysphonie","x","patientenindividuelle Symtomatik","LO"
+liste.add(new Diagnosegruppe("ST4","Psychogene Dysphonie","a","Schädigung der Stimme mit Heiserkeit, Beeinträchtigung des Stimmklangs","LO"
+liste.add(new Diagnosegruppe("ST3","Psychogene Aphonie","x","patientenindividuelle Symtomatik","LO"
+liste.add(new Diagnosegruppe("SP1","Störungen der Sprache vor Abschluss der Sprachentwicklung","b","Schädigung der Sprechfunktionen","LO"
+liste.add(new Diagnosegruppe("SP1","Störungen der Sprache vor Abschluss der Sprachentwicklung","a","Schädigung der kognitiv-sprachlichen Funktionen","LO"
+liste.add(new Diagnosegruppe("SP1","Störungen der Sprache vor Abschluss der Sprachentwicklung","x","patientenindividuelle Symptomatik","LO"
+liste.add(new Diagnosegruppe("SP1","Störungen der Sprache vor Abschluss der Sprachentwicklung","c","Schädigung der Hörfunktionen","LO"
+liste.add(new Diagnosegruppe("SP2","Störungen der auditiven Wahrnehmung","a","Störungen der zentralen Hörfunktionen in Form von nicht altersgemäßem Sprachverstehen im Störschall","LO"
+liste.add(new Diagnosegruppe("SP2","Störungen der auditiven Wahrnehmung","b","Störungen der zentralen Hörfunktionen in Form von nicht altersgemäßer Sprachlautunterscheidung/ phonologischer Bewusstheit","LO"
+liste.add(new Diagnosegruppe("SP2","Störungen der auditiven Wahrnehmung","x","patientenindividuelle Symptomatik","LO"
+liste.add(new Diagnosegruppe("SP3","Störungen der Artikulation, Dyslalie","a","Schädigung der Sprechfunktion mit Störung der altersgemäßen Aussprache einzelner/mehrerer Sprachlaute","LO"
+liste.add(new Diagnosegruppe("SP3","Störungen der Artikulation, Dyslalie","b","Schädigung der Sprechfunktion mit Störung der altersgemäßen Mundmotorik/-sensorik","LO"
+liste.add(new Diagnosegruppe("SP3","Störungen der Artikulation, Dyslalie","c","Schädigung der Sprachdifferenzierung","LO"
+liste.add(new Diagnosegruppe("SP3","Störungen der Artikulation, Dyslalie","x","patientenindividuelle Symptomatik","LO"
+liste.add(new Diagnosegruppe("SP4","Störungen des Sprechens/der Sprache bei hochgradiger Schwerhörigkeit oder Taubheit","a","Schädigung der Sprech- und Sprachfunktion mit gestörter/fehlender lautsprachlicher Kommunikation","LO"
+liste.add(new Diagnosegruppe("SP4","Störungen des Sprechens/der Sprache bei hochgradiger Schwerhörigkeit oder Taubheit","x","patientenindividuelle Symptomatik","LO"
+liste.add(new Diagnosegruppe("SP5","Störungen der Sprache nach Abschluss der Sprachentwicklung Aphasien und Dysphasien","a","Schädigungen der kognitiv-sprachlichen Funktionen","LO
+liste.add(new Diagnosegruppe("SP5","Störungen der Sprache nach Abschluss der Sprachentwicklung Aphasien und Dysphasien","b","Schädigung der Sprechfunktion mit Störung der Artikulation","LO
+liste.add(new Diagnosegruppe("SP5","Störungen der Sprache nach Abschluss der Sprachentwicklung Aphasien und Dysphasien","c","Schädigung der Sprechfunktion mit Störung des Redeflusses und des Sprechtempos","LO
+liste.add(new Diagnosegruppe("SP5","Störungen der Sprache nach Abschluss der Sprachentwicklung Aphasien und Dysphasien","x","patientenindividuelle Symptomatik","LO
+liste.add(new Diagnosegruppe("SP6","Störungen der Sprechmotorik Dysarthrie/Dysarthrophonie/ Sprechapraxie","a","Schädigung der Sprechfunktion mit Störung der Artikulation","LO
+liste.add(new Diagnosegruppe("SP6","Störungen der Sprechmotorik Dysarthrie/Dysarthrophonie/ Sprechapraxie","x","patientenindividuelle Symptomatik","LO
+liste.add(new Diagnosegruppe("SP6","Störungen der Sprechmotorik Dysarthrie/Dysarthrophonie/ Sprechapraxie","b","Schädigung der Sprechfunktion mit Störung des Redeflusses und des Sprechtempos","LO
+liste.add(new Diagnosegruppe("SP6","Störungen der Sprechmotorik Dysarthrie/Dysarthrophonie/ Sprechapraxie","c","Schädigung der Stimmfunktion","LO
+liste.add(new Diagnosegruppe("RE1","Störungen des Redeflusses Stottern","a","Störungen des Redeflusses in Form von unfreiwilligen Wiederholungen von Lauten und Silben, Dehnungen und Blockierungen","LO
+liste.add(new Diagnosegruppe("RE1","Störungen des Redeflusses Stottern","b","Störungen des Redeflusses mit ausgeprägter Begleitsymptomatik","LO
+liste.add(new Diagnosegruppe("RE1","Störungen des Redeflusses Stottern","x","patientenindividuelle Symptomatik","LO
+liste.add(new Diagnosegruppe("SB1","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen Schädigungen","a","Schädigung der Wirbelsäulen- und Gelenkfunktion","ER
+liste.add(new Diagnosegruppe("RE2","Störungen des Redeflusses Poltern","c","Störungen des Redeflusses mit ausgeprägtem Störungsbewusstsein, Vermeidungsverhalten","LO
+liste.add(new Diagnosegruppe("RE2","Störungen des Redeflusses Poltern","b","Störungen des Redeflusses mit Temposchwankungen beim Sprechen","LO
+liste.add(new Diagnosegruppe("RE2","Störungen des Redeflusses Poltern","a","Störungen des Redeflusses mit überhasteter Sprache/undeutlicher Aussprache","LO
+liste.add(new Diagnosegruppe("SF","Störungen der Stimm- und Sprechfunktion Rhinophonie","b","Schädigung der Sprechfunktion mit Störung der Artikulation","LO
+liste.add(new Diagnosegruppe("SF","Störungen der Stimm- und Sprechfunktion Rhinophonie","c","Schädigung der Sprechfunktion infolge einer Hyperfunktion der Kehlkopf-/Zungenmuskulatur","LO
+liste.add(new Diagnosegruppe("SF","Störungen der Stimm- und Sprechfunktion Rhinophonie","a","Schädigung des Stimmklangs","LO
+liste.add(new Diagnosegruppe("SC","Krankhafte Störungen des Schluckaktes Dysphagie (Schluckstörung)","b","Schädigung des Schluckaktes in der pharyngealen Phase","LO
+liste.add(new Diagnosegruppe("SC","Krankhafte Störungen des Schluckaktes Dysphagie (Schluckstörung)","c","Schädigung des Schluckaktes in der oesophagealen Phase","LO
+liste.add(new Diagnosegruppe("SC","Krankhafte Störungen des Schluckaktes Dysphagie (Schluckstörung)","x","patientenindividuelle Symptomatik","LO
+liste.add(new Diagnosegruppe("SC","Krankhafte Störungen des Schluckaktes Dysphagie (Schluckstörung)","a","Schädigung des Schluckaktes in der oralen Phase","LO
+liste.add(new Diagnosegruppe("SB1","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen Schädigungen","b","Schädigung der Muskelfunktion","ER
+liste.add(new Diagnosegruppe("SB1","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen Schädigungen","x","patientenindividuelle Symptomatik","ER
+liste.add(new Diagnosegruppe("SB2","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen und sensomotorisch-perzeptiven Schädigungen)","a","Schädigung der Wirbelsäulen- und Gelenkfunktion","ER
+liste.add(new Diagnosegruppe("SB2","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen und sensomotorisch-perzeptiven Schädigungen)","b","Schädigung der Muskelfunktion","ER
+liste.add(new Diagnosegruppe("SB2","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen und sensomotorisch-perzeptiven Schädigungen)","x","patientenindividuelle Symptomatik","ER
+liste.add(new Diagnosegruppe("SB2","Erkrankungen der Wirbelsäule, Gelenke und Extremitäten (mit motorisch-funktionellen und sensomotorisch-perzeptiven Schädigungen)","c","Schädigung der Sinnes- und Bewegungsfunktionen","ER
+liste.add(new Diagnosegruppe("SB3","System- und Autoimmunerkrankungen mit Bindegewebe-, Muskel- und Gefäßbeteiligung (mit motorisch-funktionellen/ sensomotorisch-perzeptiven Schädigungen)","a","Schädigung der Gelenkfunktionen","ER
+liste.add(new Diagnosegruppe("SB3","System- und Autoimmunerkrankungen mit Bindegewebe-, Muskel- und Gefäßbeteiligung (mit motorisch-funktionellen/ sensomotorisch-perzeptiven Schädigungen)","b","Schädigung der Muskelfunktion","ER
+liste.add(new Diagnosegruppe("SB3","System- und Autoimmunerkrankungen mit Bindegewebe-, Muskel- und Gefäßbeteiligung (mit motorisch-funktionellen/ sensomotorisch-perzeptiven Schädigungen)","c","Schädigung der Sinnes- und Bewegungsfunktionen","ER
+liste.add(new Diagnosegruppe("SB3","System- und Autoimmunerkrankungen mit Bindegewebe-, Muskel- und Gefäßbeteiligung (mit motorisch-funktionellen/ sensomotorisch-perzeptiven Schädigungen)","x","patientenindividuelle Symptomatik","ER
+liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","a","Schädigung der Bewegungsfunktionen","ER
+liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","b","Schädigung der Sinnesfunktionen","ER
+liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","c","Schädigung der mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("EN2","ZNS-Erkrankungen (Rückenmark)/ Neuromuskuläre Erkrankungen","a","Schädigung der Bewegungsfunktionen","ER
+liste.add(new Diagnosegruppe("EN2","ZNS-Erkrankungen (Rückenmark)/ Neuromuskuläre Erkrankungen","b","Schädigung der Sinnesfunktionen","ER
+liste.add(new Diagnosegruppe("EN2","ZNS-Erkrankungen (Rückenmark)/ Neuromuskuläre Erkrankungen","c","Schädigung der mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("EN2","ZNS-Erkrankungen (Rückenmark)/ Neuromuskuläre Erkrankungen","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("EN3","Periphere Nervenläsionen/ Muskelerkrankungen","a","Schädigung der Bewegungsfunktionen","ER
+liste.add(new Diagnosegruppe("EN3","Periphere Nervenläsionen/ Muskelerkrankungen","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("EN3","Periphere Nervenläsionen/ Muskelerkrankungen","b","Schädigung der Sinnesfunktionen","ER
+liste.add(new Diagnosegruppe("PS1","Entwicklungs-, Verhaltens- und emotionale Störungen mit Beginn in Kindheit und Jugend","a","Schädigung der globalen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS1","Entwicklungs-, Verhaltens- und emotionale Störungen mit Beginn in Kindheit und Jugend","b","Schädigung der spezifischen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS1","Entwicklungs-, Verhaltens- und emotionale Störungen mit Beginn in Kindheit und Jugend","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("PS2","Neurotische, Belastungs-, somatoforme und Persönlichkeitsstörungen","a","Schädigung der globalen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS2","Neurotische, Belastungs-, somatoforme und Persönlichkeitsstörungen","b","Schädigung der spezifischen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS2","Neurotische, Belastungs-, somatoforme und Persönlichkeitsstörungen","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("PS3","Wahnhafte und affektive Störungen/ Abhängigkeitserkrankungen Schizophrenie / schizotype und wahnhafte Störungen / Affektive Störungen / Psychische und Verhaltensstörungen durch psychotrope Substanzen","a","Schädigung der globalen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS3","Wahnhafte und affektive Störungen/ Abhängigkeitserkrankungen Schizophrenie / schizotype und wahnhafte Störungen / Affektive Störungen / Psychische und Verhaltensstörungen durch psychotrope Substanzen","b","Schädigung der spezifischen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS3","Wahnhafte und affektive Störungen/ Abhängigkeitserkrankungen Schizophrenie / schizotype und wahnhafte Störungen / Affektive Störungen / Psychische und Verhaltensstörungen durch psychotrope Substanzen","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("PS4","Dementielle Syndrome","a","Schädigung der globalen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS4","Dementielle Syndrome","b","Schädigung der spezifischen mentalen Funktionen","ER
+liste.add(new Diagnosegruppe("PS4","Dementielle Syndrome","x","patientenindividuelle Symptomatik]","ER
+liste.add(new Diagnosegruppe("SAS","Seltene angeborene Stoffwechselerkrankungen wenn Ernährungstherapie als medizinische Maßnahme (gegebenenfalls in Kombination mit anderen Maßnahmen) alternativlos ist, da ansonsten Tod oder Behinderung drohen","a","Störungen des Eiweißstoffwechsels","ET
+liste.add(new Diagnosegruppe("SAS","Seltene angeborene Stoffwechselerkrankungen wenn Ernährungstherapie als medizinische Maßnahme (gegebenenfalls in Kombination mit anderen Maßnahmen) alternativlos ist, da ansonsten Tod oder Behinderung drohen","b","Störung des Kohlenhydratstoffwechsels","ET
+liste.add(new Diagnosegruppe("CF","Mukoviszidose (Cystische Fibrose)","a","kompensierter normaler Ernährungszustand","ET
+liste.add(new Diagnosegruppe("CF","Mukoviszidose (Cystische Fibrose)","b","(drohende) Gedeihstörung oder (drohender) Gewichtsverlust","ET
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","a","Schädigung/Störung der Atmungsfunktion","MA
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","b","Schädigung/Störung der Atemmuskulatur (einschließlich Zwerchfell und Atemhilfsmuskulatur)","MA
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","a","chronische Schmerzen","MA
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","a","Schädigung/Störung der Gelenkfunktion","MA
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","b","Schädigung/Störung der Muskelfunktion","MA
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","a","Schmerzen der Extremitäten","MA
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","b","Schädigung/Störung der Muskelfunktion","MA
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","MA
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","b","Schädigung der Haut ( Verdickung von Kutis, Subkutis, trophische Veränderungen der Epidermis)","MA
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","a","Schädigung/Störung der Bewegungsfunktion","MA
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","b","Schädigung/Störung der Muskelfunktion","MA
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","a","Schädigung/Störung der Defäkationsfunktion","KK
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","b","Schmerzen","MA
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","a","Schädigung/Störung der Stuhlkontinenz","MA
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","b","Schädigung/Störung der Harnkontinenz","MA
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","a","Schädigung/Störung der vestibulären Funktion","MA
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","b","Schwindelgefühl, Fallneigung","MA
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","x","patientenindividuelle Symp-tomatik","MA
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","a","Schädigung/Störung der Blutgefäßfunktion","MA
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","b","Schädigung des sympathischen Nervensystems","MA
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","a","Schmerzen","MA
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","a","Schädigung der Bewegungssegmente","KG
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","b","Schädigung/Störung der Muskelfunktion","MA
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","x","patientenindividuelle Symptomatik","MA
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","a","Schädigung/Störung der Bewegungs- und Sinnesfunktion","PT
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","b","Schädigung/Störung der Muskelfunktion","MA
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","a","Schädigung/Störung der Atmungsfunktion","KK
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","b","Schädigung/Störung der Atemmuskulatur (einschließlich Zwerchfell und Atemhilfsmuskulatur)","KK
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","a","chronische Schmerzen","KK
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","a","Schädigung/Störung der Gelenkfunktion","KK
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","b","Schädigung/Störung der Muskelfunktion","KK
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","a","Schmerzen der Extremitäten","KK
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","b","Schädigung/Störung der Muskelfunktion","KK
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","KK
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","b","Schädigung der Haut ( Verdickung von Kutis, Subkutis, trophische Veränderungen der Epidermis)","KK
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","a","Schädigung/Störung der Bewegungsfunktion","KK
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","b","Schädigung/Störung der Muskelfunktion","KK
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","a","Schädigung/Störung der Defäkationsfunktion","MA
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","b","Schmerzen","KK
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","a","Schädigung/Störung der Stuhlkontinenz","KK
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","b","Schädigung/Störung der Harnkontinenz","KK
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","a","Schädigung/Störung der vestibulären Funktion","KK
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","b","Schwindelgefühl, Fallneigung","KK
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","x","patientenindividuelle Symp-tomatik","KK
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","a","Schädigung/Störung der Blutgefäßfunktion","KK
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","b","Schädigung des sympathischen Nervensystems","KK
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","a","Schmerzen","KK
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","a","Schädigung der Bewegungssegmente","KK
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","b","Schädigung/Störung der Muskelfunktion","KK
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","x","patientenindividuelle Symptomatik","KK
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","a","Schädigung/Störung der Bewegungs- und Sinnesfunktion","KK
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","a","Schädigung/Störung der Atmungsfunktion","PT
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","b","Schädigung/Störung der Atemmuskulatur (einschließlich Zwerchfell und Atemhilfsmuskulatur)","PT
+liste.add(new Diagnosegruppe("AT","Störung der Atmung","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","a","chronische Schmerzen","PT
+liste.add(new Diagnosegruppe("CS","Chronifiziertes Schmerzsyndrom","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","a","Schädigung/Störung der Gelenkfunktion","PT
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","b","Schädigung/Störung der Muskelfunktion","PT
+liste.add(new Diagnosegruppe("EX","Erkrankung der Extremitäten und des Beckens","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","a","Schmerzen der Extremitäten","PT
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","b","Schädigung/Störung der Muskelfunktion","PT
+liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","PT
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","b","Schädigung der Haut ( Verdickung von Kutis, Subkutis, trophische Veränderungen der Epidermis)","PT
+liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","a","Schädigung/Störung der Bewegungsfunktion","PT
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","b","Schädigung/Störung der Muskelfunktion","PT
+liste.add(new Diagnosegruppe("PN","Perophere Nervenläsionen Muskelerkrankungen","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","a","Schädigung/Störung der Defäkationsfunktion","PT
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","b","Schmerzen","PT
+liste.add(new Diagnosegruppe("SO1","Störung der Dickdarmfunktion","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","a","Schädigung/Störung der Stuhlkontinenz","PT
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","b","Schädigung/Störung der Harnkontinenz","PT
+liste.add(new Diagnosegruppe("SO2","Störung der Ausscheidung (Stuhlinkontinez, Harninkontinenz)","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","a","Schädigung/Störung der vestibulären Funktion","PT
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","b","Schwindelgefühl, Fallneigung","PT
+liste.add(new Diagnosegruppe("SO3","Schwindel unterschiedlicher Gene und Ätiologie","x","patientenindividuelle Symp-tomatik","PT
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","a","Schädigung/Störung der Blutgefäßfunktion","PT
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","b","Schädigung des sympathischen Nervensystems","PT
+liste.add(new Diagnosegruppe("SO4","Sekundäre periphere trophische Störungen bei erkrankungen","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","a","Schmerzen","PT
+liste.add(new Diagnosegruppe("SO5","chronische Adnexitis, Prostatitis","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","a","Schädigung der Bewegungssegmente","PT
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","b","Schädigung/Störung der Muskelfunktion","PT
+liste.add(new Diagnosegruppe("WS","Wirbelsäulenerkrankung","x","patientenindividuelle Symptomatik","PT
+liste.add(new Diagnosegruppe("ZN","ZNS-Erkrankungen einschließlich des Rückenmarks/Neuromuskuläre Erkrankungen","a","Schädigung/Störung der Bewegungs- und Sinnesfunktion","MA
