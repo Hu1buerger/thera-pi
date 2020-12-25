@@ -15,7 +15,8 @@
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
-<?import org.controlsfx.control.SearchableComboBox?>
+<?import org.controlsfx.control.PrefixSelectionChoiceBox?>
+<?import org.controlsfx.control.PrefixSelectionComboBox?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="900.0" prefWidth="630.0" styleClass="-fx-background-image:url(file:/C:/Users/astrids/Documents/knowledgebase/HMR_Okt_20/muster13_seite1.PNG)" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
   <children>
@@ -80,7 +81,7 @@
     <TextField fx:id="betriebsstaettenNr" layoutX="44.0" layoutY="201.0" prefHeight="25.0" prefWidth="104.0" />
     <DatePicker fx:id="rezeptDatum" layoutX="277.0" layoutY="201.0" prefHeight="25.0" prefWidth="104.0" promptText="  .  ." />
     <ChoiceBox fx:id="versichertenStatus" layoutX="303.0" layoutY="162.0" prefHeight="25.0" prefWidth="74.0" />
-      <ChoiceBox fx:id="hm_1" layoutX="38.0" layoutY="438.0" prefHeight="25.0" prefWidth="456.0" />
+      <ChoiceBox layoutX="38.0" layoutY="438.0" prefHeight="25.0" prefWidth="456.0" />
       <ChoiceBox fx:id="hm_2" layoutX="38.0" layoutY="463.0" prefHeight="25.0" prefWidth="456.0" />
       <ChoiceBox fx:id="hm_3" layoutX="38.0" layoutY="488.0" prefHeight="25.0" prefWidth="456.0" />
       <ChoiceBox fx:id="hm_ergaenzend" layoutX="38.0" layoutY="535.0" prefHeight="25.0" prefWidth="456.0" />
@@ -106,6 +107,8 @@
       <TextField fx:id="therapieFrequenzBis" layoutX="528.0" layoutY="573.0" prefHeight="25.0" prefWidth="67.0" />
       <CheckBox layoutX="245.0" layoutY="25.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="133.0" text="Entlassmanagement" textFill="#b50000" />
       <Label layoutX="506.0" layoutY="577.0" text="bis" />
-      <SearchableComboBox fx:id="diagnoseGruppe" editable="true" layoutX="43.0" layoutY="311.0" prefHeight="31.0" prefWidth="113.0" />
+      <PrefixSelectionChoiceBox fx:id="hm_1" layoutX="153.0" layoutY="423.0" prefHeight="31.0" prefWidth="121.0" />
+      <PrefixSelectionComboBox fx:id="diagnoseGruppe" layoutX="81.0" layoutY="311.0" maxWidth="-Infinity" prefHeight="31.0" prefWidth="74.0" AnchorPane.leftAnchor="81.0" AnchorPane.rightAnchor="475.0" />
+      <PrefixSelectionChoiceBox fx:id="hm_1_nr" layoutX="47.0" layoutY="408.0" />
   </children>
 </AnchorPane>

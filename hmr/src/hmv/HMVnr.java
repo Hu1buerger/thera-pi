@@ -4,11 +4,13 @@ import core.Disziplin;
 
 public class HMVnr {
     public final Disziplin diszi;
-    public final String ziffern;
+    public final int ziffern;
 
-    public HMVnr(Disziplin diszi, String ziffern) {
-        this.diszi = diszi;
-        this.ziffern = ziffern;
-    }
+   
+
+	public HMVnr(Disziplin disziplin, int neueNummer) {
+		 this.diszi = disziplin;
+	        this.ziffern = neueNummer;
+	}
 
 }

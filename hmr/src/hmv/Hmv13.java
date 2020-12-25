@@ -120,7 +120,7 @@ public class Hmv13 {
 
 	// this might be a combobox
 	@FXML
-	ComboBox<Diagnosegruppe> diagnoseGruppe;
+	ComboBox<String> diagnoseGruppe;
 
 	@FXML
 	ToggleGroup leitsymptomatik_kuerzel;
@@ -129,6 +129,9 @@ public class Hmv13 {
 
 	@FXML
 	ChoiceBox<Heilmittel> hm_1;
+	
+	@FXML
+	ChoiceBox<Heilmittel>      hm_1_nr;
 	@FXML
 	TextField hm_einheiten_1;
 
@@ -252,8 +255,8 @@ public class Hmv13 {
 		rezeptDatum.setValue(hmv.ausstellungsdatum);
 		dringlich.setValue(hmv.dringlich);
 
-		if (hmv.diag.diagnosegruppe != DG.INVALID) {
-			diagnoseGruppe.setPromptText(hmv.diag.diagnosegruppe.gruppe);
+		if (hmv.diag.leitsymptomatik.diagnosegruppe != DG.INVALID) {
+			diagnoseGruppe.setPromptText(hmv.diag.leitsymptomatik.diagnosegruppe.gruppe);
 		}
 		icd10Code_1.setText(hmv.diag.icd10_1.schluessel);
 		icd10Code_2.setText(hmv.diag.icd10_2.schluessel);
@@ -288,24 +291,22 @@ public class Hmv13 {
 		});
 
 		versichertenStatus.getItems().setAll(VersichertenStatus.values());
-		alleDiaGruppen = FXCollections.observableList(new DiagnosegruppeDao(context.mandant.ik()).all());
+		DiagnosegruppeDao diagnosegruppeDao = new DiagnosegruppeDao(context.mandant.ik());
+		alleDiaGruppen = FXCollections.observableList(diagnosegruppeDao.all());
+		Map<Disziplin, List<String>> diszi_diagnose = diagnosegruppeDao.gruppeNachDisziplin();
+
+		
 		availableDiagGruppe = new FilteredList<Diagnosegruppe>(alleDiaGruppen);
 
-		diagnoseGruppe.setItems(availableDiagGruppe);
+		
+		
 
 		diszi.addListener(new ChangeListener<Disziplin>() {
 
 			@Override
 			public void changed(ObservableValue<? extends Disziplin> observable, Disziplin oldValue,
 					Disziplin newValue) {
-				Predicate<? super Diagnosegruppe> diag_diszi_predicate = new Predicate<Diagnosegruppe>() {
-
-					@Override
-					public boolean test(Diagnosegruppe t) {
-						return t.diszi == newValue;
-					}
-				};
-				availableDiagGruppe.setPredicate(diag_diszi_predicate);
+			diagnoseGruppe.setItems(FXCollections.observableList(diszi_diagnose.get(newValue)));
 				Predicate<? super Heilmittel> hmDisziPredicate = new Predicate<Heilmittel>() {
 
 					@Override
@@ -330,14 +331,14 @@ public class Hmv13 {
 		leitsymptomatik_kuerzel.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
 			public void changed(ObservableValue<? extends Toggle> ov, Toggle old_toggle, Toggle new_toggle) {
 				if (leitsymptomatik_kuerzel.getSelectedToggle() != null) {
-					Diagnosegruppe selectedItem = diagnoseGruppe.getSelectionModel().getSelectedItem();
-					if (selectedItem != null) {
+					String selectedDignoseGruppe = diagnoseGruppe.getSelectionModel().getSelectedItem();
+					if (selectedDignoseGruppe != null) {
 						String ls = new_toggle.getUserData().toString();
 						System.out.println("Leitsymptomatik" + ls);
 						FilteredList<Diagnosegruppe> result = alleDiaGruppen.filtered(t -> t.diszi == diszi.get())
-								.filtered(t -> t.diagnosegruppe.equals(selectedItem.diagnosegruppe))
+								.filtered(t -> t.diagnosegruppe.equals(selectedDignoseGruppe))
 								.filtered(t -> t.leitsymptomatik.equals(ls.toLowerCase()));
-						System.out.println(result);
+					
 
 						if (result.isEmpty()) {
 							leitsymptomatik.setText("ungültige kombination ");
@@ -354,8 +355,36 @@ public class Hmv13 {
 		Map<Boolean, List<Heilmittel>> vorrang = alleHeilmittel.stream()
 		        .collect(Collectors.partitioningBy(h->h.vorrangig));
 		vorangigsHm = new FilteredList<Heilmittel>( FXCollections.observableList(vorrang.get(true)));
-		ergaenzend = new FilteredList<Heilmittel>( FXCollections.observableList(vorrang.get(true)));
+		ergaenzend = new FilteredList<Heilmittel>( FXCollections.observableList(vorrang.get(false)));
 		hm_1.setItems(vorangigsHm);
+		hm_1.setConverter(new StringConverter<Heilmittel>() {
+
+			@Override
+			public Heilmittel fromString(String string) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public String toString(Heilmittel object) {
+				return object.heilmittel + ": " +object.heilmittel_beschreibung;
+			}
+		});
+		hm_1_nr.setItems(vorangigsHm);
+		hm_1_nr.setConverter(new StringConverter<Heilmittel>() {
+
+			@Override
+			public Heilmittel fromString(String string) {
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public String toString(Heilmittel object) {
+				// TODO Auto-generated method stub
+				return diszi.get().hmpraefix + object.heilmittelposition;
+			}
+		});
 		hm_2.setItems(vorangigsHm);
 		hm_3.setItems(vorangigsHm);
 		hm_ergaenzend.setItems(ergaenzend);
@@ -427,7 +456,7 @@ public class Hmv13 {
 	}
 
 	private boolean pruefenUndMarkierungenSetzen() {
-		name.setStyle("-fx-background-color: red;");
+		
 		boolean result = mustnotbeempty(leitsymptomatik);
 		for (Node node : invalidNodes) {
 			node.lookup(".content").setStyle("-fx-background-color: red;");
@@ -476,9 +505,9 @@ public class Hmv13 {
 		hmvOut.disziplin = diszi.get();
 		hmvOut.ausstellungsdatum = rezeptDatum.getValue();
 		hmvOut.dringlich = dringlicherBedarf.isSelected();
-		Diagnosegruppe diaggrp = diagnoseGruppe.getSelectionModel().getSelectedItem();
-		hmvOut.diag = new Diagnose(new Icd10(icd10Code_1.getText()), new Icd10(icd10Code_2.getText()),
-				new DG(diaggrp.diagnosegruppe, diaggrp.diagnosegruppe_beschreibung),
+		String diaggrp = diagnoseGruppe.getSelectionModel().getSelectedItem();
+		hmvOut.diag = new Diagnose(new Icd10(icd10Code_1.getText()), new Icd10(icd10Code_2.getText()),icd10Code_Text.getText(),
+				
 				new Leitsymptomatik(DG.INVALID,
 						String.valueOf(leitsymptomatik_kuerzel.getSelectedToggle().getUserData()),
 						leitsymptomatik.getText()));

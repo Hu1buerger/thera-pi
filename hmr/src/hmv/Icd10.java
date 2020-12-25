@@ -5,7 +5,7 @@ import java.util.function.Supplier;
 
 public class Icd10 {
    static private final Icd10 EMPTY = new Icd10("");
-    String schluessel;
+   public final  String schluessel;
     String titelzeile;
     String beschreibung;
 

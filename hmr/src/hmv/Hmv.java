@@ -10,22 +10,23 @@ import core.Patient;
 import mandant.Mandant;
 
 public class Hmv  {
-    User angelegtvon;
-    //mandant
-    Mandant mandant;
+	public int id;
+    public User angelegtvon;
+    public Mandant mandant;
     public Disziplin disziplin;
-    //Patient
-    Patient patient;
-    Arzt arzt;
-    Krankenversicherung kv;
-
-    //HMV
-    LocalDate ausstellungsdatum;
-
-    Diagnose diag = new Diagnose(null, null,DG.INVALID, new Leitsymptomatik(DG.INVALID,"", ""));
-
-
-    Behandlung beh;
+    
+     //Patient
+    public Patient patient;
+    public Arzt arzt;
+    public Krankenversicherung kv;
+     
+     //HMV
+    public LocalDate ausstellungsdatum;
+     
+    public Diagnose diag = new Diagnose(new Icd10("xxx"), new Icd10("xxx"),"", new Leitsymptomatik(DG.INVALID,"", ""));
+     
+     
+    public Behandlung beh;
     public Boolean dringlich;
     public HMVnr nummer;
 
@@ -79,6 +80,29 @@ public class Hmv  {
                 && Objects.equals(mandant, other.mandant) && Objects.equals(patient, other.patient);
     }
 
+
+
+	public boolean isNew() {
+		return id==0;
+	}
+
+
+
+	public void setHmvNummer(int neueNummer) {
+		if(nummer != null) {
+			throw new IllegalStateException("HMV hat schon eine HmvNummer");
+		}
+		nummer = new HMVnr(disziplin, neueNummer);
+		
+	}
+
+
+
+	
+
+
+
+	
 
 
 }

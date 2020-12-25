@@ -10,9 +10,9 @@ public class Leitsymptomatik {
     final static String C = "C";
     final static String X = "X";
     private static final Leitsymptomatik INVALID = new Leitsymptomatik(DG.INVALID,"invalid", "no value");
-    final DG diagnosegruppe;
-    final String kennung ;// [a-c|x]
-    final String text;
+   public final DG diagnosegruppe;
+   public final String kennung ;// [a-c|x]
+   public final String text;
 
 
 

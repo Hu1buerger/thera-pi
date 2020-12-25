@@ -11,7 +11,11 @@ public class Diagnosegruppe {
 	final public String leitsymptomatik;
 	final public String leitsymptomatik_beschreibung;
 	final public Disziplin diszi;
+	final public int id;
 
+	public Disziplin getDiszi() {
+		return diszi;
+	}
 	final static	public List<Diagnosegruppe> pool = new LinkedList<>();
 	
 	static public final void setContent(List<Diagnosegruppe> newContent) {
@@ -21,6 +25,18 @@ public class Diagnosegruppe {
 	
 	public Diagnosegruppe(String diagnosegruppe, String diagnosegruppe_beschreibung, String leitsymptomatik,
 			String leitsymptomatik_beschreibung, Disziplin diszi) {
+		this(0,diagnosegruppe,diagnosegruppe_beschreibung,leitsymptomatik,leitsymptomatik_beschreibung, diszi);
+		
+
+	}
+
+	public Diagnosegruppe(String diagnosegruppe2, String diagnosegruppe_beschreibung2, String leitsymptomatik2,
+			String leitsymptomatik_beschreibung2, String string) {
+		this(diagnosegruppe2,diagnosegruppe_beschreibung2,leitsymptomatik2,leitsymptomatik_beschreibung2, Disziplin.valueOf(string));
+	}
+	public Diagnosegruppe(int id, String diagnosegruppe, String diagnosegruppe_beschreibung, String leitsymptomatik,
+			String leitsymptomatik_beschreibung, Disziplin diszi) {
+		this.id=id;
 		this.diagnosegruppe = diagnosegruppe;
 		this.diagnosegruppe_beschreibung = diagnosegruppe_beschreibung;
 		this.leitsymptomatik = leitsymptomatik;
@@ -28,10 +44,6 @@ public class Diagnosegruppe {
 		this.diszi = diszi;
 	}
 
-	public Diagnosegruppe(String diagnosegruppe2, String diagnosegruppe_beschreibung2, String leitsymptomatik2,
-			String leitsymptomatik_beschreibung2, String string) {
-		this(diagnosegruppe2,diagnosegruppe_beschreibung2,leitsymptomatik2,leitsymptomatik_beschreibung2, Disziplin.valueOf(string));
-	}
 	@Override
 	public String toString() {
 		return "Diagnosegruppe [diagnosegruppe=" + diagnosegruppe + ", diagnosegruppe_beschreibung="

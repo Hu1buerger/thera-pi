@@ -53,7 +53,7 @@ public class CoreTestDataFactory {
         hmvorig.ausstellungsdatum = LocalDate.of(2020,05,25);
         hmvorig.dringlich = Boolean.TRUE;
 
-        hmvorig.diag = new Diagnose(new Icd10("43.1"), new Icd10("69"),DG.INVALID,new Leitsymptomatik(DG.INVALID, Leitsymptomatik.X,"besonders gaga"));
+        hmvorig.diag = new Diagnose(new Icd10("43.1"), new Icd10("69"),"Diagnosetext", new Leitsymptomatik(DG.INVALID, Leitsymptomatik.X,"besonders gaga"));
         hmvorig.beh = new Behandlung();
         hmvorig.disziplin = Disziplin.ER;
         return hmvorig;

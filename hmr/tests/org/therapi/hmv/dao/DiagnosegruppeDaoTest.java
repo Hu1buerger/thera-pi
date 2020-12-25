@@ -2,20 +2,32 @@ package org.therapi.hmv.dao;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 import org.therapi.hmv.entities.Diagnosegruppe;
 
+import core.Disziplin;
 import mandant.IK;
 
 public class DiagnosegruppeDaoTest {
 
 	@Test
-	public void allReturnsEmptyListWhenThingsGoWrong() {
+	public void allhas236members() {
 		DiagnosegruppeDao dgdao = new DiagnosegruppeDao(new IK("123456789"));
 		assertEquals(236, dgdao.all().size());
+	}
+	
+	@Test
+	public void allReturnsEmptyListWhenThingsGoWrong() {
+		DiagnosegruppeDao dgdao = new DiagnosegruppeDao(new IK("123456789"));
+		Map<Disziplin, List<String>> gruppeNachDisziplin = dgdao.gruppeNachDisziplin();
+		assertEquals(14, gruppeNachDisziplin.size());
+		
+		assertEquals(Arrays.asList("SAS","CF"), gruppeNachDisziplin.get(Disziplin.ET));
 	}
 
 	private List<Diagnosegruppe> data() {
@@ -40,7 +52,7 @@ public class DiagnosegruppeDaoTest {
 		liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","a","Schmerzen der Extremitäten","KG"                ) );
 		liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","x","patientenindividuelle Symptomatik","KG"         ) );
 		liste.add(new Diagnosegruppe("GE","Arterielle Gefäßerkrankungen (bei konventioneller Behandlung, nach interventioneller/operativer Behandlung)","b","Schädigung/Störung der Muskelfunktion","KG"     ) );
-		liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","KG"                                                                              ) );	// TODO Auto-generated method stub
+		liste.add(new Diagnosegruppe("LY","Lymphabflusstörungen","a","Schädigung der Lymphgefäße, Lymphknoten, Kapiliaren","KG"                                                                              ) );	
 		liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","a","Schädigung der Bewegungsfunktionen","ER"));
 		liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","b","Schädigung der Sinnesfunktionen","ER"));
 		liste.add(new Diagnosegruppe("EN1","ZNS-Erkrankungen (Gehirn) Entwicklungsstörungen","c","Schädigung der mentalen Funktionen","ER"));

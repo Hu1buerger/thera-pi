@@ -26,8 +26,8 @@ public class HMVFiles implements HmvSaver {
     }
 
     private String filenameOf(Hmv hmv) {
-        hmv.nummer = new HMVnr(hmv.disziplin, "123");
-        return hmv.nummer.diszi + hmv.nummer.ziffern;
+        hmv.nummer = new HMVnr(hmv.disziplin, 123);
+        return hmv.nummer.diszi.toString() + hmv.nummer.ziffern;
     }
 
     public static void serialize(String outFile, Object serializableObject) throws IOException {
