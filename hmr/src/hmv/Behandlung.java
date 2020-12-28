@@ -12,8 +12,9 @@ public class Behandlung {
 
     boolean bericht;
     Hausbesuch hb;
-    int frequenzmin;
-    int frequenzmax;
+    public int frequenzmin;
+    public int frequenzmax;
+    public int dauer;
 
     String therapiZiel;
 

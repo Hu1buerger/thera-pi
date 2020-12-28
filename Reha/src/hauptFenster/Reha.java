@@ -79,6 +79,7 @@ import arztFenster.ArztPanel;
 import barKasse.Barkasse;
 import benutzerVerwaltung.BenutzerRechte;
 import core.Feature;
+import core.User;
 import dialoge.RehaSmartDialog;
 import dta301.Dta301;
 import entlassBerichte.EBerichtPanel;
@@ -285,6 +286,7 @@ public class Reha implements RehaEventListener, Monitor {
     static JXFrame thisFrame;
 
     static Logger logger;
+    public static User currentUser;
     private LinkeTaskPane linkeTaskPane;
     ActionListener ltplistener = new LinkeTaskPaneListener(this);
 

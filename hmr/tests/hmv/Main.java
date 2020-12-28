@@ -8,6 +8,7 @@ import java.util.EnumSet;
 
 import core.Disziplin;
 import core.Patient;
+import core.User;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -24,12 +25,12 @@ public class Main extends Application implements Closeable{
             stage = primaryStage;
             FXMLLoader loader = new FXMLLoader(getClass().getResource("HMV13.fxml"));
             EnumSet<Disziplin> disziplinen = EnumSet.of(Disziplin.ER, Disziplin.KG);
-            
+
             Patient patient = CoreTestDataFactory.createPatientSimonLant();
-            Context context = new Context(new Mandant(new IK("123456789"), "test",disziplinen), new User("bob"), patient);
-           
+            Context context = new Context(new Mandant(new IK("123456789"), "test",disziplinen), new User("bob",-1), patient);
+
             Hmv neueHmv = new Hmv(context);
-            
+
             Hmv13 controller = new Hmv13(neueHmv, context);
             loader.setController(controller);
 

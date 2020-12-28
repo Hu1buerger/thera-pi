@@ -7,6 +7,7 @@ import java.awt.event.ActionListener;
 import javax.swing.JOptionPane;
 
 import benutzer.Benutzer;
+import core.User;
 import dialoge.RehaSmartDialog;
 import events.RehaTPEvent;
 import events.RehaTPEventClass;
@@ -50,6 +51,7 @@ public class PassWort {
                 Reha.getThisFrame()
                     .setTitle(Reha.Titel + Reha.Titel2 + "  -->  [Benutzer: " + name + "]");
                 Reha.aktUser = name;
+                Reha.currentUser = new User(name,  Integer.valueOf( Benutzer.pKollegen.get(i).get(4)));
                 check = true;
                 break;
             }

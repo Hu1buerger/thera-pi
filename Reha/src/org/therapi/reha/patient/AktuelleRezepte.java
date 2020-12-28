@@ -67,6 +67,7 @@ import abrechnung.RezeptGebuehrRechnung;
 import commonData.Rezeptvector;
 import core.Feature;
 import core.Patient;
+import core.User;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
 import dialoge.PinPanel;
@@ -81,7 +82,6 @@ import hauptFenster.Reha;
 import hmrCheck.HMRCheck;
 import hmv.Context;
 import hmv.HmvFrame;
-import hmv.User;
 import javafx.embed.swing.JFXPanel;
 import jxTableTools.MyTableStringDatePicker;
 import jxTableTools.TableTool;
@@ -276,7 +276,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     private Object neueHmv2020() {
         if(current.isPresent()) {
-        Context context = new Context(Betriebsumfeld.umfeld.mandant(), new User(Reha.aktUser),  current.get());
+        Context context = new Context(Betriebsumfeld.umfeld.mandant(), Reha.currentUser,  current.get());
         LOGGER.debug("hmr2020 requested");
         new	HMVConfig().load(context);
           new   HmvFrame(context).setVisible(true);

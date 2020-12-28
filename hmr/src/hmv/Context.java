@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import core.Disziplin;
 import core.Patient;
+import core.User;
 import mandant.Mandant;
 import specs.Contracts;
 

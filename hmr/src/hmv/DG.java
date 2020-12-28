@@ -5,7 +5,7 @@ import java.util.Objects;
 public class DG {
 
     public static final DG INVALID = new DG("Invalid","invalid");
-    final String gruppe;
+    public final String gruppe;
     final String beschreibung;
 
     public DG(String gruppe, String beschreibung) {
