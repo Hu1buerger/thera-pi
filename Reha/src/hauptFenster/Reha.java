@@ -2254,10 +2254,51 @@ public class Reha implements RehaEventListener {
             logger.info("testeVoTableStruc: nix zu tun in Tabelle " + tableName + ".");
         }
     }
+    
+    static void testeVoTblStrucHMR2020(String tableName) {
+        Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
+        int nbOfFields = feldNamen.size();
+        if (!(feldNamen.contains("leitsyma"))) {    // && (nbOfFields == 73)
+            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMA enum('T','F') NOT NULL DEFAULT 'F'");
+            boolean retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMB enum('T','F') NOT NULL DEFAULT 'F'");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMC enum('T','F') NOT NULL DEFAULT 'F'");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMX enum('T','F') NOT NULL DEFAULT 'F'");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMTEXT longtext NULL");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN DRINGLICH enum('T','F') NOT NULL DEFAULT 'F'");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN THERAPZIEL longtext NULL");
+            retVal &= retVal2;
+            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN HMR2021 enum('T','F') NOT NULL DEFAULT 'F'");
+            retVal &= retVal2;
 
+            if (retVal) {
+                String meldung = "Die Tabelle " + tableName + "\n"
+                        + "wurde erfolgreich um die Felder für HMR2020 ergänzt.";
+                logger.info(meldung.replace("\n", " "));
+                SwingUtilities.invokeLater(new Runnable() {
+                    String txt = meldung;
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(null, txt);
+                    }
+                });
+
+
+            }
+        } else {
+            logger.info("testeVoTblStrucHMR2020: nix zu tun in Tabelle " + tableName + ".");
+        }
+    }
+    
     static void testeVoTables() {
         testeVoTableStruc ("lza");
         testeVoTableStruc ("verordn");
+        testeVoTblStrucHMR2020 ("lza");
+        testeVoTblStrucHMR2020 ("verordn");
     }
 
     ActionListener actionListener = new MenuActionListener(this);

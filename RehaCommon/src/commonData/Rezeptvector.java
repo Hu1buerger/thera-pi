@@ -617,6 +617,81 @@ public class Rezeptvector {
     public void setUseHygPausch(boolean data) {
         setStringAt(73, (data ? "T" : "F"));
     }
+
+    public boolean getLeitSymIsA() {
+        return getBoolAt(74);
+    }
+    public String getLeitSymIsAS() {
+        return getStringAt(74);
+    }
+    public void setLeitSymIsA(boolean data) {
+        setStringAt(74, (data ? "T" : "F"));
+    }
+
+    public boolean getLeitSymIsB() {
+        return getBoolAt(75);
+    }
+    public String getLeitSymIsBS() {
+        return getStringAt(75);
+    }
+    public void setLeitSymIsB(boolean data) {
+        setStringAt(75, (data ? "T" : "F"));
+    }
+
+    public boolean getLeitSymIsC() {
+        return getBoolAt(76);
+    }
+    public String getLeitSymIsCS() {
+        return getStringAt(76);
+    }
+    public void setLeitSymIsC(boolean data) {
+        setStringAt(76, (data ? "T" : "F"));
+    }
+
+    public boolean getLeitSymIsX() {
+        return getBoolAt(77);
+    }
+    public String getLeitSymIsXS() {
+        return getStringAt(77);
+    }
+    public void setLeitSymIsX(boolean data) {
+        setStringAt(77, (data ? "T" : "F"));
+    }
+
+    public String getLeitSymText() {
+        return getStringAt(78);
+    }
+    public void setLeitSymText(String txt) {
+        setStringAt(78, txt);
+    }
+
+    public boolean getDringlich() {
+        return getBoolAt(79);
+    }
+    public String getDringlichS() {
+        return getStringAt(79);
+    }
+    public void setDringlich(boolean data) {
+        setStringAt(79, (data ? "T" : "F"));
+    }
+
+    public String getTherapieZiel() {
+        return getStringAt(80);
+    }
+    public void setTherapieZiel(String txt) {
+        setStringAt(80, txt);
+    }
+
+    public boolean getIsHMR2020() {
+        return getBoolAt(81);
+    }
+    public String getIsHMR2020S() {
+        return getStringAt(81);
+    }
+    public void setIsHMR2020(boolean data) {
+        setStringAt(81, (data ? "T" : "F"));
+    }
+
     public void setNewRezNb(String rezClass) {
         int reznr = SqlInfo.erzeugeNummer(rezClass.toLowerCase());
         if (reznr < 0) {
@@ -689,7 +764,16 @@ public class Rezeptvector {
         cmd.append("anzahlhb='" + getAnzHB() + "', ");
         cmd.append("icd10='" + getICD10() + "', ");
         cmd.append("icd10_2='" + getICD10_2() + "', ");
-        cmd.append("pauschale='" + getUseHygPauschS() + "' ");
+        cmd.append("pauschale='" + getUseHygPauschS() + "', ");
+        // hmr2020
+        cmd.append("leitsyma='" + getLeitSymIsAS() + "', ");
+        cmd.append("leitsymb='" + getLeitSymIsBS() + "', ");
+        cmd.append("leitsymc='" + getLeitSymIsCS() + "', ");
+        cmd.append("leitsymx='" + getLeitSymIsXS() + "', ");
+        cmd.append("leitsymtext='" + getLeitSymText() + "', ");
+        cmd.append("dringlich='" + getDringlichS() + "', ");
+        cmd.append("therapziel='" + getTherapieZiel() + "', ");
+        cmd.append("hmr2021='" + getIsHMR2020S() + "' ");
 
         cmd.append(" where id='" + getId() + "' LIMIT 1");
         SqlInfo.sqlAusfuehren(cmd.toString());
