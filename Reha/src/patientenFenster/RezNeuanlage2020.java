@@ -14,7 +14,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Vector;
@@ -23,7 +22,6 @@ import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
@@ -37,6 +35,7 @@ import org.jdesktop.swingx.painter.MattePainter;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -65,33 +64,19 @@ import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import systemTools.ListenerTools;
 
-public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener, FocusListener, RehaTPEventListener {
-
-    private final class Icd10Listener extends MouseAdapter {
-        @Override
-        public void mouseClicked(MouseEvent e) {
-            super.mouseClicked(e);
-        }
-
-
-    }
+public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyListener, FocusListener, RehaTPEventListener {
 
     /**
-     * McM '18: Umbau Struktur
+     * McM '21: Maske für VO nach HMR2020
      *     Konzept:
-     *         - Rezeptvector 'vec' wird ersetzt durch 'myRezept' (Instanz der Klasse 'Rezept'; Zugriff über get/set)
-     *         - zu Beginn ist myRezept entweder leer (komplette Neuanlage) oder enthaelt Daten der Kopiervorlage
-     *         - ein neues Rezept wird mit Daten aus dem Patienten-Record u. der gewählten Rezeptklasse initialisiert
-     *         - ein kopiertes Rezept wird zuerst bereinigt (Behandlungen, Zuzahlung, ... entfernen)
-     *         - Eintragen der Daten in's Rezeptformular u. Auslesen aus demselben jeweils mit 1 zentralen Funktion
-     *         - Schreiben der Rezeptdaten in die DB uebernimmt die entspr. Fkt der Klasse 'Rezept'
-     *         - Fkt.:
-     *             ladeZusatzDatenAlt/Neu() -> initRezept*()
-     *             doSpeichernAlt/Neu -> copyFormToVec(), copyFormToVec1stTime()
+     *         - Basis ist eine Kopie von 'RezNeuanlage' um minimalen Impact auf den 'Rest' des Programmes zu gewährleisten
+     *         - 'ausdünnen' soweit möglich
      *
      */
     // Lemmi Doku: Das sind die Text-Eingabefgelder im Rezept
-    public JRtaTextField[] jtf = new JRtaTextField[32];
+    public JRtaTextField[] jtf = { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
+            null };
     // Lemmi 20101231: Harte Index-Zahlen für "jtf" durch sprechende Konstanten
     // ersetzt !
     final int cKTRAEG = 0;
@@ -209,7 +194,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
-    public RezNeuanlage(Vector<String> vec, boolean neu, Connection connection) {
+    public RezNeuanlage2020(Vector<String> vec, boolean neu, Connection connection) { 
         super();
         try {
             this.neu = neu;
@@ -220,12 +205,12 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             diszis = new Disziplinen();
 
             if (vec.size() > 0 && this.neu) {
-                aktuelleDisziplin = RezTools.getDisziplinFromRezNr(vec.get(1));
+                aktuelleDisziplin = StringTools.getDisziplin(vec.get(1)); 
             }
 
             setName("RezeptNeuanlage");
             rtp = new RehaTPEventClass();
-            rtp.addRehaTPEventListener(this);
+            rtp.addRehaTPEventListener((RehaTPEventListener) this);
 
             addKeyListener(this);
 
@@ -234,7 +219,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
             add(getDatenPanel(), BorderLayout.CENTER);
             add(getButtonPanel(), BorderLayout.SOUTH);
-            setBackgroundPainter(Reha.instance.compoundPainter.get("RezNeuanlage"));
+            setBackgroundPainter(Reha.instance.compoundPainter.get("ArztPanel"));
             validate();
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
@@ -265,7 +250,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
-                    "Fehler im Konstruktor RezNeuanlage\n" + RezNeuanlage.makeStacktraceToString(ex));
+                    "Fehler im Konstruktor RezNeuanlage2020\n" + RezNeuanlage2020.makeStacktraceToString(ex));
         }
 
     }
@@ -286,7 +271,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             if (!this.neu) {
                 int itest = myRezept.getFarbCode();
                 if (itest >= 0) {
-                    jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
+                    jcmb[cFARBCOD].setSelectedItem((String) SystemConfig.vSysColsBedeut.get(itest));
                 } else {
                     jcmb[cFARBCOD].setSelectedIndex(0);
                 }
@@ -419,12 +404,12 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         // alle ComboBoxen
         for (i = 0; i < jcmb.length; i++) {
-            originale.add(jcmb[i].getSelectedIndex()); // Art d. Verordn. etc.
+            originale.add((Integer) jcmb[i].getSelectedIndex()); // Art d. Verordn. etc.
         }
 
         // alle CheckBoxen
         for (i = 0; i < jcb.length; i++) {
-            originale.add((jcb[i].isSelected())); //
+            originale.add((Boolean) (jcb[i].isSelected())); //
         }
     }
 
@@ -475,7 +460,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
      * @return
      */
     private JScrollPane getDatenPanel() { // 1 2 3 4 5 6 7 8
-        FormLayout lay = new FormLayout("right:max(80dlu;p), 4dlu, 60dlu, 5dlu, right:max(60dlu;p), 4dlu, 80dlu",
+        FormLayout lay = new FormLayout("right:max(90dlu;p), 4dlu, 60dlu, 5dlu, right:max(60dlu;p), 4dlu, 80dlu",
                 // 1. 2. 3. 4. 5. 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
                 "p, 10dlu, p, 5dlu,  p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, "
                         +
@@ -483,8 +468,8 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                         "10dlu, p, 10dlu, p, 2dlu, p, 2dlu,  p,  10dlu, p, 10dlu, p,10dlu,p,10dlu,30dlu,2dlu");
 
         CellConstraints cc = new CellConstraints();
-        PanelBuilder jpan = new PanelBuilder(lay);
-        //PanelBuilder jpan = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
+        //PanelBuilder jpan = new PanelBuilder(lay);
+        PanelBuilder jpan = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
         jpan.setDefaultDialogBorder();
         jpan.getPanel()
             .setOpaque(false);
@@ -524,12 +509,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jtf[cZZSTAT] = new JRtaTextField("", false); // zzstatus
             jtf[cHEIMBEWPATSTAM] = new JRtaTextField("", false); // Heimbewohner aus PatStamm
             jtf[cICD10] = new JRtaTextField("GROSS", false); // 1. ICD10-Code
-            JRtaTextField TF_icd10_1 = jtf[cICD10];
-            MouseListener icd10Text = new Icd10Listener();
-            TF_icd10_1.addMouseListener(icd10Text );
             jtf[cICD10_2] = new JRtaTextField("GROSS", false); // 2. ICD10-Code
-            JRtaTextField TF_icd10_2 = jtf[cICD10];
-            TF_icd10_2.addMouseListener(icd10Text );
             jcmb[cRKLASSE] = new JRtaComboBox();
             strRezepklassenAktiv = diszis.getActiveRK();
             jcmb[cRKLASSE] = diszis.getComboBoxActiveRK();
@@ -543,11 +523,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.add(jcmb[cRKLASSE], cc.xyw(3, 3, 5));
             jcmb[cRKLASSE].setActionCommand("rezeptklasse");
             jcmb[cRKLASSE].addActionListener(this);
-            allowShortCut(jcmb[cRKLASSE], "RezeptClass");
+            allowShortCut((Component) jcmb[cRKLASSE], "RezeptClass");
             /********************/
 
             if (myRezept.isEmpty()) {
-                jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);
+                jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);                    
             } else {
                 String rezClassInVO = myRezept.getRezClass();
                 for (int i = 0; i < strRezepklassenAktiv.length; i++) {
@@ -589,7 +569,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
             jtf[cKTRAEG].setName("ktraeger");
             jtf[cKTRAEG].addKeyListener(this);
-            allowShortCut(jtf[cKTRAEG], "ktraeger");
+            allowShortCut((Component) jtf[cKTRAEG], "ktraeger");
             jpan.add(kassenLab, cc.xy(1, 7));
             jpan.add(jtf[cKTRAEG], cc.xy(3, 7));
 
@@ -624,12 +604,12 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.add(jtf[cARZT], cc.xy(7, 7));
 
             jtf[cREZDAT].setName("rez_datum");
-            allowShortCut(jtf[cREZDAT], "rez_datum");
+            allowShortCut((Component) jtf[cREZDAT], "rez_datum");
             jpan.addLabel("Rezeptdatum", cc.xy(1, 9));
             jpan.add(jtf[cREZDAT], cc.xy(3, 9));
             eingabeRezDate = jpan.add(jtf[cREZDAT], cc.xy(3, 9));
 
-            allowShortCut(jtf[cBEGINDAT], "lastdate");
+            allowShortCut((Component) jtf[cBEGINDAT], "lastdate");
             jpan.addLabel("spätester Beh.Beginn", cc.xy(5, 9));
             jpan.add(jtf[cBEGINDAT], cc.xy(7, 9));
 
@@ -637,14 +617,14 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
             jcmb[cVERORD].setActionCommand("verordnungsart");
             jcmb[cVERORD].addActionListener(this);
-            allowShortCut(jcmb[cVERORD], "selArtDerVerordn");
+            allowShortCut((Component) jcmb[cVERORD], "selArtDerVerordn");
             jpan.addLabel("Art d. Verordn.", cc.xy(1, 11));
             eingabeVerordnArt = jpan.add(jcmb[cVERORD], cc.xy(3, 11));
 
             jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
             jcb[cBEGRADR].setOpaque(false);
             jcb[cBEGRADR].setEnabled(false);
-            allowShortCut(jcb[cBEGRADR], "adrCheck");
+            allowShortCut((Component) jcb[cBEGRADR], "adrCheck");
             jpan.addLabel("Begründ. für adR", cc.xy(5, 11));
             jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
 
@@ -652,7 +632,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcb[cHAUSB].setOpaque(false);
             jcb[cHAUSB].setActionCommand("Hausbesuche");
             jcb[cHAUSB].addActionListener(this);
-            allowShortCut(jcb[cHAUSB], "hbCheck");
+            allowShortCut((Component) jcb[cHAUSB], "hbCheck");
             jpan.addLabel("Hausbesuch", cc.xy(1, 13));
             jpan.add(jcb[cHAUSB], cc.xy(3, 13));
 
@@ -685,7 +665,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                     }
                 }
             }
-            allowShortCut(jcb[cVOLLHB], "hbVollCheck");
+            allowShortCut((Component) jcb[cVOLLHB], "hbVollCheck");
             jpan.add(jcb[cVOLLHB], cc.xy(7, 13));
 
             jcb[cTBANGEF] = new JRtaCheckBox("angefordert");
@@ -706,7 +686,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             }
             allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
             jpan.add(jcb[cHygienePausch], cc.xy(7, 15));
-
+            
             jpan.addSeparator("Verordnete Heilmittel", cc.xyw(1, 17, 7));
 
             jtf[cANZ1].setName("anzahl1");
@@ -717,7 +697,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcmb[cLEIST1] = new JRtaComboBox();
             jcmb[cLEIST1].setActionCommand("leistung1");
             jcmb[cLEIST1].addActionListener(this);
-            allowShortCut(jcmb[cLEIST1], "leistung1");
+            allowShortCut((Component) jcmb[cLEIST1], "leistung1");
             jpan.add(jcmb[cLEIST1], cc.xyw(5, 19, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 2", cc.xy(1, 21));
@@ -726,7 +706,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcmb[cLEIST2] = new JRtaComboBox();
             jcmb[cLEIST2].setActionCommand("leistung2");
             jcmb[cLEIST2].addActionListener(this);
-            allowShortCut(jcmb[cLEIST2], "leistung2");
+            allowShortCut((Component) jcmb[cLEIST2], "leistung2");
             jpan.add(jcmb[cLEIST2], cc.xyw(5, 21, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 3", cc.xy(1, 23));
@@ -735,7 +715,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jcmb[cLEIST3] = new JRtaComboBox();
             jcmb[cLEIST3].setActionCommand("leistung3");
             jcmb[cLEIST3].addActionListener(this);
-            allowShortCut(jcmb[cLEIST3], "leistung3");
+            allowShortCut((Component) jcmb[cLEIST3], "leistung3");
             jpan.add(jcmb[cLEIST3], cc.xyw(5, 23, 3));
 
             jpan.addLabel("Anzahl / Heilmittel 4", cc.xy(1, 25));
@@ -760,7 +740,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.addLabel("Indikationsschlüssel", cc.xy(1, 31));
             jcmb[cINDI] = new JRtaComboBox();
             jcmb[cINDI].addKeyListener(this);
-            allowShortCut(jcmb[cINDI],"Indikationsschluessel");
+            allowShortCut((Component)jcmb[cINDI],"Indikationsschluessel");
             jpan.add(jcmb[cINDI], cc.xy(3, 31));
 
             klassenReady = true;
@@ -784,11 +764,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
             jpan.addSeparator("ICD-10 Codes", cc.xyw(1, 35, 7));
             jpan.addLabel("1. ICD-10-Code", cc.xy(1, 37));
-            allowShortCut(jtf[cICD10], "icd10");
+            allowShortCut((Component) jtf[cICD10], "icd10");
             eingabeICD = jpan.add(jtf[cICD10], cc.xy(3, 37));
 
             jpan.addLabel("2. ICD-10-Code", cc.xy(5, 37));
-            allowShortCut(jtf[cICD10_2], "icd10_2");
+            allowShortCut((Component) jtf[cICD10_2], "icd10_2");
             jpan.add(jtf[cICD10_2], cc.xy(7, 37));
 
             jpan.addSeparator("Ärztliche Diagnose laut Rezept", cc.xyw(1, 39, 7));
@@ -945,7 +925,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
         return retwert;
     }
 
-    public RezNeuanlage getInstance() {
+    public RezNeuanlage2020 getInstance() {
         return this;
     }
 
@@ -1513,7 +1493,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(null, "Fehler bei füller Inikat.schlüssel\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(null, "Fehler beim füllen der Inikat.schlüssel\n" + ex.getMessage());
 
         }
 
@@ -1746,10 +1726,10 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                                               .get(i))
                             - 1;
                 }
-                preisgruppe = Integer.parseInt(vec.get(0)
+                preisgruppe = Integer.parseInt((String) vec.get(0)
                                                            .get(0))
                         - 1;
-                jtf[cPREISGR].setText(vec.get(0)
+                jtf[cPREISGR].setText((String) vec.get(0)
                                                   .get(0));
             } else {
                 JOptionPane.showMessageDialog(null,
@@ -1827,7 +1807,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 thisRezept.setKtraeger(Reha.instance.patpanel.patDaten.get(68));
             }
         }
-
+        
         initRezeptAll(thisRezept);
 
         thisRezept.setRezNb("");
@@ -1935,7 +1915,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
         itest = myRezept.getFarbCode();
         if (itest >= 0) {
-            jcmb[cFARBCOD].setSelectedItem(SystemConfig.vSysColsBedeut.get(itest));
+            jcmb[cFARBCOD].setSelectedItem((String) SystemConfig.vSysColsBedeut.get(itest));
         }
 
     }
@@ -2247,11 +2227,11 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
 
     private String[] holePreis(int ivec, int ipreisgruppe) {
         if (ivec > 0) {
-            int prid = Integer.valueOf(this.preisvec.get(ivec)
+            int prid = Integer.valueOf((String) this.preisvec.get(ivec)
                                                              .get(this.preisvec.get(ivec)
                                                                                .size()
                                                                      - 1));
-            Vector<?> xvec = (this.preisvec.get(ivec));
+            Vector<?> xvec = ((Vector<?>) this.preisvec.get(ivec));
             return new String[] { (String) xvec.get(3), (String) xvec.get(2) };
         } else {
             return new String[] { "0.00", "" };
@@ -2330,7 +2310,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             if (evt.getDetails()[0] != null) {
                 if (evt.getDetails()[0].equals(this.getName())) {
                     this.setVisible(false);
-                    rtp.removeRehaTPEventListener(this);
+                    rtp.removeRehaTPEventListener((RehaTPEventListener) this);
                     rtp = null;
                     aufraeumen();
                 }
@@ -2362,7 +2342,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                 ListenerTools.removeListeners(jta);
                 ListenerTools.removeListeners(getInstance());
                 if (rtp != null) {
-                    rtp.removeRehaTPEventListener(getInstance());
+                    rtp.removeRehaTPEventListener((RehaTPEventListener) getInstance());
                     rtp = null;
                 }
                 return null;

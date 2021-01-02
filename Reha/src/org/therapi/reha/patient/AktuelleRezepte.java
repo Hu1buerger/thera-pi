@@ -86,6 +86,7 @@ import krankenKasse.KassenFormulare;
 import oOorgTools.OOTools;
 import patientenFenster.KeinRezept;
 import patientenFenster.RezNeuanlage;
+import patientenFenster.VoEditWindow;
 import patientenFenster.RezTest;
 import patientenFenster.RezTestPanel;
 import patientenFenster.RezeptGebuehren;
@@ -2783,9 +2784,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                           .setTitle("Rezept Neuanlage");
                 }
                 neuRez.setSize(500, 800);
-                neuRez.setPreferredSize(new Dimension(490 + Reha.zugabex, 690 + Reha.zugabey));
+                neuRez.setPreferredSize(new Dimension(505 + Reha.zugabex, 710 + Reha.zugabey));
                 neuRez.getSmartTitledPanel()
-                      .setPreferredSize(new Dimension(490, 800));
+                      .setPreferredSize(new Dimension(505, 800));
                 neuRez.setPinPanel(pinPanel);
                 if (lneu) {
                     // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei
@@ -2827,7 +2828,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         }
                     }
 
-                    RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecKopiervorlage.clone(), lneu, connection);
+                    VoEditWindow rezNeuAn = new VoEditWindow((Vector<String>) vecKopiervorlage.clone(), lneu, connection);
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(rezNeuAn);
                     if (vecKopiervorlage.size() < 1)
@@ -2841,7 +2842,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 } else { // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geöffnet:
                     neuRez.getSmartTitledPanel()
                           .setContentContainer(
-                                  new RezNeuanlage(Reha.instance.patpanel.vecaktrez, lneu, connection));
+                                  new VoEditWindow(Reha.instance.patpanel.vecaktrez, lneu, connection));
                     neuRez.getSmartTitledPanel()
                           .setTitle("editieren Rezept ---> " + Reha.instance.patpanel.vecaktrez.get(1));
                 }
