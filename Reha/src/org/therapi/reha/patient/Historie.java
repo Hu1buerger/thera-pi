@@ -1028,7 +1028,7 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
                         if ((getActiveRezNr()) == null) {
                             return null;
                         }
-                        Reha.instance.patpanel.aktRezept.neuanlageRezept(true, "", "KopiereHistorienRezept");
+                        Reha.instance.patpanel.aktRezept.neuanlageRezept(true, "KopiereHistorienRezept");
                         Reha.instance.patpanel.multiTab.setSelectedIndex(0);
                     } catch (Exception ex) {
                         ex.printStackTrace();

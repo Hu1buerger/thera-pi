@@ -462,7 +462,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     if (rezGeschlossen()) {
                         return;
                     }
-                    neuanlageRezept(false, "", "");
+                    neuanlageRezept(false, "");
                 }
                 if (arg0.getClickCount() == 1 && arg0.getButton() == 3) {
                     if (Rechte.hatRecht(Rechte.Funktion_rezgebstatusedit, false)) {
@@ -486,7 +486,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     if (rezGeschlossen()) {
                         return;
                     }
-                    neuanlageRezept(false, "", "");
+                    neuanlageRezept(false, "");
                 }
                 if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
                     arg0.consume();
@@ -1590,7 +1590,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     strModus = "KopiereAngewaehltes";
                 else if (bAltPressed)
                     strModus = "KopiereHistorienRezept";
-                neuanlageRezept(true, "", strModus);
+                neuanlageRezept(true, strModus);
 
                 break;
             }
@@ -1603,7 +1603,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 if (rezGeschlossen()) {
                     return;
                 }
-                neuanlageRezept(false, "", "");
+                neuanlageRezept(false, "");
                 break;
             }
             if (cmd.equals("rezdelete")) {
@@ -1834,11 +1834,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
 
             if (cmd.equals("KopiereAngewaehltes")) {
-                neuanlageRezept(true, "", "KopiereAngewaehltes");
+                neuanlageRezept(true, "KopiereAngewaehltes");
             }
 
             if (cmd.equals("KopiereLetztes")) {
-                neuanlageRezept(true, "", "KopiereLetztes");
+                neuanlageRezept(true, "KopiereLetztes");
             }
 
             if (cmd.equals("rezeptbrief")) {
@@ -2479,7 +2479,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             abrechnungPrivat.setVisible(true);
             int rueckgabe = abrechnungPrivat.rueckgabe;
             if (rueckgabe == AbrechnungPrivat.KORREKTUR) {
-                neuanlageRezept(false, "", "");
+                neuanlageRezept(false, "");
             }
             abrechnungPrivat = null;
         } catch (Exception ex) {
@@ -2758,7 +2758,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     // Lemmi 20110101: bCtrlPressed zugefügt. Kopieren des letzten Rezepts des
     // selben Patienten bei Rezept-Neuanlage
-    public void neuanlageRezept(boolean lneu, String feldname, String strModus) {
+    public void neuanlageRezept(boolean lneu, String strModus) {
         try {
             if (Reha.instance.patpanel.aid < 0 || Reha.instance.patpanel.kid < 0) {
                 String meldung = "Hausarzt und/oder Krankenkasse im Patientenstamm sind nicht verwertbar.\n"
