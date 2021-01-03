@@ -16,6 +16,7 @@ dependencies {
     implementation group:'com.lowagie', name:'itext', version:'2.1.7'
     //New Version needs some rewrite
     //implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.2'
+    implementation group: 'com.github.rjolly', name: 'pdf-renderer', version: '140'
 
     //OpenOffice
     implementation fileTree('../lib/openofficeorg', { include '*.jar'})

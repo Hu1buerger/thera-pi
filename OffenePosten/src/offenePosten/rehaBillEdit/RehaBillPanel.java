@@ -458,6 +458,8 @@ public class RehaBillPanel extends JXPanel implements   TableModelListener {
         buts[1].setEnabled(false);
         buts[3].setEnabled(true);
         int modvec = tab.convertRowIndexToModel(row);
+
+        //Cyka TODO: rework
         Vector<Vector<Object>> vec = tabmod.getDataVector();
         tabmod.addRow((Vector<?>) vec.get(modvec)
                                      .clone());

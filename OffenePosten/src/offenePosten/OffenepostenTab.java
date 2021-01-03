@@ -52,7 +52,9 @@ public class OffenepostenTab extends JXPanel implements ChangeListener {
         setOpaque(false);
         setLayout(new BorderLayout());
         jtb = new JTabbedPane();
-        jtb.setUI(new WindowsTabbedPaneUI());
+
+        //TODO Not working because WindowsTabbedPaneUI not available on mac or linux
+        //jtb.setUI(new WindowsTabbedPaneUI());
 
         oppanel = new OffenepostenPanel(this, offenePosten);
         jtb.addTab("Rechnungen ausbuchen", oppanel);
