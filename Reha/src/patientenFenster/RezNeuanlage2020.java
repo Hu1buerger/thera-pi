@@ -122,28 +122,41 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     // und Check-Boxen
     Vector<Object> originale = new Vector<Object>();
 
+    /*********** entfällt
     public JRtaCheckBox[] jcb = { null, null, null, null, null };
+    **********/
+    /*********** entfällt (?)
+    public JRtaCheckBox[] jcb = { null, null, null, null };
+    **********/
+    public JRtaCheckBox[] jcb = { null, null, null };
     // Lemmi 20101231: Harte Index-Zahlen für "jcb" durch sprechende Konstanten
     // ersetzt !
+    /*********** entfällt    
     final int cBEGRADR = 0;
-    final int cHAUSB = 1;
-    final int cTBANGEF = 2;
-    final int cVOLLHB = 3;
-    final int cHygienePausch = 4;
+     **********/    
+    final int cHAUSB = 0;
+    final int cTBANGEF = 1;
+    final int cVOLLHB = 2;
+    /*********** entfällt (?)
+    final int cHygienePausch = 3;
+    **********/
 
-    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
+//    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
+    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null };
 
     final int cRKLASSE = 0;
+    /*********** entfällt    
     final int cVERORD = 1;
-    final int cLEIST1 = 2; // Lemmi 20101231: ACHTUNG
+    **********/    
+    final int cLEIST1 = 1; // Lemmi 20101231: ACHTUNG
                            // die Positionen cLEIST1 bis cLEIST4 müssen immer
                            // nacheinander definiert sein
-    final int cLEIST2 = 3;
-    final int cLEIST3 = 4;
-    final int cLEIST4 = 5;
-    final int cINDI = 6;
-    final int cBARCOD = 7;
-    final int cFARBCOD = 8;
+    final int cLEIST2 = 2;
+    final int cLEIST3 = 3;
+    final int cLEIST4 = 4;
+    final int cINDI = 5;
+    final int cBARCOD = 6;
+    final int cFARBCOD = 7;
 
     public JTextArea jta = null;
 
@@ -613,6 +626,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jpan.addLabel("spätester Beh.Beginn", cc.xy(5, 9));
             jpan.add(jtf[cBEGINDAT], cc.xy(7, 9));
 
+            /*********** entfällt                
             jcmb[cVERORD] = new JRtaComboBox(
                     new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
             jcmb[cVERORD].setActionCommand("verordnungsart");
@@ -627,6 +641,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             allowShortCut((Component) jcb[cBEGRADR], "adrCheck");
             jpan.addLabel("Begründ. für adR", cc.xy(5, 11));
             jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
+            **********/    
 
             jcb[cHAUSB] = new JRtaCheckBox("Ja / Nein");
             jcb[cHAUSB].setOpaque(false);
@@ -674,6 +689,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jcb[cTBANGEF].addKeyListener(this);
             jpan.add(jcb[cTBANGEF], cc.xy(3, 15));
 
+            /*********** entfällt (?)
             jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
             jcb[cHygienePausch].setOpaque(false);
             jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 30.09.2020");
@@ -685,7 +701,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 jcb[cHygienePausch].setSelected((myRezept.getUseHygPausch() ? true : false));
             }
             allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
-            jpan.add(jcb[cHygienePausch], cc.xy(7, 15));
+            jpan.add(jcb[cHygienePausch], cc.xy(3, 41));
+            **********/
             
             jpan.addSeparator("Verordnete Heilmittel", cc.xyw(1, 17, 7));
 
@@ -973,7 +990,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
             return;
         }
-        /*********************/
+        /*********** entfällt
         if (e.getActionCommand()
              .equals("verordnungsart") && klassenReady) {
             if (jcmb[cVERORD].getSelectedIndex() == 2) {
@@ -985,6 +1002,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             }
             return;
         }
+        **********/
         /*********************/
         if (e.getActionCommand()
              .equals("speichern")) {
@@ -1849,11 +1867,14 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         if (!test.equals("")) {
             jtf[cBEGINDAT].setText(DatFunk.sDatInDeutsch(test));
         }
-        int itest = myRezept.getRezArt();
+        int itest = 0;
+        /*********** entfällt
+        itest = myRezept.getRezArt();
         if (itest >= 0) {
             jcmb[cVERORD].setSelectedIndex(itest);
         }
         jcb[cBEGRADR].setSelected(myRezept.getBegrAdR());
+        **********/
         jcb[cHAUSB].setSelected(myRezept.getHausbesuch());
 
         jcb[cVOLLHB].setSelected(myRezept.getHbVoll());
@@ -1967,8 +1988,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
             thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
             thisRezept.setLastEdit(Reha.aktUser);
+            /*********** entfällt
             thisRezept.setRezArt(jcmb[cVERORD].getSelectedIndex());
             thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());
+            **********/
             thisRezept.setHausbesuch(jcb[cHAUSB].isSelected());
             if (thisRezept.getHausbesuch()) {
                 String anzHB = String.valueOf(thisRezept.getAnzHB());
@@ -2163,7 +2186,9 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                                                                               // 'initRezeptAll')
             thisRezept.setHeimbew(jtf[cHEIMBEW].getText()); // dito
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
+            /*********** entfällt (?)
             thisRezept.setUseHygPausch(jcb[cHygienePausch].isSelected() ? true : false);
+            **********/
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
             thisRezept.setKm(stest.equals("") ? "0.00" : stest);
