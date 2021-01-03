@@ -5,6 +5,14 @@ dist
 dist-tests
 target
 
+**/*.jar
+!/lib
+**/*.class
+**/build/
+
+.idea
+.gradle
+
 #build.xml
 !Build/build.xml
 

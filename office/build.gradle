@@ -1,0 +1,12 @@
+dependencies {
+    implementation files(
+            '../lib/ini/ini4j-0.5.4.jar',
+            '../lib/logging/sysout-over-slf4j-1.0.2.jar'
+    )
+
+    //OpenOffice
+    implementation fileTree('../lib/openofficeorg', { include '*.jar'})
+
+    //Logger
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+}

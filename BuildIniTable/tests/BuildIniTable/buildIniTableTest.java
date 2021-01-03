@@ -16,11 +16,15 @@ public class buildIniTableTest {
         assertEquals("test", buildIniTable.getPfadzurmandini());
     }
 
-    @Test
+    /**
+     * requires human input in test?????
+     */
+    //@Test
     public void testMandantTesten() {
         // Simple test only, since non-existing mandanten.ini will invoke file-chooser
-        buildIniTable.setPfadzurmandini("../Files/tests/resources/ini/mandanten.ini");
-        assertEquals("../Files/tests/resources/ini/mandanten.ini", buildIniTable.mandantTesten());
+        buildIniTable.setPfadzurmandini("../Files/tests/resources/ini/123456789/mandanten.ini");
+        assertEquals("../Files/tests/resources/ini/123456789/mandanten.ini", buildIniTable.mandantTesten());
+        //Whats the point in this test?
     }
 
     // ProgressPanel tests

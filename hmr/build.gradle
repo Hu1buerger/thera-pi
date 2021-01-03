@@ -1,0 +1,11 @@
+dependencies {
+    implementation project(':RehaCommon')
+
+    testCompile group: 'org.testfx', name: 'testfx-core', version: '4.0.1-alpha'
+    testCompile group: 'org.testfx', name: 'testfx-junit', version: '4.0.1-alpha'
+
+    implementation "org.openjfx:javafx-base:11:${project.platform}"
+    implementation "org.openjfx:javafx-graphics:11:${project.platform}"
+    implementation "org.openjfx:javafx-controls:11:${project.platform}"
+    implementation "org.openjfx:javafx-fxml:11:${project.platform}"
+}

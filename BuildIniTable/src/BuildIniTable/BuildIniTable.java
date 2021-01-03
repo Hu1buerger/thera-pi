@@ -69,6 +69,11 @@ public class BuildIniTable {
         this.pfadzurini = this.pfadzurmandini.replace("mandanten.ini", "");
     }
 
+    public BuildIniTable(String mandantenIniPath){
+        this.pfadzurmandini = mandantenIniPath;
+        this.pfadzurini = this.pfadzurmandini.replace("mandanten.ini", "");
+    }
+
     /** @VisibleForTesting */
     void setPfadzurmandini(String pfadZurMandIni) {
         this.pfadzurmandini = pfadZurMandIni;

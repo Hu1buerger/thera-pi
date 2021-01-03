@@ -43,7 +43,6 @@ public class Feature {
      *
      * @param mandant
      */
-
     public static void init(Mandant mandant) {
         StringBuilder pathStringBuilder = new StringBuilder();
         pathStringBuilder.append(environment.Path.Instance.getProghome());

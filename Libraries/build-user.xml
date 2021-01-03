@@ -17,7 +17,7 @@
 	<target name="copylibs">
 		<mkdir dir="${dir.dist.lib}" />
 		<copy todir="${dir.dist.lib}">
-			<fileset dir="${dir.binary.lib}" includes="**/*.jar,**/*.dll" />
+			<fileset dir="../lib" includes="**/*.jar,**/*.dll" />
 		</copy>
 	</target>
 

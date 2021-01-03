@@ -18,6 +18,8 @@ import org.slf4j.LoggerFactory;
  *
  */
 public enum Path {
+
+    //TODO change to singleton !!!
     Instance;
 
     private final Logger logger = LoggerFactory.getLogger(Path.class);
@@ -93,9 +95,11 @@ public enum Path {
              **/
             break;
         case UNKNOWN:
-            setProghome(C_REHA_VERWALTUNG);
-            break;
+            throw new IllegalStateException("OS not detected");
+            //setProghome(C_REHA_VERWALTUNG);
+            //break;
         default:
+            //TODO: future remove because whyyy??
             System.out.println("setting Directory to default");
             setProghome(C_REHA_VERWALTUNG);
             break;
@@ -119,9 +123,11 @@ public enum Path {
 
         if (osVersion.contains("Linux")) {
             return OS.LINUX;
-        } else if (osVersion.contains("Windows")) {
+        }
+        if (osVersion.contains("Windows")) {
             return OS.WIN;
-        } else if (osVersion.contains("Mac OS X")) {
+        }
+        if (osVersion.contains("Mac OS X")) {
             return OS.MAC;
         }
         // this should not happen

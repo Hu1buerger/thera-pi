@@ -1,0 +1,8 @@
+dependencies {
+    implementation project(':RehaCommon')
+
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+    implementation group: 'org.json', name: 'json', version: '20201115'
+}

@@ -1,0 +1,16 @@
+dependencies {
+    implementation project(':RehaCommon')
+    implementation project(':datenbank')
+
+    //Networking
+    implementation fileTree('../lib/apachecommons/', {include '*.jar'})
+
+    //Logger
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+    //ini-files
+    implementation files{
+        '../lib/ini/ini4j-0.5.4.jar'
+    }
+}

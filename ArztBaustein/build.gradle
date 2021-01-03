@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':RehaCommon')
+    implementation project(':datenbank')
+    implementation project(':office')
+
+    implementation 'com.kenai.nbpwr:org-jdesktop-swingx:1.6-201002261215'
+    //DB
+    implementation 'mysql:mysql-connector-java:5.1.5'
+
+    implementation fileTree('../lib/openofficeorg', { include '*.jar'})
+    implementation files('../lib/jgoodies/forms-1.3.0.jar')
+}

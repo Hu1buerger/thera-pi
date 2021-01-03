@@ -1,0 +1,6 @@
+dependencies {
+    implementation project(':RehaCommon')
+
+    //Outdated dep
+    implementation files('../lib/dbf/jdbf.jar')
+}

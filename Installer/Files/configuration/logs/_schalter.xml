@@ -1,0 +1,8 @@
+<included>
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+        <appender-ref ref="FILE" />
+    </root>
+</included>
+<!-- zum ausschalten entweder level auf "OFF" setzen, oder den jeweiligen appender
+    auskommentieren. -->

@@ -1,0 +1,12 @@
+dependencies {
+    implementation project(':RehaCommon')
+
+    //DB
+    implementation 'mysql:mysql-connector-java:5.1.5'
+
+    //INI files handler
+    implementation files('../lib/ini/ini4j-0.5.4.jar')
+
+    //Logger
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+}

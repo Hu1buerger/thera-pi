@@ -1,28 +1,25 @@
 package theraPi;
 
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.ImageIcon;
-import javax.swing.JOptionPane;
-
-import org.ini4j.Ini;
-import org.ini4j.InvalidFileFormatException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.qos.logback.classic.util.ContextInitializer;
 import environment.Path;
 import hauptFenster.Reha;
 import mandant.Mandant;
+import org.ini4j.Ini;
+import org.ini4j.InvalidFileFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.org.lidalia.sysoutslf4j.context.SysOutOverSLF4J;
 import umfeld.Betriebsumfeld;
+
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
 
 public class TheraPi {
 
     private static Logger logger;
 
-    public static void main(String[] args) throws InvalidFileFormatException, IOException {
+    public static void main(String[] args) throws IOException {
 
         String path = "./logs/conf/reha.xml";
         System.setProperty(ContextInitializer.CONFIG_FILE_PROPERTY, path);
@@ -52,7 +49,7 @@ public class TheraPi {
                 startReha(current);
             } else {
                 logger.debug(liste.defaultMandant()
-                                  .toString());
+                        .toString());
                 startReha(liste.defaultMandant());
 
             }
@@ -95,8 +92,7 @@ public class TheraPi {
     private static void setLookAndFeel() {
         for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 
-            if (info.getName()
-                    .contains("PlasticXP")) {
+            if (info.getName().contains("PlasticXP")) {
 
                 try {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
@@ -107,10 +103,7 @@ public class TheraPi {
                 }
 
                 break;
-
             }
         }
-
     }
-
 }

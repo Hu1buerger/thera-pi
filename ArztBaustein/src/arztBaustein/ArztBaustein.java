@@ -1,20 +1,5 @@
 package arztBaustein;
 
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.GridLayout;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.FileNotFoundException;
-import java.sql.Connection;
-import java.sql.SQLException;
-
-import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
-
-import org.jdesktop.swingx.JXFrame;
-
 import CommonTools.Monitor;
 import CommonTools.ini.INIFile;
 import CommonTools.ini.Settings;
@@ -24,7 +9,17 @@ import gui.LaF;
 import logging.Logging;
 import mandant.IK;
 import office.OOService;
+import org.jdesktop.swingx.JXFrame;
 import sql.DatenquellenFactory;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.FileNotFoundException;
+import java.sql.Connection;
+import java.sql.SQLException;
 
 public class ArztBaustein {
     private IOfficeApplication officeapplication;
@@ -74,19 +69,14 @@ public class ArztBaustein {
                 @Override
                 public void statusChange(Object status) {
                     SwingUtilities.invokeLater(() -> {
-                        if(status ==Monitor.START) {
+                        if (status == Monitor.START) {
                             jFrame.setCursor(new Cursor(Cursor.WAIT_CURSOR));
-                        }
-                        else {
+                        } else {
                             jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
                         }
-
                     });
-
                 }
             };
-
-
 
             jFrame.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
             LaF.setPlastic();
@@ -102,11 +92,11 @@ public class ArztBaustein {
             jFrame.setTitle("Bausteine für ärztlichen Entlassbericht anlegen / ändern");
 
             jFrame.getContentPane()
-                  .setPreferredSize(new Dimension(1024, 800));
+                    .setPreferredSize(new Dimension(1024, 800));
             jFrame.getContentPane()
-                  .setLayout(new GridLayout());
+                    .setLayout(new GridLayout());
             jFrame.getContentPane()
-                  .add(arztbausteinpanel = new ArztBausteinPanel(this.conn, this.officeapplication, monitor));
+                    .add(arztbausteinpanel = new ArztBausteinPanel(this.conn, this.officeapplication, monitor));
             WindowListener wl = new ArztBausteinWindowlistener(arztbausteinpanel);
             jFrame.addWindowListener(wl);
             jFrame.setVisible(true);

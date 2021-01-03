@@ -1,0 +1,22 @@
+dependencies {
+    implementation project(':RehaCommon')
+    implementation project(':datenbank')
+
+    //Crypto S/MIME and CMS lib; Release from 02.2011
+    implementation group: 'org.bouncycastle', name: 'bcmail-jdk16', version: '1.46'
+
+    //Logger
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+
+    //Jdesktop GUI
+    implementation 'com.kenai.nbpwr:org-jdesktop-swingx:1.6-201002261215'
+    implementation files('../lib/jgoodies/forms-1.3.0.jar')
+
+    //PDF and Document thingy LAST VERSION FROM 2015
+    implementation group:'com.lowagie', name:'itext', version:'2.1.7'
+    //New Version needs some rewrite
+    //implementation group: 'com.itextpdf', name: 'itextpdf', version: '5.5.13.2'
+
+    //OpenOffice
+    implementation fileTree('../lib/openofficeorg', { include '*.jar'})
+}

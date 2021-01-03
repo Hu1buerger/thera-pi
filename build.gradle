@@ -1,0 +1,84 @@
+//TopLevel BuildFile
+
+//TODO: https://stackoverflow.com/questions/19379517/how-to-find-remove-unused-dependencies-in-gradle
+
+
+
+allprojects {
+    apply plugin: 'java'
+
+    group 'de.thera-pi-software'
+    version '1.0-SNAPSHOT'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        boolean useJunit5 = false;
+
+        if (useJunit5){
+            testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
+            testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
+        }
+        else {
+            testImplementation('junit:junit:4.13')
+            testRuntime("org.junit.vintage:junit-vintage-engine:5.2.0")
+        }
+    }
+
+    java {
+        sourceCompatibility = JavaVersion.VERSION_15
+        targetCompatibility = JavaVersion.VERSION_15
+    }
+
+    compileJava {
+        options.encoding('UTF-8')
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+
+    sourceSets {
+        main {
+            java {
+                srcDirs = ['src']
+            }
+            resources {
+                srcDirs = ['src/resources']
+            }
+        }
+        test {
+            java {
+                srcDirs = ['tests']
+            }
+            resources {
+                srcDirs = ['tests/resources']
+            }
+        }
+    }
+}
+
+subprojects {
+
+}
+
+project.ext {
+    platform = 'UNDEF'
+}
+
+def currentOS = org.gradle.internal.os.OperatingSystem.current()
+if (currentOS.isWindows()) {
+    ext.platform = 'win'
+} else if (currentOS.isLinux()) {
+    ext.platform = 'linux'
+} else if (currentOS.isMacOsX()) {
+    ext.platform = 'mac'
+}
+
+tasks.withType(JavaCompile) {
+
+    //options.warnings = true
+    // ...
+}

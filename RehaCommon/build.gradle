@@ -1,0 +1,22 @@
+dependencies {
+    implementation fileTree('../lib/openofficeorg', { include '*.jar'})
+
+    implementation files(
+            '../lib/swingx/grad.jar'
+    )
+
+    /*Old version from 2011 TODO: CHANGE
+      sysout is same version as in /lib/logging/
+      logback is version ahead
+     */
+    implementation 'uk.org.lidalia:sysout-over-slf4j:1.0.2'
+    implementation 'ch.qos.logback:logback-classic:1.3.0-alpha5'
+    //OLD versions most recent 2020 is version 2.0.0 TODO: UPDATE
+    implementation group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version: '1.7.25'
+
+    //Outdate as of 2020.12 v1.9.0 update not possible. obsoletes.
+    // implementation 'com.jgoodies:jgoodies-forms:1.9.0'
+    implementation files('../lib/jgoodies/forms-1.3.0.jar')
+    implementation 'com.kenai.nbpwr:org-jdesktop-swingx:1.6-201002261215'
+}

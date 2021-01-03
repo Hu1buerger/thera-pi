@@ -1,0 +1,22 @@
+dependencies {
+    implementation project(':RehaCommon')
+    implementation project(':TheraPiUpdates')
+
+    //OpenOffice
+    implementation fileTree('../lib/openofficeorg', { include '*.jar'})
+
+    //Logger
+    implementation 'org.slf4j:slf4j-api:1.7.25'
+
+    //Swing
+    implementation 'com.kenai.nbpwr:org-jdesktop-swingx:1.6-201002261215'
+    implementation 'org.swinglabs:swingx:1.6'
+    implementation 'org.swinglabs:swing-worker:1.1'
+
+    //DB
+    implementation 'mysql:mysql-connector-java:5.1.5'
+
+    implementation files(
+            '../lib/jgoodies/forms-1.3.0.jar'
+    )
+}
