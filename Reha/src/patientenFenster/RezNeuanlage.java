@@ -2194,6 +2194,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                                          .replace(" ", ""));
             thisRezept.setICD10_2(jtf[cICD10_2].getText()
                                              .replace(" ", ""));
+            thisRezept.setIsHMR2020(false);
             setCursor(Cursors.normalCursor);
         } catch (Exception ex) {
             ex.printStackTrace();

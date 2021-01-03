@@ -24,10 +24,12 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 
 import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXPanel;
@@ -128,7 +130,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     /*********** entfällt (?)
     public JRtaCheckBox[] jcb = { null, null, null, null };
     **********/
+    /*********** vor ind. Leitsymp.
     public JRtaCheckBox[] jcb = { null, null, null };
+    **********/
+    public JRtaCheckBox[] jcb = { null, null, null, null, null, null, null, null };
     // Lemmi 20101231: Harte Index-Zahlen für "jcb" durch sprechende Konstanten
     // ersetzt !
     /*********** entfällt    
@@ -140,6 +145,12 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     /*********** entfällt (?)
     final int cHygienePausch = 3;
     **********/
+    final int cdringBehBedarf = 3;
+    
+    final int cLeitSymptA = 4;
+    final int cLeitSymptB = 5;
+    final int cLeitSymptC = 6;
+    final int cLeitSymptX = 7;
 
 //    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
     public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null };
@@ -158,7 +169,9 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cBARCOD = 6;
     final int cFARBCOD = 7;
 
-    public JTextArea jta = null;
+    public JTextArea diagnose_txt = null;
+    private JTextArea lsym_x_txt;
+    private JTextArea thZielBefund_txt;
 
     public JButton speichern = null;
     public JButton abbrechen = null;
@@ -413,7 +426,11 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
 
         // Das Feld mit "Ärztliche Diagnose"
-        originale.add(jta.getText());
+        originale.add(diagnose_txt.getText());
+        // indiv. Leitsyptomatik
+        originale.add(lsym_x_txt.getText());
+        // Therapieziele
+        originale.add(thZielBefund_txt.getText());
 
         // alle ComboBoxen
         for (i = 0; i < jcmb.length; i++) {
@@ -440,8 +457,16 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
 
         // Das Feld mit "Ärztliche Diagnose"
-        if (!jta.getText()
+        if (!diagnose_txt.getText()
                 .equals(originale.get(idx++))) // Ärztliche Diagnose
+            return true;
+        // indiv. Leitsyptomatik
+        if (!lsym_x_txt.getText()
+                .equals(originale.get(idx++)))
+            return true;
+        // Therapieziele
+        if (!thZielBefund_txt.getText()
+                .equals(originale.get(idx++)))
             return true;
 
         // alle ComboBoxen
@@ -469,21 +494,59 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 strOptions[1]);
     }
 
+    private JPanel getLeitSymPanel() {
+        FormLayout lay = new FormLayout(
+             //       LS        A        B        C         X
+                "2dlu, p, 4dlu, p, 2dlu, p, 2dlu, p, 13dlu, p", "p");
+        CellConstraints cc = new CellConstraints();
+        PanelBuilder jpan = new PanelBuilder(lay);
+        //PanelBuilder jpan = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
+        jpan.getPanel()
+            .setOpaque(false);
+
+        jcb[cLeitSymptA] = new JRtaCheckBox("a");
+        jcb[cLeitSymptA].setOpaque(false);
+        jcb[cLeitSymptA].setActionCommand("leitSymA");
+//        jcb[cLeitSymptA].addActionListener(cBoxActionListener);
+        jpan.addLabel("Leitsymptomatik", cc.xy(2,1));
+        jpan.add(jcb[cLeitSymptA], cc.xy(4,1));
+
+        jcb[cLeitSymptB] = new JRtaCheckBox("b");
+        jcb[cLeitSymptB].setOpaque(false);
+        jcb[cLeitSymptB].setActionCommand("leitSymB");
+//        jcb[cLeitSymptB].addActionListener(cBoxActionListener);
+        jpan.add(jcb[cLeitSymptB], cc.xy(6,1));
+
+        jcb[cLeitSymptC] = new JRtaCheckBox("c");
+        jcb[cLeitSymptC].setOpaque(false);
+        jcb[cLeitSymptC].setActionCommand("leitSymC");
+//        jcb[cLeitSymptC].addActionListener(cBoxActionListener);
+        jpan.add(jcb[cLeitSymptC], cc.xy(8,1));
+
+        jcb[cLeitSymptX] = new JRtaCheckBox("indiv.");
+        jcb[cLeitSymptX].setOpaque(false);
+        jcb[cLeitSymptX].setActionCommand("leitSymX");
+//        jcb[cLeitSymptX].addActionListener(cBoxActionListener);
+        jpan.add(jcb[cLeitSymptX], cc.xy(10,1));
+        
+        return jpan.getPanel();
+    }
+
     /**
      * @return
      */
     private JScrollPane getDatenPanel() { // 1 2 3 4 5 6 7 8
-        FormLayout lay = new FormLayout("right:max(90dlu;p), 4dlu, 60dlu, 5dlu, right:max(60dlu;p), 4dlu, 80dlu",
-                // 1. 2. 3. 4. 5. 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25
-                "p, 10dlu, p, 5dlu,  p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 10dlu, p, 10dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, "
+        FormLayout lay = new FormLayout("right:max(80dlu;p), 4dlu, 70dlu, 5dlu, right:max(60dlu;p), 4dlu, 70dlu",
+              // RK   2.  sp   4.    KT  6   RD    8   sp   10  I1   12  I2   14  DG   16  iL       19  sp   21  H1   23  H2   25  H3
+                "p, 10dlu, p, 5dlu,  p, 2dlu, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, "
                         +
-                        // 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42
-                        "10dlu, p, 10dlu, p, 2dlu, p, 2dlu,  p,  10dlu, p, 10dlu, p,10dlu,p,10dlu,30dlu,2dlu");
+                       // 27  eH    29  sp   31  TB   33  HB   35  BF   37  DB   39   TZ      42  sp   44  FC   46  av   48    
+                        "7dlu, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu");
 
         CellConstraints cc = new CellConstraints();
-        //PanelBuilder jpan = new PanelBuilder(lay);
-        PanelBuilder jpan = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
-        jpan.setDefaultDialogBorder();
+        PanelBuilder jpan = new PanelBuilder(lay);
+        //PanelBuilder jpan = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
+        jpan.setBorder(BorderFactory.createEmptyBorder(0, 12, 0, 0));
         jpan.getPanel()
             .setOpaque(false);
         JScrollPane jscr = null;
@@ -532,12 +595,13 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 jtf[cANGEL].setEditable(false);
             }
 
-            jpan.addLabel("Rezeptklasse auswählen", cc.xy(1, 3));
-            jpan.add(jcmb[cRKLASSE], cc.xyw(3, 3, 5));
+            int rowCnt = 0;
+            /********************/
+            jpan.addLabel("Rezeptklasse auswählen", cc.xy(1, ++rowCnt));    // 1
+            jpan.add(jcmb[cRKLASSE], cc.xyw(3, rowCnt++, 5));
             jcmb[cRKLASSE].setActionCommand("rezeptklasse");
             jcmb[cRKLASSE].addActionListener(this);
             allowShortCut((Component) jcmb[cRKLASSE], "RezeptClass");
-            /********************/
 
             if (myRezept.isEmpty()) {
                 jcmb[cRKLASSE].setSelectedItem(SystemConfig.initRezeptKlasse);                    
@@ -553,8 +617,11 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 jcmb[cRKLASSE].setEnabled(false);
             }
 
-            jpan.addSeparator("Rezeptkopf", cc.xyw(1, 5, 7));
+            /********************/
+            jpan.addSeparator("Rezeptkopf", cc.xyw(1, ++rowCnt, 7));    // 3
 
+            /********************/
+            rowCnt++;
             kassenLab = new JLabel("Kostenträger");
             kassenLab.setIcon(SystemConfig.hmSysIcons.get("kleinehilfe"));
             kassenLab.setHorizontalTextPosition(JLabel.LEFT);
@@ -583,8 +650,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jtf[cKTRAEG].setName("ktraeger");
             jtf[cKTRAEG].addKeyListener(this);
             allowShortCut((Component) jtf[cKTRAEG], "ktraeger");
-            jpan.add(kassenLab, cc.xy(1, 7));
-            jpan.add(jtf[cKTRAEG], cc.xy(3, 7));
+            jpan.add(kassenLab, cc.xy(1, ++rowCnt));    // 5
+            jpan.add(jtf[cKTRAEG], cc.xy(3, rowCnt));
 
             arztLab = new JLabel("verordn. Arzt");
             arztLab.setIcon(SystemConfig.hmSysIcons.get("kleinehilfe"));
@@ -613,48 +680,145 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
             jtf[cARZT].setName("arzt");
             jtf[cARZT].addKeyListener(this);
-            jpan.add(arztLab, cc.xy(5, 7));
-            jpan.add(jtf[cARZT], cc.xy(7, 7));
+            jpan.add(arztLab, cc.xy(5, rowCnt));
+            jpan.add(jtf[cARZT], cc.xy(7, rowCnt++));
 
+            /********************/
             jtf[cREZDAT].setName("rez_datum");
             allowShortCut((Component) jtf[cREZDAT], "rez_datum");
-            jpan.addLabel("Rezeptdatum", cc.xy(1, 9));
-            jpan.add(jtf[cREZDAT], cc.xy(3, 9));
-            eingabeRezDate = jpan.add(jtf[cREZDAT], cc.xy(3, 9));
+            jpan.addLabel("Rezeptdatum", cc.xy(1, ++rowCnt));   // 7
+            jpan.add(jtf[cREZDAT], cc.xy(3, rowCnt));
+            eingabeRezDate = jpan.add(jtf[cREZDAT], cc.xy(3, rowCnt));
 
             allowShortCut((Component) jtf[cBEGINDAT], "lastdate");
-            jpan.addLabel("spätester Beh.Beginn", cc.xy(5, 9));
-            jpan.add(jtf[cBEGINDAT], cc.xy(7, 9));
+            jpan.addLabel("spätester Beh.Beginn", cc.xy(5, rowCnt));
+            jpan.add(jtf[cBEGINDAT], cc.xy(7, rowCnt++));
 
-            /*********** entfällt                
-            jcmb[cVERORD] = new JRtaComboBox(
-                    new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
-            jcmb[cVERORD].setActionCommand("verordnungsart");
-            jcmb[cVERORD].addActionListener(this);
-            allowShortCut((Component) jcmb[cVERORD], "selArtDerVerordn");
-            jpan.addLabel("Art d. Verordn.", cc.xy(1, 11));
-            eingabeVerordnArt = jpan.add(jcmb[cVERORD], cc.xy(3, 11));
+            /********************/
+            jpan.addSeparator("Behandlungsrelevante Diagnosen", cc.xyw(1, ++rowCnt, 7));    // 9
 
-            jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
-            jcb[cBEGRADR].setOpaque(false);
-            jcb[cBEGRADR].setEnabled(false);
-            allowShortCut((Component) jcb[cBEGRADR], "adrCheck");
-            jpan.addLabel("Begründ. für adR", cc.xy(5, 11));
-            jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
-            **********/    
+            /********************/
+            rowCnt++;
+            jpan.addLabel("1. ICD-10-Code", cc.xy(1, ++rowCnt));    // 11
+            allowShortCut((Component) jtf[cICD10], "icd10");
+            eingabeICD = jpan.add(jtf[cICD10], cc.xy(3, rowCnt));
 
+            diagnose_txt = new JTextArea();
+            diagnose_txt.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.5f)));
+            diagnose_txt.setFont(new Font("Courier", Font.PLAIN, 11));
+            diagnose_txt.setLineWrap(true);
+            diagnose_txt.setName("notitzen");
+            diagnose_txt.setWrapStyleWord(true);
+            diagnose_txt.setEditable(true);
+            diagnose_txt.setBackground(Color.WHITE);
+            diagnose_txt.setForeground(Color.RED);
+            diagnose_txt.setToolTipText("Diagnose");
+            eingabeDiag = diagnose_txt;
+            JScrollPane spanD = JCompTools.getTransparentScrollPane(diagnose_txt);
+            spanD.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
+            jpan.add(spanD, cc.xywh(5, rowCnt++, 3, 3));
+
+            /********************/
+            jpan.addLabel("2. ICD-10-Code", cc.xy(1, ++rowCnt));    // 13
+            allowShortCut((Component) jtf[cICD10_2], "icd10_2");
+            jpan.add(jtf[cICD10_2], cc.xy(3, rowCnt++));
+
+            /********************/
+            jpan.addLabel("Diagnosegruppe", cc.xy(1, ++rowCnt));    // 15
+            jcmb[cINDI] = new JRtaComboBox();
+            jcmb[cINDI].addKeyListener(this);
+            allowShortCut((Component)jcmb[cINDI],"Diagnosegruppe");
+            jpan.add(jcmb[cINDI], cc.xy(3, rowCnt));
+
+            klassenReady = true;
+            this.fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
+
+            jpan.add(getLeitSymPanel(), cc.xyw(5, rowCnt++, 3));
+
+            /********************/
+            jpan.addLabel("Freitext individuelle", cc.xy(1, ++rowCnt));    // 17
+            lsym_x_txt = new JTextArea();
+            lsym_x_txt.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.5f)));
+            lsym_x_txt.setFont(new Font("Courier", Font.PLAIN, 11));
+            lsym_x_txt.setLineWrap(true);
+            lsym_x_txt.setName("leitsym_x_txt");
+            lsym_x_txt.setWrapStyleWord(true);
+            lsym_x_txt.setEditable(true);
+            lsym_x_txt.setBackground(Color.WHITE);
+            lsym_x_txt.setForeground(Color.RED);
+//            lsym_x_txt.setToolTipText("nur editierbar, wenn individuelle Leitsymptomatik ausgewählt ist");
+            JScrollPane spanLS = JCompTools.getTransparentScrollPane(lsym_x_txt);
+            spanLS.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
+            jpan.add(spanLS, cc.xywh(3, rowCnt++, 5, 2));   // Freitext indiv. Leitsymptomatik
+            jpan.addLabel("Leitsymptomatik", cc.xy(1, rowCnt++));    // 18
+            
+            /********************/
+            jpan.addSeparator("Verordnete Heilmittel", cc.xyw(1, ++rowCnt, 7));    // 20
+
+            /********************/
+            rowCnt++;
+            jtf[cANZ1].setName("anzahl1");
+            jtf[cANZ1].addFocusListener(this);
+            jtf[cANZ1].addKeyListener(this);
+            jpan.addLabel("Heilmittel 1 / Anzahl", cc.xy(1, ++rowCnt)); // 22
+            jcmb[cLEIST1] = new JRtaComboBox();
+            jcmb[cLEIST1].setActionCommand("leistung1");
+            jcmb[cLEIST1].addActionListener(this);
+            allowShortCut((Component) jcmb[cLEIST1], "leistung1");
+            jpan.add(jcmb[cLEIST1], cc.xyw(3, rowCnt, 3));
+            eingabeVerordn1 = jpan.add(jtf[cANZ1], cc.xy(7, rowCnt++));
+
+            jpan.addLabel("Heilmittel 2 / Anzahl", cc.xy(1, ++rowCnt)); // 24
+            jtf[cANZ2].addKeyListener(this);
+            jcmb[cLEIST2] = new JRtaComboBox();
+            jcmb[cLEIST2].setActionCommand("leistung2");
+            jcmb[cLEIST2].addActionListener(this);
+            allowShortCut((Component) jcmb[cLEIST2], "leistung2");
+            jpan.add(jcmb[cLEIST2], cc.xyw(3, rowCnt, 3));
+            jpan.add(jtf[cANZ2], cc.xy(7, rowCnt++));
+
+            jpan.addLabel("Heilmittel 3 / Anzahl", cc.xy(1, ++rowCnt)); // 26
+            jtf[cANZ3].addKeyListener(this);
+            jcmb[cLEIST3] = new JRtaComboBox();
+            jcmb[cLEIST3].setActionCommand("leistung3");
+            jcmb[cLEIST3].addActionListener(this);
+            allowShortCut((Component) jcmb[cLEIST3], "leistung3");
+            jpan.add(jcmb[cLEIST3], cc.xyw(3, rowCnt, 3));
+            jpan.add(jtf[cANZ3], cc.xy(7, rowCnt++));
+
+            jpan.addLabel("erg. Heilmittel / Anzahl", cc.xy(1, ++rowCnt)); // 28
+            jtf[cANZ4].addKeyListener(this);
+            jcmb[cLEIST4] = new JRtaComboBox();
+            jcmb[cLEIST4].setActionCommand("leistung4");
+            jcmb[cLEIST4].setName("leistung4");
+            jcmb[cLEIST4].addActionListener(this);
+            jpan.add(jcmb[cLEIST4], cc.xyw(3, rowCnt, 3));
+            jpan.add(jtf[cANZ4], cc.xy(7, rowCnt++));
+
+            /********************/
+            jpan.addSeparator("ergänzende Angaben", cc.xyw(1, ++rowCnt, 7));    // 30
+
+            /********************/
+            rowCnt++;
+            jcb[cTBANGEF] = new JRtaCheckBox("angefordert");
+            jcb[cTBANGEF].setOpaque(false);
+            jpan.addLabel("Therapiebericht", cc.xy(1, ++rowCnt));   // 32
+            jcb[cTBANGEF].addKeyListener(this);
+            jpan.add(jcb[cTBANGEF], cc.xy(3, rowCnt++));
+
+            /********************/
             jcb[cHAUSB] = new JRtaCheckBox("Ja / Nein");
             jcb[cHAUSB].setOpaque(false);
             jcb[cHAUSB].setActionCommand("Hausbesuche");
             jcb[cHAUSB].addActionListener(this);
             allowShortCut((Component) jcb[cHAUSB], "hbCheck");
-            jpan.addLabel("Hausbesuch", cc.xy(1, 13));
-            jpan.add(jcb[cHAUSB], cc.xy(3, 13));
+            jpan.addLabel("Hausbesuch", cc.xy(1, ++rowCnt));    //34
+            jpan.add(jcb[cHAUSB], cc.xy(3, rowCnt));
 
             jcb[cVOLLHB] = new JRtaCheckBox("abrechnen");
             jcb[cVOLLHB].setOpaque(false);
             jcb[cVOLLHB].setToolTipText("Nur aktiv wenn Patient Heimbewohner und Hausbesuch angekreuzt");
-            jpan.addLabel("volle HB-Gebühr", cc.xy(5, 13));
+            jpan.addLabel("volle HB-Gebühr", cc.xy(5, rowCnt));
             if (neu) {
                 jcb[cVOLLHB].setEnabled(false);
                 jcb[cVOLLHB].setSelected(false);
@@ -681,19 +845,88 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 }
             }
             allowShortCut((Component) jcb[cVOLLHB], "hbVollCheck");
-            jpan.add(jcb[cVOLLHB], cc.xy(7, 13));
+            jpan.add(jcb[cVOLLHB], cc.xy(7, rowCnt++));
 
-            jcb[cTBANGEF] = new JRtaCheckBox("angefordert");
-            jcb[cTBANGEF].setOpaque(false);
-            jpan.addLabel("Therapiebericht", cc.xy(1, 15));
-            jcb[cTBANGEF].addKeyListener(this);
-            jpan.add(jcb[cTBANGEF], cc.xy(3, 15));
+            /********************/
+            jtf[cFREQ].addKeyListener(this);
+            jpan.addLabel("Behandlungsfrequenz", cc.xy(1, ++rowCnt));   // 36
+            eingabeBehFrequ = jpan.add(jtf[cFREQ], cc.xy(3, rowCnt));
+
+            jpan.addLabel("Dauer der Behandl. in Min.", cc.xy(5, rowCnt));
+            jtf[cDAUER].addKeyListener(this);
+            jpan.add(jtf[cDAUER], cc.xy(7, rowCnt++));
+
+            jcb[cdringBehBedarf] = new JRtaCheckBox("Dringlicher Behandlungsbedarf (innerhalb von 14 Tagen)");
+            jcb[cdringBehBedarf].setOpaque(false);
+            jcb[cdringBehBedarf].addKeyListener(this);
+            jpan.add(jcb[cdringBehBedarf], cc.xyw(3, ++rowCnt, 5));   // 38
+
+            rowCnt++;
+            /********************/
+            jpan.addLabel("Therapieziele / Befunde", cc.xy(1, ++rowCnt));    // 40
+            thZielBefund_txt = new JTextArea();
+            thZielBefund_txt.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.5f)));
+            thZielBefund_txt.setFont(new Font("Courier", Font.PLAIN, 11));
+            thZielBefund_txt.setLineWrap(true);
+            thZielBefund_txt.setName("leitsym_x_txt");
+            thZielBefund_txt.setWrapStyleWord(true);
+            thZielBefund_txt.setEditable(true);
+            thZielBefund_txt.setBackground(Color.WHITE);
+            thZielBefund_txt.setForeground(Color.RED);
+            JScrollPane spanTZ = JCompTools.getTransparentScrollPane(thZielBefund_txt);
+            spanTZ.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
+            jpan.add(spanTZ, cc.xywh(3, rowCnt++, 5, 2));
+            jpan.addLabel("Hinweise", cc.xy(1, rowCnt++));    // 41
+
+            /********************/
+            jpan.addSeparator("interne Daten", cc.xyw(1, ++rowCnt, 7)); // 43
+
+            /********************/
+            rowCnt++;
+            jpan.addLabel("FarbCode im TK", cc.xy(1, ++rowCnt));    // 45
+            jcmb[cFARBCOD] = new JRtaComboBox();
+            jcmb[cFARBCOD].addKeyListener(this);
+            macheFarbcodes();
+
+            jpan.add(jcmb[cFARBCOD], cc.xy(3, rowCnt));
+
+            jpan.addLabel("Barcode-Format", cc.xy(5, rowCnt));
+            jcmb[cBARCOD] = new JRtaComboBox(SystemConfig.rezBarCodName);
+            jcmb[cBARCOD].addKeyListener(this);
+            jpan.add(jcmb[cBARCOD], cc.xy(7, rowCnt++));
+
+            jpan.addLabel("Angelegt von", cc.xy(5, ++rowCnt));  // 47
+            jtf[cANGEL].addKeyListener(this);
+            jpan.add(jtf[cANGEL], cc.xy(7, rowCnt++));
+            // *** bis hier ok ***
+
+            
+            
+            
+            
+            
+            /*********** entfällt                
+            jcmb[cVERORD] = new JRtaComboBox(
+                    new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
+            jcmb[cVERORD].setActionCommand("verordnungsart");
+            jcmb[cVERORD].addActionListener(this);
+            allowShortCut((Component) jcmb[cVERORD], "selArtDerVerordn");
+            jpan.addLabel("Art d. Verordn.", cc.xy(1, 11));
+            eingabeVerordnArt = jpan.add(jcmb[cVERORD], cc.xy(3, 11));
+
+            jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
+            jcb[cBEGRADR].setOpaque(false);
+            jcb[cBEGRADR].setEnabled(false);
+            allowShortCut((Component) jcb[cBEGRADR], "adrCheck");
+            jpan.addLabel("Begründ. für adR", cc.xy(5, 11));
+            jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
+            **********/
 
             /*********** entfällt (?)
             jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
             jcb[cHygienePausch].setOpaque(false);
             jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 30.09.2020");
-            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(5, 15));
+            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(1, 41));
             if (neu) {
                 jcb[cHygienePausch].setSelected(false);
             } else {
@@ -703,105 +936,11 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
             jpan.add(jcb[cHygienePausch], cc.xy(3, 41));
             **********/
-            
-            jpan.addSeparator("Verordnete Heilmittel", cc.xyw(1, 17, 7));
 
-            jtf[cANZ1].setName("anzahl1");
-            jtf[cANZ1].addFocusListener(this);
-            jtf[cANZ1].addKeyListener(this);
-            jpan.addLabel("Anzahl / Heilmittel 1", cc.xy(1, 19));
-            eingabeVerordn1 = jpan.add(jtf[cANZ1], cc.xy(3, 19));
-            jcmb[cLEIST1] = new JRtaComboBox();
-            jcmb[cLEIST1].setActionCommand("leistung1");
-            jcmb[cLEIST1].addActionListener(this);
-            allowShortCut((Component) jcmb[cLEIST1], "leistung1");
-            jpan.add(jcmb[cLEIST1], cc.xyw(5, 19, 3));
 
-            jpan.addLabel("Anzahl / Heilmittel 2", cc.xy(1, 21));
-            jtf[cANZ2].addKeyListener(this);
-            jpan.add(jtf[cANZ2], cc.xy(3, 21));
-            jcmb[cLEIST2] = new JRtaComboBox();
-            jcmb[cLEIST2].setActionCommand("leistung2");
-            jcmb[cLEIST2].addActionListener(this);
-            allowShortCut((Component) jcmb[cLEIST2], "leistung2");
-            jpan.add(jcmb[cLEIST2], cc.xyw(5, 21, 3));
 
-            jpan.addLabel("Anzahl / Heilmittel 3", cc.xy(1, 23));
-            jtf[cANZ3].addKeyListener(this);
-            jpan.add(jtf[cANZ3], cc.xy(3, 23));
-            jcmb[cLEIST3] = new JRtaComboBox();
-            jcmb[cLEIST3].setActionCommand("leistung3");
-            jcmb[cLEIST3].addActionListener(this);
-            allowShortCut((Component) jcmb[cLEIST3], "leistung3");
-            jpan.add(jcmb[cLEIST3], cc.xyw(5, 23, 3));
 
-            jpan.addLabel("Anzahl / Heilmittel 4", cc.xy(1, 25));
-            jtf[cANZ4].addKeyListener(this);
-            jpan.add(jtf[cANZ4], cc.xy(3, 25));
-            jcmb[cLEIST4] = new JRtaComboBox();
-            jcmb[cLEIST4].setActionCommand("leistung4");
-            jcmb[cLEIST4].setName("leistung4");
-            jcmb[cLEIST4].addActionListener(this);
-            jpan.add(jcmb[cLEIST4], cc.xyw(5, 25, 3));
 
-            jpan.addSeparator("Durchführungsbestimmungen", cc.xyw(1, 27, 7));
-
-            jtf[cFREQ].addKeyListener(this);
-            jpan.addLabel("Behandlungsfrequenz", cc.xy(1, 29));
-            eingabeBehFrequ = jpan.add(jtf[cFREQ], cc.xy(3, 29));
-
-            jpan.addLabel("Dauer der Behandl. in Min.", cc.xy(5, 29));
-            jtf[cDAUER].addKeyListener(this);
-            jpan.add(jtf[cDAUER], cc.xy(7, 29));
-
-            jpan.addLabel("Indikationsschlüssel", cc.xy(1, 31));
-            jcmb[cINDI] = new JRtaComboBox();
-            jcmb[cINDI].addKeyListener(this);
-            allowShortCut((Component)jcmb[cINDI],"Indikationsschluessel");
-            jpan.add(jcmb[cINDI], cc.xy(3, 31));
-
-            klassenReady = true;
-            this.fuelleIndis((String) jcmb[cRKLASSE].getSelectedItem());
-
-            jpan.addLabel("Barcode-Format", cc.xy(5, 31));
-            jcmb[cBARCOD] = new JRtaComboBox(SystemConfig.rezBarCodName);
-            jcmb[cBARCOD].addKeyListener(this);
-            jpan.add(jcmb[cBARCOD], cc.xy(7, 31));
-
-            jpan.addLabel("FarbCode im TK", cc.xy(1, 33));
-            jcmb[cFARBCOD] = new JRtaComboBox();
-            jcmb[cFARBCOD].addKeyListener(this);
-            macheFarbcodes();
-
-            jpan.add(jcmb[cFARBCOD], cc.xy(3, 33));
-
-            jpan.addLabel("Angelegt von", cc.xy(5, 33));
-            jtf[cANGEL].addKeyListener(this);
-            jpan.add(jtf[cANGEL], cc.xy(7, 33));
-
-            jpan.addSeparator("ICD-10 Codes", cc.xyw(1, 35, 7));
-            jpan.addLabel("1. ICD-10-Code", cc.xy(1, 37));
-            allowShortCut((Component) jtf[cICD10], "icd10");
-            eingabeICD = jpan.add(jtf[cICD10], cc.xy(3, 37));
-
-            jpan.addLabel("2. ICD-10-Code", cc.xy(5, 37));
-            allowShortCut((Component) jtf[cICD10_2], "icd10_2");
-            jpan.add(jtf[cICD10_2], cc.xy(7, 37));
-
-            jpan.addSeparator("Ärztliche Diagnose laut Rezept", cc.xyw(1, 39, 7));
-            jta = new JTextArea();
-            jta.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.5f)));
-            jta.setFont(new Font("Courier", Font.PLAIN, 11));
-            jta.setLineWrap(true);
-            jta.setName("notitzen");
-            jta.setWrapStyleWord(true);
-            jta.setEditable(true);
-            jta.setBackground(Color.WHITE);
-            jta.setForeground(Color.RED);
-            eingabeDiag = jta;
-            JScrollPane span = JCompTools.getTransparentScrollPane(jta);
-            span.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
-            jpan.add(span, cc.xywh(1, 41, 7, 2));
             jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
             jscr.getVerticalScrollBar()
                 .setUnitIncrement(15);
@@ -978,6 +1117,40 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         return string;
     }
 
+/*    private void resetLeitSymCBoxExcept(int keep) {
+        for (int i = cLeitSymptA; i <= cLeitSymptX; i++) {
+            if (i != keep) {
+                jcb[i].setSelected(false);
+            }
+        }
+        if (jcb[cLeitSymptX].isSelected()) {
+            lsym_x_txt.setEditable(true);
+            lsym_x_txt.setForeground(Color.RED);
+        } else {
+            lsym_x_txt.setEditable(false);
+            lsym_x_txt.setForeground(Color.LIGHT_GRAY);
+        }
+    }
+ */
+/*    ActionListener cBoxActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String cmd = e.getActionCommand();
+            if (cmd.equals("leitSymA")) {
+                resetLeitSymCBoxExcept(cLeitSymptA);
+            }
+            if (cmd.equals("leitSymB")) {
+                resetLeitSymCBoxExcept(cLeitSymptB);
+            }
+            if (cmd.equals("leitSymC")) {
+                resetLeitSymCBoxExcept(cLeitSymptC);
+            }
+            if (cmd.equals("leitSymX")) {
+                resetLeitSymCBoxExcept(cLeitSymptX);                
+            }
+        }
+    };
+ */   
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand()
@@ -1484,8 +1657,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
     }
 
-    /** Holt die passenden Inikationsschlüssel gemäß aktiver Disziplin**/
-    private void fuelleIndis(String typeOfVO) {
+    /** Holt die passenden Inikationsschlüssel gemäß aktiver Disziplin**/       // <- stehen in 'aktuelleRezepte', werden aber nur 'hier' benutzt -> künftig lokal
+    private void fuelleIndis(String typeOfVO) {                                 // weitere Definitionen in 'Historie' u. 'Dokumentation' - scheinbar unbenutzt
         try {
             if (jcmb[cINDI].getItemCount() > 0) {
                 jcmb[cINDI].removeAllItems();
@@ -1635,7 +1808,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 }
                 return;
             }
-            if (componentName.equals("Indikationsschluessel") && jumpForward) {
+            if (componentName.equals("Diagnosegruppe") && jumpForward) {
                 if (ctrlIsPressed) {
                     eingabeICD.requestFocusInWindow();
                 }
@@ -1888,8 +2061,16 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         jcb[cLeitSymptB].setSelected(myRezept.getLeitSymIsB());
         jcb[cLeitSymptC].setSelected(myRezept.getLeitSymIsC());
         jcb[cLeitSymptX].setSelected(myRezept.getLeitSymIsX());
-        
+        lsym_x_txt.setText(myRezept.getLeitSymText());
+/*        for (int i = cLeitSymptA; i <= cLeitSymptX; i++) {
+            if (jcb[i].isSelected()) {
+                resetLeitSymCBoxExcept(i);
+                break;
+            }
+        }
+ */
         jcb[cTBANGEF].setSelected(myRezept.getArztbericht());
+        jcb[cdringBehBedarf].setSelected(myRezept.getDringlich());
         jtf[cANZ1].setText(myRezept.getAnzBehS(1));
         jtf[cANZ2].setText(myRezept.getAnzBehS(2));
         jtf[cANZ3].setText(myRezept.getAnzBehS(3));
@@ -1925,7 +2106,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                  .equals("")) {
             jtf[cANGEL].setEnabled(false);
         }
-        jta.setText(StringTools.NullTest(myRezept.getDiagn()));
+        diagnose_txt.setText(StringTools.NullTest(myRezept.getDiagn()));
+        lsym_x_txt.setText(StringTools.NullTest(myRezept.getLeitSymText()));
+        thZielBefund_txt.setText(StringTools.NullTest(myRezept.getTherapieZiel()));
+
         if (!jtf[cKASID].getText()
                         .equals("")) {
             holePreisGruppe(jtf[cKASID].getText()
@@ -1940,7 +2124,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         jtf[cPATID].setText(myRezept.getPatIdS());
         jtf[cPATINT].setText(myRezept.getPatIntern());
 
-        // ICD-10
         jtf[cICD10].setText(myRezept.getICD10());
         jtf[cICD10_2].setText(myRezept.getICD10_2());
 
@@ -2016,6 +2199,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 }
             }
             thisRezept.setArztBericht(jcb[cTBANGEF].isSelected());
+            thisRezept.setDringlich(jcb[cdringBehBedarf].isSelected());
             thisRezept.setAnzBeh(1, jtf[cANZ1].getText());
             thisRezept.setAnzBeh(2, jtf[cANZ2].getText());
             thisRezept.setAnzBeh(3, jtf[cANZ3].getText());
@@ -2175,14 +2359,14 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             String[] lzv = holeLFV("anamnese", "pat5", "pat_intern", jtf[cPATINT].getText(), rezKlasse.toUpperCase()
                                                                                                       .substring(0, 2));
             if (!lzv[0].equals("")) {
-                if (!jta.getText()
+                if (!diagnose_txt.getText()
                         .contains(lzv[0])) {
                     int frage = JOptionPane.showConfirmDialog(null,
                             "Für den Patient ist eine Langfristverordnung eingetragen die diese Verordnung noch nicht einschließt.\n\n"
                                     + lzv[1] + "\n\nWollen Sie diesen Eintrag dieser Verordnung zuweisen?",
                             "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                     if (frage == JOptionPane.YES_OPTION) {
-                        jta.setText(jta.getText() + "\n" + lzv[0]);
+                        diagnose_txt.setText(diagnose_txt.getText() + "\n" + lzv[0]);
                     }
                 }
             }
@@ -2190,7 +2374,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
             thisRezept.setUnter18(unter18); // oben schon berechnet
             thisRezept.setZzStat(szzstatus);
-            thisRezept.setDiagn(StringTools.Escaped(jta.getText()));
+            thisRezept.setDiagn(StringTools.Escaped(diagnose_txt.getText()));
+            thisRezept.setLeitSymText(StringTools.Escaped(lsym_x_txt.getText()));
+            thisRezept.setTherapieZiel(StringTools.Escaped(thZielBefund_txt.getText()));
+
             thisRezept.setvorJahrFrei(Reha.instance.patpanel.patDaten.get(69)); // (?) falls seit Rezeptanlage geaendert
                                                                               // (?) (nicht editierbar -> kann in's
                                                                               // 'initRezeptAll')
@@ -2201,8 +2388,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             thisRezept.setLeitSymIsB(jcb[cLeitSymptB].isSelected() ? true : false);
             thisRezept.setLeitSymIsC(jcb[cLeitSymptC].isSelected() ? true : false);
             thisRezept.setLeitSymIsX(jcb[cLeitSymptX].isSelected() ? true : false);
-            
-            
+
             /*********** entfällt (?)
             thisRezept.setUseHygPausch(jcb[cHygienePausch].isSelected() ? true : false);
             **********/
@@ -2216,6 +2402,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                                          .replace(" ", ""));
             thisRezept.setICD10_2(jtf[cICD10_2].getText()
                                              .replace(" ", ""));
+            thisRezept.setIsHMR2020(true);
             setCursor(Cursors.normalCursor);
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -2381,7 +2568,9 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 for (int i = 0; i < jcmb.length; i++) {
                     ListenerTools.removeListeners(jcmb[i]);
                 }
-                ListenerTools.removeListeners(jta);
+                ListenerTools.removeListeners(diagnose_txt);
+                ListenerTools.removeListeners(lsym_x_txt);
+                ListenerTools.removeListeners(thZielBefund_txt);
                 ListenerTools.removeListeners(getInstance());
                 if (rtp != null) {
                     rtp.removeRehaTPEventListener((RehaTPEventListener) getInstance());
