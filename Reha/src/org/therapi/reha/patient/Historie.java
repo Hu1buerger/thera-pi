@@ -81,9 +81,6 @@ public class Historie extends JXPanel implements ActionListener, TableModelListe
     public TableCellEditor tbl = null;
     public boolean rezneugefunden = false;
     public boolean neuDlgOffen = false;
-    public String[] indphysio = null;
-    public String[] indergo = null;
-    public String[] indlogo = null;
     public HistorDaten jpan1 = null;
     public JButton[] histbut = { null, null, null, null };
     public static boolean inRezeptDaten = false;

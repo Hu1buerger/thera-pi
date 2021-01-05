@@ -139,9 +139,6 @@ public class DokumentationPanel extends JXPanel
     public TableCellEditor tbl = null;
     // public boolean rezneugefunden = false;
     // public boolean neuDlgOffen = false;
-    // public String[] indphysio = null;
-    // public String[] indergo = null;
-    // public String[] indlogo = null;
     public JXPanel jpan1 = null;
     public JButton[] dokubut = { null, null, null, null, null, null };
     public JButton[] pmbut = { null, null, null, null, null };
