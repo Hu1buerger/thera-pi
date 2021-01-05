@@ -205,7 +205,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
     String[] strRezepklassenAktiv = null;
 
-    // McM 16/11: Steuerung der Abkürzungen bei Rezepteingabe
+    // McM 16/11: Steuerung der Abkürzungen bei Rezepteingabe   
+    // ToDo: neu organisieren für *2020!
     private boolean ctrlIsPressed = false;
     private Component eingabeRezDate = null;
     private Component eingabeBehFrequ = null;
@@ -220,6 +221,13 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     private ArztVec verordnenderArzt = null;
     private Disziplinen diszis = null;
 
+    public String[] diagGroupsPhysio = null;
+    public String[] diagGroupsErgo = null;
+    public String[] diagGroupsLogo = null;
+    public String[] diagGroupsPodo = null;
+    private String noDiagGrpSelected = "keine DiagGrp";
+    private String noDiagGrpInVO = "k.A.";
+
     public RezNeuanlage2020(Vector<String> vec, boolean neu, Connection connection) { 
         super();
         try {
@@ -229,6 +237,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             verordnenderArzt = new ArztVec();
             myRezept.setVec_rez(vec);
             diszis = new Disziplinen();
+
+            mkDiagGroups();
 
             if (vec.size() > 0 && this.neu) {
                 aktuelleDisziplin = StringTools.getDisziplin(vec.get(1)); 
@@ -1429,7 +1439,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         // System.out.println(SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[jcmb[cRKLASSE].getSelectedIndex()]));
         int itest = 0; // jcmb[cLEIST1].getSelectedIndex();
         String indi = (String) jcmb[cINDI].getSelectedItem();
-        if (indi.equals("") || indi.contains("kein IndiSchl.")) {
+        if (indi.equals("") || indi.contains(noDiagGrpSelected)) {
             JOptionPane.showMessageDialog(null,
                     "<html><b>Kein Indikationsschlüssel angegeben.<br>Die Angaben sind <font color='#ff0000'>nicht</font> gemäß den gültigen Heilmittelrichtlinien!</b></html>");
             return;
@@ -1657,6 +1667,21 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
     }
 
+    public void mkDiagGroups() {
+        diagGroupsPhysio = new String[] { noDiagGrpSelected, "WS", "EX", "CS", "ZN", "PN", "AT", "GE", "LY", "SO1", "SO2", "SO3", "SO4", "SO5", 
+                "CD1", "CD2", "ZNSZ", "CSZ", "LYZ1", "LYZ2", // Zahnarzt-VO
+                noDiagGrpInVO };
+
+        diagGroupsErgo = new String[] { noDiagGrpSelected, "SB1", "SB2", "SB3", "EN1", "EN2", "EN3", "PS1", "PS2", "PS3", "PS4", noDiagGrpInVO };
+
+        diagGroupsLogo = new String[] { noDiagGrpSelected, "ST1", "ST2", "ST3", "ST4", "SP1", "SP2", "SP3", "SP4", "SP5", "SP6", "RE1", "RE2", "SF", "SC", 
+                "SPZ", "SCZ", "OFZ",    // Zahnarzt-VO
+                noDiagGrpInVO };
+        
+        diagGroupsPodo = new String[] { noDiagGrpSelected, "DF", "NF", "QF", noDiagGrpInVO };
+
+    }
+ 
     /** Holt die passenden Inikationsschlüssel gemäß aktiver Disziplin**/       // <- stehen in 'aktuelleRezepte', werden aber nur 'hier' benutzt -> künftig lokal
     private void fuelleIndis(String typeOfVO) {                                 // weitere Definitionen in 'Historie' u. 'Dokumentation' - scheinbar unbenutzt
         try {
@@ -1671,17 +1696,17 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             String[] indis = null;
             if (tmpItem.contains("physio") || tmpItem.contains("massage") || tmpItem.contains("rehasport")
                     || tmpItem.contains("funktions")) {
-                anz = Reha.instance.patpanel.aktRezept.indphysio.length;
-                indis = Reha.instance.patpanel.aktRezept.indphysio;
+                anz = diagGroupsPhysio.length;
+                indis = diagGroupsPhysio;
             } else if (tmpItem.contains("ergo")) {
-                anz = Reha.instance.patpanel.aktRezept.indergo.length;
-                indis = Reha.instance.patpanel.aktRezept.indergo;
+                anz = diagGroupsErgo.length;
+                indis = diagGroupsErgo;
             } else if (tmpItem.contains("logo")) {
-                anz = Reha.instance.patpanel.aktRezept.indlogo.length;
-                indis = Reha.instance.patpanel.aktRezept.indlogo;
+                anz = diagGroupsLogo.length;
+                indis = diagGroupsLogo;
             } else if (tmpItem.contains("podo")) {
-                anz = Reha.instance.patpanel.aktRezept.indpodo.length;
-                indis = Reha.instance.patpanel.aktRezept.indpodo;
+                anz = diagGroupsPodo.length;
+                indis = diagGroupsPodo;
             }
             for (int i = 0; i < anz; i++) {
                 jcmb[cINDI].addItem(indis[i]);
@@ -2231,7 +2256,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             if (jcmb[cINDI].getSelectedIndex() > 0) {
                 thisRezept.setIndiSchluessel((String) jcmb[cINDI].getSelectedItem());
             } else {
-                thisRezept.setIndiSchluessel("kein IndiSchl.");
+                thisRezept.setIndiSchluessel(noDiagGrpSelected);
             }
 
             thisRezept.setBarcodeform(jcmb[cBARCOD].getSelectedIndex());

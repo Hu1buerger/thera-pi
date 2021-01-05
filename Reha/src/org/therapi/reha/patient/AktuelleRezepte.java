@@ -1390,6 +1390,12 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                      .indexOf(sindi) >= 0;
     }
 
+    public static boolean isDentist2020(String sindi) {
+        String[] aindi = { "CD1", "CD2", "ZNSZ", "CSZ", "LYZ1", "LYZ2", "SPZ", "SCZ", "OFZ" };
+        return Arrays.asList(aindi)
+                     .indexOf(sindi) >= 0;
+    }
+
     public void indiSchluessel() {
         indphysio = new String[] { "kein IndiSchl.", "AT1 a", "AT1 b", "AT1 c", "AT2 a", "AT2 b", "AT2 c", "AT3 a",
                 "AT3 b", "AT3 c", "CS a", "CS b", "EX1 a", "EX1 b", "EX1 c", "EX2 a", "EX2 b", "EX2 c", "EX2 d",
