@@ -1053,6 +1053,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         if (e.getActionCommand()
              .equals("hmrcheck")) {
             System.out.println("Button hmrcheck");
+
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
@@ -1089,13 +1090,17 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
                             }
                         }
-                        doHmrCheck(icd10falsch, welcherIcd);
+                        String meldung = "Achtung - HMRCheck für HMR2020 ist noch nicht implementiert!\n\n"
+                                + "Bitte prüfen Sie die Verordnung manuell.";
+                        JOptionPane.showMessageDialog(null, meldung);
+//                        doHmrCheck(icd10falsch, welcherIcd);
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
                     return null;
                 }
             }.execute();
+ 
             return;
         }
 
@@ -1879,6 +1884,11 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
         jcb[cVOLLHB].setSelected(myRezept.getHbVoll());
 
+        jcb[cLeitSymptA].setSelected(myRezept.getLeitSymIsA());
+        jcb[cLeitSymptB].setSelected(myRezept.getLeitSymIsB());
+        jcb[cLeitSymptC].setSelected(myRezept.getLeitSymIsC());
+        jcb[cLeitSymptX].setSelected(myRezept.getLeitSymIsX());
+        
         jcb[cTBANGEF].setSelected(myRezept.getArztbericht());
         jtf[cANZ1].setText(myRezept.getAnzBehS(1));
         jtf[cANZ2].setText(myRezept.getAnzBehS(2));
@@ -2186,6 +2196,13 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                                                                               // 'initRezeptAll')
             thisRezept.setHeimbew(jtf[cHEIMBEW].getText()); // dito
             thisRezept.setHbVoll(jcb[cVOLLHB].isSelected() ? true : false); // dito
+
+            thisRezept.setLeitSymIsA(jcb[cLeitSymptA].isSelected() ? true : false);
+            thisRezept.setLeitSymIsB(jcb[cLeitSymptB].isSelected() ? true : false);
+            thisRezept.setLeitSymIsC(jcb[cLeitSymptC].isSelected() ? true : false);
+            thisRezept.setLeitSymIsX(jcb[cLeitSymptX].isSelected() ? true : false);
+            
+            
             /*********** entfällt (?)
             thisRezept.setUseHygPausch(jcb[cHygienePausch].isSelected() ? true : false);
             **********/

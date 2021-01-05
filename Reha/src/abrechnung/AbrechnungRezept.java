@@ -287,6 +287,8 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     boolean kannAbhaken = false;
     private Connection connection;
     private static final Logger logger = LoggerFactory.getLogger(AbrechnungRezept.class);
+    
+    Component rezAbschluss  = null;
 
     public AbrechnungRezept(AbrechnungGKV xeltern, Connection conn) {
         this.connection = conn;
@@ -538,8 +540,20 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             jSplitOU.setDividerLocation(tts.getTageTreeSize(rows));
         }
         rezeptSichtbar = true;
-
+        lockAbrechnung2021(rez);
         return true;
+    }
+
+    private void lockAbrechnung2021(String rez) {
+        String isHMR2021 = SqlInfo.holeEinzelFeld("select hmr2021 from verordn where rez_nr='" + rez + "' LIMIT 1");
+        if (isHMR2021.equals("T")) {
+            rezAbschluss.setEnabled(false);
+            ((JComponent) rezAbschluss).setToolTipText("Rezept abschließen nicht möglich - Abrechnung nach HMR2020 ist noch nicht implementiert");
+        } else {
+            rezAbschluss.setEnabled(true);
+            ((JComponent) rezAbschluss).setToolTipText("Rezept abschließen");
+        }
+        
     }
 
     /******
@@ -928,7 +942,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         tbbuts[2].setToolTipText("Rezept abschließen");
         tbbuts[2].setActionCommand("abschliessen");
         tbbuts[2].addActionListener(tbaction);
-        jtb.add(tbbuts[2]);
+        rezAbschluss = jtb.add(tbbuts[2]);
 
         jtb.addSeparator(new Dimension(30, 0));
 
