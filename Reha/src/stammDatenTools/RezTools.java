@@ -55,11 +55,11 @@ public class RezTools {
         return ret;
     }
 
-    public static Vector<ArrayList<?>> Y_holePosUndAnzahlAusRezept(String xreznr) {
-        Vector<ArrayList<?>> xvec = new Vector<>();
-        ArrayList<String> positionen = new ArrayList<>();
-        ArrayList<String> doppeltest = new ArrayList<>();
-        ArrayList<Integer> anzahl = new ArrayList<>();
+    public static Vector<ArrayList<?>> Y_holePosUndAnzahlAusRezept(String xreznr) { // unbenutzt (?)
+        Vector<ArrayList<?>> xvec = new Vector<ArrayList<?>>();
+        ArrayList<String> positionen = new ArrayList<String>();
+        ArrayList<String> doppeltest = new ArrayList<String>();
+        ArrayList<Integer> anzahl = new ArrayList<Integer>();
 
         Vector<String> rezvec;
 
@@ -115,7 +115,16 @@ public class RezTools {
                 "rez_nr='" + xreznr + "'", Arrays.asList(new String[] {}));
         Vector<String> termvec = holeEinzelZiffernAusRezept(null, rezvec.get(0));
 
-        List<String> list = Arrays.asList(rezvec.get(1), rezvec.get(2), rezvec.get(3), rezvec.get(4));
+        List<String> tmpList = Arrays.asList(rezvec.get(1), rezvec.get(2), rezvec.get(3), rezvec.get(4));
+        List<String> list = new ArrayList<String>();
+        for (int i = tmpList.size() - 1; i >= 0; i--) {
+            String sTmp = tmpList.get(i);
+            if (!sTmp.equals("")) { // Liste umsortieren auf 'alten Stand' (belegte Felder vorn)
+                list.add(0, sTmp);
+            } else {
+                list.add(sTmp);                
+            }
+        }
 
         ArrayList<String> positionen = new ArrayList<>();
         String behandlungen = null;
@@ -125,37 +134,38 @@ public class RezTools {
         ArrayList<Boolean> einzelerlaubt = new ArrayList<>();
         ArrayList<Object[]> doppelpos = new ArrayList<>();
         boolean[] bvorrangig = null;
-        // String aktpos = "";
+        String aktHmPos = "";
+        int idxPos = 0;
         for (int i = 1; i < 5; i++) {
-            if ("".equals(rezvec.get(i)
-                                .trim())) {
-                break;
-            }
-            positionen.add(String.valueOf(rezvec.get(i)));
-            bvorrangig = isVorrangigAndExtra(rezvec.get(i + 4), xreznr.substring(0, 2));
-            vorrangig.add(Boolean.valueOf(bvorrangig[0]));
-            einzelerlaubt.add(Boolean.valueOf(bvorrangig[1]));
-            anzahl.add(0);
-
-            if (countOccurence(list, rezvec.get(i)) > 1) {
-                doppelpos.add(sucheDoppel(i - 1, list, rezvec.get(i)));
-            } else {
-                Object[] obj = { false, i - 1, i - 1 };
-                doppelpos.add(obj.clone());
+            aktHmPos = rezvec.get(i)
+                             .trim();
+            if (! "".equals(aktHmPos)) {
+                positionen.add(String.valueOf(aktHmPos));
+                bvorrangig = isVorrangigAndExtra(rezvec.get(i + 4), xreznr.substring(0, 2));
+                vorrangig.add(Boolean.valueOf(bvorrangig[0]));
+                einzelerlaubt.add(Boolean.valueOf(bvorrangig[1]));
+                anzahl.add(0);
+                if (countOccurence(list, aktHmPos) > 1) {
+                    doppelpos.add(sucheDoppel(idxPos, list, aktHmPos));
+                } else {
+                    Object[] obj = { false, idxPos, idxPos };
+                    doppelpos.add(obj.clone());
+                }
+                idxPos++;
             }
         }
 
         Vector<String> imtag = new Vector<>();
         Object[] tests = null;
         for (int i = 0; i < termvec.size(); i++) {
-            // Über alle Tage hinweg
+            // Über alle Behandlungstage hinweg
             try {
                 behandlungen = termvec.get(i);
                 if (!"".equals(behandlungen)) {
                     einzelbehandlung = behandlungen.split(",");
                     imtag.clear();
                     int i2;
-                    for (i2 = 0; i2 < einzelbehandlung.length; i2++) {
+                    for (i2 = 0; i2 < einzelbehandlung.length; i2++) {  // über Behandlungen des Tages
                         try {
                             // Jetzt testen ob Doppelbehandlung
                             tests = doppelpos.get(list.indexOf(einzelbehandlung[i2]));
@@ -2266,7 +2276,7 @@ public class RezTools {
         }
     }
 
-    public static void constructFormularHMap() {
+    public static void constructFormularHMap() { // unbenutzt (?)
         try {
             DecimalFormat dfx = new DecimalFormat("0.00");
             SystemConfig.hmAdrRDaten.put("<Rid>", Reha.instance.patpanel.vecaktrez.get(35));
@@ -2428,7 +2438,6 @@ public class RezTools {
         boolean hmrtest = false;
 
         Object[] retObj = { null, null, null };
-
         try {
             // die anzahlen 1-4 werden jetzt zusammenhängend ab index 11 abgerufen
             if (vecx != null) {
@@ -2461,18 +2470,20 @@ public class RezTools {
                 // termine.get(4) = Object[]
                 // {doppelbehandlung(Boolean),erstepos(Integer),letztepos(Integer)}
 
-                for (i = 0; i <= 3; i++) {
+                int termineIdx = 0;
+                for (i = 0; i <= 3; i++) {  // pos1..pos4
                     if ("".equals(vec.get(1 + i)
-                                     .trim())) {
+                            .trim())) {
                         hMPos.get(i).hMPosNr = "./.";
                         hMPos.get(i).vOMenge = 0;
                         hMPos.get(i).anzBBT = 0;
                     } else {
                         hMPos.get(i).hMPosNr = String.valueOf(vec.get(1 + i));
                         hMPos.get(i).vOMenge = Integer.parseInt(vec.get(i + 11));
-                        hMPos.get(i).vorrangig = (Boolean) ((ArrayList<?>) ((Vector<?>) termine).get(2)).get(i);
+                        hMPos.get(i).vorrangig = (Boolean) ((ArrayList<?>) ((Vector<?>) termine).get(2)).get(termineIdx);
                         hMPos.get(i).invOBelegt = true;
-                        hMPos.get(i).anzBBT = (Integer) ((ArrayList<?>) ((Vector<?>) termine).get(1)).get(i);
+                        hMPos.get(i).anzBBT = (Integer) ((ArrayList<?>) ((Vector<?>) termine).get(1)).get(termineIdx);
+                        termineIdx++;
                     }
                     hMPos.get(i)
                          .gehtNochEiner();
@@ -2507,7 +2518,7 @@ public class RezTools {
                                     return retObj;
                                 }
                             } else {
-                                // nein keine Doppelposition also Ende-Gelände
+                                // nein keine Doppelposition also Ende-Gelände      // TODO HMR2020: kann noch weiter gehen (bis 3 vorr. HM)
                                 retObj[0] = String.valueOf(termbuf.toString());
                                 retObj[1] = Integer.valueOf(REZEPT_IST_BEREITS_VOLL);
                                 // if(debug){System.out.println("erste Position = voll und keine
@@ -2539,43 +2550,51 @@ public class RezTools {
                 }
 
                 // 2. dann prüfen welche Behandlungsformen noch einen vertragen können
-                count = 0;
+                int hMmitOffenenBehandlungen = 0;
+                int anzOffeneVorrHM = 0;
                 int ianzahl = hMPos.get(0).vOMenge;
                 int ioffen = hMPos.get(0).vORestMenge;
                 for (i = 0; i < j; i++) {
-                    hMPos.get(i)
-                         .danachVoll();
-                    // wenn eine Behandlung noch frei ist //(ausgeschaltet)und die Position keine
-                    // Doppelposition ist
-                    if (hMPos.get(i).einerOk /*
-                                              * && ((Object[])((ArrayList<?>)((Vector<?>)termine).get(4)).get(i))[0]==
-                                              * Boolean.valueOf(false)
-                                              */) {
-                        count++;
+                    BestaetigungsDaten currHmPos = hMPos.get(i);
+                    currHmPos.danachVoll();
+                    // wenn eine Behandlung noch frei ist 
+                    if (currHmPos.einerOk ) {
+                        hMmitOffenenBehandlungen++;
+                        if (currHmPos.vorrangig) {
+                            anzOffeneVorrHM++;
+                        }
                     }
-                    if (ianzahl != hMPos.get(i).vOMenge) {
+                    if (ianzahl != currHmPos.vOMenge) {  // HMR2020: bis zu 3 vorr. u. 1 erg. HM (nur 1 vorr. pro Behandlg.!)
                         anzahlRezeptGleich = false;
                     }
-                    if (ioffen != hMPos.get(i).vORestMenge) {
+                    if (ioffen != currHmPos.vORestMenge) {
                         nochOffenGleich = false;
                     }
                 }
                 // Keine Postition mehr frei
-                if (count == 0) {
+                if (hMmitOffenenBehandlungen == 0) {
                     retObj[0] = String.valueOf(termbuf.toString());
                     retObj[1] = Integer.valueOf(REZEPT_IST_BEREITS_VOLL);
                     // if(debug){System.out.println("Rezept war bereits voll");}
                     return retObj;
                 }
                 // Nur Wenn mehrere Behandlungen im Rezept vermerkt
-                if (j > 1 && count > 1 && !/* anzahlRezeptGleich && */ nochOffenGleich) {
-                    dlgZeigen = true;
+                boolean mustSelect = false;
+                if (j > 1) {
+                    // Wenn mehrere noch offen sind aber ungleiche noch Offen
+                    if ((hMmitOffenenBehandlungen > 1) && (!(/* anzahlRezeptGleich && */ nochOffenGleich))) {
+                        dlgZeigen = true;
+                    }
+                    if (anzOffeneVorrHM > 1) { // HMR2020: vorr. HM einzeln behandeln!
+                        mustSelect = true;
+                    }
                 }
                 // 3. Dann Dialog zeigen
                 // TerminBestätigenAuswahlFenster anzeigen oder überspringen
                 // Evtl. noch Einbauen ob bei unterschiedlichen Anzahlen
                 // (System-Initialisierung) immer geöffnet wird.
-                if (xforceDlg || (dlgZeigen && (Boolean) SystemConfig.hmTerminBestaetigen.get("dlgzeigen"))) {
+                if (xforceDlg || mustSelect || (dlgZeigen && (Boolean) SystemConfig.hmTerminBestaetigen.get("dlgzeigen"))) {
+
                     TerminBestaetigenAuswahlFenster termBestAusw = new TerminBestaetigenAuswahlFenster(
                             Reha.getThisFrame(), null, hMPos, swreznum, Integer.parseInt(vec.get(15)));
                     termBestAusw.pack();
@@ -2591,15 +2610,12 @@ public class RezTools {
                         return retObj;
                     }
                     for (i = 0; i < j; i++) {
-                        if (hMPos.get(i).best) {
-                            hMPos.get(i).anzBBT += 1;
+                        BestaetigungsDaten currHmPos = hMPos.get(i);
+                        if (currHmPos.best) {
+                            currHmPos.anzBBT += 1;
                             // gleichzeitig prüfen ob voll
-                            if ((hMPos.get(i)
-                                      .jetztVoll()
-                                    && hMPos.get(i).vorrangig)
-                                    || (hMPos.get(i)
-                                             .jetztVoll()
-                                            && !hMPos.get(i).vorrangig && j == 1)) {
+                            if ((currHmPos.jetztVoll() && currHmPos.vorrangig) 
+                                    || (currHmPos.jetztVoll() && (!currHmPos.vorrangig) && j == 1)) {
                                 jetztVoll = true;
                             }
                         }
@@ -2610,16 +2626,14 @@ public class RezTools {
                      * Heilmittel
                      */
                     for (i = 0; i < j; i++) {
-                        hMPos.get(i).best = hMPos.get(i).einerOk;
-                        if (hMPos.get(i).einerOk) {
-                            hMPos.get(i).anzBBT += 1;
-                            hMPos.get(i).best = true;
-                            if ((hMPos.get(i)
-                                      .jetztVoll()
-                                    && hMPos.get(i).vorrangig)
-                                    || (hMPos.get(i)
-                                             .jetztVoll()
-                                            && !hMPos.get(i).vorrangig && j == 1)) {
+                        BestaetigungsDaten currHmPos = hMPos.get(i);
+                        currHmPos.best = Boolean.valueOf(currHmPos.einerOk);
+                        if (currHmPos.einerOk) {
+                            currHmPos.anzBBT += 1;
+                            currHmPos.best = true;
+                            if (currHmPos.jetztVoll() && currHmPos.vorrangig) {
+                                jetztVoll = true;
+                            } else if (currHmPos.jetztVoll() && (!currHmPos.vorrangig) && j == 1) {
                                 jetztVoll = true;
                             }
                         }
@@ -2628,8 +2642,9 @@ public class RezTools {
                 String[] params = { null, null, null, null };
                 count = 0;
                 for (i = 0; i < j; i++) {
-                    if (hMPos.get(i).best) {
-                        params[i] = vec.get(i + 1);
+                    BestaetigungsDaten currHmPos = hMPos.get(i);
+                    if (currHmPos.best) {
+                        params[i] = currHmPos.hMPosNr;
                         count++;
                     }
                 }
