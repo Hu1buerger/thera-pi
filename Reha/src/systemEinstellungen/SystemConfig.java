@@ -975,7 +975,7 @@ public class SystemConfig {
                 "<Rposition2>", "<Rposition3>", "<Rposition4>", "<Rpreis1>", "<Rpreis2>", "<Rpreis3>", "<Rpreis4>",
                 "<Rproz1>", "<Rproz2>", "<Rproz3>", "<Rproz4>", "<Rgesamt1>", "<Rgesamt2>", "<Rgesamt3>", "<Rgesamt4>",
                 "<Rpauschale>", "<Rendbetrag>", "<Ranzahl1>", "<Ranzahl2>", "<Ranzahl3>", "<Ranzahl4>", "<Rerstdat>",
-                "<Rletztdat>", "<Rid>", "<Rtage>", "<Rkuerzel1>", "<Rkuerzel2", "<Rkuerzel3>", "<Rkuerzel4>",
+                "<Rletztdat>", "<Rid>", "<Rtage>", "<Rkuerzel1>", "<Rkuerzel2>", "<Rkuerzel3>", "<Rkuerzel4>",
                 "<Rlangtext1>", "<Rlangtext2>", "<Rlangtext3>", "<Rlangtext4>", "<Rbarcode>", "<Systemik>", "<Rwert>",
                 "<Rhbpos>", "<Rwegpos>", "<Rhbpreis>", "<Rwegpreis>", "<Rhbproz>", "<Rwegproz>", "<Rhbanzahl>",
                 "<Rweganzahl>", "<Rhbgesamt>", "<Rweggesamt>", "<Rwegkm>", "<Rtage>" });

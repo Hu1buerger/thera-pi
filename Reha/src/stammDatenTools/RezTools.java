@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
@@ -1191,9 +1192,13 @@ public class RezTools {
 
                 String id = Reha.instance.patpanel.vecaktrez.get(8 + i);
                 SystemConfig.hmAdrRDaten.put("<Rlangtext" + (i + 1) + ">",
-                        getLangtextFromID(id, "", SystemPreislisten.hmPreise.get(xdiszi)
-                                                                            .get(xpreisgr)));
+                        RezTools.getLangtextFromID(id, "", SystemPreislisten.hmPreise.get(xdiszi)
+                                                                                     .get(xpreisgr)));
 
+                SystemConfig.hmAdrRDaten.put("<Rkuerzel" + (i + 1) + ">",
+                        RezTools.getKurzformFromID(id, SystemPreislisten.hmPreise.get(xdiszi)
+                                                                                 .get(xpreisgr)));
+                
                 SystemConfig.hmAdrRDaten.put("<Rpreis" + (i + 1) + ">", dfx.format(preise[i]));
 
                 einzelpreis = preise[i].divide(BigDecimal.valueOf(Double.valueOf(10.000)));
@@ -1218,9 +1223,11 @@ public class RezTools {
                 SystemConfig.hmAdrRDaten.put("<Rproz" + (i + 1) + ">", "0,00");
                 SystemConfig.hmAdrRDaten.put("<Rgesamt" + (i + 1) + ">", "0,00");
                 SystemConfig.hmAdrRDaten.put("<Ranzahl" + (i + 1) + ">", "----");
+                SystemConfig.hmAdrRDaten.put("<Rkuerzel" + (i + 1) + ">", "");
             }
         }
-        // System.out.println(SystemConfig.hmAdrRDaten);
+        sortHmAdrRdaten();
+        /*****************************************************/
         if (zm.hausbesuch) { // Hausbesuch
             Object[] obi = hbNormal(zm, rezwert, rezgeb, Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(64)),
                     neuerpreis);
@@ -1291,6 +1298,7 @@ public class RezTools {
                             SystemConfig.hmAdrRDaten.put("<Rlangtext" + (i + 1) + ">", "");
                         }
                     }
+                    sortHmAdrRdaten();
                     // Hausbesuche
                     if ("T".equals(Reha.instance.patpanel.vecaktrez.get(43))) {
                         SystemConfig.hmAdrRDaten.put("<Rhbpos>", SystemPreislisten.hmHBRegeln.get(diszi)
@@ -1338,6 +1346,7 @@ public class RezTools {
             SystemConfig.hmAdrRDaten.put("<Rproz" + (i + 1) + ">", "0,00");
             SystemConfig.hmAdrRDaten.put("<Rgesamt" + (i + 1) + ">", "0,00");
             SystemConfig.hmAdrRDaten.put("<Ranzahl" + (i + 1) + ">", "----");
+            SystemConfig.hmAdrRDaten.put("<Rkuerzel" + (i + 1) + ">", "");
         }
         SystemConfig.hmAdrRDaten.put("<Rhbpos>", "----");
         SystemConfig.hmAdrRDaten.put("<Rhbpreis>", "0,00");
@@ -1456,6 +1465,7 @@ public class RezTools {
                 SystemConfig.hmAdrRDaten.put("<Rgesamt" + (i + 1) + ">", "0,00");
                 SystemConfig.hmAdrRDaten.put("<Ranzahl" + (i + 1) + ">", "----");
             }
+            sortHmAdrRdaten();
         }
         if (zm.hausbesuch) { // Hausbesuch
             if (zm.gesamtZahl > Integer.valueOf(Reha.instance.patpanel.vecaktrez.get(64))) {
@@ -1476,7 +1486,61 @@ public class RezTools {
         //// System.out.println(SystemConfig.hmAdrRDaten);
     }
 
-    private static void constructEndeFreiRezHMap(ZuzahlModell zm, boolean anfang) {
+    private static void sortHmAdrRdaten() {
+        int onceAgain = 0;
+        HashMap<String, String> voData = SystemConfig.hmAdrRDaten;
+        
+        do {
+            onceAgain = 0;
+            for (int i = 1; i < 4; i++) {
+                String sCurr = SystemConfig.hmAdrRDaten.get("<Rposition" + (i) + ">");
+                String sNext = SystemConfig.hmAdrRDaten.get("<Rposition" + (i + 1) + ">");
+                if (sCurr.equals("----") && !sNext.equals("----")) {
+                    // akt. Platz ist leer; Nachfolger nicht -> Plaetze tauschen
+                    String currIdx = String.valueOf(i);
+                    String nextIdx = String.valueOf(1 + i);
+                    String sTmp = SystemConfig.hmAdrRDaten.get("<Rposition" + currIdx + ">");
+                    String sTmp2 = SystemConfig.hmAdrRDaten.get("<Rposition" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rposition" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rposition" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Rpreis" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Rpreis" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rpreis" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rpreis" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Rproz" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Rproz" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rproz" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rproz" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Rgesamt" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Rgesamt" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rgesamt" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rgesamt" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Ranzahl" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Ranzahl" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Ranzahl" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Ranzahl" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Rkuerzel" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Rkuerzel" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rkuerzel" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rkuerzel" + nextIdx + ">", sTmp);
+
+                    sTmp = SystemConfig.hmAdrRDaten.get("<Rlangtext" + currIdx + ">");
+                    sTmp2 = SystemConfig.hmAdrRDaten.get("<Rlangtext" + nextIdx + ">");
+                    SystemConfig.hmAdrRDaten.put("<Rlangtext" + currIdx + ">", sTmp2);
+                    SystemConfig.hmAdrRDaten.put("<Rlangtext" + nextIdx + ">", sTmp);
+                    
+                    onceAgain++;
+                }
+            }
+        } while (onceAgain > 0);
+    }
+
+    public static void constructEndeFreiRezHMap(ZuzahlModell zm, boolean anfang) {
         // System.out.println("*****Über Ende Frei*********");
         constructAnfangFreiRezHMap(zm, anfang);
     }
@@ -2298,6 +2362,7 @@ public class RezTools {
                                                                                 .replace(".", ","));
                 }
             }
+            sortHmAdrRdaten();
         } catch (Exception ex) {
             ex.printStackTrace();
         }

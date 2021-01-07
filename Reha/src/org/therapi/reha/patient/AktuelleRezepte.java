@@ -2608,6 +2608,14 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
 
+    private boolean patIstBefreit () {
+        if (Reha.instance.patpanel.vecaktrez.get(39)
+                                            .equals("0")) {
+            JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
+            return true;
+        }
+        return false;
+    }
     public void doRezeptGebuehr(Point pt) { // Lemmi Doku: Bares Kassieren der Rezeptgebühr
         boolean bereitsbezahlt = false;
 
@@ -2625,9 +2633,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
         // erst prüfen ob Zuzahlstatus = 0, wenn ja zurück;
         // dann prüfen ob bereits bezahlt wenn ja fragen ob Kopie erstellt werden soll;
-        if (Reha.instance.patpanel.vecaktrez.get(39)
-                                            .equals("0")) {
-            JOptionPane.showMessageDialog(null, "Zuzahlung nicht erforderlich!");
+        if (patIstBefreit()) {
             return;
         }
         if (DatFunk.Unter18(DatFunk.sHeute(), DatFunk.sDatInDeutsch(Reha.instance.patpanel.patDaten.get(4)))) {
@@ -3024,6 +3030,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     // Lemmi 20101218: kopiert aus AbrechnungRezept.java und die
     // Datenherkunfts-Variablen verändert bzw. angepasst.
     private void doRezeptgebuehrRechnung(Point location) {
+        if (patIstBefreit()) {
+            return;
+        }
         boolean buchen = true;
         DecimalFormat dfx = new DecimalFormat("0.00");
         Rezeptvector currVO = new Rezeptvector();
@@ -3070,27 +3079,33 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         RezTools.testeRezGebArt(false, false, sRezNr, termine);
 
         // String mit den Anzahlen und HM-Kürzeln erzeugen
+        int hmIdx = 0;
+        HashMap<String, String> voData = SystemConfig.hmAdrRDaten;
+
         for (i = 1; i < 5; i++) {
-            String hmKurz = currVO.getHMkurz(i);
-            String aktAnzBehandlg = currVO.getAnzBehS(i);
+            //String hmKurz = currVO.getHMkurz(i);  // Reihenfolge in der HM ist umsortiert!
+            String hmKurz = voData.get("<Rkuerzel" + String.valueOf(i) + ">");
+            //String aktAnzBehandlg = currVO.getAnzBehS(i);
+            String aktAnzBehandlg = voData.get("<Ranzahl" + String.valueOf(i) + ">");
             if ((hmKurz != null) && hmKurz.length() > 0) {
+                hmIdx++;
                 behandl += ((behandl.length() > 0) ? ", " : "") + aktAnzBehandlg + " * " + hmKurz;
 
-                hmRezgeb.put("<rgposition"+ String.valueOf(i) + ">",  SystemConfig.hmAdrRDaten.get("<Rposition"+ String.valueOf(i) +">"));
-                hmRezgeb.put("<rglangtext"+ String.valueOf(i) + ">", SystemConfig.hmAdrRDaten.get("<Rlangtext"+ String.valueOf(i) +">"));
-                hmRezgeb.put("<rganzahl"+ String.valueOf(i) + ">",  SystemConfig.hmAdrRDaten.get("<Ranzahl"+ String.valueOf(i) +">"));
-                hmRezgeb.put("<rgpreis"+ String.valueOf(i) + ">",  SystemConfig.hmAdrRDaten.get("<Rpreis"+ String.valueOf(i) +">"));
-                hmRezgeb.put("<rgproz"+ String.valueOf(i) + ">",  SystemConfig.hmAdrRDaten.get("<Rproz"+ String.valueOf(i) +">"));
-                hmRezgeb.put("<rggesamt"+ String.valueOf(i) + ">",  SystemConfig.hmAdrRDaten.get("<Rgesamt"+ String.valueOf(i) +">"));
-
+                hmRezgeb.put("<rgposition"+ String.valueOf(i) + ">",  voData.get("<Rposition"+ String.valueOf(i) +">"));
+                hmRezgeb.put("<rglangtext"+ String.valueOf(i) + ">", voData.get("<Rlangtext"+ String.valueOf(i) +">"));
+                hmRezgeb.put("<rganzahl"+ String.valueOf(i) + ">",  voData.get("<Ranzahl"+ String.valueOf(i) +">"));
+                hmRezgeb.put("<rgpreis"+ String.valueOf(i) + ">",  voData.get("<Rpreis"+ String.valueOf(i) +">"));
+                hmRezgeb.put("<rgproz"+ String.valueOf(i) + ">",  voData.get("<Rproz"+ String.valueOf(i) +">"));
+                hmRezgeb.put("<rggesamt"+ String.valueOf(i) + ">",  voData.get("<Rgesamt"+ String.valueOf(i) +">"));
+                
                 hmRezgeb.put("<rglangtext"+ String.valueOf(i+1) + ">", "Rezeptgebühr");
                 hmRezgeb.put("<rganzahl"+ String.valueOf(i+1) + ">",  "1");
-                hmRezgeb.put("<rggesamt"+ String.valueOf(i+1) + ">", SystemConfig.hmAdrRDaten.get("<Rpauschale>"));
-                hmRezgeb.put("<rganzpos>", String.valueOf(i+1));
+                hmRezgeb.put("<rggesamt"+ String.valueOf(i+1) + ">", voData.get("<Rpauschale>"));
+                hmRezgeb.put("<rganzpos>", String.valueOf(i+1));  
             }
         }
 
-        strZuzahlung = SystemConfig.hmAdrRDaten.get("<Rendbetrag>");
+        strZuzahlung = voData.get("<Rendbetrag>");
 
         String cmd = "select abwadress,id from pat5 where pat_intern='" + currVO.getPatIntern() + "' LIMIT 1";
         Vector<Vector<String>> adrvec = SqlInfo.holeFelder(cmd);
