@@ -74,6 +74,7 @@ import ag.ion.noa.search.SearchDescriptor;
 
 public class OOTools {
     private static final Logger LOGGER = LoggerFactory.getLogger(OOTools.class);
+
     public static synchronized void loescheLeerenPlatzhalter(ITextDocument textDocument, ITextField placeholders) {
         try {
             IViewCursor viewCursor = textDocument.getViewCursorService()
@@ -98,15 +99,12 @@ public class OOTools {
         }
     }
 
-
     public static XTextTableCursor doMergeCellsInTextTabel(XTextTable table, String startCell, String endCell) {
         XTextTableCursor cursor = table.createCursorByCellName(startCell);
         cursor.gotoCellByName(endCell, true);
         cursor.mergeRange();
         return cursor;
     }
-
-
 
     public static void setzePapierFormatCalc(ISpreadsheetDocument document, int hoch, int breit)
             throws NoSuchElementException, WrappedTargetException, UnknownPropertyException, PropertyVetoException,
@@ -208,16 +206,7 @@ public class OOTools {
         });
     }
 
-
-
-
-
     /*********************** OO-Calc Funktionen *******************************/
-
-
-
-
-
 
     public static void doCellValue(XSheetCellCursor cellCursor, int col, int row, Object value)
             throws IndexOutOfBoundsException {
@@ -345,14 +334,15 @@ public class OOTools {
         ITextDocument textDocument = null;
         try {
 
-
             OOService ooService = new OOService();
-            if (!ooService.getOfficeapplication().isActive()) {
+            if (!ooService.getOfficeapplication()
+                          .isActive()) {
                 ooService.start();
             }
             DocumentDescriptor docdescript = DocumentDescriptor.DEFAULT;
             docdescript.setHidden(!visible);
-            IDocumentService documentService = ooService.getOfficeapplication().getDocumentService();
+            IDocumentService documentService = ooService.getOfficeapplication()
+                                                        .getDocumentService();
             IDocument document = documentService.constructNewDocument(IDocument.WRITER, docdescript);
             textDocument = (ITextDocument) document;
             if (visible) {
@@ -380,8 +370,6 @@ public class OOTools {
             }
 
             IDocumentService documentService = officeapplication.getDocumentService();
-
-
 
             DocumentDescriptor docdescript = new DocumentDescriptor();
             docdescript.setURL(url);
@@ -441,7 +429,6 @@ public class OOTools {
 
     }
 
-
     public static void setOneCellProperty(ITextTableCell cell, boolean italic, boolean bold, boolean underline,
             int color, float size) {
         // ITextTableCellProperties props = cell.getProperties();
@@ -462,7 +449,6 @@ public class OOTools {
         }
 
     }
-
 
     public static synchronized void printAndClose(final ITextDocument textDocument, final int exemplare) {
 
@@ -496,7 +482,6 @@ public class OOTools {
 
         }.execute();
     }
-
 
     /*******************************************************************************************/
 
@@ -539,7 +524,6 @@ public class OOTools {
         return true;
     }
 
-
     private static void sucheErsetze(ITextDocument document, String suchenach, String ersetzemit, boolean alle) {
         SearchDescriptor searchDescriptor = new SearchDescriptor(suchenach);
         searchDescriptor.setIsCaseSensitive(true);
@@ -561,7 +545,6 @@ public class OOTools {
         }
     }
 
-
     public static void starteLeerenCalc() {
         try {
             IDocumentService documentService = new OOService().getOfficeapplication()
@@ -574,7 +557,6 @@ public class OOTools {
             exception.printStackTrace();
         }
     }
-
 
     public static void starteLeerenImpress() {
         try {
@@ -590,7 +572,6 @@ public class OOTools {
 
     }
 
-
     public static synchronized void setzePapierFormat(ITextDocument textDocument, int hoch, int breit)
             throws NoSuchElementException, WrappedTargetException, UnknownPropertyException, PropertyVetoException,
             IllegalArgumentException {
@@ -603,7 +584,6 @@ public class OOTools {
         xStyleProps.setPropertyValue("Height", hoch);
         xStyleProps.setPropertyValue("Width", breit);
     }
-
 
     public static synchronized ITextDocument starteWriterMitDatei(String url) {
         try {
@@ -672,8 +652,6 @@ public class OOTools {
         }
     }
 
-
-
     public static void doColWidth(ISpreadsheetDocument spreadsheetDocument, String sheetName, int col_first,
             int col_last, int width) throws NoSuchElementException, WrappedTargetException, IndexOutOfBoundsException,
             UnknownPropertyException, PropertyVetoException, IllegalArgumentException {
@@ -681,8 +659,7 @@ public class OOTools {
                                                         .getSheets();
         XSpreadsheet spreadsheet1 = UnoRuntime.queryInterface(XSpreadsheet.class, spreadsheets.getByName(sheetName));
         XCellRange xCellRange = spreadsheet1.getCellRangeByPosition(0, 0, col_last, 0);
-       XColumnRowRange xColRowRange = UnoRuntime.queryInterface(
-                XColumnRowRange.class, xCellRange);
+        XColumnRowRange xColRowRange = UnoRuntime.queryInterface(XColumnRowRange.class, xCellRange);
         com.sun.star.beans.XPropertySet xPropSet = null;
         com.sun.star.table.XTableColumns xColumns = xColRowRange.getColumns();
         for (int i = col_first; i <= col_last; i++) {
@@ -699,8 +676,7 @@ public class OOTools {
                                                         .getSheets();
         XSpreadsheet spreadsheet1 = UnoRuntime.queryInterface(XSpreadsheet.class, spreadsheets.getByName(sheetName));
         XCellRange xCellRange = spreadsheet1.getCellRangeByPosition(0, 0, col_last, 0);
-        XColumnRowRange xColRowRange = UnoRuntime.queryInterface(
-                XColumnRowRange.class, xCellRange);
+        XColumnRowRange xColRowRange = UnoRuntime.queryInterface(XColumnRowRange.class, xCellRange);
         com.sun.star.beans.XPropertySet xPropSet = null;
         com.sun.star.table.XTableColumns xColumns = xColRowRange.getColumns();
         for (int i = col_first; i <= col_last; i++) {
@@ -709,7 +685,6 @@ public class OOTools {
             xPropSet.setPropertyValue("HoriJustify", col_textalign);
         }
     }
-
 
     public static void doColNumberFormat(ISpreadsheetDocument spreadsheetDocument, String sheetName, int col_first,
             int col_last, int col_numberformat) throws NoSuchElementException, WrappedTargetException,
@@ -729,7 +704,6 @@ public class OOTools {
         }
     }
 
-
     public static void doCellFontItalic(XSheetCellCursor cellCursor, int col, int row) throws IndexOutOfBoundsException,
             UnknownPropertyException, PropertyVetoException, IllegalArgumentException, WrappedTargetException {
         XCell cell = cellCursor.getCellByPosition(col, row);
@@ -739,14 +713,12 @@ public class OOTools {
         xPropSet.setPropertyValue("CharPosture", com.sun.star.awt.FontSlant.ITALIC);
     }
 
-
     public static void refreshTextFields(XTextDocument xTextDocument) {
         XTextFieldsSupplier tfSupplier = UnoRuntime.queryInterface(XTextFieldsSupplier.class, xTextDocument);
         XRefreshable refreshable = UnoRuntime.queryInterface(XRefreshable.class, tfSupplier.getTextFields());
         refreshable.refresh();
 
     }
-
 
     public static synchronized ITextDocument starteLeerenWriter() {
 
@@ -775,9 +747,10 @@ public class OOTools {
         }
         return textDocument;
     }
+
     public static Optional<IOfficeApplication> initOffice(final String path, final String aktik) {
         try {
-            String rehainiPath = path + "ini/" + aktik + "/rehajava.ini";
+            String rehainiPath = exchangebackslashes(path) + "ini/" + aktik + "/rehajava.ini";
             File file = new File(rehainiPath);
             assert (file.exists());
             Ini rehajavaIni = new Ini(new FileReader(file));
@@ -788,5 +761,16 @@ public class OOTools {
         }
 
         return Optional.empty();
+    }
+
+    /**
+     * Replaces any backslash in stringtoparse with forward slash.
+     *
+     * @param stringToParse string to parse
+     * @return String with replacements
+     */
+    public static String exchangebackslashes(String stringToParse) {
+        stringToParse = stringToParse.replaceAll("\\\\", "/");
+        return stringToParse;
     }
 }
