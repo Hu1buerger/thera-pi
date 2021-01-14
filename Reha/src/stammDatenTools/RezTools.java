@@ -291,6 +291,9 @@ public class RezTools {
     }
 
     public static Object[] holeTermineAnzahlUndLetzter(String termine) {
+        if("".equals(termine)) {
+            return new Object[] {0,""};
+        }
         Object[] retobj = { null, null };
         try {
             String[] tlines = termine.split("\n");
@@ -510,14 +513,15 @@ public class RezTools {
 
     public static boolean zweiPositionenBeiHB(String disziplin, String preisgruppe) {
         int pg = Integer.parseInt(preisgruppe) - 1;
-        return !"".equals(SystemPreislisten.hmHBRegeln.get(disziplin)
-                                                      .get(pg)
-                                                      .get(2)
-                                                      .trim())
-                || !"".equals(SystemPreislisten.hmHBRegeln.get(disziplin)
-                                                          .get(pg)
-                                                          .get(3)
-                                                          .trim());
+        String pg2 = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                 .get(pg)
+                                                 .get(2)
+                                                 .trim();
+        String pg3 = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                 .get(pg)
+                                                 .get(3)
+                                                 .trim();
+        return !"".equals(pg2) || !"".equals(pg3);
     }
 
     private static boolean keineWeggebuehrBeiHB(String disziplin, String preisgruppe) {

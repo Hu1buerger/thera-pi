@@ -1,6 +1,6 @@
 package stammDatenTools;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 import org.junit.Test;
 
@@ -19,6 +19,13 @@ public class RezToolsTest {
             assertEquals( "Podo", RezTools.getDisziplinFromRezNr("PO" + anytext));
             assertEquals( "Rsport", RezTools.getDisziplinFromRezNr("RS" + anytext));
             assertEquals( "Ftrain", RezTools.getDisziplinFromRezNr("FT" + anytext));
+
+    }
+
+    @Test
+    public void emptyTermineStringReturns0ForAnzahl() throws Exception {
+
+        assertEquals(0, RezTools.holeTermineAnzahlUndLetzter("")[0]);
 
     }
 
