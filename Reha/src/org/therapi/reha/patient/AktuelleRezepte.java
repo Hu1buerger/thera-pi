@@ -302,6 +302,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     private void privatrechnungerstellen() {
         if (Rechte.hatRecht(Rechte.Rezept_privatrechnung, true)) {
+            if (dtermm.anzahlTermine() ==0) {
+               JOptionPane.showMessageDialog(null, "keine Termine zum Abrechnen vorhanden", "Private Abrechnung ohne bestätigte Termine",
+                      JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             try {
                 fuelleTage();
                 privatRechnung();
@@ -2805,6 +2810,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             } else {
                 return false;
             }
+        }
+
+        int anzahlTermine(){
+            return getRowCount();
         }
     }
 
