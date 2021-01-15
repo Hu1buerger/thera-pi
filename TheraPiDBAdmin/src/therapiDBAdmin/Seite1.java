@@ -19,7 +19,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public class Seite1 extends JXPanel {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     JFormattedTextField[] tfs = { null, null, null, null, null };
@@ -96,18 +96,15 @@ public class Seite1 extends JXPanel {
             e.printStackTrace();
         }
         try {
-            // jdbc:mysql://192.168.2.3:3306/rtadaten
             String connection = "jdbc:mysql://" + tfs[0].getText()
                                                         .trim()
                     + ":" + tfs[1].getText()
                                   .trim()
                     + "/";
-            // tfs[0].getText().trim()+":"+tfs[1].getText().trim()+"/"+tfs[4].getText().trim();
             System.out.println(connection);
             TheraPiDbAdmin.conn_root = DriverManager.getConnection(connection, tfs[3].getText()
                                                                                      .trim(),
                     String.valueOf(pw.getPassword()));
-            // TheraPiDbAdmin.conn_root.close();
             return true;
         } catch (final SQLException ex) {
             JOptionPane.showMessageDialog(null, ex.getMessage());
