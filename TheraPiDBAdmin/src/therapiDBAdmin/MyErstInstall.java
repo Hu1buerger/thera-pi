@@ -48,9 +48,9 @@ public class MyErstInstall extends JXPanel {
     private JFormattedTextField[] tfs = { null, null, null, null, null, null, null };
     JLabel lab1 = null, lab2 = null;
     ActionListener al = null;
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
 
-    MyErstInstall(MySqlTab xeltern) {
+    MyErstInstall(DatenbankTab xeltern) {
         super();
         eltern = xeltern;
         setLayout(new BorderLayout());
@@ -212,10 +212,10 @@ public class MyErstInstall extends JXPanel {
             e.printStackTrace();
         }
         try {
-            String connection = "jdbc:mysql://" + MySqlTab.iPAdresse + ":3306/" + MySqlTab.neuerDBName;
+            String connection = "jdbc:mysql://" + DatenbankTab.iPAdresse + ":3306/" + DatenbankTab.neuerDBName;
             System.out.println(connection);
-            TheraPiDbAdmin.conn_root = DriverManager.getConnection(connection, MySqlTab.neuerUser,
-                    MySqlTab.neuesPasswort);
+            TheraPiDbAdmin.conn_root = DriverManager.getConnection(connection, DatenbankTab.neuerUser,
+                    DatenbankTab.neuesPasswort);
 
             return true;
         } catch (final SQLException ex) {
@@ -286,16 +286,16 @@ public class MyErstInstall extends JXPanel {
             System.out.println("*************************************************************************");
             System.out.println("Beginne mit der Umsetzung der rehajava.ini");
 
-            String decrypted = MySqlTab.neuesPasswort;
+            String decrypted = DatenbankTab.neuesPasswort;
             Verschluesseln man = Verschluesseln.getInstance();
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBPasswort1",
                     man.encrypt(decrypted));
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "AnzahlConnections", "1");
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBKontakt1",
-                    "jdbc:mysql://" + MySqlTab.iPAdresse + ":3306/" + MySqlTab.neuerDBName);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBName1", MySqlTab.neuerDBName);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBBenutzer1", MySqlTab.neuerUser);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBServer1", MySqlTab.iPAdresse);
+                    "jdbc:mysql://" + DatenbankTab.iPAdresse + ":3306/" + DatenbankTab.neuerDBName);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBName1", DatenbankTab.neuerDBName);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBBenutzer1", DatenbankTab.neuerUser);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBServer1", DatenbankTab.iPAdresse);
             // firmen.ini beschreiben
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "firmen.ini", "Firma", "Ik", tfs[0].getText()
                                                                                           .trim());

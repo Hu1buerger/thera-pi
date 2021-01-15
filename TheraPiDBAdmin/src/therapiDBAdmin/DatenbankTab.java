@@ -19,7 +19,7 @@ import org.jdesktop.swingx.JXTitledPanel;
 
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
-public class MySqlTab extends JXPanel implements ChangeListener {
+public class DatenbankTab extends JXPanel implements ChangeListener {
 
     /**
      *
@@ -43,7 +43,7 @@ public class MySqlTab extends JXPanel implements ChangeListener {
     private Vector<String> vecdescript = new Vector<String>();
     private Vector<ImageIcon> vecimg = new Vector<ImageIcon>();
 
-    MySqlTab() {
+    DatenbankTab() {
         super();
 
         setLayout(new BorderLayout());

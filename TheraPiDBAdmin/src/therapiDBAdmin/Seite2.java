@@ -31,9 +31,9 @@ public class Seite2 extends JXPanel {
     JPasswordField pw2 = null;
     JCheckBox checkalt = null;
     JButton[] buts = { null, null };
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
 
-    Seite2(MySqlTab xeltern) {
+    Seite2(DatenbankTab xeltern) {
         eltern = xeltern;
         // 1 2 3 4 5
         String xwerte = "fill:0:grow(0.5),right:max(250;p),5dlu,150dlu,fill:0:grow(0.5)";
@@ -111,7 +111,7 @@ public class Seite2 extends JXPanel {
             e.printStackTrace();
         }
         try {
-            String connection = "jdbc:mysql://" + MySqlTab.iPAdresse + ":" + MySqlTab.portAdresse + "/"
+            String connection = "jdbc:mysql://" + DatenbankTab.iPAdresse + ":" + DatenbankTab.portAdresse + "/"
                     + tfs[0].getText()
                             .trim();
             TheraPiDbAdmin.conn_db = DriverManager.getConnection(connection, tfs[1].getText()

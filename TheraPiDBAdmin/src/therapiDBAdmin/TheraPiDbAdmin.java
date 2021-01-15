@@ -59,7 +59,7 @@ public class TheraPiDbAdmin implements WindowListener {
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setLocationRelativeTo(null);
         jFrame.getContentPane()
-              .add(new MySqlTab());
+              .add(new DatenbankTab());
         jFrame.setVisible(true);
 
         thisFrame = jFrame;

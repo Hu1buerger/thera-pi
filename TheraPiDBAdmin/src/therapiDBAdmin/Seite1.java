@@ -25,9 +25,9 @@ public class Seite1 extends JXPanel {
     JFormattedTextField[] tfs = { null, null, null, null, null };
     JPasswordField pw = null;
     JButton[] buts = { null, null };
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
 
-    Seite1(MySqlTab xeltern) {
+    Seite1(DatenbankTab xeltern) {
         super();
         eltern = xeltern;
         // 1 2 3 4 5
@@ -60,9 +60,9 @@ public class Seite1 extends JXPanel {
                     eltern.setSeite1Ok(true);
                     eltern.sqlTab.setSelectedIndex(1);
                     buts[0].setEnabled(false);
-                    MySqlTab.iPAdresse = tfs[0].getText()
+                    DatenbankTab.iPAdresse = tfs[0].getText()
                                                .trim();
-                    MySqlTab.portAdresse = tfs[1].getText()
+                    DatenbankTab.portAdresse = tfs[1].getText()
                                                  .trim();
                     return;
                 }
