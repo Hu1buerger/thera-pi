@@ -133,7 +133,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     /*********** vor ind. Leitsymp.
     public JRtaCheckBox[] jcb = { null, null, null };
     **********/
-    public JRtaCheckBox[] jcb = { null, null, null, null, null, null, null, null };
+    public JRtaCheckBox[] jcb = { null, null, null, null, null, null, null, null, null };
     // Lemmi 20101231: Harte Index-Zahlen für "jcb" durch sprechende Konstanten
     // ersetzt !
     /*********** entfällt    
@@ -151,6 +151,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cLeitSymptB = 5;
     final int cLeitSymptC = 6;
     final int cLeitSymptX = 7;
+    final int cHygienePausch = 8;
 
 //    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
     public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null };
@@ -815,7 +816,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jpan.addLabel("Therapiebericht", cc.xy(1, ++rowCnt));   // 32
             jcb[cTBANGEF].addKeyListener(this);
             jpan.add(jcb[cTBANGEF], cc.xy(3, rowCnt++));
-
+            
             /********************/
             jcb[cHAUSB] = new JRtaCheckBox("Ja / Nein");
             jcb[cHAUSB].setOpaque(false);
@@ -905,7 +906,20 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jcmb[cBARCOD].addKeyListener(this);
             jpan.add(jcmb[cBARCOD], cc.xy(7, rowCnt++));
 
-            jpan.addLabel("Angelegt von", cc.xy(5, ++rowCnt));  // 47
+            jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
+            jcb[cHygienePausch].setOpaque(false);
+            jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 31.03.2021");
+            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(1, ++rowCnt));  // 47
+            if (neu) {
+                jcb[cHygienePausch].setSelected(false);
+            } else {
+                boolean dummy = myRezept.getUseHygPausch();
+                jcb[cHygienePausch].setSelected((myRezept.getUseHygPausch() ? true : false));
+            }
+            allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
+            jpan.add(jcb[cHygienePausch], cc.xy(3, rowCnt));
+
+            jpan.addLabel("Angelegt von", cc.xy(5, rowCnt));
             jtf[cANGEL].addKeyListener(this);
             jpan.add(jtf[cANGEL], cc.xy(7, rowCnt++));
             // *** bis hier ok ***
@@ -932,20 +946,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
             **********/
 
-            /*********** entfällt (?)
-            jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
-            jcb[cHygienePausch].setOpaque(false);
-            jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 30.09.2020");
-            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(1, 41));
-            if (neu) {
-                jcb[cHygienePausch].setSelected(false);
-            } else {
-                boolean dummy = myRezept.getUseHygPausch();
-                jcb[cHygienePausch].setSelected((myRezept.getUseHygPausch() ? true : false));
-            }
-            allowShortCut((Component) jcb[cHygienePausch], "hygPausch");
-            jpan.add(jcb[cHygienePausch], cc.xy(3, 41));
-            **********/
 
 
 
@@ -2414,9 +2414,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             thisRezept.setLeitSymIsC(jcb[cLeitSymptC].isSelected() ? true : false);
             thisRezept.setLeitSymIsX(jcb[cLeitSymptX].isSelected() ? true : false);
 
-            /*********** entfällt (?)
             thisRezept.setUseHygPausch(jcb[cHygienePausch].isSelected() ? true : false);
-            **********/
+
             stest = jtf[cANZKM].getText()
                                .trim(); // dito
             thisRezept.setKm(stest.equals("") ? "0.00" : stest);
