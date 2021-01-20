@@ -292,6 +292,14 @@ public class JRtaTextField extends JFormattedTextField implements PropertyChange
             if (inhalt.equals("  .  .    ")) {
                 return true;
             }
+
+            Calendar initDate = new GregorianCalendar();
+            initDate.setTime(new Date()); // Kalender auf heute
+            SimpleDateFormat datumsFormat = new SimpleDateFormat("dd.MM.yyyy");
+            String currDate = datumsFormat.format(initDate.getTime());
+            int jahrhundert = Integer.parseInt(currDate.substring(6,8));
+            int currJahr2stellig = Integer.parseInt(currDate.substring(8));
+
             final DateFormat sdf = this.getDateFormat();
             try {
                 String teil = inhalt.substring(6)
@@ -301,23 +309,19 @@ public class JRtaTextField extends JFormattedTextField implements PropertyChange
                     return true;
                 }
                 if (teil.length() == 2) {
-                    String jahrtausend = "";
-                    if (IntegerTools.trailNullAndRetInt(teil) > 20) {
-                        jahrtausend = inhalt.substring(0, 6)
-                                            .trim()
-                                + "19" + teil;
-                    } else {
-                        jahrtausend = inhalt.substring(0, 6)
-                                            .trim()
-                                + "20" + teil;
+                    String datumFinal = inhalt.substring(0, 6)
+                                              .trim();
+                    if (IntegerTools.trailNullAndRetInt(teil) > currJahr2stellig) {
+                        jahrhundert--;
                     }
-                    input.setText(jahrtausend);
+                    datumFinal = datumFinal + jahrhundert + teil;
+                    input.setText(datumFinal);
                 }
                 if (inhalt.length() >= 8) {
                     if (inhalt.substring(6, 7)
                               .equals("0")) {
                         String korrekt = inhalt.substring(0, 6);
-                        korrekt = korrekt + "20" + inhalt.substring(6, 8);
+                        korrekt = korrekt + jahrhundert + inhalt.substring(6, 8);
                         input.setText(korrekt);
                     }
                 }
