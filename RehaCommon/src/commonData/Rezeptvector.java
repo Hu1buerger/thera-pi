@@ -307,6 +307,15 @@ public class Rezeptvector {
         setBoolAt(24, data);
     }
 
+    public String getAkutDatum() {
+        return getStringAt(25);
+    }
+
+    public void setAkutDatum(String akutDat) {
+        setStringAt(25, akutDat);
+    }
+
+
     public int getRezArt() {
         return getIntAt(27);
     }
@@ -314,6 +323,19 @@ public class Rezeptvector {
     public void setRezArt(int rezArt) {
         setIntAt(27, rezArt);
     }
+
+    int skipPre2020 = 3;   // Erst-,Folge-VO u. A.d.R. belegen Werte 0..2
+    public int getVoArtHmr2020() {
+        int tmp = getIntAt(27);
+        tmp -= skipPre2020;
+        return (tmp >= 0? tmp : 0);
+    }
+
+    public int setVoArtHmr2020(int voArt) {
+        setIntAt(27, voArt + skipPre2020);
+        return 0;
+    }
+
 
     public String getTermine() {
         return getStringAt(34);
@@ -734,7 +756,8 @@ public class Rezeptvector {
         cmd.append("datum='" + getAngelegtDatum() + "', ");
         cmd.append("diagnose='" + getDiagn() + "', ");
         cmd.append("heimbewohn='" + getHeimbewS() + "', ");
-        // veraenderd, veraendera
+        cmd.append("veraenderd='" + getAkutDatum() + "', ");
+        // veraendera
         cmd.append("rezeptart='" + getRezArt() + "', ");
         // logfrei1, logfrei2, numfrei1, numfrei2, charfrei1, charfrei2, termine, id
         cmd.append("ktraeger='" + getKtrName() + "', ");
@@ -765,7 +788,6 @@ public class Rezeptvector {
         cmd.append("icd10='" + getICD10() + "', ");
         cmd.append("icd10_2='" + getICD10_2() + "', ");
         cmd.append("pauschale='" + getUseHygPauschS() + "', ");
-        // hmr2020
         cmd.append("leitsyma='" + getLeitSymIsAS() + "', ");
         cmd.append("leitsymb='" + getLeitSymIsBS() + "', ");
         cmd.append("leitsymc='" + getLeitSymIsCS() + "', ");

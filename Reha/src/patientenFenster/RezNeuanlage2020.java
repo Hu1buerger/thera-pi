@@ -78,7 +78,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     // Lemmi Doku: Das sind die Text-Eingabefgelder im Rezept
     public JRtaTextField[] jtf = { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-            null };
+            null,  null };
     // Lemmi 20101231: Harte Index-Zahlen für "jtf" durch sprechende Konstanten
     // ersetzt !
     final int cKTRAEG = 0;
@@ -119,6 +119,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cHEIMBEWPATSTAM = 29;
     final int cICD10 = 30;
     final int cICD10_2 = 31;
+    final int cAKUTDATUM = 32;
 
     // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder, Combo-
     // und Check-Boxen
@@ -154,12 +155,9 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cHygienePausch = 8;
 
 //    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
-    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null };
+    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
 
     final int cRKLASSE = 0;
-    /*********** entfällt    
-    final int cVERORD = 1;
-    **********/    
     final int cLEIST1 = 1; // Lemmi 20101231: ACHTUNG
                            // die Positionen cLEIST1 bis cLEIST4 müssen immer
                            // nacheinander definiert sein
@@ -169,6 +167,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cINDI = 5;
     final int cBARCOD = 6;
     final int cFARBCOD = 7;
+    final int cVERORDART = 8;
 
     public JTextArea diagnose_txt = null;
     private JTextArea lsym_x_txt;
@@ -551,8 +550,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
               // RK   2.  sp   4.    KT  6   RD    8   sp   10  I1   12  I2   14  DG   16  iL       19  sp   21  H1   23  H2   25  H3
                 "p, 10dlu, p, 5dlu,  p, 2dlu, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, "
                         +
-                       // 27  eH    29  sp   31  TB   33  HB   35  BF   37  DB   39   TZ      42  sp   44  FC   46  av   48    
-                        "7dlu, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu");
+                       // 27  eH    29  sp   31  TB   33  HB   35  BF   37  DB   39   TZ      42  sp   44  FC   46  VA   48  av   50    
+                        "7dlu, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, 2dlu, p, p, 10dlu, p, 5dlu, p, 2dlu, p, 2dlu, p, 2dlu");
 
         CellConstraints cc = new CellConstraints();
         PanelBuilder jpan = new PanelBuilder(lay);
@@ -597,6 +596,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jtf[cHEIMBEWPATSTAM] = new JRtaTextField("", false); // Heimbewohner aus PatStamm
             jtf[cICD10] = new JRtaTextField("GROSS", false); // 1. ICD10-Code
             jtf[cICD10_2] = new JRtaTextField("GROSS", false); // 2. ICD10-Code
+            jtf[cAKUTDATUM] = new JRtaTextField("DATUM", true); // akutDatum
             jcmb[cRKLASSE] = new JRtaComboBox();
             strRezepklassenAktiv = diszis.getActiveRK();
             jcmb[cRKLASSE] = diszis.getComboBoxActiveRK();
@@ -698,7 +698,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jtf[cREZDAT].setName("rez_datum");
             allowShortCut((Component) jtf[cREZDAT], "rez_datum");
             jpan.addLabel("Rezeptdatum", cc.xy(1, ++rowCnt));   // 7
-            jpan.add(jtf[cREZDAT], cc.xy(3, rowCnt));
             eingabeRezDate = jpan.add(jtf[cREZDAT], cc.xy(3, rowCnt));
 
             allowShortCut((Component) jtf[cBEGINDAT], "lastdate");
@@ -906,10 +905,25 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jcmb[cBARCOD].addKeyListener(this);
             jpan.add(jcmb[cBARCOD], cc.xy(7, rowCnt++));
 
+            /********************/
+            jcmb[cVERORDART] = new JRtaComboBox(
+                    new String[] { "Standard","Bes.VO-Bedarf","Langfrist-VO","Blanko-VO","Entlassmanagement" });
+            jcmb[cVERORDART].setActionCommand("verordnungsart");
+            jcmb[cVERORDART].addActionListener(voArtActionListener);
+//            allowShortCut((Component) jcmb[cVERORDART], "selArtDerVerordn");
+            jpan.addLabel("Verordnungsart", cc.xy(1, ++rowCnt));   // 47
+//            eingabeVerordnArt = jpan.add(jcmb[cVERORDART], cc.xy(3, rowCnt));
+            jpan.add(jcmb[cVERORDART], cc.xy(3, rowCnt));
+
+            jtf[cAKUTDATUM].setName("akut_datum");
+            jpan.addLabel("Datum Akutereignis", cc.xy(5, rowCnt));
+            jpan.add(jtf[cAKUTDATUM], cc.xy(7, rowCnt++));
+
+            /********************/
             jcb[cHygienePausch] = new JRtaCheckBox("abrechnen");
             jcb[cHygienePausch].setOpaque(false);
             jcb[cHygienePausch].setToolTipText("nur zulässig bei Abrechnung zwischen 05.05.2020 und 31.03.2021");
-            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(1, ++rowCnt));  // 47
+            jpan.addLabel("Hygiene-Mehraufwand", cc.xy(1, ++rowCnt));  // 49
             if (neu) {
                 jcb[cHygienePausch].setSelected(false);
             } else {
@@ -930,14 +944,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             
             
             /*********** entfällt                
-            jcmb[cVERORD] = new JRtaComboBox(
-                    new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
-            jcmb[cVERORD].setActionCommand("verordnungsart");
-            jcmb[cVERORD].addActionListener(this);
-            allowShortCut((Component) jcmb[cVERORD], "selArtDerVerordn");
-            jpan.addLabel("Art d. Verordn.", cc.xy(1, 11));
-            eingabeVerordnArt = jpan.add(jcmb[cVERORD], cc.xy(3, 11));
-
             jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
             jcb[cBEGRADR].setOpaque(false);
             jcb[cBEGRADR].setEnabled(false);
@@ -1161,6 +1167,23 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
     };
  */   
+    ActionListener voArtActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String cmd = e.getActionCommand();
+            if (cmd.equals("leitSymA")) {
+                //action
+            }
+            if(jcmb[cVERORDART].getSelectedIndex() == 1) {
+                jtf[cAKUTDATUM].setEnabled(true);
+            }else {
+                jtf[cAKUTDATUM].setText("  .  .    ");
+                jtf[cAKUTDATUM].setEnabled(false);
+            }
+        }
+        
+    };
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getActionCommand()
@@ -2072,10 +2095,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
         int itest = 0;
         /*********** entfällt
-        itest = myRezept.getRezArt();
-        if (itest >= 0) {
-            jcmb[cVERORD].setSelectedIndex(itest);
-        }
         jcb[cBEGRADR].setSelected(myRezept.getBegrAdR());
         **********/
         jcb[cHAUSB].setSelected(myRezept.getHausbesuch());
@@ -2157,6 +2176,14 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jcmb[cFARBCOD].setSelectedItem((String) SystemConfig.vSysColsBedeut.get(itest));
         }
 
+        itest = myRezept.getVoArtHmr2020();
+        jcmb[cVERORDART].setSelectedIndex(itest);
+
+        test = StringTools.NullTest(myRezept.getAkutDatum());
+        if (!test.equals("")) {
+            jtf[cAKUTDATUM].setText(DatFunk.sDatInDeutsch(test));
+        }
+        
     }
 
     /***********
@@ -2207,7 +2234,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
             thisRezept.setLastEdit(Reha.aktUser);
             /*********** entfällt
-            thisRezept.setRezArt(jcmb[cVERORD].getSelectedIndex());
             thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());
             **********/
             thisRezept.setHausbesuch(jcb[cHAUSB].isSelected());
@@ -2268,6 +2294,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             } else {
                 thisRezept.setFarbCode(-1);
             }
+            thisRezept.setVoArtHmr2020(jcmb[cVERORDART].getSelectedIndex());
+
             //// System.out.println("Speichern bestehendes Rezept -> Preisgruppe =
             //// "+jtf[cPREISGR].getText());
             Integer izuzahl = Integer.valueOf(jtf[cPREISGR].getText());
@@ -2426,6 +2454,14 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                                          .replace(" ", ""));
             thisRezept.setICD10_2(jtf[cICD10_2].getText()
                                              .replace(" ", ""));
+
+            thisRezept.setVoArtHmr2020(jcmb[cVERORDART].getSelectedIndex());
+            stest = jtf[cAKUTDATUM].getText()
+                    .trim();
+            if (!stest.equals(".  .")) {
+                thisRezept.setAkutDatum(DatFunk.sDatInSQL(stest));
+            }
+            
             thisRezept.setIsHMR2020(true);
             setCursor(Cursors.normalCursor);
         } catch (Exception ex) {

@@ -2795,10 +2795,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     neuRez.getSmartTitledPanel()
                           .setTitle("Rezept Neuanlage");
                 }
-                neuRez.setSize(500, 800);
-                neuRez.setPreferredSize(new Dimension(505 + Reha.zugabex, 710 + Reha.zugabey));
+                neuRez.setSize(500, 820);
+                neuRez.setPreferredSize(new Dimension(505 + Reha.zugabex, 730 + Reha.zugabey));
                 neuRez.getSmartTitledPanel()
-                      .setPreferredSize(new Dimension(505, 800));
+                      .setPreferredSize(new Dimension(505, 820));
                 neuRez.setPinPanel(pinPanel);
                 if (lneu) {
                     // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei

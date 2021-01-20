@@ -115,15 +115,17 @@ public class VoEditWindow extends JXPanel {  // implements ActionListener, KeyLi
 
     private void showMask() {
         aktiveMaske.setVisible(false);
-        if(idxMask == idxMask2020) {
-            eingabeMasken[idxMask2020] = new RezNeuanlage2020((Vector<String>) this.vec.clone(), this.neu, this.connection);
-            setBackgroundPainter(Reha.instance.compoundPainter.get("ArztPanel"));
+        if (!aktiveMaske.equals(eingabeMasken[idxMask])) {
+            if(idxMask == idxMask2020) {
+                eingabeMasken[idxMask2020] = new RezNeuanlage2020((Vector<String>) this.vec.clone(), this.neu, this.connection);
+                setBackgroundPainter(Reha.instance.compoundPainter.get("ArztPanel"));
+            }
+            if(idxMask == idxOldMask) {
+                eingabeMasken[idxOldMask] = new RezNeuanlage((Vector<String>) this.vec.clone(), this.neu, this.connection);
+                setBackgroundPainter(Reha.instance.compoundPainter.get("RezNeuanlage"));
+            }
+            aktiveMaske = eingabeMasken[idxMask];
         }
-        if(idxMask == idxOldMask) {
-            eingabeMasken[idxOldMask] = new RezNeuanlage((Vector<String>) this.vec.clone(), this.neu, this.connection);
-            setBackgroundPainter(Reha.instance.compoundPainter.get("RezNeuanlage"));
-        }
-        aktiveMaske = eingabeMasken[idxMask];
         this.add(aktiveMaske, BorderLayout.CENTER);
         aktiveMaske.setVisible(true);
         validate();
