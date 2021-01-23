@@ -52,6 +52,7 @@ import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
+import commonData.VerordnungsArten;
 import environment.LadeProg;
 import environment.Path;
 import events.RehaTPEvent;
@@ -907,7 +908,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
             /********************/
             jcmb[cVERORDART] = new JRtaComboBox(
-                    new String[] { "Standard","Bes.VO-Bedarf","Langfrist-VO","Blanko-VO","Entlassmanagement" });
+                    new VerordnungsArten().getHmr2020() );
             jcmb[cVERORDART].setActionCommand("verordnungsart");
             jcmb[cVERORDART].addActionListener(voArtActionListener);
 //            allowShortCut((Component) jcmb[cVERORDART], "selArtDerVerordn");

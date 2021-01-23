@@ -26,6 +26,7 @@ import CommonTools.JCompTools;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
+import commonData.VerordnungsArten;
 import hauptFenster.Reha;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -47,7 +48,7 @@ public class HistorDaten extends JXPanel {
             null };
     public JTextArea rezdiag = null;
 
-    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. außerhalb d.R." };
+    public String[] rezart = new VerordnungsArten().getHmrOld();
     /*
      * ImageIcon hgicon; int icx,icy; AlphaComposite xac1 = null; AlphaComposite
      * xac2 = null;

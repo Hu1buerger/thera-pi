@@ -51,6 +51,7 @@ import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
+import commonData.VerordnungsArten;
 import environment.LadeProg;
 import environment.Path;
 import events.RehaTPEvent;
@@ -634,7 +635,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
             jpan.add(jtf[cBEGINDAT], cc.xy(7, 9));
 
             jcmb[cVERORD] = new JRtaComboBox(
-                    new String[] { "Erstverordnung", "Folgeverordnung", "außerhalb des Regelfalles" });
+                    new VerordnungsArten().getHmrOld() );
             jcmb[cVERORD].setActionCommand("verordnungsart");
             jcmb[cVERORD].addActionListener(this);
             allowShortCut(jcmb[cVERORD], "selArtDerVerordn");

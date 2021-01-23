@@ -33,6 +33,7 @@ import CommonTools.JRtaTextField;
 import CommonTools.StringTools;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
+import commonData.VerordnungsArten;
 import environment.Path;
 import hauptFenster.Reha;
 import rechteTools.Rechte;
@@ -59,7 +60,7 @@ public class RezeptDaten extends JXPanel implements ActionListener {
     private JMenuItem copyToBunker = null;
     private JRtaLabel hblab = null;
 
-    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. außerhalb d.R." };
+    public String[] rezart = new VerordnungsArten().getAll();
 
     public RezeptDaten(PatientHauptPanel eltern) {
         super();

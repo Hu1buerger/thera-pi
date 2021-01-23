@@ -107,6 +107,7 @@ import ag.ion.bion.officelayer.application.OfficeApplicationException;
 import ag.ion.bion.officelayer.text.TextException;
 import ag.ion.noa.NOAException;
 import commonData.Rezeptvector;
+import commonData.VerordnungsArten;
 import environment.Path;
 import hauptFenster.Reha;
 import hauptFenster.UIFSplitPane;
@@ -231,8 +232,9 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     StringBuffer buf3 = new StringBuffer();
 
     private UIFSplitPane jSplitOU = null;
-    private String[] voArt = { "Erstverordnung", "Folgeverordnung", "Folgeverordn. außerhalb d. Regelf." };
-    private String[] voIndex = { "01", "02", "10" };
+    private String[] voArt = new VerordnungsArten().getAll();
+    // ERST_VO, FOLGE_VO, FOLGE_VO_A_D_R, STANDARD_VO, BES_VO_BEDARF, LANGFRIST_VO, BLANKO_VO, ENTLASS_MNGMNT
+    private String[] voIndex = { "01", "02", "10", "03", "04", "04", "05", "4" };   // s. Anl.3, 8.1.12 / 8.1.11
 
     private String[] voBreak = { "", "K", "F", "T", "A" };
     // private String[] voPreis = {"akt. Tarif","alter Tarif"};

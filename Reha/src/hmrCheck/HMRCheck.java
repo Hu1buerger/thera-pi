@@ -13,6 +13,7 @@ import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
 import abrechnung.Disziplinen;
 import commonData.Rezeptvector;
+import commonData.VerordnungsArten;
 import hauptFenster.Reha;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
@@ -39,7 +40,7 @@ public class HMRCheck {
     static SimpleDateFormat sdDeutsch = new SimpleDateFormat("dd.MM.yyyy");
     static SimpleDateFormat sdSql = new SimpleDateFormat("yyyy-MM-dd");
 
-    String[] rezarten = { "Erstverordnung", "Folgeverordnung", "Verordnung außerhalb des Regelfalles" };
+    VerordnungsArten voArten = new VerordnungsArten();
 
     String[] keinefolgevo = { "EX1a", "EX1b", "EX1c", "WS1a", "WS1b", "WS1c", "WS1d", "WS1e", "AT1a", "AT1b", "AT1c",
             "SB4", "ST3" };
@@ -195,7 +196,7 @@ public class HMRCheck {
                    .contains(indischluessel))
                 && (rezeptart > 0)) {
             fehlertext.add("<b>Bei Indikationsschlüssel " + indischluessel + " ist keine<br><font color='#ff0000'>"
-                    + rezarten[rezeptart] + "</font> erlaubt!!</b><br><br>");
+                    + voArten.getHmrOld()[rezeptart] + "</font> erlaubt!!</b><br><br>");
             testok = false;
         }
         // Hier den Folgeverordnungstest einbauen, bzw. testen ob Höchstverordnungsmenge
@@ -709,7 +710,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsErstVO(int rezeptArt) {
-        if (rezarten[rezeptArt] == "Erstverordnung") {
+        if (voArten.getHmrOld()[rezeptArt].equals(voArten.ERST_VO)) {
             return true;
         } else {
             return false;
@@ -736,7 +737,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsFolgeVO(int rezeptArt) {
-        if (rezarten[rezeptArt] == "Folgeverordnung") {
+        if (voArten.getHmrOld()[rezeptArt].equals(voArten.FOLGE_VO)) {
             return true;
         } else {
             return false;
@@ -759,7 +760,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsAdR(int rezeptArt) {
-        if (rezarten[rezeptArt].equals("Verordnung außerhalb des Regelfalles")) {
+        if (voArten.getHmrOld()[rezeptArt].equals(voArten.FOLGE_VO_A_D_R)) {
             return true;
         } else {
             return false;
