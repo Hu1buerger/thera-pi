@@ -1,4 +1,4 @@
-package therapi.updatehint;
+package therapi.updatehint.fx;
 
 import java.awt.Desktop;
 import java.io.File;

@@ -5,6 +5,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.swing.SwingUtilities;
 
+import org.thera_pi.updater.UpdateConsent;
+import org.thera_pi.updater.UpdateUI;
+
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.ChoiceDialog;
@@ -45,4 +48,5 @@ public class DefaultUpdateUI extends ChoiceDialog<UpdateConsent> implements Upda
         if (!latch.await(5L, TimeUnit.SECONDS))
             throw new ExceptionInInitializerError();
     }
+
 }

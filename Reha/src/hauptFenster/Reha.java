@@ -169,7 +169,8 @@ import systemTools.RehaPainters;
 import systemTools.RezeptFahnder;
 import systemTools.TestePatStamm;
 import terminKalender.TerminFenster;
-import therapi.updatehint.UpdatesMain;
+import therapi.updatehint.HintMain;
+import therapi.updatehint.fx.UpdatesMainFX;
 import umfeld.Betriebsumfeld;
 import update.DueUpdates;
 import urlaubBeteiligung.Beteiligung;
@@ -342,7 +343,7 @@ public class Reha implements RehaEventListener , Monitor{
     public static Vector<Vector<String>> vRGAFoffen;
     public static boolean bRGAFoffen;
     public static boolean bHatMerkmale;
-    
+
     public static HmrCheck2021XML hmrXML;
 
     public static Vector<Vector<List<String>>> terminLookup = new Vector<Vector<List<String>>>();
@@ -397,26 +398,26 @@ public class Reha implements RehaEventListener , Monitor{
 
         logger = LoggerFactory.getLogger(Reha.class);
     }
-   
-    
-	public void startWithMandantSet(Mandant mandant) {
-    	//TODO
-		
-		InetAddress byName;
-		try {
-			byName = InetAddress.getByName("pfluegeredv.de");
-			if(byName.isReachable(5000)) {;
-	    		Reha.tracking(mandant.ikDigitString());
-	        	Reha.loadBackground();
-	    	}
-		} catch (UnknownHostException e3) {
-		} catch (IOException e) {
-		}
-    	
-    	
-    	
-    	
-    	Reha.hmrXML = new HmrCheck2021XML(new File(Path.Instance.getProghome()+"\\tools\\hmk.xml"));
+
+
+    public void startWithMandantSet(Mandant mandant) {
+        //TODO
+
+        InetAddress byName;
+        try {
+            byName = InetAddress.getByName("pfluegeredv.de");
+            if(byName.isReachable(5000)) {;
+                Reha.tracking(mandant.ikDigitString());
+                Reha.loadBackground();
+            }
+        } catch (UnknownHostException e3) {
+        } catch (IOException e) {
+        }
+
+
+
+
+        Reha.hmrXML = new HmrCheck2021XML(new File(Path.Instance.getProghome()+"\\tools\\hmk.xml"));
         logger.info("Thera-Pi Version: " + new Version().number());
         logger.info("Java Version:     " + System.getProperty("java.version"));
 
@@ -1262,10 +1263,11 @@ public class Reha implements RehaEventListener , Monitor{
     }
 
     private void searchForUpdates() {
-        Thread updater = new Thread("Udpater") {
+        Thread updater = new Thread("Updater") {
             @Override
             public void run() {
-                UpdatesMain.main(new String[0]);
+                HintMain updateCheck = new HintMain(new UpdatesMainFX());
+                updateCheck.execute();
             }
         };
         updater.start();
@@ -2291,153 +2293,153 @@ public class Reha implements RehaEventListener , Monitor{
             SqlInfo.sqlAusfuehren(cmd);
         }
     }
-    
+
     static void testeDBVersion() {
-    	// Version aus DB Abfragen
-    	
-    	// wenn < 1.1.13
-    	if(!testeTableExists("version")) {
-    		JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.1.13\n"
-    				+ "Updates werden jetzt durchgeführt", "DB Version Check", JOptionPane.ERROR_MESSAGE);
-    		checkForDB1113();
-    	}
+        // Version aus DB Abfragen
+
+        // wenn < 1.1.13
+        if(!testeTableExists("version")) {
+            JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.1.13\n"
+                    + "Updates werden jetzt durchgeführt", "DB Version Check", JOptionPane.ERROR_MESSAGE);
+            checkForDB1113();
+        }
     }
     static void checkForDB1113() {
-    	
-    	//gibt es adrgenehmigung
-    	if(!testeTableExists("adrgenehmigung")) {
-    			runExternSQL("adrgenehmigung.sql");
-    	}
-    	// gibt es hmr_diagnosegruppe
-    	if(!testeTableExists("hmr_diagnosegruppe")) {
-    		runExternSQL("hmrdiagnosegruppe.sql");
-    	}
-    	
-    	// verkaufstabellen double in dezi
-    	if(!testeTableStructure("verkliste", "v_betrag", "decimal(10,2)")) {
-    		runExternSQL("verkaufsmodul.sql");
-    	}
-    	// ik spalte in Rechnungstabellen (verkfaktura, rgaffaktura,faktura,rliste)
-    	boolean ikspalte = true;
-    	if(!testeTableColumn("verkfaktura", "IK")) { ikspalte = false; };
-    	if(!testeTableColumn("rgaffaktura", "IK")) { ikspalte = false; };
-    	if(!testeTableColumn("faktura", "IK")) { ikspalte = false; };
-    	if(!testeTableColumn("rliste", "IK")) { ikspalte = false; };
-    	
-    	if(!ikspalte) {
-    		runExternSQL("ikfaktura.sql");
-    	}
-    	
-    	// icd10_2 in verordn, lza wird dann implizit vorrausgesetzt
-    	if(!testeTableColumn("verordn", "ICD10_2")) {
-    		runExternSQL("icd102.sql");
-    	}
-    	
-    	// pauschale in verordn
-    	if(!testeTableColumn("verordn", "PAUSCHALE")) {
-    		runExternSQL("pauschale.sql");
-    	}
-    	
-    	//hmr2021 spalten in verordn
-    	if(!testeTableColumn("verordn", "LEITSYMA")) {
-    		runExternSQL("verordn2021.sql");
-    	}
-    	
-    	//ICD-10 Tabelle 2021 importieren
-    	runExternSQL("icd2021.sql");    	
-    	        
+
+        //gibt es adrgenehmigung
+        if(!testeTableExists("adrgenehmigung")) {
+                runExternSQL("adrgenehmigung.sql");
+        }
+        // gibt es hmr_diagnosegruppe
+        if(!testeTableExists("hmr_diagnosegruppe")) {
+            runExternSQL("hmrdiagnosegruppe.sql");
+        }
+
+        // verkaufstabellen double in dezi
+        if(!testeTableStructure("verkliste", "v_betrag", "decimal(10,2)")) {
+            runExternSQL("verkaufsmodul.sql");
+        }
+        // ik spalte in Rechnungstabellen (verkfaktura, rgaffaktura,faktura,rliste)
+        boolean ikspalte = true;
+        if(!testeTableColumn("verkfaktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("rgaffaktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("faktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("rliste", "IK")) { ikspalte = false; };
+
+        if(!ikspalte) {
+            runExternSQL("ikfaktura.sql");
+        }
+
+        // icd10_2 in verordn, lza wird dann implizit vorrausgesetzt
+        if(!testeTableColumn("verordn", "ICD10_2")) {
+            runExternSQL("icd102.sql");
+        }
+
+        // pauschale in verordn
+        if(!testeTableColumn("verordn", "PAUSCHALE")) {
+            runExternSQL("pauschale.sql");
+        }
+
+        //hmr2021 spalten in verordn
+        if(!testeTableColumn("verordn", "LEITSYMA")) {
+            runExternSQL("verordn2021.sql");
+        }
+
+        //ICD-10 Tabelle 2021 importieren
+        runExternSQL("icd2021.sql");
+
         // Version DB auf 1.1.13 setzen
-    	runExternSQL("version.sql");
+        runExternSQL("version.sql");
     }
-    
+
     static void runExternSQL(String filename) {
-    	ScriptRunner runner = new ScriptRunner(Reha.instance.conn, false, false);
-    	String pfad = "C:\\RehaVerwaltung\\tools\\"+filename;
-    	try {
-			runner.runScript(new BufferedReader(new FileReader(pfad)));
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+        ScriptRunner runner = new ScriptRunner(Reha.instance.conn, false, false);
+        String pfad = "C:\\RehaVerwaltung\\tools\\"+filename;
+        try {
+            runner.runScript(new BufferedReader(new FileReader(pfad)));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
-    
+
     static boolean testeTableColumn(String table, String column) {
-    	Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"`;");
-    	for(Vector<String> v : structure) {
-    		if(v.get(0).equals(column)) {
-    			return true;
-    		}
-    	}
-    	return false;
+        Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"`;");
+        for(Vector<String> v : structure) {
+            if(v.get(0).equals(column)) {
+                return true;
+            }
+        }
+        return false;
     }
-    
+
     static boolean testeTableStructure(String table, String column, String type) {
-    	Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"` LIKE '"+column+"';");
-    	String dbTyp = structure.get(0).get(1);
-    	if(dbTyp.equals(type)) {
-    		return true;
-    	}
-    	return false;
+        Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"` LIKE '"+column+"';");
+        String dbTyp = structure.get(0).get(1);
+        if(dbTyp.equals(type)) {
+            return true;
+        }
+        return false;
     }
-    
-    
-    
+
+
+
     static boolean testeTableExists(String tablename) {
-    	Vector<Vector<String>> showTables = SqlInfo.holeFelder("SHOW TABLES;");
-    	
-    	for(Vector<String> t : showTables) {
-    		if(t.get(0).equals(tablename)) {
-    			return true;
-    		}
-    	}
-    	System.out.println("Tabellen Prüfung: Tabelle " + tablename + " nicht (!) gefunden");
-    	return false;
+        Vector<Vector<String>> showTables = SqlInfo.holeFelder("SHOW TABLES;");
+
+        for(Vector<String> t : showTables) {
+            if(t.get(0).equals(tablename)) {
+                return true;
+            }
+        }
+        System.out.println("Tabellen Prüfung: Tabelle " + tablename + " nicht (!) gefunden");
+        return false;
     }
-    
+
     static void tracking(String ik) {
-    	String mac = "N/A";
-    	try {
-			NetworkInterface ni = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
-			byte[] adr = ni.getHardwareAddress();
-			if(adr != null) {
-				mac = "";
-				for(int i = 0; i < adr.length; i++) {
-					mac += String.format("%x:",	 adr[i]);
-				}
-			}
-			
-		} catch (SocketException | UnknownHostException e) {
-		}
-    	try {
-    		String url = "https://pfluegeredv.de/tracking.php?mac="+mac+"&ik="+ik;
-			new URL(url).openStream().close();;
-		} catch (IOException e) {
-		}
-    	
+        String mac = "N/A";
+        try {
+            NetworkInterface ni = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
+            byte[] adr = ni.getHardwareAddress();
+            if(adr != null) {
+                mac = "";
+                for(int i = 0; i < adr.length; i++) {
+                    mac += String.format("%x:",	 adr[i]);
+                }
+            }
+
+        } catch (SocketException | UnknownHostException e) {
+        }
+        try {
+            String url = "https://pfluegeredv.de/tracking.php?mac="+mac+"&ik="+ik;
+            new URL(url).openStream().close();;
+        } catch (IOException e) {
+        }
+
     }
-    
+
     static void loadBackground() {
-    	Path.Instance.getProghome();
-    	try {
-			URL url = new URL("https://pfluegeredv.de/therapieMT1.gif");
-			InputStream in = new BufferedInputStream(url.openStream());
-			OutputStream out = new BufferedOutputStream(new FileOutputStream(Path.Instance.getProghome() +"icons/therapieMT1.gif"));
-			
-			for(int i; (i = in.read())!= -1;) {
-				out.write(i);
-			}
-			in.close();
-			out.close();
-		} catch (IOException e) {
-		}
+        Path.Instance.getProghome();
+        try {
+            URL url = new URL("https://pfluegeredv.de/therapieMT1.gif");
+            InputStream in = new BufferedInputStream(url.openStream());
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(Path.Instance.getProghome() +"icons/therapieMT1.gif"));
+
+            for(int i; (i = in.read())!= -1;) {
+                out.write(i);
+            }
+            in.close();
+            out.close();
+        } catch (IOException e) {
+        }
     }
-   
+
 
     ActionListener actionListener = new MenuActionListener(this);
 
