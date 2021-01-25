@@ -3892,7 +3892,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             JOptionPane.showMessageDialog(null, "Versichertennummer nicht angegeben oder falsch");
             return false;
         }
-        edibuf.append("INV+" + test.trim() + plus);
+        edibuf.append("INV+" + test.trim() + plus); // Versicherten-Nummer
         test = vec_pat.get(0)
                       .get(7);
         if (test.trim()
@@ -3904,23 +3904,23 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                        .length() > 5) {
             test = test.substring(0, 5);
         } else {
-            test = test.substring(0, 1) + "0001";
+            test = test.substring(0, 1) + "0001";   // McM: sollte das nicht '0000' sein? (Anlage1 Versichertenstatus)
         }
         if (test.trim()
-                .length() != 5
+                .length() != 5  // McM: 'Länge falsch' kann nicht sein (wurde gerade entweder auf 5 gekürzt oder erweitert)
                 || (test.trim()
                         .indexOf(" ") >= 0)) {
             JOptionPane.showMessageDialog(null,
                     "Die Länge des Versichertenstatus ist falsch, oder es wurden Leerzeichen im Status angegeben!\nRezept kann nicht abgerechnet werden");
             return false;
         }
-        edibuf.append(test.trim() + plus + plus);
-        edibuf.append(aktRezept.getRezNb() + EOL);
-        edibuf.append("NAD+" + hochKomma(vec_pat.get(0)
+        edibuf.append(test.trim() + plus + plus);   // Versichertenstatus + McM: sollte Beleginformation nicht auf '1' (= per Post) stehen?
+        edibuf.append(aktRezept.getRezNb() + EOL);  // Belegnummer  McM: opt.: besondere Versorgungsform  u. URI-Segment (bei Korrektur)
+        edibuf.append("NAD+" + hochKomma(vec_pat.get(0) // Nachname
                                                 .get(0)
                                                 .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)
+        edibuf.append(hochKomma(vec_pat.get(0)  // Vorname
                                        .get(1)
                                        .trim())
                 + plus);
@@ -3930,25 +3930,25 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             JOptionPane.showMessageDialog(null, "Geburtsdatum nicht angegeben");
             return false;
         }
-        edibuf.append(test + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)
+        edibuf.append(test + plus); // Geburtsdatum
+        edibuf.append(hochKomma(vec_pat.get(0)  // Straße Nr.
                                        .get(3)
                                        .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)
+        edibuf.append(hochKomma(vec_pat.get(0)  // PLZ
                                        .get(4)
                                        .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)
+        edibuf.append(hochKomma(vec_pat.get(0)  // Wohnort
                                        .get(5)
                                        .trim())
-                + EOL);
+                + EOL); // McM: opt.: Länderkennzeichen
         JXTTreeTableNode node;
-        for (int i = 0; i < getNodeCount(); i++) {
+        for (int i = 0; i < getNodeCount(); i++) {  // je Termin
             node = holeNode(i);
             // Notwendig wg. BKK-Gesundheit Tarifwechsel
             if (!node.abr.tarifwechsel) {
-                edibuf.append(
+                edibuf.append(  // Einzelfallnachweis Heilmittel + Abrechnungscode + Tarifkennzeichen (Anlage 3 8.1.5.1/2)
                         (disziplinGruppe.equals("61") || disziplinGruppe.equals("62") ? "ENF++" : "EHE+")
                                 + disziplinGruppe + ":" + SystemPreislisten.hmPreisBereich.get(aktDisziplin)
                                                                                           .get(Integer.parseInt(
@@ -3960,20 +3960,20 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 edibuf.append((disziplinGruppe.equals("61") || disziplinGruppe.equals("62") ? "ENF++" : "EHE+")
                         + disziplinGruppe + ":" + node.abr.tarifkennzeichen + "000" + plus);
             }
-            edibuf.append(RezTools.getPosFromID(node.abr.preisid, preisgruppe, preisvec) + plus);
-            edibuf.append(dfx.format(node.abr.anzahl) + plus);
+            edibuf.append(RezTools.getPosFromID(node.abr.preisid, preisgruppe, preisvec) + plus);   // Abrechnungspositionsnummer
+            edibuf.append(dfx.format(node.abr.anzahl) + plus);  // Anzahl
             gesamt += BigDecimal.valueOf(node.abr.preis)
                                 .multiply(BigDecimal.valueOf(node.abr.anzahl))
                                 .doubleValue();
-            edibuf.append(dfx.format(node.abr.preis) + plus);
-            edibuf.append(ediDatumFromDeutsch(node.abr.datum));
+            edibuf.append(dfx.format(node.abr.preis) + plus);   // Einzelbetrag
+            edibuf.append(ediDatumFromDeutsch(node.abr.datum)); // Datum d. Behandlg.
             if (node.abr.rezgeb > 0) {
                 rez += node.abr.rezgeb;
                 if (eltern.zuzahlModusDefault) {
                     edibuf.append(plus + dfx.format(node.abr.rezgeb) + EOL);
                 } else { // bayrischer Modus
                          // Einstieg1 für Kilometer
-                    edibuf.append(plus + dfx.format(node.abr.rezgeb / node.abr.anzahl) + EOL);
+                    edibuf.append(plus + dfx.format(node.abr.rezgeb / node.abr.anzahl) + EOL);  // Zuzahlung
                 }
 
             } else {
@@ -3983,11 +3983,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                                         .equals(""))
                     && (!node.abr.unterbrechung.trim()
                                                .equals("-"))) {
-                edibuf.append("TXT+" + node.abr.unterbrechung.trim() + EOL);
+                edibuf.append("TXT+" + node.abr.unterbrechung.trim() + EOL);    // opt.: TXT (bei Unterbrechnung)
             }
 
         }
-        if (disziplinGruppe.equals("61") || disziplinGruppe.equals("62")) {
+        if (disziplinGruppe.equals("61") || disziplinGruppe.equals("62")) { // Rehasport / Funktionstraining
             edibuf.append("ZUV+");
             test = vec_pat.get(0)
                           .get(14)
@@ -4014,7 +4014,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             edibuf.append(ediDatumFromSql(aktRezept.getRezeptDatum()) + plus);
             edibuf.append(zuZahlungsPos + EOL);
 
-        } else {
+        } else {    // alle anderen ("KG", "MA", "ER", "LO", "RH", "PO") McM: kein IMG (eigentl. Muss-Feld, aber 'kann' im Beschreibungstxt)
             edibuf.append("ZHE+");
             test = vec_pat.get(0)
                           .get(14)
@@ -4026,7 +4026,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             if (!testeZahl(test)) {
                 test = "999999999";
             }
-            edibuf.append(test + plus);
+            edibuf.append(test + plus); // Betriebsstättennummer
             test = vec_pat.get(0)
                           .get(15)
                           .trim();
@@ -4037,9 +4037,9 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             if (!testeZahl(test)) {
                 test = "999999999";
             }
-            edibuf.append(test + plus);
-            edibuf.append(ediDatumFromSql(aktRezept.getRezeptDatum()) + plus);
-            edibuf.append(zuZahlungsPos + plus);
+            edibuf.append(test + plus); // LANR
+            edibuf.append(ediDatumFromSql(aktRezept.getRezeptDatum()) + plus);  // Verordnungsdatum
+            edibuf.append(zuZahlungsPos + plus);    // Zuzahlungskennzeichen
             test = aktRezept.getIndiSchluessel();
             if (test.startsWith("kein Indi")) {
                 JOptionPane.showMessageDialog(null, "Kein Indikationsschlüssel angegeben");
@@ -4048,26 +4048,26 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 test = "9999";
             }
 
-            edibuf.append(test.replace(" ", "") + plus);
+            edibuf.append(test.replace(" ", "") + plus);    // Indikationsschlüssel / neu HMR2020: Diagnosegruppe (ok)
             /************************************************/
             edibuf.append(voIndex[aktRezept.getRezArt()]);
             if (AktuelleRezepte.isDentist(test)) {
-                edibuf.append(plus + "1");
+                edibuf.append(plus + "1");  // Verordnungsbesonderheiten
                 System.out.println("Zahnarztverordnung");
-            }
-            edibuf.append(EOL);
+            } // McM: opt.: Unfallkennzeichen, Kennzeichen BVG, Behandlungsbeginn, Therapiebericht, Hausbesuch, 
+            edibuf.append(EOL); // neu HMR2020: Leitsymptomatik + Patientenindividuelle Leitsymptomatik, Dringlicher Behandlungsbedarf, opt.: Heilmittel-Bereich, Therapiefrequenz
         }
 
         // an dieser Stelle muß der ICD-10 eingebaut werden, sofern vorhanden
         // DIA+....
         if (aktRezept.getICD10()
                      .length() > 0) {
-            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10()) + EOL);
+            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10()) + EOL);  // Diagnoseschlüssel
         }
         if (aktRezept.getICD10_2()
                      .length() > 0) {
-            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10_2()) + EOL);
-        }
+            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10_2()) + EOL);    // Diagnoseschlüssel
+        }   // opt HMR2020: Diagnosetext (falls kein ICD10 angegeben)
 
         // an dieser Stelle müssen Daten zur Bewilligung eingebaut werden sofern
         // vorhanden
@@ -4158,12 +4158,12 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 }
             }
         }
-        edibuf.append("BES+");
-        edibuf.append(dfx.format(gesamt) + plus);
-        edibuf.append(dfx.format(rez + pauschal) + plus);
-        edibuf.append(dfx.format(rez) + plus);
-        edibuf.append(dfx.format(pauschal) + EOL);
-
+        edibuf.append("BES+");   // BetragsSummen
+        edibuf.append(dfx.format(gesamt) + plus);   // Gesamtbetrag Brutto
+        edibuf.append(dfx.format(rez + pauschal) + plus);   // Gesamtbetrag gesetzliche Zuzahlung
+        edibuf.append(dfx.format(rez) + plus);  // Gesamtbetrag prozentuale Zuzahlung
+        edibuf.append(dfx.format(pauschal) + EOL);  // pauschaler Zuzahlungsbetrag
+        // McM: opt.: Pauschale Korrekturabzug (im Korrekturverfahren)
         String kopfzeile = "PG=" + preisgruppe + ":PATINTERN=" + aktRezept.getPatIntern() + ":REZNUM="
                 + aktRezept.getRezNb() + ":GESAMT=" + dfx.format(gesamt) + ":REZGEB=" + dfx.format(rez + pauschal)
                 + ":REZANTEIL=" + dfx.format(rez) + ":REZPAUSCHL=" + dfx.format(pauschal) + ":KASSENID="

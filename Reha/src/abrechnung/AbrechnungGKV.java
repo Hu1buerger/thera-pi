@@ -89,6 +89,14 @@ import suchen.PatMitVollenVOs;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 
+/**
+ * Änderungen für Abrechnung von Verordnungen nach HMR2020:
+ * Im Kassenbaum werden getrennte Zweige für VOs mit Ausstellungsdatum < 01.01.2021 und solche mit
+ * Ausstellungsdatum > 31.12.2020 angelegt, da deren Daten beim Einreichen nach unterschiedlichen 
+ * DTA-Versionen (13/14) strukturiert werden müssen. 
+ * Der gewohnte Abrechnungsvorgang bleibt so weitestgehend erhalten ...
+ * 
+ */
 public class AbrechnungGKV extends JXPanel {
 
     private static final long serialVersionUID = -3580427603080353812L;
@@ -214,8 +222,14 @@ public class AbrechnungGKV extends JXPanel {
         jSplitLR.setDividerLocation(230);
         add(jSplitLR, BorderLayout.CENTER);
         mandantenCheck();
-        SlgaVersion = "13";
-        SllaVersion = "13";
+
+        String Stichtag = "31.12.2020";
+        String DTA_Version_alt = "13";
+        String DTA_Version_neu = "14";
+        boolean vorStichtag = ( DatFunk.TageDifferenz("31.12.2019",DatFunk.sHeute()) <= 0);
+
+        SlgaVersion = ( vorStichtag ? DTA_Version_alt : DTA_Version_neu);   // !! HMR2020: künftig je Abrechnungsdatei festlegen !!
+        SllaVersion = ( vorStichtag ? DTA_Version_alt : DTA_Version_neu);
 
         keyStore = new KeyStore();
         myCert = new OwnCertState();
@@ -1249,7 +1263,7 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
             abrDlg.setVisible(true);
 
             holeEdifact();
-            macheKopfDaten();
+            macheKopfDaten();   //aktuellerKassenKnoten.knotenObjekt.isHMR2021(); // SlgaVersion, SllaVersion festlegen!
             macheEndeDaten();
 
 
@@ -1621,8 +1635,8 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
     /*************************************************/
     private void macheEndeDaten() {
         String zeilenzahl = StringTools.fuelleMitZeichen(Integer.toString(positionenAnzahl + 4), "0", true, 6);
-        unzBuf.append("UNT" + plus + zeilenzahl + plus + "00002" + EOL);
-        unzBuf.append("UNZ" + plus + "000002" + plus + aktDfue + EOL);
+        unzBuf.append("UNT" + plus + zeilenzahl + plus + "00002" + EOL);    // Anzahl Segmente (incl. UNH,UNT), Nachrichtenreferenznummer (= 2. UNH)
+        unzBuf.append("UNZ" + plus + "000002" + plus + aktDfue + EOL);  // Anzahl Nachrichten, Datenaustauschreferenz (DFUe-#)
     }
 
     /***************************************************************/
@@ -1678,22 +1692,22 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
             sgruppe = "B";
         }
 
-        unbBuf.append("UNB+UNOC:3+" + zertifikatVon.replace("IK", "") + plus + ik_nutzer + plus);
-        unbBuf.append(getEdiDatumFromDeutsch(DatFunk.sHeute()) + ":" + getEdiTimeString(false) + plus);
-        unbBuf.append(aktDfue + plus + sgruppe + plus);
+        unbBuf.append("UNB+UNOC:3+" + zertifikatVon.replace("IK", "") + plus + ik_nutzer + plus);   // Kopfsegment, Syntax, Absender-IK, Empfänger-IK
+        unbBuf.append(getEdiDatumFromDeutsch(DatFunk.sHeute()) + ":" + getEdiTimeString(false) + plus); // Datum:Uhrzeit
+        unbBuf.append(aktDfue + plus + sgruppe + plus); // Datenaustauschreferenz (DFUe-#), Sammelgruppenschlüssel
         abrDateiName = "SL" + zertifikatVon.replace("IK", "")
                                            .substring(2, 8)
                 + "S" + getEdiMonat();
-        unbBuf.append(abrDateiName + plus);
-        unbBuf.append("2" + EOL);
+        unbBuf.append(abrDateiName + plus); //Anwendungsreferenz (log. Dateiname, s. Anhang_1_Anlage_1_TP5)
+            unbBuf.append("2" + EOL);   // Testindikator: Echtdatei
 
-        unbBuf.append("UNH+00001+SLGA:" + SlgaVersion + ":0:0" + EOL);
-        unbBuf.append("FKT+01" + plus + plus + Reha.getAktIK() + plus + ik_kostent + plus + ik_kasse + plus
-                + zertifikatVon.replace("IK", "") + EOL);
-        unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus
-                + (lOwnCert ? "1" : "2") + EOL);
-        unbBuf.append("UST" + plus + SystemConfig.hmFirmenDaten.get("Steuernummer") + plus + "J" + EOL);
-        unbBuf.append("GES" + plus + "00" + plus + dfx.format(preis00[0]) + plus + dfx.format(preis00[1]) + plus
+        unbBuf.append("UNH+00001+SLGA:" + SlgaVersion + ":0:0" + EOL);  // Nachrichtentyp, Nachrichtenreferenznummer, Nachrichtenkennung: Versionsnummer: 0:0
+        unbBuf.append("FKT+01" + plus + plus + Reha.getAktIK() + plus + ik_kostent + plus + ik_kasse + plus // FKT, Verarbeitungskennzeichen, IK Rechnungssteller, Ik Kostenträger, Ik Kasse
+                + zertifikatVon.replace("IK", "") + EOL);   // IK Absender Datei
+        unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus    // REC, Rechnungsnummer
+                + (lOwnCert ? "1" : "2") + EOL);    // Rechnungsart (s. Anlage 3 8.1.4)
+        unbBuf.append("UST" + plus + SystemConfig.hmFirmenDaten.get("Steuernummer") + plus + "J" + EOL);    // UST, Steuernummer, USt-Befreiung
+        unbBuf.append("GES" + plus + "00" + plus + dfx.format(preis00[0]) + plus + dfx.format(preis00[1]) + plus    // GES, Summenstatus (s. Anlage 3 8.1.6)
                 + dfx.format(preis00[2]) + EOL);
         unbBuf.append("GES" + plus + "11" + plus + dfx.format(preis11[0]) + plus + dfx.format(preis11[1]) + plus
                 + dfx.format(preis11[2]) + EOL);
@@ -1701,7 +1715,7 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                 + dfx.format(preis31[2]) + EOL);
         unbBuf.append("GES" + plus + "51" + plus + dfx.format(preis51[0]) + plus + dfx.format(preis51[1]) + plus
                 + dfx.format(preis51[2]) + EOL);
-        unbBuf.append("NAM" + plus + (abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung"))
+        unbBuf.append("NAM" + plus + (abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung")) // Name Absender (Firma), Ansprechpartner, Tel
                                             .length() > 30
                                                     ? abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung"))
                                                             .substring(0, 30)
@@ -1716,11 +1730,11 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                                        : abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Nachname"))
                                                .trim())
                 + plus + SystemConfig.hmFirmenDaten.get("Telefon") + EOL);
-        unbBuf.append("UNT+000010+00001" + EOL);
-        unbBuf.append("UNH+00002+SLLA:" + SllaVersion + ":0:0" + EOL);
-        unbBuf.append("FKT+01" + plus + plus + Reha.getAktIK() + plus + ik_kostent + plus + ik_kasse + EOL);
-        unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus
-                + (lOwnCert ? "1" : "2") + EOL);
+        unbBuf.append("UNT+000010+00001" + EOL);    // Nachrichtentypendesegment, Anz. Segmente, Nachrichtenreferenznummer (wie UNH)
+        unbBuf.append("UNH+00002+SLLA:" + SllaVersion + ":0:0" + EOL);  // Nachrichtentyp, Nachrichtenreferenznummer, Nachrichtenkennung: Versionsnummer: 0:0
+        unbBuf.append("FKT+01" + plus + plus + Reha.getAktIK() + plus + ik_kostent + plus + ik_kasse + EOL); // FKT, Verarbeitungskennzeichen, IK Rechnungssteller, Ik Kostenträger, Ik Kasse
+        unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus    // REC, Rechnungsnummer
+                + (lOwnCert ? "1" : "2") + EOL);    // Rechnungsart (s. Anlage 3 8.1.4)
         getEdiTimeString(false);
     }
 
