@@ -53,13 +53,6 @@ public class TermineErfassen implements Runnable {
             if ((scanrez.startsWith("RS") || scanrez.startsWith("FT")) && SystemConfig.RsFtOhneKalender) {
                 scanrez = scanrez.replace("_", "");
                 if ((ret = testeVerordnung()) == 0) {
-                    // die Daten liegen im Vector vec
-                    // 0 1 2 3 4 5 6 7 8 9 10 11
-                    // vec =
-                    // SqlInfo.holeSatz("verordn","termine,pos1,pos2,pos3,pos4,hausbes,unter18,jahrfrei,pat_intern,preisgruppe,zzregel,anzahl1,anzahl2,anzahl3,anzahl4,preisgruppe","
-                    // rez_nr='"+scanrez+"'",Arrays.asList(new String[]{}));
-                    // public static String macheNeuTermin2(String pos1,String pos2,String
-                    // pos3,String pos4,String xkollege,String datum)
                     String terminNeu = vec.get(0) + macheNeuTermin2(vec.get(1), vec.get(2), vec.get(3), vec.get(4),
                             Reha.aktUser, DatFunk.sHeute());
                     SqlInfo.sqlAusfuehren("update verordn set termine = '" + terminNeu + "' where rez_nr = '" + scanrez
@@ -121,12 +114,6 @@ public class TermineErfassen implements Runnable {
                             + "Gescannte Rezeptnummer -><font color='#ff0000'> " + scanrez
                             + "</font></font></b></html>";
                     JOptionPane.showMessageDialog(null, htmlmeldung);
-                    // public ErrorMail(String text,String comp,String user,String senderadress){
-                    /*
-                     * new ErrorMail("Rezept am heutigen Tag nicht eingetragen: Rezept = "+scanrez,
-                     * SystemConfig.dieseMaschine.toString(), this.kollege,
-                     * SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
-                     */
                     // System.out.println("Rezept steht an diesem Tag nicht im Kalender");
                     setTerminSuccess(false);
                 }
@@ -146,40 +133,18 @@ public class TermineErfassen implements Runnable {
                                 + "existiert weder im<font color='#ff0000'> aktuellen Rezeptstamm</font><br>noch in der<font color='#ff0000'> Historie</font>"
                                 + "<br><br>Bitte melden Sie dieses Rezept dem Administrator</font></b></html>";
                         JOptionPane.showMessageDialog(null, htmlmeldung);
-                        /*
-                         * new
-                         * ErrorMail("Das gescannte Rezept existiert weder im aktuellen Rezeptstamm noch in der Historie.\nRezept ="
-                         * +scanrez+"\nMitarbeiterspalte:"+this.kollege,
-                         * SystemConfig.dieseMaschine.toString(), Reha.aktUser,
-                         * SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
-                         */
                         break;
                     case 2:
                         JOptionPane.showMessageDialog(null,
                                 "<html><b><font size='5'>Dieses Rezept wurde bereits abgerechnet!</font><br><br>"
                                         + "Das gescannte Rezept -><font size='6' color='#ff0000'> " + scanrez
                                         + "<br></font></html>");
-                        // System.out.println("Das Rezept wurde bereits abgerechnet");
-                        /*
-                         * new
-                         * ErrorMail("Das gescannte Rezept ist bereits abgerechnet. Rezept ="+scanrez+
-                         * "\nMitarbeiterspalte:"+this.kollege, SystemConfig.dieseMaschine.toString(),
-                         * Reha.aktUser, SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
-                         */
-
                         break;
                     case 3:
                         JOptionPane.showMessageDialog(null,
                                 "<html><b><font size='5'>Dieses Rezept wurde am heutigen Tab bereits erfaßt!<br><br>"
                                         + "Das gescannte Rezept -><font size='6' color='#ff0000'> " + scanrez
                                         + "<br></font></html>");
-                        // System.out.println("Das Rezept wurde an diesen Tag bereits erfaßt");
-                        /*
-                         * new ErrorMail("Doppelerfassung eines Rezeptes. Rezept ="+scanrez+
-                         * "\nMitarbeiterspalte:"+this.kollege, SystemConfig.dieseMaschine.toString(),
-                         * Reha.aktUser, SystemConfig.hmEmailIntern.get("Username"), "Fehler-Mail");
-                         */
-
                         break;
                     }
                 }
@@ -217,8 +182,6 @@ public class TermineErfassen implements Runnable {
         String termine = vec.get(0);
         // Tag ist bereits erfaßt !
         if (termine.contains(DatFunk.sHeute())) {
-            // JOptionPane.showMessageDialog(null, "Dieser Termin wurde heute bereits
-            // erfa�t");
             return 3;
         }
         unter18 = (vec.get(6)
@@ -233,13 +196,6 @@ public class TermineErfassen implements Runnable {
     private boolean testeTermine() throws Exception {
         long zeit1 = System.currentTimeMillis();
         boolean ret;
-        /*
-         * alleterm = new Vector();
-         *
-         * alleterm = SqlInfo.holeSaetze("flexkc", " * ",
-         * "datum='"+DatFunk.sDatInSQL(heute)+"'", Arrays.asList(new String[] {}));
-         *
-         */
         alleterm = SqlInfo.holeFelder("select * from flexkc where datum='" + DatFunk.sDatInSQL(DatFunk.sHeute())
                 + "' LIMIT " + Integer.toString(KollegenListe.maxKalZeile));
         /*******************************************/
@@ -263,15 +219,6 @@ public class TermineErfassen implements Runnable {
                 int gesperrt = SqlInfo.zaehleSaetze("flexlock", stmt);
                 // if( gesperrt == 0 ){
                 String sblock = Integer.toString((((Integer) obj[2] / 5) + 1));
-                /*
-                 * stmt = "Update flexkc set T"+sblock+" = '"+copyright+(String)obj[4]
-                 * +"' where datum = '"+(String)obj[7]+"' AND "+
-                 * "behandler = '"+(String)obj[1]+"' AND TS"+sblock+" = '"+(String)obj[5]
-                 * +"' AND T"+sblock+" = '"+(String)obj[4]+
-                 * "' AND N"+sblock+" LIKE '%"+scanrez+"%' LIMIT 1"; new
-                 * ExUndHop().setzeStatement(String.valueOf(stmt));
-                 * //System.out.println("Ex und Hopp Statement =\n"+stmt+"\n************");
-                 */
                 SqlInfo.aktualisiereSatz("flexkc", "T" + sblock + " = '" + copyright + (String) obj[4] + "'",
                         "datum='" + (String) obj[7] + "' AND " + "behandler='" + (String) obj[1] + "' AND TS" + sblock
                                 + "='" + (String) obj[5] + "' AND T" + sblock + "='" + (String) obj[4] + "' AND N"
@@ -310,12 +257,6 @@ public class TermineErfassen implements Runnable {
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
-
-                /*
-                 * }else{ JOptionPane.showMessageDialog(null,
-                 * "Die Spalte ist momentan gesperrt, der Termin kann zwar\n"+
-                 * "nicht markiert werden, wird aber im Rezeptstamm erfaßt"); }
-                 */
                 ret = true;
             } else {
 
@@ -374,8 +315,6 @@ public class TermineErfassen implements Runnable {
                         obj[5] = ((Vector) alleterm.get(i)).get(((y * 5)) + 2); // Beginn
                         obj[6] = ((Vector) alleterm.get(i)).get(((y * 5))); // Name
                         obj[7] = ((Vector) alleterm.get(i)).get(bloecke - 2);// Datum
-                        // ((Vector)alleterm.get(i)).set((y*5),
-                        // copyright+String.valueOf((String)obj[4]));
                         // System.out.println("Gefunden in Spalte "+Integer.toString(i+1)+
                         // " in Block "+Integer.toString(y+1)+" Ergebnis = "+obj[3]);
 
@@ -442,21 +381,11 @@ public class TermineErfassen implements Runnable {
                         String sblock = "";
                         // if( gesperrt == 0 ){
                         sblock = Integer.toString((((Integer) obj[2] / 5) + 1));
-                        /*
-                         * stmt = "Update flexkc set T"+sblock+" = '"+copyright+(String)obj[4]
-                         * +"' where datum = '"+(String)obj[7]+"' AND "+
-                         * "behandler = '"+(String)obj[1]+"' AND TS"+sblock+" = '"+(String)obj[5]
-                         * +"' AND T"+sblock+" = '"+(String)obj[4]+
-                         * "' AND N"+sblock+" LIKE '%"+scanrez+"%' LIMIT 1"; new
-                         * ExUndHop().setzeStatement(String.valueOf(stmt));
-                         */
                         SqlInfo.aktualisiereSatz("flexkc", "T" + sblock + " = '" + copyright + (String) obj[4] + "'",
                                 "datum='" + (String) obj[7] + "' AND " + "behandler='" + (String) obj[1] + "' AND TS"
                                         + sblock + "='" + (String) obj[5] + "' AND T" + sblock + "='" + (String) obj[4]
                                         + "' AND N" + sblock + " LIKE '%" + scanrez + "%'");
 
-                        // }else{
-                        // }
                         try {
                             String snum = ((String) obj[1]).substring(0, 2);
                             int inum;
@@ -510,7 +439,6 @@ public class TermineErfassen implements Runnable {
         try {
             //// System.out.println("Kollegen-Nummer = "+ikoll);
             this.kollege = KollegenListe.getMatchCodeUeberDBZeile(ikoll);
-            // String termkollege =
             sbuftermine.setLength(0);
             sbuftermine.toString();
             if (!vec.get(0)
@@ -603,9 +531,6 @@ public class TermineErfassen implements Runnable {
         } else if (!unter18 && vorjahrfrei) {
             String befreit = SqlInfo.holePatFeld("befreit", "pat_intern='" + vec.get(8) + "'");
             String bezahlt = SqlInfo.holeRezFeld("rez_bez", "rez_nr='" + scanrez + "'");
-            // String bef_dat =
-            // datFunk.sDatInDeutsch(SqlInfo.holePatFeld("befreit","pat_intern='"+vec.get(9)+"'"
-            // ));
             if (!befreit.equals("T") && bezahlt.equals("F")) {
                 if ((DatFunk.DatumsWert("31.12." + vec.get(7)) < DatFunk.DatumsWert(DatFunk.sHeute()))) {
                     // System.out.println("In Variante 4");
@@ -633,11 +558,6 @@ public class TermineErfassen implements Runnable {
                 RezTools.RezGebSignal(scanrez);
             }
         }
-        /*******************************/
-
-        // String cmd = "update verordn set termine='"+sbuftermine.toString()+"' where
-        // rez_nr='"+scanrez+"'";
-        // new ExUndHop().setzeStatement(cmd);
     }
 
     /********************/
@@ -662,11 +582,6 @@ public class TermineErfassen implements Runnable {
     public static String macheNeuTermin2(String pos1, String pos2, String pos3, String pos4, String xkollege,
             String datum) {
         String ret = datum + "@" + (xkollege == null ? "" : xkollege) + "@" + "" + "@" +
-        /*
-         * pos1 + ( pos1.trim().equals("") || pos2.trim().equals("") ? "" : "," )+ pos2
-         * + ( pos2.trim().equals("") || pos3.trim().equals("") ? "" : "," )+ pos3 + (
-         * pos3.trim().equals("") || pos4.trim().equals("") ? "" : "," )+ pos4 +
-         */
                 machePositionsString(Arrays.asList(pos1, pos2, pos3, pos4)) + "@" + DatFunk.sDatInSQL(datum) + "\n";
         return ret;
     }

@@ -76,18 +76,16 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
      *         - 'ausdünnen' soweit möglich
      *
      */
-    // Lemmi Doku: Das sind die Text-Eingabefgelder im Rezept
+    // Text-Eingabefgelder der Rezept-Maske
     public JRtaTextField[] jtf = { null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
             null,  null };
-    // Lemmi 20101231: Harte Index-Zahlen für "jtf" durch sprechende Konstanten
-    // ersetzt !
+    // Index-Konstanten für Text-Eingabefgelder
     final int cKTRAEG = 0;
     final int cARZT = 1;
     final int cREZDAT = 2;
     final int cBEGINDAT = 3;
-    final int cANZ1 = 4; // Lemmi 20101231: ACHTUNG
-                         // die Positionen cANZ1 bis cANZ4 müssen immer
+    final int cANZ1 = 4; // ACHTUNG, die Positionen cANZ1 bis cANZ4 müssen immer
                          // nacheinander definiert sein
     final int cANZ2 = 5;
     final int cANZ3 = 6;
@@ -100,15 +98,13 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cPREISGR = 13;
     final int cHEIMBEW = 14;
     final int cBEFREIT = 15;
-    final int cPOS1 = 16; // Lemmi 20101231: ACHTUNG
-                          // die Positionen cPOS1 bis cPOS4 müssen immer
+    final int cPOS1 = 16; // ACHTUNG, die Positionen cPOS1 bis cPOS4 müssen immer
                           // nacheinander definiert sein
     final int cPOS2 = 17;
     final int cPOS3 = 18;
     final int cPOS4 = 19;
-    final int cPREIS1 = 20; // Lemmi 20101231: ACHTUNG
-                            // die Positionen cPREIS1 bis cPREIS4 müssen immer
-                            // nacheinander definiert sein
+    final int cPREIS1 = 20; // ACHTUNG, die Positionen cPREIS1 bis cPREIS4 müssen
+                            // immer nacheinander definiert sein
     final int cPREIS2 = 21;
     final int cPREIS3 = 22;
     final int cPREIS4 = 23;
@@ -122,46 +118,27 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     final int cICD10_2 = 31;
     final int cAKUTDATUM = 32;
 
-    // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder, Combo-
-    // und Check-Boxen
+    // Merken der Originalwerte der eingelesenen Textfelder, Combo- und
+    // Check-Boxen
     Vector<Object> originale = new Vector<Object>();
 
-    /*********** entfällt
-    public JRtaCheckBox[] jcb = { null, null, null, null, null };
-    **********/
-    /*********** entfällt (?)
-    public JRtaCheckBox[] jcb = { null, null, null, null };
-    **********/
-    /*********** vor ind. Leitsymp.
-    public JRtaCheckBox[] jcb = { null, null, null };
-    **********/
     public JRtaCheckBox[] jcb = { null, null, null, null, null, null, null, null, null };
-    // Lemmi 20101231: Harte Index-Zahlen für "jcb" durch sprechende Konstanten
-    // ersetzt !
-    /*********** entfällt    
-    final int cBEGRADR = 0;
-     **********/    
+    // Index-Konstanten für Checkboxen
     final int cHAUSB = 0;
     final int cTBANGEF = 1;
     final int cVOLLHB = 2;
-    /*********** entfällt (?)
-    final int cHygienePausch = 3;
-    **********/
     final int cdringBehBedarf = 3;
-    
     final int cLeitSymptA = 4;
     final int cLeitSymptB = 5;
     final int cLeitSymptC = 6;
     final int cLeitSymptX = 7;
     final int cHygienePausch = 8;
 
-//    public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
     public JRtaComboBox[] jcmb = { null, null, null, null, null, null, null, null, null };
 
     final int cRKLASSE = 0;
-    final int cLEIST1 = 1; // Lemmi 20101231: ACHTUNG
-                           // die Positionen cLEIST1 bis cLEIST4 müssen immer
-                           // nacheinander definiert sein
+    final int cLEIST1 = 1; // ACHTUNG, die Positionen cLEIST1 bis cLEIST4 müssen
+                           // immer nacheinander definiert sein
     final int cLEIST2 = 2;
     final int cLEIST3 = 3;
     final int cLEIST4 = 4;
@@ -233,7 +210,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         super();
         try {
             this.neu = neu;
-            this.vec = vec; // Lemmi 20110106 Wird auch fuer das Kopieren verwendet !!!!
+            this.vec = vec;
             myRezept = new Rezeptvector();
             verordnenderArzt = new ArztVec();
             myRezept.setVec_rez(vec);
@@ -265,19 +242,18 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             });
             initReady = true;
             if (!neu) {
-                if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) { // Lemmi Doku: Das sieht aus wie der
-                                                                       // Read-Only-Modus für das Rezept
-                    for (int i = 0; i < jtf.length; i++) { // Lemmi Doku: alle Textfelder unbedienbar machen
+                if (!Rechte.hatRecht(Rechte.Rezept_editvoll, false)) { // Read-Only-Modus für das Rezept
+                    for (int i = 0; i < jtf.length; i++) { // alle Textfelder unbedienbar machen
                         if (jtf[i] != null) {
                             jtf[i].setEnabled(false);
                         }
                     }
-                    for (int i = 0; i < jcb.length; i++) { // Lemmi Doku: alle CheckBoxen unbedienbar machen
+                    for (int i = 0; i < jcb.length; i++) { // alle CheckBoxen unbedienbar machen
                         if (jcb[i] != null) {
                             jcb[i].setEnabled(false);
                         }
                     }
-                    for (int i = 0; i < jcmb.length; i++) { // Lemmi Doku: alle ComboBoxen unbedienbar machen
+                    for (int i = 0; i < jcmb.length; i++) { // alle ComboBoxen unbedienbar machen
                         if (jcmb[i] != null) {
                             jcmb[i].setEnabled(false);
                         }
@@ -423,12 +399,12 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
     /********************************************/
 
-    // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
+    // Merken der Originalwerte der eingelesenen Textfelder
     // ACHTUNG: Die Reihenfolge der Abfragen muß in SaveChangeStatus() und
     // HasChanged() exakt identisch sein !
     private void SaveChangeStatus() {
         int i;
-        originale.clear(); // vorherige Merkung wegwerfen
+        originale.clear();
 
         // Alle Text-Eingabefelder
         for (i = 0; i < jtf.length; i++) {
@@ -445,16 +421,16 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
         // alle ComboBoxen
         for (i = 0; i < jcmb.length; i++) {
-            originale.add((Integer) jcmb[i].getSelectedIndex()); // Art d. Verordn. etc.
+            originale.add((Integer) jcmb[i].getSelectedIndex());
         }
 
         // alle CheckBoxen
         for (i = 0; i < jcb.length; i++) {
-            originale.add((Boolean) (jcb[i].isSelected())); //
+            originale.add((Boolean) (jcb[i].isSelected()));
         }
     }
 
-    // Lemmi 20101231: prüft, ob sich Einträge geändert haben
+    // prüft, ob sich Einträge geändert haben
     // ACHTUNG: Die Reihenfolge der Abfragen muß in SaveChangeStatus() und
     // HasChanged() exakt identisch sein !
     public Boolean HasChanged() {
@@ -469,7 +445,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
         // Das Feld mit "Ärztliche Diagnose"
         if (!diagnose_txt.getText()
-                .equals(originale.get(idx++))) // Ärztliche Diagnose
+                .equals(originale.get(idx++)))
             return true;
         // indiv. Leitsyptomatik
         if (!lsym_x_txt.getText()
@@ -481,22 +457,22 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             return true;
 
         // alle ComboBoxen
-        for (i = 0; i < jcmb.length; i++) { // ComboBoxen
-            if (jcmb[i].getSelectedIndex() != (Integer) originale.get(idx++)) // Art d. Verordn. etc.
+        for (i = 0; i < jcmb.length; i++) {
+            if (jcmb[i].getSelectedIndex() != (Integer) originale.get(idx++))
                 return true;
         }
 
         // alle CheckBoxen
-        for (i = 0; i < jcb.length; i++) { // CheckBoxen
-            if (jcb[i].isSelected() != (Boolean) originale.get(idx++)) // Begründung außer der Regel vorhanden ? .....
+        for (i = 0; i < jcb.length; i++) {
+            if (jcb[i].isSelected() != (Boolean) originale.get(idx++))
                 return true;
         }
 
         return false;
     }
 
-    // Lemmi 20101231: Standard-Abfrage nach Prüfung, ob sich Einträge geändert haben
-    // fragt nach, ob wirklich ungesichert abgebrochen werden soll !
+    // Abfrage wenn sich Einträge geändert haben: fragt nach, ob wirklich
+    // ungesichert abgebrochen werden soll !
     public int askForCancelUsaved() {
         String[] strOptions = { "ja", "nein" }; // Defaultwert auf "nein" gesetzt !
         return JOptionPane.showOptionDialog(null,
@@ -518,26 +494,22 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         jcb[cLeitSymptA] = new JRtaCheckBox("a");
         jcb[cLeitSymptA].setOpaque(false);
         jcb[cLeitSymptA].setActionCommand("leitSymA");
-//        jcb[cLeitSymptA].addActionListener(cBoxActionListener);
         jpan.addLabel("Leitsymptomatik", cc.xy(2,1));
         jpan.add(jcb[cLeitSymptA], cc.xy(4,1));
 
         jcb[cLeitSymptB] = new JRtaCheckBox("b");
         jcb[cLeitSymptB].setOpaque(false);
         jcb[cLeitSymptB].setActionCommand("leitSymB");
-//        jcb[cLeitSymptB].addActionListener(cBoxActionListener);
         jpan.add(jcb[cLeitSymptB], cc.xy(6,1));
 
         jcb[cLeitSymptC] = new JRtaCheckBox("c");
         jcb[cLeitSymptC].setOpaque(false);
         jcb[cLeitSymptC].setActionCommand("leitSymC");
-//        jcb[cLeitSymptC].addActionListener(cBoxActionListener);
         jpan.add(jcb[cLeitSymptC], cc.xy(8,1));
 
         jcb[cLeitSymptX] = new JRtaCheckBox("indiv.");
         jcb[cLeitSymptX].setOpaque(false);
         jcb[cLeitSymptX].setActionCommand("leitSymX");
-//        jcb[cLeitSymptX].addActionListener(cBoxActionListener);
         jpan.add(jcb[cLeitSymptX], cc.xy(10,1));
         
         return jpan.getPanel();
@@ -563,8 +535,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         JScrollPane jscr = null;
 
         try {
-            // Lemmi 20101231: Harte Index-Zahlen für "jtf" durch sprechende Konstanten
-            // ersetzt !
             jtf[cKTRAEG] = new JRtaTextField("NIX", false); // kasse/kostenträger
             jtf[cARZT] = new JRtaTextField("NIX", false); // arzt
             jtf[cREZDAT] = new JRtaTextField("DATUM", true); // rezeptdatum
@@ -757,7 +727,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             lsym_x_txt.setEditable(true);
             lsym_x_txt.setBackground(Color.WHITE);
             lsym_x_txt.setForeground(Color.RED);
-//            lsym_x_txt.setToolTipText("nur editierbar, wenn individuelle Leitsymptomatik ausgewählt ist");
             JScrollPane spanLS = JCompTools.getTransparentScrollPane(lsym_x_txt);
             spanLS.setBorder(BorderFactory.createLineBorder(Colors.PiOrange.alpha(0.25f)));
             jpan.add(spanLS, cc.xywh(3, rowCnt++, 5, 2));   // Freitext indiv. Leitsymptomatik
@@ -911,9 +880,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                     new VerordnungsArten().getHmr2020() );
             jcmb[cVERORDART].setActionCommand("verordnungsart");
             jcmb[cVERORDART].addActionListener(voArtActionListener);
-//            allowShortCut((Component) jcmb[cVERORDART], "selArtDerVerordn");
             jpan.addLabel("Verordnungsart", cc.xy(1, ++rowCnt));   // 47
-//            eingabeVerordnArt = jpan.add(jcmb[cVERORDART], cc.xy(3, rowCnt));
             jpan.add(jcmb[cVERORDART], cc.xy(3, rowCnt));
 
             jtf[cAKUTDATUM].setName("akut_datum");
@@ -937,26 +904,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jpan.addLabel("Angelegt von", cc.xy(5, rowCnt));
             jtf[cANGEL].addKeyListener(this);
             jpan.add(jtf[cANGEL], cc.xy(7, rowCnt++));
-            // *** bis hier ok ***
-
-            
-            
-            
-            
-            
-            /*********** entfällt                
-            jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
-            jcb[cBEGRADR].setOpaque(false);
-            jcb[cBEGRADR].setEnabled(false);
-            allowShortCut((Component) jcb[cBEGRADR], "adrCheck");
-            jpan.addLabel("Begründ. für adR", cc.xy(5, 11));
-            jpan.add(jcb[cBEGRADR], cc.xy(7, 11));
-            **********/
-
-
-
-
-
 
             jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
             jscr.getVerticalScrollBar()
@@ -1014,8 +961,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Fehler in der Erstellung des Rezeptfensters\n" + ex.getMessage());
         }
-
-        // Lemmi 20101231: Merken der Originalwerte der eingelesenen Textfelder
         SaveChangeStatus();
 
         return jscr;
@@ -1197,23 +1142,9 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
             return;
         }
-        /*********** entfällt
-        if (e.getActionCommand()
-             .equals("verordnungsart") && klassenReady) {
-            if (jcmb[cVERORD].getSelectedIndex() == 2) {
-                jcb[cBEGRADR].setEnabled(true);
-                testeGenehmigung(jtf[cKASID].getText());
-            } else {
-                jcb[cBEGRADR].setSelected(false);
-                jcb[cBEGRADR].setEnabled(false);
-            }
-            return;
-        }
-        **********/
         /*********************/
         if (e.getActionCommand()
              .equals("speichern")) {
-//            System.out.println("Button speichern");
             SwingUtilities.invokeLater(new Runnable() {
                 public void run() {
                     try {
@@ -1247,7 +1178,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
         if (e.getActionCommand()
              .equals("abbrechen")) {
-//            System.out.println("Button abbrechen");
             new SwingWorker<Void, Void>() {
                 @Override
                 protected Void doInBackground() throws Exception {
@@ -1369,32 +1299,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         }
     }
 
-    private void testeGenehmigung(final String kassenid) {
-        new SwingWorker<Void, Void>() {
-            @Override
-            protected Void doInBackground() throws Exception {
-                try {
-                    String test = SqlInfo.holeEinzelFeld(
-                            "select id from adrgenehmigung where ik = (select ik_kostent from kass_adr where id = '"
-                                    + kassenid + "') LIMIT 1");
-                    if (!test.isEmpty()) {
-                        String meldung = "<html><b>Achtung!</b><br><br>Sie haben Verordnung außerhalb des Regelfalles gewählt!<br><br>Die Krankenkasse des Patienten besteht auf eine <br>"
-                                + "<b>Genehmigung für Verordnungen außerhalb des Regelfalles</b><br><br></html>";
-                        JOptionPane.showMessageDialog(null, meldung);
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null,
-                            "Fehler!!!\n\nVermutlich haben Sie eines der letzten Updates verpaßt.\nFehlt zufällig die Tabelle adrgenehmigung?");
-                    ex.printStackTrace();
-                }
-                return null;
-            }
-        }.execute();
-
-    }
-
-    // Lemmi Doku: prüft ob die Heilmittel überhaupt und in der korrekten
-    // Reihenfolge eingetragen worden sind
+    // prüft ob Heilmittel eingetragen worden sind
     private boolean anzahlTest() {
         int itest;
         int maxanzahl = 0, aktanzahl = 0;
@@ -2095,9 +2000,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             jtf[cBEGINDAT].setText(DatFunk.sDatInDeutsch(test));
         }
         int itest = 0;
-        /*********** entfällt
-        jcb[cBEGRADR].setSelected(myRezept.getBegrAdR());
-        **********/
         jcb[cHAUSB].setSelected(myRezept.getHausbesuch());
 
         jcb[cVOLLHB].setSelected(myRezept.getHbVoll());
@@ -2234,9 +2136,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
             thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
             thisRezept.setLastEdit(Reha.aktUser);
-            /*********** entfällt
-            thisRezept.setBegrAdR(jcb[cBEGRADR].isSelected());
-            **********/
             thisRezept.setHausbesuch(jcb[cHAUSB].isSelected());
             if (thisRezept.getHausbesuch()) {
                 String anzHB = String.valueOf(thisRezept.getAnzHB());
@@ -2571,19 +2470,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     }
 
     private void doAbbrechen() {
-        // Lemmi 20101231: Verhinderung von Datenverlust bei unbeabsichtigtem Zumachen
-        // des geänderten Rezept-Dialoges
-        // Solche gravierenden Änderungen der Programmlogik dürfen erst dann eingeführt
-        // werden
-        // wenn sich der Benutzer auf einer System-Init-Seite entscheiden kann ob er
-        // diese
-        // Funktionalität will oder nicht
-        // Wir im RTA wollen die Abfagerei definitiv nicht!
-        // Wenn meine Damen einen Vorgang abbrechen wollen, dann wollen sie den Vorgang
-        // abbrechen
-        // und nicht gefrag werden ob sie den Vorgang abbrechen wollen.
-        // Steinhilber
-        // Lemmi 20110116: Gerne auch mit Steuer-Parameter
         if ((Boolean) SystemConfig.hmRezeptDlgIni.get("RezAendAbbruchWarn")) {
             if (HasChanged() && askForCancelUsaved() == JOptionPane.NO_OPTION)
                 return;

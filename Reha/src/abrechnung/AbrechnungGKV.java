@@ -415,7 +415,6 @@ public class AbrechnungGKV extends JXPanel {
     }
 
     public int doEinlesenEinzeln(String neueReznr) {
-        // das Gleiche, mit Papierannahmestelle:
         String cmd = sucheFertige + "WHERE rez_nr='" + neueReznr + "' Limit 1";
         Vector<Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
         treeKasse.setEnabled(true);
@@ -637,7 +636,6 @@ public class AbrechnungGKV extends JXPanel {
                             astAnhaengen(kassenName, ktraeger, ikkasse, ikpapier);
                             rezepteAnhaengen(aeste);
                             aeste++;
-
                         }
                     }
                     kassenIconsNeuAnzeigen();
@@ -670,27 +668,27 @@ public class AbrechnungGKV extends JXPanel {
         JXTTreeNode node = (JXTTreeNode) rootKasse.getChildAt(knoten);
 
         JXTTreeNode meinitem = null;
+        int posRezNr = 0;
+        int posPatInt = 1;
+        int posEdiOk = 2;
+        int posIkKass = 3;        
         for (int i = 0; i < vecRezepte.size(); i++) {
             try {
-                cmd = "select n_name from pat5 where pat_intern='" + vecRezepte.get(i)
-                                                                               .get(1)
-                        + "' LIMIT 1";
-
-                String thisRezNr = vecRezepte.get(i)
-                                             .get(0);
-                String thisPatInt = vecRezepte.get(i)
-                                              .get(1);
+                Vector<String> currRezVec = vecRezepte.get(i);
+                String thisRezNr = currRezVec.get(posRezNr);
+                String thisPatInt = currRezVec.get(posPatInt);
+                
+                cmd = "select n_name from pat5 where pat_intern='" + thisPatInt + "' LIMIT 1";
                 String name = SqlInfo.holeEinzelFeld(cmd);
+                
                 cmd = "select preisgruppe from verordn where rez_nr='" + thisRezNr + "' LIMIT 1";
                 String preisgr = SqlInfo.holeEinzelFeld(cmd);
 
                 KnotenObjekt rezeptknoten = new KnotenObjekt(thisRezNr + "-" + name, vecRezepte.get(i)
                                                                                                .get(0),
-                        (vecRezepte.get(i)
-                                   .get(2)
+                        (currRezVec.get(posEdiOk)
                                    .equals("T") ? true : false),
-                        vecRezepte.get(i)
-                                  .get(3),
+                        currRezVec.get(posIkKass),
                         preisgr);
                 rezeptknoten.ktraeger = ktraeger;
                 rezeptknoten.pat_intern = thisPatInt;
@@ -806,7 +804,6 @@ public class AbrechnungGKV extends JXPanel {
         if (nodeWithSameIK != null) { // Nachfolger o. Vorgänger hat gleiches IKpapier -> icons können bleiben
             aktKassNode = nodeWithSameIK; // ... wird aktueller Knoten
             int aktNodeIdx = 1 + treeModelKasse.getIndexOfChild(rootKasse, aktKassNode);
-
             treeKasse.repaint(); // Anzeige aktualisieren
         } else if (prevKNode!=null && nextKNode!=null) {
             kassenIconsNeuAnzeigen();
@@ -815,8 +812,6 @@ public class AbrechnungGKV extends JXPanel {
     }
 
     private JXTTreeNode sameIkPap(JXTTreeNode aktNode) {
-
-
         JXTTreeNode prevKNode = getPrevKassenKnoten(aktNode);
         JXTTreeNode nextKNode = getNextKassenKnoten(aktNode);
         if (nextKNode != null) {
@@ -1530,13 +1525,6 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                 }
 
                 SqlInfo.sqlAusfuehren(historieBuf.toString());
-
-                /***
-                 *
-                 * In der Echtfunktion muß das Loeschen in der rezept-Datenbank eingeschaltet
-                 * werden und das sofortige Löschen aus der Historie auschgeschaltet werden
-                 *
-                 */
 
                 String delrez = String.valueOf(abgerechneteRezepte.get(i2));
                 SqlInfo.sqlAusfuehren("delete from fertige where rez_nr='" + delrez + "' LIMIT 1");
