@@ -710,7 +710,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsErstVO(int rezeptArt) {
-        if (voArten.getHmrOld()[rezeptArt].equals(voArten.ERST_VO)) {
+        if (voArten.getAll()[rezeptArt].equals(voArten.ERST_VO)) {
             return true;
         } else {
             return false;
@@ -737,7 +737,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsFolgeVO(int rezeptArt) {
-        if (voArten.getHmrOld()[rezeptArt].equals(voArten.FOLGE_VO)) {
+        if (voArten.getAll()[rezeptArt].equals(voArten.FOLGE_VO)) {
             return true;
         } else {
             return false;
@@ -760,7 +760,7 @@ public class HMRCheck {
     }
 
     private boolean chkIsAdR(int rezeptArt) {
-        if (voArten.getHmrOld()[rezeptArt].equals(voArten.FOLGE_VO_A_D_R)) {
+        if (voArten.getAll()[rezeptArt].equals(VerordnungsArten.FOLGE_VO_A_D_R)) {
             return true;
         } else {
             return false;
