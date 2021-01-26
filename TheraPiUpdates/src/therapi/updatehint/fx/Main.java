@@ -13,11 +13,11 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import therapi.updatehint.Hint;
 
-public class Main extends Application implements Runnable {
+ class Main extends Application implements Runnable {
 
     private Hint hint;
 
-    public Main(Hint hinweis) {
+     Main(Hint hinweis) {
         this.hint = hinweis;
     }
 
@@ -43,7 +43,7 @@ public class Main extends Application implements Runnable {
         try {
             start(new Stage());
         } catch (IOException e) {
-            LoggerFactory.getLogger(Main.class).error("Fehler beim start des UpdateHinweises");
+            LoggerFactory.getLogger(Main.class).error("Fehler beim start des UpdateHinweises",e);
         }
 
     }

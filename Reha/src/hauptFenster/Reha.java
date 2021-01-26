@@ -171,6 +171,7 @@ import systemTools.TestePatStamm;
 import terminKalender.TerminFenster;
 import therapi.updatehint.HintMain;
 import therapi.updatehint.fx.UpdatesMainFX;
+import therapi.updatehint.swing.UpdatesMainSwing;
 import umfeld.Betriebsumfeld;
 import update.DueUpdates;
 import urlaubBeteiligung.Beteiligung;
@@ -1266,7 +1267,7 @@ public class Reha implements RehaEventListener , Monitor{
         Thread updater = new Thread("Updater") {
             @Override
             public void run() {
-                HintMain updateCheck = new HintMain(new UpdatesMainFX());
+                HintMain updateCheck = new HintMain();
                 updateCheck.execute();
             }
         };

@@ -4,8 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thera_pi.updater.Version;
 
+import therapi.updatehint.swing.UpdatesMainSwing;
+
 public class HintMain {
-    HintGui gui;
+    private HintGui gui;
+
+    public HintMain() {
+        this(new UpdatesMainSwing());
+    }
 
     public HintMain(HintGui gui) {
         this.gui = gui;

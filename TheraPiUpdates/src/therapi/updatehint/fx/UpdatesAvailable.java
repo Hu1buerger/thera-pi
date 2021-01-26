@@ -1,10 +1,6 @@
 package therapi.updatehint.fx;
 
-import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +18,12 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
+import therapi.updatehint.HyperLInkEventHandler;
 
 public class UpdatesAvailable {
 
-    private static final Logger logger = LoggerFactory.getLogger(UpdatesAvailable.class);
-    private static final String UPDATES_PAGE = "https://www.thera-pi-software.de/downloads/";
-    @FXML
+    static final Logger logger = LoggerFactory.getLogger(UpdatesAvailable.class);
+    private @FXML
     TextFlow tf;
 
     @FXML
@@ -49,7 +45,7 @@ public class UpdatesAvailable {
 
         Text aufforderungMitte = new Text("von dieser Webseite\n");
 
-        Hyperlink link = new Hyperlink(UPDATES_PAGE);
+        Hyperlink link = new Hyperlink(HyperLInkEventHandler.UPDATES_PAGE);
         link.setOnAction(goHandler);
         Text aufforderungEnde = new Text("\nherunter\n");
 
@@ -71,23 +67,7 @@ public class UpdatesAvailable {
 
     }
 
-    EventHandler<ActionEvent> goHandler = new EventHandler<ActionEvent>() {
-
-        @Override
-        public void handle(ActionEvent event) {
-            if (Desktop.isDesktopSupported()) {
-                Desktop desktop = Desktop.getDesktop();
-                if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                    try {
-                        desktop.browse(new URL(UPDATES_PAGE).toURI());
-                    } catch (IOException | URISyntaxException e) {
-                        logger.error("cannot open url in system browser", e);
-                    }
-                }
-            }
-
-        }
-    };
+    private EventHandler<ActionEvent> goHandler = new HyperLInkEventHandler();
     private Text dateiname;
 
     public void setFileToDownload(File updateFile) {
