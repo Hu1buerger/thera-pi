@@ -140,6 +140,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     int idInTable = 8;
     int termineInTable = 9;
 
+    public final static int cREZEPTART = 27;
+    public final static int cHMR2021 = 81;
+    public final static int cINDISCHLUESSEL = 44;
+    public final static int cDIAGGRUPPE = 44;
+    public final static int cDRINGLICH = 79;
+    public final static int cAKUTEREIGNIS = 25;
+
     AbrechnungRezept abrRez = null;
 
     InfoDialogTerminInfo infoDlg = null;
@@ -2251,6 +2258,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             rnr = Reha.instance.patpanel.vecaktrez.get(1);
             String cmd = "insert into fertige set ikktraeger='" + ikkost + "', ikkasse='" + ikkass + "', " + "name1='"
                     + kname + "', rez_nr='" + rnr + "', pat_intern='" + patint + "', rezklasse='" + rnr.substring(0, 2)
+                    + "', neueversion='" + Reha.instance.patpanel.vecaktrez.get(cHMR2021)
                     + "'";
             SqlInfo.sqlAusfuehren(cmd);
         } else {

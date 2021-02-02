@@ -2294,11 +2294,38 @@ public class Reha implements RehaEventListener {
         }
     }
     
+    public static void testeFertigeHMR2020() {
+        // ... damit die DB kompatibel bleibt...
+        Vector<String> feldNamen = SqlInfo.holeFeldNamen("fertige", true, Arrays.asList(new String[] { "id" }));
+        int nbOfFields = feldNamen.size();
+        if (!(feldNamen.contains("neueversion"))) {    // && (nbOfFields == 9) 
+            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE fertige ADD COLUMN neueversion enum('T','F') NOT NULL DEFAULT 'F'");
+
+            if (retVal) {
+                String meldung = "Die Tabelle fertige\n"
+                        + "wurde erfolgreich um das Feld für HMR2020 ergänzt.";
+                logger.info(meldung.replace("\n", " "));
+                SwingUtilities.invokeLater(new Runnable() {
+                    String txt = meldung;
+                    @Override
+                    public void run() {
+                        JOptionPane.showMessageDialog(null, txt);
+                    }
+                });
+
+
+            }
+        } else {
+            logger.info("testeFertigeHMR2020: nix zu tun in Tabelle fertige.");
+        }
+    }
+
     static void testeVoTables() {
         testeVoTableStruc ("lza");
         testeVoTableStruc ("verordn");
         testeVoTblStrucHMR2020 ("lza");
         testeVoTblStrucHMR2020 ("verordn");
+        testeFertigeHMR2020();
     }
 
     ActionListener actionListener = new MenuActionListener(this);
