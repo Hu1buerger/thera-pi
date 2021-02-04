@@ -185,7 +185,6 @@ class OpRgafTab extends JXPanel implements ChangeListener {
                     + op.bezahltAm + "' where verklisteID ='" + op.tabellenId + "'";
         }
 
-        System.out.println(rgafakturaSql);
         SqlInfo.sqlAusfuehren(rgafakturaSql);
         op.offen = restbetrag;
     }

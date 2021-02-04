@@ -189,8 +189,56 @@ public class OffenePostenDTO {
     }
 
     private boolean updateVr(OffenePosten op) {
-        // TODO use this
-        return false;
+
+
+            String updateRGRSQL = generateVRPayment(op);
+
+            try (Connection con = new DatenquellenFactory(ik.digitString()).createConnection();
+                    Statement stmt = con.createStatement()) {
+                stmt.executeUpdate(updateRGRSQL, Statement.RETURN_GENERATED_KEYS);
+
+            } catch (SQLException e) {
+                logger.error("coud not save OffenPosten " + op, e);
+                return false;
+            }
+            return true;
+
+        }
+
+    private String generateVRPayment(OffenePosten op) {
+
+        String sql = new StringBuilder().append("UPDATE verkliste")
+        .append(" SET v_betrag= ")
+        .append(op.gesamtBetrag.toPlainString())
+        .append(" , v_offen = ")
+        .append(op.offen.toPlainString())
+        .append(" , v_betrag =")
+        .append(op.rgBetrag)
+
+        .append(" , v_datum = ")
+        .append(einklammern(op.rgDatum != null
+                ? op.rgDatum.format(DateTimeFormatters.yyyyMMddmitBindestrich)
+                : null))
+
+        .append(" , v_bezahldatum = ")
+        .append(einklammern(op.bezahltAm != null
+                ? op.bezahltAm.format(DateTimeFormatters.yyyyMMddmitBindestrich)
+                : null))
+
+        .append(" , mahndat1 = ")
+        .append(einklammern(op.mahnungEins != null
+                ? op.mahnungEins.format(DateTimeFormatters.yyyyMMddmitBindestrich)
+                : null))
+
+        .append(" , mahndat2 = ")
+        .append(einklammern(op.mahnungZwei != null
+                ? op.mahnungZwei.format(DateTimeFormatters.yyyyMMddmitBindestrich)
+                : null))
+        .append(" where verklisteID = ")
+        .append(op.tabellenId)
+        .toString();
+        return sql;
     }
+
 
 }
