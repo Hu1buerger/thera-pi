@@ -18,14 +18,14 @@ public class VerkaufTest {
         Verkauf verk = new Verkauf();
 
         ArtikelVerkauf posten = new Testartikel();
-        posten.setMwst(16);
-        posten.setPreis(116);
+        posten.setMwst(MwSTSatz.now().vollerSatz());
+        posten.setPreis(100 + MwSTSatz.now().vollerSatz());
         posten.setAnzahl(1);
         verk.fuegeArtikelHinzu(posten );
         assertEquals(MwSTSatz.now().vollerSatz(), verk.getBetrag19() , 0.001);
         ArtikelVerkauf posten2 = new Testartikel();
-        posten2.setMwst(5);
-        posten2.setPreis(105);
+        posten2.setMwst(MwSTSatz.now().verminderterSatz());
+        posten2.setPreis(100 + MwSTSatz.now().verminderterSatz());
         posten2.setAnzahl(1);
         verk.fuegeArtikelHinzu(posten2);
         assertEquals(MwSTSatz.now().verminderterSatz(), verk.getBetrag7() , 0.001);
