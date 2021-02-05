@@ -55,6 +55,7 @@ import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import systemTools.ListenerTools;
+import umfeld.Betriebsumfeld;
 
 public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyListener,FocusListener,RehaTPEventListener{
 
@@ -121,6 +122,7 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 	final int cDRINGLICH = 8;
 	
 	public JRtaComboBox[] jcmb =  {null,null,null,null,null,null,null,null,null,null};
+	public JRtaComboBox jcmbIK;
 	// Lemmi 20101231: Harte Index-Zahlen für "jcmb" durch sprechende Konstanten ersetzt ! 
 	final int cRKLASSE = 0;
 	final int cVERORD  = 1;
@@ -559,6 +561,8 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		jcmb[cRKLASSE] = new JRtaComboBox();
 		jcmb[cVERORD] = new JRtaComboBox(new String[] {"Standard","Bes.VoBedarf","Langfrist-VO","Blanko-VO","Zahnarzt","Entlassmanagement"});
 		jcmb[cVERORD].setSelectedIndex(0);
+		
+		
 		jcb[cBEGRADR] = new JRtaCheckBox("vorhanden");
 		int lang = SystemConfig.rezeptKlassenAktiv.size();
 		strRezepklassenAktiv = new String[lang];
@@ -884,6 +888,20 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		jpan.add(jtf[cANGEL],cc.xy(7, 64));
 		jtf[cANGEL].setName("angelegtvon");
 		
+		Vector<Vector<String>> iks = SqlInfo.holeFelder("SELECT * FROM mandant");
+		String[] mandanten = new String[iks.size()];
+		int n = 0;
+		for(Vector<String> v : iks) {
+			String mandant = v.get(0) + " - " + v.get(1);
+			mandanten[n] = mandant;
+			n++;
+		}
+		
+		jcmbIK = new JRtaComboBox(mandanten);
+		String manSet = Betriebsumfeld.getAktIK() +" - "+ Betriebsumfeld.getAktMandant();
+		jcmbIK.setSelectedItem(manSet);
+		jpan.addLabel("Praxis:", cc.xy(1, 64));
+		jpan.add(jcmbIK, cc.xy(3, 64));
 		
 		jpan.getPanel().validate();
 		jscr = JCompTools.getTransparentScrollPane(jpan.getPanel());
@@ -2109,8 +2127,8 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			jtf[cAKUTDATUM].setText(DatFunk.sDatInDeutsch(this.vec.get(AktuelleRezepte.cAKUTEREIGNIS)));	
 		}
 		
-		
-		
+		String mand = SqlInfo.holeEinzelFeld("SELECT praxisname FROM mandant WHERE ik = '"+this.vec.get(82)+"';");
+		this.jcmbIK.setSelectedItem(this.vec.get(82) + " - " + mand);   
 		
 	}
 	
@@ -2476,7 +2494,12 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			sbuf.append("anzahlkm='"+(jtf[cANZKM].getText().trim().equals("") ? "0.00" : jtf[cANZKM].getText().trim())+"', ");
 			sbuf.append("zzregel='"+SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin).get(Integer.parseInt(jtf[cPREISGR].getText())-1 )+"', ");
 			sbuf.append("icd10='"+jtf[cICD10].getText().trim().replace(" ", "")+"', ");
-			sbuf.append("icd10_2='"+jtf[cICD10_2].getText().trim().replace(" ", "")+"' ");
+			sbuf.append("icd10_2='"+jtf[cICD10_2].getText().trim().replace(" ", "")+"', ");
+			
+			String ik = (String) this.jcmbIK.getSelectedItem();
+			ik = ik.split(" - ")[0];
+			sbuf.append("ik='"+ik+"', ");
+			sbuf.append("pauschale = 'T' ");
 			sbuf.append(" where id='"+this.vec.get(35)+"' LIMIT 1");
 
 			SqlInfo.sqlAusfuehren(sbuf.toString());
@@ -2755,7 +2778,12 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			sbuf.append("befr='"+Reha.instance.patpanel.patDaten.get(30)+"', ");
 			sbuf.append("zzregel='"+SystemPreislisten.hmZuzahlRegeln.get(aktuelleDisziplin).get(Integer.valueOf(jtf[cPREISGR].getText())-1 )+"',");
 			sbuf.append("icd10='"+jtf[cICD10].getText().trim().replace(" ", "")+"', ");
-			sbuf.append("icd10_2='"+jtf[cICD10_2].getText().trim().replace(" ", "")+"' ");
+			sbuf.append("icd10_2='"+jtf[cICD10_2].getText().trim().replace(" ", "")+"', ");
+			
+			String ik = (String) this.jcmbIK.getSelectedItem();
+			ik = ik.split(" - ")[0];
+			sbuf.append("ik='"+ik+"', ");
+			sbuf.append("pauschale = 'T' ");
 			sbuf.append("where id='"+Integer.toString(rezidneu)+"'  LIMIT 1");
 			SqlInfo.sqlAusfuehren(sbuf.toString());
 			//System.out.println("Rezept wurde mit Preisgruppe "+jtf[cPREISGR].getText()+" gespeichert");

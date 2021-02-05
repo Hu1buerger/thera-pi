@@ -17,11 +17,23 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.EventObject;
+import java.util.GregorianCalendar;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.event.TableModelEvent;
@@ -382,7 +394,8 @@ public class RehaUrlaubPanel extends JXPanel implements TableModelListener {
         String ywerte = "10dlu,p,10dlu,p,10dlu";
         Vector<String> jahre = new Vector<String>();
         jahre.add("./.");
-        for (int i = 2009; i < 2021; i++) {
+        int calYear = Integer.valueOf(new GregorianCalendar().get(Calendar.YEAR));
+        for (int i = calYear; i >= 2009; i--) {
             jahre.add(Integer.toString(i));
         }
 

@@ -12,7 +12,7 @@ import javax.swing.text.StyledDocument;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thera_pi.updater.Version;
+import org.therapi.updater.Version;
 
 
 class Credits extends JPanel {

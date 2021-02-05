@@ -110,6 +110,8 @@ public class AbrechnungGKV extends JXPanel {
     FileWriter fw;
     BufferedWriter bw;
     AbrechnungDlg abrDlg = null;
+    JRtaComboBox cmbTA14 = null;
+    public JRtaComboBox cmbIK = null;
 
     public JXTTreeNode rootKasse;
     public KassenTreeModel treeModelKasse;
@@ -189,6 +191,8 @@ public class AbrechnungGKV extends JXPanel {
     OwnCertState myCert = null;
     private List<String> volleVOs;
     private List<String> abgebrocheneVOs;
+    
+    public static Boolean hmr2021 = true;
 
     public AbrechnungGKV(JAbrechnungInternal xjry, Connection connection) {
         super();
@@ -207,8 +211,8 @@ public class AbrechnungGKV extends JXPanel {
         jSplitLR.setDividerLocation(230);
         add(jSplitLR, BorderLayout.CENTER);
         mandantenCheck();
-        SlgaVersion = "13";
-        SllaVersion = "13";
+        SlgaVersion = "14";
+        SllaVersion = "14";
 
         keyStore = new KeyStore();
         myCert = new OwnCertState();
@@ -278,7 +282,7 @@ public class AbrechnungGKV extends JXPanel {
     private JScrollPane getLeft() {
         FormLayout lay = new FormLayout("5dlu,fill:0:grow(1.0),5dlu",
                 // 1 2 3 4 5 6 7 8 9 10 11
-                "5dlu,p,5dlu,p,15dlu,p,20dlu,p,15dlu,fill:0:grow(1.0),5dlu");
+                "5dlu,p,5dlu,p,5dlu,p,5dlu,p,5dlu,p,5dlu,p,15dlu,p,20dlu,p,15dlu,fill:0:grow(1.0),5dlu");
         PanelBuilder pb = new PanelBuilder(lay);
         CellConstraints cc = new CellConstraints();
         pb.getPanel()
@@ -287,7 +291,34 @@ public class AbrechnungGKV extends JXPanel {
 
         cmbDiszi.setActionCommand("einlesen");
         pb.add(cmbDiszi, cc.xy(2, 4));
+        
+        // Unterscheidung TA13 und TA14
+        pb.addLabel("Abrechnung VO-Datum", cc.xy(2, 6));
 
+        String[] strTA14 = {"nach 01.01.2021", "bis 31.12.2020"};
+        this.cmbTA14 = new JRtaComboBox(strTA14);
+        this.cmbTA14.setActionCommand("einlesen");
+        this.cmbTA14.addActionListener(actionListener);
+        pb.add(this.cmbTA14, cc.xy(2, 8));
+        
+        // Filter für die IK Nummer
+        pb.addLabel("Abrechnung für IK Nummer:", cc.xy(2, 10));
+        Vector<Vector<String>> iks = SqlInfo.holeFelder("SELECT * FROM mandant");
+        int n = 0;
+        String[] strIKs = new String[iks.size()+1];
+        for(Vector<String> v : iks) {
+        	strIKs[n] = v.get(0);
+        	n++;
+        }
+        strIKs[n] = "alle IKs";
+        this.cmbIK = new JRtaComboBox(strIKs);
+        this.cmbIK.setSelectedItem("alle IKs");
+        this.cmbIK.setActionCommand("einlesen");
+        this.cmbIK.addActionListener(actionListener);
+        pb.add(this.cmbIK, cc.xy(2, 12));
+
+        
+        
         rootKasse = new JXTTreeNode(new KnotenObjekt("Abrechnung für Kasse...", "", false, "", ""), true);
         treeModelKasse = new KassenTreeModel(rootKasse);
 
@@ -303,7 +334,7 @@ public class AbrechnungGKV extends JXPanel {
 
         JScrollPane jscrk = JCompTools.getTransparentScrollPane(treeKasse);
         jscrk.validate();
-        pb.add(jscrk, cc.xy(2, 6));
+        pb.add(jscrk, cc.xy(2, 14));
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
@@ -320,7 +351,7 @@ public class AbrechnungGKV extends JXPanel {
         htmlPane.setOpaque(false);
         jscrk = JCompTools.getTransparentScrollPane(htmlPane);
         jscrk.validate();
-        pb.add(jscrk, cc.xy(2, 10));
+        pb.add(jscrk, cc.xy(2, 18));
 
         pb.getPanel()
           .validate();
@@ -580,11 +611,26 @@ public class AbrechnungGKV extends JXPanel {
                     lateKtList.clear();
                     lateVOList.clear();
                     String dsz = disziSelect.getCurrRezClass();
-
-                    String cmd = sucheFertige + "WHERE rezklasse='" + dsz
-                            + "' GROUP by ikktraeger ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id";
-
-                    Vector<Vector<String>> vecKassen = SqlInfo.holeFelder(cmd);
+                    
+                    int selTA14 = cmbTA14.getSelectedIndex();
+       
+                    StringBuffer sbuf = new StringBuffer();
+                    sbuf.append(sucheFertige);
+                    if(selTA14 == 1) {
+                    	sbuf.append("WHERE rezklasse='" + dsz + "' AND t1.neueversion LIKE 'F' ");
+                    	hmr2021 = false;
+                    } else {
+                    	sbuf.append("WHERE rezklasse='" + dsz + "' AND t1.neueversion LIKE 'T' ");   
+                    	hmr2021 = true;
+                    }
+                    String ik = (String)cmbIK.getSelectedItem();
+                    if(!ik.equals("alle IKs")) {
+                    	sbuf.append(" AND t1.ik = '"+ik+"' ");
+                    }
+                    sbuf.append(" GROUP by ikktraeger ORDER BY t2.ik_papier, t1.name1, t1.ikktraeger, t1.id");
+                    System.out.println("KAssen: " +sbuf.toString());
+                    
+                    Vector<Vector<String>> vecKassen = SqlInfo.holeFelder(sbuf.toString());
 
                     kassenBaumLoeschen();
                     if (vecKassen.size() <= 0) {
@@ -655,11 +701,30 @@ public class AbrechnungGKV extends JXPanel {
     private void rezepteAnhaengen(int knoten) {
         String ktraeger = ((JXTTreeNode) rootKasse.getChildAt(knoten)).knotenObjekt.ktraeger;
         String dsz = disziSelect.getCurrRezClass();
-        String cmd = "select rez_nr,pat_intern,ediok,ikkasse from fertige where rezklasse='" + dsz
-                + "' AND ikktraeger='" + ktraeger + "' AND fertige.neueversion LIKE 'F' ORDER BY id,pat_intern";
-        System.out.println(cmd);
+        
+        StringBuffer sbuf = new StringBuffer();
+        sbuf.append("select rez_nr,pat_intern,ediok,ikkasse from fertige ");
+        String cmd = null;
+        if(hmr2021) {
+        	cmd = " where rezklasse='" + dsz
+                    + "' AND ikktraeger='" + ktraeger + "' AND fertige.neueversion LIKE 'T' ";
+        	sbuf.append(cmd);
+        } else {
+        	cmd = " where rezklasse='" + dsz
+                    + "' AND ikktraeger='" + ktraeger + "' AND fertige.neueversion LIKE 'F' ";
+        	sbuf.append(cmd);
+        }
+        
+        String ik = (String)cmbIK.getSelectedItem();
+        if(!ik.equals("alle IKs")) {
+        	sbuf.append(" AND fertige.ik = '"+ik+"' ");
+        }
+        
+        sbuf.append("ORDER BY id,pat_intern");
+        
 
-        Vector<Vector<String>> vecRezepte = SqlInfo.holeFelder(cmd);
+        System.out.println(sbuf.toString());
+        Vector<Vector<String>> vecRezepte = SqlInfo.holeFelder(sbuf.toString());
 
         JXTTreeNode node = (JXTTreeNode) rootKasse.getChildAt(knoten);
 
@@ -1692,8 +1757,12 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                 + "S" + getEdiMonat();
         unbBuf.append(abrDateiName + plus);
         unbBuf.append("2" + EOL);
-
-        unbBuf.append("UNH+00001+SLGA:" + SlgaVersion + ":0:0" + EOL);
+        
+        if(!hmr2021) {
+        	unbBuf.append("UNH+00001+SLGA:13:0:0" + EOL);
+        } else {
+            unbBuf.append("UNH+00001+SLGA:" + SlgaVersion + ":0:0" + EOL);
+        }
         unbBuf.append("FKT+01" + plus + plus + Betriebsumfeld.getAktIK() + plus + ik_kostent + plus + ik_kasse + plus
                 + zertifikatVon.replace("IK", "") + EOL);
         unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus
@@ -1723,7 +1792,11 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                                                .trim())
                 + plus + SystemConfig.hmFirmenDaten.get("Telefon") + EOL);
         unbBuf.append("UNT+000010+00001" + EOL);
-        unbBuf.append("UNH+00002+SLLA:" + SllaVersion + ":0:0" + EOL);
+        if(!hmr2021) {
+        	unbBuf.append("UNH+00002+SLLA:13:0:0" + EOL);
+        } else {
+        	unbBuf.append("UNH+00002+SLLA:" + SllaVersion + ":0:0" + EOL);
+        }
         unbBuf.append("FKT+01" + plus + plus + Betriebsumfeld.getAktIK() + plus + ik_kostent + plus + ik_kasse + EOL);
         unbBuf.append("REC" + plus + aktRechnung + ":0" + plus + getEdiDatumFromDeutsch(DatFunk.sHeute()) + plus
                 + (lOwnCert ? "1" : "2") + EOL);

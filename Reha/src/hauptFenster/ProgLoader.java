@@ -396,7 +396,7 @@ public class ProgLoader {
 
         Reha.getThisFrame()
             .setCursor(Cursors.wartenCursor);
-        new SplittingDAO(Betriebsumfeld.umfeld.mandant().ik()).load();
+        //new SplittingDAO(Betriebsumfeld.umfeld.mandant().ik()).load();
         String name = "Abrechnung" + WinNum.NeueNummer();
         int containerNr = setPos;
         Reha.containerHandling(containerNr);

@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter;
 
 import javax.swing.JOptionPane;
 
-import org.thera_pi.updater.Version;
+import org.therapi.updater.Version;
 
 import CommonTools.ExUndHop;
 import systemEinstellungen.SystemConfig;

@@ -29,7 +29,7 @@ import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTitledPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thera_pi.updater.Version;
+import org.therapi.updater.Version;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import com.jgoodies.forms.layout.CellConstraints;

@@ -429,35 +429,35 @@ public class LinkeTaskPane extends JXPanel {
         jxLink.setIcon(new ImageIcon(img));
         jxLink.addActionListener(ltplistener);
         nuetzlichesPanel.add(jxLink);
-        jxLink = new JXHyperlink();
-        jxLink.setText("Thera-PI - Browser");
-        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
-        img = new ImageIcon(Path.Instance.getProghome() + "icons/home.gif").getImage()
-                                                                           .getScaledInstance(24, 24,
-                                                                                   Image.SCALE_SMOOTH);
-        jxLink.setIcon(new ImageIcon(img));
-        jxLink.addActionListener(ltplistener);
-        nuetzlichesPanel.add(jxLink);
-        jxLink = new JXHyperlink();
-        jxLink.setText("piTool - ScreenShots");
-        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
-        img = new ImageIcon(Path.Instance.getProghome() + "icons/camera_unmount.png").getImage()
-                                                                                     .getScaledInstance(24, 24,
-                                                                                             Image.SCALE_SMOOTH);
-        jxLink.setIcon(new ImageIcon(img));
-        jxLink.setActionCommand("piTool");
-        jxLink.addActionListener(ltplistener);
-        nuetzlichesPanel.add(jxLink);
-        jxLink = new JXHyperlink();
-        jxLink.setText("piHelp - Hifetextgenerator");
-        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
-        img = new ImageIcon(Path.Instance.getProghome() + "icons/fragezeichenklein.png").getImage()
-                                                                                        .getScaledInstance(24, 24,
-                                                                                                Image.SCALE_SMOOTH);
-        jxLink.setIcon(new ImageIcon(img));
-        jxLink.setActionCommand("piHelp");
-        jxLink.addActionListener(ltplistener);
-        nuetzlichesPanel.add(jxLink);
+//        jxLink = new JXHyperlink();
+//        jxLink.setText("Thera-PI - Browser");
+//        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
+//        img = new ImageIcon(Path.Instance.getProghome() + "icons/home.gif").getImage()
+//                                                                           .getScaledInstance(24, 24,
+//                                                                                   Image.SCALE_SMOOTH);
+//        jxLink.setIcon(new ImageIcon(img));
+//        jxLink.addActionListener(ltplistener);
+//        nuetzlichesPanel.add(jxLink);
+//        jxLink = new JXHyperlink();
+//        jxLink.setText("piTool - ScreenShots");
+//        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
+//        img = new ImageIcon(Path.Instance.getProghome() + "icons/camera_unmount.png").getImage()
+//                                                                                     .getScaledInstance(24, 24,
+//                                                                                             Image.SCALE_SMOOTH);
+//        jxLink.setIcon(new ImageIcon(img));
+//        jxLink.setActionCommand("piTool");
+//        jxLink.addActionListener(ltplistener);
+//        nuetzlichesPanel.add(jxLink);
+//        jxLink = new JXHyperlink();
+//        jxLink.setText("piHelp - Hifetextgenerator");
+//        jxLink.setClickedColor(new Color(0, 0x33, 0xFF));
+//        img = new ImageIcon(Path.Instance.getProghome() + "icons/fragezeichenklein.png").getImage()
+//                                                                                        .getScaledInstance(24, 24,
+//                                                                                                Image.SCALE_SMOOTH);
+//        jxLink.setIcon(new ImageIcon(img));
+//        jxLink.setActionCommand("piHelp");
+//        jxLink.addActionListener(ltplistener);
+//        nuetzlichesPanel.add(jxLink);
         jxLink = new JXHyperlink();
         jxLink.setText("Textbausteine - Therapiebericht");
         jxLink.setClickedColor(new Color(0, 0x33, 0xFF));

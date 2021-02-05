@@ -300,8 +300,6 @@ public class SystemInit extends JXPanel implements TreeSelectionListener {
         root.add(node);
 
         /***/
-        node = new DefaultMutableTreeNode("Software-Updateservice");
-        root.add(node);
 
         tree = new JTree(root);
         tree.getSelectionModel()

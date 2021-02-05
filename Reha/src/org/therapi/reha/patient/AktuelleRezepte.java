@@ -2483,10 +2483,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             kname = Reha.instance.patpanel.vecaktrez.get(36);
             patint = Reha.instance.patpanel.vecaktrez.get(0);
             rnr = Reha.instance.patpanel.vecaktrez.get(1);
+            String ik = Reha.instance.patpanel.vecaktrez.get(82);
             String cmd = "insert into fertige set ikktraeger='" + ikkost + "', ikkasse='" + ikkass + "', " + "name1='"
                     + kname + "', rez_nr='" + rnr + "', pat_intern='" + patint + "', rezklasse='" + rnr.substring(0, 2)
                     + "', neueversion='" + Reha.instance.patpanel.vecaktrez.get(cHMR2021)
-                    + "'";
+                    + "', ik = '"+ik+"'";
             SqlInfo.sqlAusfuehren(cmd);
         } else {
             if (!Rechte.hatRecht(Rechte.Rezept_unlock, true)) {

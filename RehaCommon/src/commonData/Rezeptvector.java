@@ -591,6 +591,29 @@ public class Rezeptvector {
     public void setICD10_2(String data) {
         setStringAt(72, data);
     }
+    
+    public String getSymFrei() {
+    	return getStringAt(78);
+    }
+    
+    public String getDringlich() {
+    	return getStringAt(79);
+    }
+    
+    public String getSymA() {
+    	return getStringAt(74);
+    }
+    public String getSymB() {
+    	return getStringAt(75);
+    }
+    public String getSymC() {
+    	return getStringAt(76);
+    }
+    public String getSymX() {
+    	return getStringAt(77);
+    }
+    
+    
 
     public boolean getUseHygPausch() {
         return getBoolAt(73);

@@ -13,7 +13,7 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thera_pi.updater.Version;
+import org.therapi.updater.Version;
 
 import CommonTools.DatFunk;
 import CommonTools.ExUndHop;

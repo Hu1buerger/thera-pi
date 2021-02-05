@@ -1,7 +1,11 @@
 package hauptFenster;
 
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
@@ -270,6 +274,15 @@ final class MenuActionListener implements ActionListener {
             new LadeProg(Path.Instance.getProghome() + "RehaOCR.jar" + " " + Path.Instance.getProghome() + " "
                     + Betriebsumfeld.getAktIK() + " " + String.valueOf(Integer.toString(Reha.xport)));
             return;
+
+        case "homepage":
+        	try {
+				Desktop.getDesktop().browse(new URI("https://www.thera-pi-software.de/downloads"));
+			} catch (IOException | URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	return;
         }
 
     }

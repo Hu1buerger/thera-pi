@@ -16,6 +16,7 @@ import static java.awt.event.KeyEvent.VK_X;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FlowLayout;
@@ -62,6 +63,8 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.sql.Connection;
@@ -114,9 +117,11 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.thera_pi.updater.Version;
 import org.therapi.hmrCheck2021.HmrCheck2021XML;
 import org.therapi.reha.patient.PatientHauptPanel;
+import org.therapi.updater.HTTPRepository;
+import org.therapi.updater.UpdateFile;
+import org.therapi.updater.Version;
 
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
@@ -169,7 +174,6 @@ import systemTools.RehaPainters;
 import systemTools.RezeptFahnder;
 import systemTools.TestePatStamm;
 import terminKalender.TerminFenster;
-import therapi.updatehint.UpdatesMain;
 import umfeld.Betriebsumfeld;
 import update.DueUpdates;
 import urlaubBeteiligung.Beteiligung;
@@ -211,6 +215,7 @@ public class Reha implements RehaEventListener , Monitor{
     private JMenu helpMenu = null;
     private JMenuItem exitMenuItem = null;
     JMenuItem aboutMenuItem = null;
+    JMenuItem homepageMenuItem = null;
     private JMenuItem aboutF2RescueMenuItem = null;
     public JXStatusBar jXStatusBar = null;
     private int dividerLocLR = 0;
@@ -284,6 +289,7 @@ public class Reha implements RehaEventListener , Monitor{
     public static ImageIcon rehaBackImg = null;
     public JLabel bunker = null;
     public JProgressBar Rehaprogress = null;
+    //TODO
     public GradientPaint gp1 = new GradientPaint(0, 0, new Color(112, 141, 255), 0, 25, Color.WHITE, true);
     public GradientPaint gp2 = new GradientPaint(0, 0, new Color(112, 141, 120), 0, 25, Color.WHITE, true);
     public HashMap<String, CompoundPainter<Object>> compoundPainter = new HashMap<String, CompoundPainter<Object>>();
@@ -1134,7 +1140,9 @@ public class Reha implements RehaEventListener , Monitor{
             Point2D start = new Point2D.Float(0, 0);
             Point2D end = new Point2D.Float(800, 500);
             float[] dist = { 0.2f, 0.7f, 1.0f };
+            //TODO richtige Stelle für Hintergrund farbe?
             Color[] colors = { Colors.TaskPaneBlau.alpha(1.0f), Color.WHITE, Colors.TaskPaneBlau.alpha(1.0f) };
+            
             LinearGradientPaint p = new LinearGradientPaint(start, end, dist, colors);
             MattePainter mp = new MattePainter(p);
 
@@ -1265,7 +1273,33 @@ public class Reha implements RehaEventListener , Monitor{
         Thread updater = new Thread("Udpater") {
             @Override
             public void run() {
-                UpdatesMain.main(new String[0]);
+            	boolean updateFound = false;
+                List<File> files = new HTTPRepository().filesList();
+                for(File f : files) {
+                	UpdateFile uf = new UpdateFile(f);
+                	if(uf.getFrom() != null) {
+                		if(uf.getFrom().equals(new Version())) {
+                    		updateFound = true;
+                    	} else {
+                    		Version v = new Version();
+                    		if(v.getMajor() < uf.getTo().getMajor()) { updateFound = true; };
+                    		if(v.getMinor() < uf.getTo().getMinor()) { updateFound = true; };
+                    		if(v.getRevision() < uf.getTo().getRevision()) { updateFound = true; };
+                    	}
+                	}
+                }
+                if(updateFound) {
+                	int answer = JOptionPane.showConfirmDialog(null, "Neues Update gefunden, möchten Sie es jetzt herunterladen?", "Neues Update", JOptionPane.YES_NO_OPTION);
+                	if(answer == JOptionPane.YES_OPTION) {
+                		try {
+							Desktop.getDesktop().browse(new URI("https://www.thera-pi-software.de/Downloads"));
+						} catch (IOException e) {
+							e.printStackTrace();
+						} catch (URISyntaxException e) {
+							e.printStackTrace();
+						}
+                	}
+                }
             }
         };
         updater.start();
@@ -1759,6 +1793,8 @@ public class Reha implements RehaEventListener , Monitor{
             helpMenu.add(getF2RescueMenuItem());
             helpMenu.addSeparator();
             helpMenu.add(getAboutMenuItem());
+            helpMenu.addSeparator();
+            helpMenu.add(getWebsiteMenuItem());
         }
         return helpMenu;
     }
@@ -1813,6 +1849,16 @@ public class Reha implements RehaEventListener , Monitor{
             aboutMenuItem.addActionListener(actionListener);
         }
         return aboutMenuItem;
+    }
+    
+    private JMenuItem getWebsiteMenuItem() {
+        if (homepageMenuItem == null) {
+        	homepageMenuItem = new JMenuItem();
+        	homepageMenuItem.setText("Thera-\u03C0 Homepage und Updates");
+        	homepageMenuItem.setActionCommand("homepage");
+        	homepageMenuItem.addActionListener(actionListener);
+        }
+        return homepageMenuItem;
     }
 
     private JMenuItem getF2RescueMenuItem() {
@@ -2296,12 +2342,41 @@ public class Reha implements RehaEventListener , Monitor{
     	// Version aus DB Abfragen
     	
     	// wenn < 1.1.13
+    	
     	if(!testeTableExists("version")) {
     		JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.1.13\n"
-    				+ "Updates werden jetzt durchgeführt", "DB Version Check", JOptionPane.ERROR_MESSAGE);
+    				+ "Anpassungen werden jetzt durchgeführt", "DB Version Check", JOptionPane.ERROR_MESSAGE);
     		checkForDB1113();
     	}
+    	
+    	if(testeTableExists("version")) {
+    		String version = SqlInfo.holeEinzelFeld("SELECT version FROM version WHERE object LIKE 'DB'");
+    		if(!version.equals("1.1.14")) {
+    			JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.1.14\n"
+        				+ "Anpassungen werden jetzt durchgeführt.", "DB Version Check", JOptionPane.ERROR_MESSAGE);
+    			checkForDB1114();
+    		}
+    		String sql = "SELECT * FROM mandant WHERE ik LIKE '"+Betriebsumfeld.getAktIK()+"';";
+    		Vector<Vector<String>> iks = SqlInfo.holeFelder(sql);
+    		if(iks.size() == 0) {
+    			SqlInfo.sqlAusfuehren("INSERT INTO mandant SET "
+    					+ "ik = "+Betriebsumfeld.getAktIK()+", "
+    					+ "praxisname = '"+Betriebsumfeld.getAktMandant()+"';");
+    		}
+    		
+    	}
     }
+    
+    static void checkForDB1114() {
+    	if(!testeTableExists("mandant")) {
+    		runExternSQL("mandant.sql");
+    	}
+    	if(!testeTableColumn("verordn", "ik")) {
+    		runExternSQL("verordnIK.sql");
+    	}
+    	SqlInfo.sqlAusfuehren("UPDATE version SET version = '1.1.14' WHERE object LIKE 'DB';");
+    }
+    
     static void checkForDB1113() {
     	
     	//gibt es adrgenehmigung
@@ -2404,11 +2479,13 @@ public class Reha implements RehaEventListener , Monitor{
     	String mac = "N/A";
     	try {
 			NetworkInterface ni = NetworkInterface.getByInetAddress(InetAddress.getLocalHost());
-			byte[] adr = ni.getHardwareAddress();
-			if(adr != null) {
-				mac = "";
-				for(int i = 0; i < adr.length; i++) {
-					mac += String.format("%x:",	 adr[i]);
+			if(ni != null) {
+				byte[] adr = ni.getHardwareAddress();
+				if(adr != null) {
+					mac = "";
+					for(int i = 0; i < adr.length; i++) {
+						mac += String.format("%x:",	 adr[i]);
+					}
 				}
 			}
 			
