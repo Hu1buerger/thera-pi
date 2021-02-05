@@ -8,6 +8,11 @@ Datumsformat ist jjjj-mm-tt, also Jahr-Monat-Tag
 
 - HMR2020 Formulare
 
+## [1.1.15] - 2020-02-05
+### fixed
+- Fehler in der Abrechnung, Korrektur für fehlerhaftes ZHE Segment
+- Überstunden Auswertung erweitert sich automatisch jedes Jahr
+
 ## [1.1.14] - 2020-01-31
 ### added
 - Abrechnung für Verordnungen HMR 2020
