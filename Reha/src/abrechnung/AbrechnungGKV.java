@@ -182,6 +182,8 @@ public class AbrechnungGKV extends JXPanel {
     final String ABR_MODE_IV = "abrechnungIV";
     public String SlgaVersion = null;
     public String SllaVersion = null;
+    public String dtaVerPreHMR2020 = null;
+    public String dtaVerCurrent = null;
     public boolean zuzahlModusDefault = true;
 
     public static String zertifikatVon = SystemConfig.hmAbrechnung.get("hmkeystoreusecertof");
@@ -224,10 +226,10 @@ public class AbrechnungGKV extends JXPanel {
         String Stichtag = "31.12.2020";
         String DTA_Version_alt = "13";
         String DTA_Version_neu = "14";
-        boolean vorStichtag = ( DatFunk.TageDifferenz("31.12.2019",DatFunk.sHeute()) <= 0);
+        dtaVerPreHMR2020 = "13"; //bleibt gültig bis 31.12.2023
+        boolean vorStichtag = ( DatFunk.TageDifferenz("31.12.2020",DatFunk.sHeute()) <= 0);
 
-        SlgaVersion = ( vorStichtag ? DTA_Version_alt : DTA_Version_neu);   // !! HMR2020: künftig je Abrechnungsdatei festlegen !!
-        SllaVersion = ( vorStichtag ? DTA_Version_alt : DTA_Version_neu);
+        dtaVerCurrent = ( vorStichtag ? DTA_Version_alt : DTA_Version_neu);
 
         keyStore = new KeyStore();
         myCert = new OwnCertState();
@@ -950,7 +952,7 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
 
 
     @Override
-    public void valueChanged(TreeSelectionEvent arg0) {
+    public void valueChanged(TreeSelectionEvent arg0) { // <- TreeSelectionListener
         TreePath tp = treeKasse.getSelectionPath();
         kontrollierteRezepte = 0;
         if (tp == null) {
@@ -1328,7 +1330,14 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
             abrDlg.setVisible(true);
 
             holeEdifact();
-            macheKopfDaten();   //aktuellerKassenKnoten.knotenObjekt.isHMR2021(); // SlgaVersion, SllaVersion festlegen!
+            if (!aktuellerKassenKnoten.knotenObjekt.isHMR2021()) {
+                SlgaVersion = dtaVerPreHMR2020;
+                SllaVersion = dtaVerPreHMR2020;
+            } else {
+                SlgaVersion = dtaVerCurrent;
+                SllaVersion = dtaVerCurrent;                
+            }
+            macheKopfDaten();
             macheEndeDaten();
 
 

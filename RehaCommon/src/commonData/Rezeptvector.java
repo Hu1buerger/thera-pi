@@ -489,10 +489,18 @@ public class Rezeptvector {
     public String getFrequenz() {
         return getStringAt(52);
     }
-
     public void setFrequenz(String data) {
         setStringAt(52, data);
     }
+    public int getFrequenzMax() {
+        String freq = getFrequenz();
+        int hasSpan = freq.indexOf("-");
+        if (hasSpan > 0) {
+            freq = freq.substring(++hasSpan);
+        }
+        return Integer.parseInt(freq);
+    }
+
 
     public String getLastEdit() {
         return getStringAt(53);

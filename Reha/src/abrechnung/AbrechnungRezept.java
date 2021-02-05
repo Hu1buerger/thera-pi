@@ -549,7 +549,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     private void lockAbrechnung2021(String rez) {
         String isHMR2021 = SqlInfo.holeEinzelFeld("select hmr2021 from verordn where rez_nr='" + rez + "' LIMIT 1");
         if (isHMR2021.equals("T")) {
-            rezAbschluss.setEnabled(false);
+            rezAbschluss.setEnabled(true);
             ((JComponent) rezAbschluss).setToolTipText("Rezept abschließen nicht möglich - Abrechnung nach HMR2020 ist noch nicht implementiert");
         } else {
             rezAbschluss.setEnabled(true);
@@ -4051,11 +4051,37 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             edibuf.append(test.replace(" ", "") + plus);    // Indikationsschlüssel / neu HMR2020: Diagnosegruppe (ok)
             /************************************************/
             edibuf.append(voIndex[aktRezept.getRezArt()]);
-            if (AktuelleRezepte.isDentist(test)) {
-                edibuf.append(plus + "1");  // Verordnungsbesonderheiten
-                System.out.println("Zahnarztverordnung");
-            } // McM: opt.: Unfallkennzeichen, Kennzeichen BVG, Behandlungsbeginn, Therapiebericht, Hausbesuch, 
-            edibuf.append(EOL); // neu HMR2020: Leitsymptomatik + Patientenindividuelle Leitsymptomatik, Dringlicher Behandlungsbedarf, opt.: Heilmittel-Bereich, Therapiefrequenz
+            if (!aktRezept.getIsHMR2020()) {
+                // gültig bis DTA-Version 13
+                if (AktuelleRezepte.isDentist(test)) {
+                    edibuf.append(plus + "1");  // Verordnungsbesonderheiten
+                } // opt.: Unfallkennzeichen, Kennzeichen BVG, Behandlungsbeginn, Therapiebericht, Hausbesuch, 
+            } else {
+                // ab DTA-Version 14
+                edibuf.append(plus);
+                if (AktuelleRezepte.isDentist2020(test)) {  // Verordnungsbesonderheiten (fehlt noch: Schwangerschaft/Entlassungsmanagement)
+                    edibuf.append("1");
+                } 
+                edibuf.append("++++++");    // opt.: Unfallkennzeichen, Kennzeichen BVG, Behandlungsbeginn, Therapiebericht, Hausbesuch
+                test = (aktRezept.getLeitSymIsA() ? "1" : "0");
+                test = test + (aktRezept.getLeitSymIsB() ? "1" : "0"); 
+                test = test + (aktRezept.getLeitSymIsC() ? "1" : "0"); 
+                test = test + (aktRezept.getLeitSymIsX() ? "1" : "0");
+                edibuf.append("0000".equals(test) ? "9999" : test); // Leitsymptomatiken
+                test = aktRezept.getLeitSymText();
+                if (test.length() > 70) {
+                    test = test.substring(0, 69);
+                }
+                if (aktRezept.getLeitSymIsX() && test.length() == 0){   // besser schon im HMRCheck?
+                    JOptionPane.showMessageDialog(null, "Individuelle Leitsymptomatik gewählt:  Freitext ist zwingend erforderlich!");
+                    return false;
+                }
+                edibuf.append(plus + test); // Patientenindividuelle Leitsymptomatik
+                edibuf.append(plus + (aktRezept.getDringlich() ? "1" : "0"));   // Dringlicher Behandlungsbedarf
+                edibuf.append(plus + getHmBereich (aktRezept.getRezClass()));   // Heilmittel-Bereich
+                edibuf.append(plus + aktRezept.getFrequenzMax());   // max. Therapiefrequenz
+            }
+            edibuf.append(EOL);
         }
 
         // an dieser Stelle muß der ICD-10 eingebaut werden, sofern vorhanden
@@ -4182,6 +4208,21 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         edibuf.insert(0, kopfzeile);
 
         return ret;
+    }
+
+    private String getHmBereich(String rezClass) {
+        switch (rezClass.toUpperCase()) {
+        case ("KG"):
+            return "1";
+        case ("PO"):
+            return "2";
+        case ("LO"):
+            return "3";
+        case ("ER"):
+            return "4";
+        default:
+            return"";
+        }
     }
 
     private boolean testeZahl(String zahl) {
