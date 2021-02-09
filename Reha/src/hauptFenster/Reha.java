@@ -2234,63 +2234,67 @@ public class Reha implements RehaEventListener {
     static void testeVoTableStruc(String tableName) {
         Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
         int nbOfFields = feldNamen.size();
-        if (!(feldNamen.contains("pauschale")) && (nbOfFields == 72)) {
-            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN PAUSCHALE enum('T','F') NOT NULL DEFAULT 'F'");
-            if (retVal) {
-                String meldung = "Die Tabelle " + tableName + "\n"
-                        + "wurde erfolgreich um das Feld 'PAUSCHALE' ergänzt.";
-                logger.info(meldung.replace("\n", " "));
-                SwingUtilities.invokeLater(new Runnable() {
-                    String txt = meldung;
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(null, txt);
-                    }
-                });
-
-
-            }
+        if (feldNamen.contains("pauschale")) {
+            logger.info("testeVoTableStruc: nix zu tun in Tabelle " + tableName + ".");            
         } else {
-            logger.info("testeVoTableStruc: nix zu tun in Tabelle " + tableName + ".");
+            if (nbOfFields == 72) {
+                boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN PAUSCHALE enum('T','F') NOT NULL DEFAULT 'F'");
+                if (retVal) {
+                    String meldung = "Die Tabelle " + tableName + "\n"
+                            + "wurde erfolgreich um das Feld 'PAUSCHALE' ergänzt.";
+                    logger.info(meldung.replace("\n", " "));
+                    SwingUtilities.invokeLater(new Runnable() {
+                        String txt = meldung;
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, txt);
+                        }
+                    });
+                }
+            } else {
+                logger.error("Error testeVoTableStruc: Tabelle " + tableName + " enthält nicht 'pauschale' und hat falsche Anz. Spalten für Korrektur.");
+            }
         }
     }
     
     static void testeVoTblStrucHMR2020(String tableName) {
         Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
         int nbOfFields = feldNamen.size();
-        if (!(feldNamen.contains("leitsyma"))) {    // && (nbOfFields == 73)
-            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMA enum('T','F') NOT NULL DEFAULT 'F'");
-            boolean retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMB enum('T','F') NOT NULL DEFAULT 'F'");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMC enum('T','F') NOT NULL DEFAULT 'F'");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMX enum('T','F') NOT NULL DEFAULT 'F'");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMTEXT longtext NULL");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN DRINGLICH enum('T','F') NOT NULL DEFAULT 'F'");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN THERAPZIEL longtext NULL");
-            retVal &= retVal2;
-            retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN HMR2021 enum('T','F') NOT NULL DEFAULT 'F'");
-            retVal &= retVal2;
-
-            if (retVal) {
-                String meldung = "Die Tabelle " + tableName + "\n"
-                        + "wurde erfolgreich um die Felder für HMR2020 ergänzt.";
-                logger.info(meldung.replace("\n", " "));
-                SwingUtilities.invokeLater(new Runnable() {
-                    String txt = meldung;
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(null, txt);
-                    }
-                });
-
-
-            }
-        } else {
+        if (feldNamen.contains("leitsyma")) {
             logger.info("testeVoTblStrucHMR2020: nix zu tun in Tabelle " + tableName + ".");
+        } else {
+            if (nbOfFields == 73) {
+                boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMA enum('T','F') NOT NULL DEFAULT 'F'");
+                boolean retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMB enum('T','F') NOT NULL DEFAULT 'F'");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMC enum('T','F') NOT NULL DEFAULT 'F'");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMX enum('T','F') NOT NULL DEFAULT 'F'");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN LEITSYMTEXT longtext NULL");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN DRINGLICH enum('T','F') NOT NULL DEFAULT 'F'");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN THERAPZIEL longtext NULL");
+                retVal &= retVal2;
+                retVal2 = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN HMR2021 enum('T','F') NOT NULL DEFAULT 'F'");
+                retVal &= retVal2;
+
+                if (retVal) {
+                    String meldung = "Die Tabelle " + tableName + "\n"
+                            + "wurde erfolgreich um die Felder für HMR2020 ergänzt.";
+                    logger.info(meldung.replace("\n", " "));
+                    SwingUtilities.invokeLater(new Runnable() {
+                        String txt = meldung;
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, txt);
+                        }
+                    });
+                }
+            } else {
+                logger.error("Error testeVoTblStrucHMR2020: Tabelle " + tableName + " enthält nicht 'leitsyma' und hat falsche Anz. Spalten für Korrektur.");
+            }
         }
     }
     
@@ -2298,34 +2302,72 @@ public class Reha implements RehaEventListener {
         // ... damit die DB kompatibel bleibt...
         Vector<String> feldNamen = SqlInfo.holeFeldNamen("fertige", true, Arrays.asList(new String[] { "id" }));
         int nbOfFields = feldNamen.size();
-        if (!(feldNamen.contains("neueversion"))) {    // && (nbOfFields == 9) 
-            boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE fertige ADD COLUMN neueversion enum('T','F') NOT NULL DEFAULT 'F'");
-
-            if (retVal) {
-                String meldung = "Die Tabelle fertige\n"
-                        + "wurde erfolgreich um das Feld für HMR2020 ergänzt.";
-                logger.info(meldung.replace("\n", " "));
-                SwingUtilities.invokeLater(new Runnable() {
-                    String txt = meldung;
-                    @Override
-                    public void run() {
-                        JOptionPane.showMessageDialog(null, txt);
-                    }
-                });
-
-
-            }
-        } else {
+        if (feldNamen.contains("neueversion")) {
             logger.info("testeFertigeHMR2020: nix zu tun in Tabelle fertige.");
+        } else {
+            if (nbOfFields == 9) { 
+                boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE fertige ADD COLUMN neueversion enum('T','F') NOT NULL DEFAULT 'F'");
+
+                if (retVal) {
+                    String meldung = "Die Tabelle fertige\n"
+                            + "wurde erfolgreich um das Feld für HMR2020 ergänzt.";
+                    logger.info(meldung.replace("\n", " "));
+                    SwingUtilities.invokeLater(new Runnable() {
+                        String txt = meldung;
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, txt);
+                        }
+                    });
+                }
+            } else {
+                logger.error("Error testeFertigeHMR2020: Tabelle fertige enthält nicht 'neueversion' und hat falsche Anz. Spalten für Korrektur.");
+            }
         }
+    }
+
+    static void testeVoTableStrucIk(String tableName) {
+        Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
+        int nbOfFields = feldNamen.size();
+        if (feldNamen.contains("ik")) {
+            logger.info("testeVoTableStrucIk: nix zu tun in Tabelle " + tableName + ".");
+        } else {
+            if ((nbOfFields == 81) || (nbOfFields == 10)) {
+                boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN `IK` int(9) DEFAULT NULL");
+                if (retVal) {
+                    String meldung = "Die Tabelle " + tableName + "\n"
+                            + "wurde erfolgreich um das Feld 'IK' ergänzt.";
+                    logger.info(meldung.replace("\n", " "));
+                    SwingUtilities.invokeLater(new Runnable() {
+                        String txt = meldung;
+                        @Override
+                        public void run() {
+                            JOptionPane.showMessageDialog(null, txt);
+                        }
+                    });
+                }
+            } else {
+                logger.error("Error testeVoTableStrucIk: Tabelle " + tableName + "enthält nicht 'ik' und hat falsche Anz. Spalten für Korrektur.");
+            }
+        }
+    }
+
+    static boolean setVersion(String version, String ofWhat) {
+        return SqlInfo.sqlAusfuehren("UPDATE version SET version = '" + version + "' WHERE object LIKE '" + ofWhat + "';");
     }
 
     static void testeVoTables() {
         testeVoTableStruc ("lza");
         testeVoTableStruc ("verordn");
+        setVersion("1.1.12", "DB");
         testeVoTblStrucHMR2020 ("lza");
         testeVoTblStrucHMR2020 ("verordn");
         testeFertigeHMR2020();
+        setVersion("1.1.13", "DB");
+        testeVoTableStrucIk ("verordn");
+        testeVoTableStrucIk ("lza");
+        testeVoTableStrucIk ("fertige");
+        setVersion("1.1.14", "DB");
     }
 
     ActionListener actionListener = new MenuActionListener(this);
