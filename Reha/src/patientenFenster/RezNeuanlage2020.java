@@ -707,7 +707,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             /********************/
             jpan.addLabel("Diagnosegruppe", cc.xy(1, ++rowCnt));    // 15
             jcmb[cINDI] = new JRtaComboBox();
-            jcmb[cINDI].addKeyListener(this);
+            jcmb[cINDI].setActionCommand("selDiagGrp");
             allowShortCut((Component)jcmb[cINDI],"Diagnosegruppe");
             jpan.add(jcmb[cINDI], cc.xy(3, rowCnt));
 
@@ -949,9 +949,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                                                   .toString()
                                                   .trim(),
                         preisgruppen[getPgIndex()]);
-                this.fuelleIndis(jcmb[cRKLASSE].getSelectedItem()
-                                               .toString()
-                                               .trim());
             }
             verordnenderArzt.init(myRezept.getArztId());
             copyVecToForm();
@@ -1079,47 +1076,42 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         return string;
     }
 
-/*    private void resetLeitSymCBoxExcept(int keep) {
-        for (int i = cLeitSymptA; i <= cLeitSymptX; i++) {
-            if (i != keep) {
-                jcb[i].setSelected(false);
-            }
-        }
-        if (jcb[cLeitSymptX].isSelected()) {
-            lsym_x_txt.setEditable(true);
-            lsym_x_txt.setForeground(Color.RED);
-        } else {
-            lsym_x_txt.setEditable(false);
-            lsym_x_txt.setForeground(Color.LIGHT_GRAY);
+    private void setLeitSymCBox(int idx, boolean isEnabled) {
+        jcb[idx].setEnabled(isEnabled);
+        if (!isEnabled) {
+            jcb[idx].setSelected(false);
         }
     }
- */
-/*    ActionListener cBoxActionListener = new ActionListener() {
+    
+    private void initLeitSymCBoxes() {
+        Vector<String> lsymVec = new Vector<String>();
+        Vector<Vector<String>> tmpVec = SqlInfo.holeFelder("select leitsyma,leitsymb,leitsymc,leitsymx from hmr_diagnosegruppe where diagnosegruppe ='"+jcmb[cINDI].getSelectedItem().toString()+"' LIMIT 1");
+        if (tmpVec.size() > 0) {
+            lsymVec = tmpVec.get(0);
+        }
+        for (int i = cLeitSymptA; i <= cLeitSymptX; i++) {
+            if(lsymVec.size() > 0) {
+                boolean cBoxIsActive = lsymVec.get(i-cLeitSymptA).equals("T");
+                setLeitSymCBox (i, cBoxIsActive);
+            }else if(lsymVec.size() == 0) { // Zahnarzt oder Keine DiagGr.
+                setLeitSymCBox (i, false);
+            }
+        }
+    }
+
+    ActionListener cINDIActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             String cmd = e.getActionCommand();
-            if (cmd.equals("leitSymA")) {
-                resetLeitSymCBoxExcept(cLeitSymptA);
-            }
-            if (cmd.equals("leitSymB")) {
-                resetLeitSymCBoxExcept(cLeitSymptB);
-            }
-            if (cmd.equals("leitSymC")) {
-                resetLeitSymCBoxExcept(cLeitSymptC);
-            }
-            if (cmd.equals("leitSymX")) {
-                resetLeitSymCBoxExcept(cLeitSymptX);                
+            if(cmd.equals("selDiagGrp")) {
+                initLeitSymCBoxes();
             }
         }
     };
- */   
+
     ActionListener voArtActionListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String cmd = e.getActionCommand();
-            if (cmd.equals("leitSymA")) {
-                //action
-            }
             if(jcmb[cVERORDART].getSelectedIndex() == 1) {
                 jtf[cAKUTDATUM].setEnabled(true);
             }else {
@@ -1459,6 +1451,14 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             if (checkok) {
                 JOptionPane.showMessageDialog(null,
                         "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> den geltenden Heilmittelrichtlinien</b></html>");
+            } else {
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        jtf[cKTRAEG].requestFocusInWindow();
+                        return null;
+                    }
+                }.execute();
             }
         } else {
             JOptionPane.showMessageDialog(null, "Keine Behandlungspositionen angegeben, HMR-Check nicht möglich!!!");
@@ -1542,6 +1542,56 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 });
                 return false;
             }
+          //*********************
+            //Test nach Diagnosegruppe
+            if(jcmb[cINDI].getSelectedIndex() == 0) {
+                JOptionPane.showMessageDialog(null, "Ohne Angabe der 'Diagnosegruppe' kann ein GKV-Rezept nicht abgespeichert werden.");
+                SwingUtilities.invokeLater(new Runnable(){
+                       public  void run()
+                       {
+                            jcmb[cINDI].requestFocus();
+                       }
+                });
+                return false;
+            }
+            // Leitsymptomatiktest
+            if ((!jcb[this.cLeitSymptA].isSelected() && !jcb[this.cLeitSymptB].isSelected()
+                    && !jcb[this.cLeitSymptC].isSelected() && !jcb[this.cLeitSymptX].isSelected())
+                    && (!AktuelleRezepte.isDentist2020(jcmb[cINDI].getSelectedItem()
+                                                              .toString()))) {
+                JOptionPane.showMessageDialog(null,
+                        "Achtung!\nNicht zulässige Rezeptanlage.\nEs wurde keine Leitsymptomatik angegeben.");
+                SwingUtilities.invokeLater(new Runnable() {
+                    public void run() {
+                        jcb[cLeitSymptA].requestFocus();
+                    }
+                });
+                return false;
+            }
+            //ob dem Nachfolgenden nach den neuen HMR so ist muß erst noch ermittelt werden
+            if(jcb[this.cLeitSymptX].isSelected() && (this.lsym_x_txt.getText().length() < 5) /*z.B. nur ein paar Zeilenumbrüche*/) {
+                JOptionPane.showMessageDialog(null, "Achtung!\nNicht zulässige Rezeptanlage.\nEs wurde individuelle Leitsymptomatik angegeben\n"+
+                            "aber kein Freitext eingetragen");
+                SwingUtilities.invokeLater(new Runnable(){
+                       public  void run() {
+                            jcb[cLeitSymptX].requestFocus();
+                       }
+                });
+                return false;
+            }
+            String tmpStr = jcmb[cINDI].getSelectedItem().toString();
+            if(!AktuelleRezepte.isDentist2020(tmpStr)) {
+                if(SqlInfo.holeFeld("select diagnosegruppe from hmr_diagnosegruppe where diagnosegruppe ='"+tmpStr+"' LIMIT 1" ).equals("")) {
+                    JOptionPane.showMessageDialog(null, "Achtung!\nNicht zulässige Rezeptanlage.\nDiagnosegruppe konnte nicht ermittelt werden\nHMR-Check ist nicht möglich");
+                    SwingUtilities.invokeLater(new Runnable(){
+                           public  void run() {
+                              jcmb[cINDI].requestFocus();
+                           }
+                    });
+                    return false;
+                }
+            }
+          //*********************
         }
         return true;
     }
@@ -1614,6 +1664,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
     /** Holt die passenden Inikationsschlüssel gemäß aktiver Disziplin**/       // <- stehen in 'aktuelleRezepte', werden aber nur 'hier' benutzt -> künftig lokal
     private void fuelleIndis(String typeOfVO) {                                 // weitere Definitionen in 'Historie' u. 'Dokumentation' - scheinbar unbenutzt
         try {
+            jcmb[cINDI].removeActionListener(this);
             if (jcmb[cINDI].getItemCount() > 0) {
                 jcmb[cINDI].removeAllItems();
             }
@@ -1640,11 +1691,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             for (int i = 0; i < anz; i++) {
                 jcmb[cINDI].addItem(indis[i]);
             }
-
+            jcmb[cINDI].addActionListener(cINDIActionListener);
         } catch (Exception ex) {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(null, "Fehler beim füllen der Inikat.schlüssel\n" + ex.getMessage());
-
         }
 
         return;
