@@ -34,6 +34,7 @@ import javax.swing.Timer;
 import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.MattePainter;
+import org.therapi.hmrCheck.HMRCheck2020;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import com.jgoodies.forms.builder.PanelBuilder;
@@ -49,6 +50,7 @@ import CommonTools.JRtaComboBox;
 import CommonTools.JRtaTextField;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
+import Suchen.ICDrahmen;
 import abrechnung.Disziplinen;
 import commonData.ArztVec;
 import commonData.Rezeptvector;
@@ -1066,6 +1068,25 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
 
     }
 
+    private boolean chkIcdIsValid(String string) {
+        if (string.length() > 0) {
+            String suchenach = macheIcdString(string);
+            if (SqlInfo.holeEinzelFeld(
+                    "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
+                       .equals("")) {
+                int frage = JOptionPane.showConfirmDialog(null,
+                        "<html><b>Der eingetragene ICD-10-Code ist falsch: <font color='#ff0000'>" + string
+                                + "</font></b><br>" + "Wollen Sie jetzt das ICD-10-Tool starten?<br><br></html>",
+                        "falscher ICD-10", JOptionPane.YES_NO_OPTION);
+                if (frage == JOptionPane.YES_OPTION) {
+                    new LadeProg(Path.Instance.getProghome()+"ICDSuche.jar"+" "+Reha.getAktIK());
+                }
+                return false;
+            }            
+        }
+        return true;
+    }
+
     private String chkIcdFormat(String string) {
         int posDot = string.indexOf(".");
         if ((string.length() > 3) && (posDot < 0)) {
@@ -1183,52 +1204,17 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
              .equals("hmrcheck")) {
             System.out.println("Button hmrcheck");
 
-            new SwingWorker<Void, Void>() {
-                @Override
-                protected Void doInBackground() throws Exception {
-                    try {
-                        boolean icd10falsch = false;
-                        int welcherIcd = 0;
-                        if (jtf[cICD10].getText()
-                                       .trim()
-                                       .length() > 0) {
-                            String suchenach = macheIcdString(jtf[cICD10].getText());
-                            if (SqlInfo.holeEinzelFeld(
-                                    "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                       .equals("")) {
-                                icd10falsch = true;
-                                welcherIcd = 1;
-                            }
-                            if (jtf[cICD10_2].getText()
-                                             .trim()
-                                             .length() > 0) {
-                                suchenach = macheIcdString(jtf[cICD10_2].getText());
-                                if (SqlInfo.holeEinzelFeld(
-                                        "select id from icd10 where schluessel1 like '" + suchenach + "%' LIMIT 1")
-                                           .equals("")) {
-                                    icd10falsch = true;
-                                    welcherIcd = 2;
-                                }
-                            }
-                        } else {
-                            if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
-                                                                 .get(preisgruppen[getPgIndex()]) == 1) {
-                                hmrcheck.setEnabled(true);
-                                JOptionPane.showMessageDialog(null,
-                                        "<html><b><font color='#ff0000'>Kein ICD-10 Code angegeben!</font></b></html>");
+            if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
+                                                 .get(preisgruppen[getPgIndex()]) == 0) {
+                this.hmrcheck.setEnabled(true);
+                JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostenträger nicht erforderlich");
+                return;
+            }
 
-                            }
-                        }
-                        String meldung = "Achtung - HMRCheck für HMR2020 ist noch nicht implementiert!\n\n"
-                                + "Bitte prüfen Sie die Verordnung manuell.";
-                        JOptionPane.showMessageDialog(null, meldung);
-//                        doHmrCheck(icd10falsch, welcherIcd);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    return null;
-                }
-            }.execute();
+            String meldung = "Achtung - HMRCheck für HMR2020 ist noch nicht komplett implementiert!\n\n"
+                    + "Bitte prüfen Sie die Verordnung (auch) manuell.";
+            JOptionPane.showMessageDialog(null, meldung);
+            doHmrCheck();
  
             return;
         }
@@ -1299,11 +1285,10 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         for (int i = 0; i < 4; i++) { // über alle 4 Leistungs- und Anzahl-Positionen rennen
             itest = jcmb[cLEIST1 + i].getSelectedIndex();
             if (itest > 0) {
-                if (i == 0) { // die 1. Position besonders abfragen - diese muß existieren !
+                if (i < 3) {
                     try {
-                        maxanzahl = Integer.parseInt(jtf[cANZ1 + i].getText());
+                        maxanzahl = maxanzahl + Integer.parseInt(jtf[cANZ1 + i].getText());
                     } catch (Exception ex) {
-                        maxanzahl = 0;
                     }
                 } else {
                     try {
@@ -1312,9 +1297,8 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                         aktanzahl = 0;
                     }
                     if (aktanzahl > maxanzahl) {
-                        String cmd = "Sie haben mehrere Heilmittel mit unterschiedlicher Anzahl eingegeben.\n"
-                                + "Bitte geben Sie die Heilmittel so ein daß das Heilmittel mit der größten Anzahl oben steht\n"
-                                + "und dann (bezogen auf die Anzahl) in absteigender Reihgenfolge nach unten";
+                        String cmd = "Sie haben mehr ergänzende Heilmittel als vorrangige eingegeben.\n"
+                                + "Es sind maximal soviele möglich, wie die Summe der vorrangigen Heilmittel.";
                         JOptionPane.showMessageDialog(null, cmd);
                         return false;
                     }
@@ -1350,26 +1334,19 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         return true;
     }
 
-    private void doHmrCheck(boolean icd10falsch, int welcher) {
-        if (SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin)
-                                             .get(preisgruppen[getPgIndex()]) == 0) {
-            this.hmrcheck.setEnabled(true);
-            JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostenträger nicht erforderlich");
-            return;
-        }
-        // System.out.println(SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[jcmb[cRKLASSE].getSelectedIndex()]));
-        int itest = 0; // jcmb[cLEIST1].getSelectedIndex();
+    private void doHmrCheck() {
+        int itest = 0;
         String indi = (String) jcmb[cINDI].getSelectedItem();
         if (indi.equals("") || indi.contains(noDiagGrpSelected)) {
             JOptionPane.showMessageDialog(null,
-                    "<html><b>Kein Indikationsschlüssel angegeben.<br>Die Angaben sind <font color='#ff0000'>nicht</font> gemäß den gültigen Heilmittelrichtlinien!</b></html>");
+                    "<html><b>Keie Diagnosegruppe angegeben.<br>Die Angaben sind <font color='#ff0000'>nicht</font> gemäß den gültigen Heilmittelrichtlinien!</b></html>");
             return;
         }
         indi = indi.replace(" ", "");
         Vector<Integer> anzahlen = new Vector<Integer>();
         Vector<String> hmpositionen = new Vector<String>();
 
-        for (int i = 0; i < 4; i++) { // Lemmi Doku: Nacheinander alle 4 Leistungen abfragen und Anzahlen addieren
+        for (int i = 0; i < 4; i++) {
             itest = jcmb[cLEIST1 + i].getSelectedIndex();
             if (itest > 0) {
                 anzahlen.add(Integer.parseInt(jtf[cANZ1 + i].getText()));
@@ -1381,38 +1358,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
         if (jtf[cREZDAT].getText()
                         .trim()
                         .equals(".  .")) {
-            JOptionPane.showMessageDialog(null, "Rezeptdatum nicht korrekt angegeben HMR-Check nicht möglich");
-            return;
-        }
-        if (icd10falsch) {
-            int frage = JOptionPane.showConfirmDialog(null,
-                    "<html><b>Der eingetragene " + Integer.toString(welcher)
-                            + ". ICD-10-Code ist falsch: <font color='#ff0000'>" + (welcher == 1 ? jtf[cICD10].getText()
-                                                                                                              .trim()
-                                    : jtf[cICD10_2].getText()
-                                                   .trim())
-                            + "</font></b><br>" + "HMR-Check nicht möglich!<br><br>"
-                            + "Wollen Sie jetzt das ICD-10-Tool starten?<br><br></html>",
-                    "falscher ICD-10", JOptionPane.YES_NO_OPTION);
-            if (frage == JOptionPane.YES_OPTION) {
-                new LadeProg(Path.Instance.getProghome()+"ICDSuche.jar"+" "+Reha.getAktIK());
-            }
-            if (welcher == 1) {
-                jtf[cICD10].setText("");
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        jtf[cICD10].requestFocusInWindow();
-                    }
-                });
-            } else if (welcher == 2) {
-                jtf[cICD10_2].setText("");
-                SwingUtilities.invokeLater(new Runnable() {
-                    public void run() {
-                        jtf[cICD10_2].requestFocusInWindow();
-                    }
-                });
-
-            }
+            JOptionPane.showMessageDialog(null, "Rezeptdatum nicht korrekt angegeben, HMR-Check nicht möglich");
             return;
         }
         if (hmpositionen.size() > 0) {
@@ -1447,7 +1393,7 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 tmpRezept.setVec_rez(myRezept.getVec_rez());
             }
             copyFormToVec1stTime(tmpRezept);
-            boolean checkok = new HMRCheck(tmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
+            boolean checkok = new HMRCheck2020(tmpRezept, diszis.getCurrDisziFromActRK(), preisvec).check();
             if (checkok) {
                 JOptionPane.showMessageDialog(null,
                         "<html><b>Das Rezept <font color='#ff0000'>entspricht</font> den geltenden Heilmittelrichtlinien</b></html>");
@@ -1820,15 +1766,23 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
             }
             if (componentName.equals("icd10")) {
                 String text = jtf[cICD10].getText();
-                jtf[cICD10].setText(chkIcdFormat(text));
+                text = chkIcdFormat(text);
+                if (!chkIcdIsValid(text)) {  // Prüfung auf Gültigkeit
+                    return;
+                }
+                jtf[cICD10].setText(text);
                 if (ctrlIsPressed & jumpForward) {
                     eingabeDiag.requestFocusInWindow();
                 }
-                return;
+                return; // chkIcdIsValid(String string)
             }
             if (componentName.equals("icd10_2")) {
                 String text = jtf[cICD10_2].getText();
-                jtf[cICD10_2].setText(chkIcdFormat(text));
+                text = chkIcdFormat(text);
+                if (!chkIcdIsValid(text)) {  // Prüfung auf Gültigkeit
+                    return;
+                }
+                jtf[cICD10_2].setText(text);
                 return;
             }
         }
