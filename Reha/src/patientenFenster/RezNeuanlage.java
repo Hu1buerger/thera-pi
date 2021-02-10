@@ -1289,7 +1289,7 @@ public class RezNeuanlage extends JXPanel implements ActionListener, KeyListener
                             + "Wollen Sie jetzt das ICD-10-Tool starten?<br><br></html>",
                     "falscher ICD-10", JOptionPane.YES_NO_OPTION);
             if (frage == JOptionPane.YES_OPTION) {
-                new LadeProg(Path.Instance.getProghome()+"ICDSuche.jar"+" "+Path.Instance.getProghome()+" "+Reha.getAktIK());
+                new LadeProg(Path.Instance.getProghome()+"ICDSuche.jar"+" "+Reha.getAktIK());
             }
             if (welcher == 1) {
                 jtf[cICD10].setText("");
