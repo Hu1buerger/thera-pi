@@ -672,6 +672,7 @@ public class PatientHauptLogic {
             final String xpatint = evt.getDetails()[1].trim();
             final String xrez = evt.getDetails()[2].trim();
             patientHauptPanel.aktPatID = xpatint;
+            patientHauptPanel.getMultiFuncPanel().verlaufModul().refreshData(Integer.parseInt(xpatint));
             // Anzeigedaten holen
             new Thread() {
                 @Override

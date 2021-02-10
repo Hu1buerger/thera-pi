@@ -8,15 +8,19 @@ import javax.swing.BorderFactory;
 import javax.swing.JTabbedPane;
 
 import org.jdesktop.swingx.JXPanel;
+import org.therapi.reha.patient.verlauf.VerlaufModul;
 
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
 import hauptFenster.Reha;
+import mandant.IK;
+import umfeld.Betriebsumfeld;
 
 public class PatientMultiFunctionPanel extends JXPanel {
 
     private static final long serialVersionUID = -1284209871875228012L;
     PatientHauptPanel patientHauptPanel = null;
+    private VerlaufModul verlaufModul;
 
     public PatientMultiFunctionPanel(PatientHauptPanel patHauptPanel, Connection connection) {
         super();
@@ -34,8 +38,8 @@ public class PatientMultiFunctionPanel extends JXPanel {
         JXPanel rechts = new JXPanel(new BorderLayout());
         rechts.setOpaque(false);
         rechts.setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 10));
-
-        patientHauptPanel.multiTab = new JTabbedPane();
+        JTabbedPane jTabbedPane = new JTabbedPane();
+        patientHauptPanel.multiTab = jTabbedPane;
 
 
         try {
@@ -48,7 +52,7 @@ public class PatientMultiFunctionPanel extends JXPanel {
         tabpan.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         tabpan.setOpaque(true);
         tabpan.setBackgroundPainter(Reha.instance.compoundPainter.get("getTabs2"));
-        
+
         tabpan.add(patientHauptPanel.aktRezept);
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[0] + " - 0", tabpan);
         patientHauptPanel.multiTab.setMnemonicAt(0, KeyEvent.VK_A);
@@ -69,6 +73,9 @@ public class PatientMultiFunctionPanel extends JXPanel {
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[4] + " - 0", patientHauptPanel.gutachten);
         patientHauptPanel.multiTab.setMnemonicAt(4, KeyEvent.VK_G);
 
+        verlaufModul = new VerlaufModul(new IK(Betriebsumfeld.getAktIK()));
+        jTabbedPane.add("Verlauf", verlaufModul.component());
+
         rechts.add(patientHauptPanel.multiTab, BorderLayout.CENTER);
         rechts.revalidate();
         return rechts;
@@ -76,6 +83,10 @@ public class PatientMultiFunctionPanel extends JXPanel {
 
     public AktuelleRezepte getAktRez() {
         return patientHauptPanel.aktRezept;
+    }
+
+    public VerlaufModul verlaufModul() {
+        return verlaufModul;
     }
 
 }
