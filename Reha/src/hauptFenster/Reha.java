@@ -18,7 +18,10 @@ import java.awt.event.*;
 import java.awt.geom.Point2D;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -97,6 +100,7 @@ import rehaInternalFrame.JRehaInternal;
 import rehaInternalFrame.OOODesktopManager;
 import roogle.RoogleFenster;
 import sql.DatenquellenFactory;
+import sqlTools.ScriptRunner;
 import systemEinstellungen.ImageRepository;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemInit;
@@ -2231,6 +2235,64 @@ public class Reha implements RehaEventListener {
         }
     }
 
+    static void runExternSQL(String filename) {
+        ScriptRunner runner = new ScriptRunner(Reha.instance.conn, false, false);
+        String pfad = "C:\\RehaVerwaltung\\tools\\"+filename;
+        try {
+            runner.runScript(new BufferedReader(new FileReader(pfad)));
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+
+    static boolean testeTableEntry(String table, String column, String value) {
+        Vector<Vector<String>> structure = SqlInfo.holeFelder("SELECT * FROM `"+table+"` WHERE `"+column+"` LIKE '"+value+"';");
+        for(Vector<String> v : structure) {
+            if(v.get(0).equalsIgnoreCase(value)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    static boolean testeTableColumn(String table, String column) {
+        Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"`;");
+        for(Vector<String> v : structure) {
+            if(v.get(0).equalsIgnoreCase(column)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    static boolean testeTableStructure(String table, String column, String type) {
+        Vector<Vector<String>> structure = SqlInfo.holeFelder("SHOW COLUMNS FROM `"+table+"` LIKE '"+column+"';");
+        String dbTyp = structure.get(0).get(1);
+        if(dbTyp.equals(type)) {
+            return true;
+        }
+        return false;
+    }
+
+    static boolean testeTableExists(String tablename) {
+        Vector<Vector<String>> showTables = SqlInfo.holeFelder("SHOW TABLES;");
+        
+        for(Vector<String> t : showTables) {
+            if(t.get(0).equalsIgnoreCase(tablename)) {
+                return true;
+            }
+        }
+        System.out.println("Tabellen Prüfung: Tabelle " + tablename + " nicht (!) gefunden");
+        return false;
+    }
+
     static void testeVoTableStruc(String tableName) {
         Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
         int nbOfFields = feldNamen.size();
@@ -2326,13 +2388,13 @@ public class Reha implements RehaEventListener {
         }
     }
 
-    static void testeVoTableStrucIk(String tableName) {
+    static void testeVoTableStrucIk(String tableName, int columnsBefore) {
         Vector<String> feldNamen = SqlInfo.holeFeldNamen(tableName, true, Arrays.asList(new String[] { "id" }));
         int nbOfFields = feldNamen.size();
         if (feldNamen.contains("ik")) {
             logger.info("testeVoTableStrucIk: nix zu tun in Tabelle " + tableName + ".");
         } else {
-            if ((nbOfFields == 81) || (nbOfFields == 10)) {
+            if ((nbOfFields == columnsBefore)) {
                 boolean retVal = SqlInfo.sqlAusfuehren("ALTER TABLE " + tableName + " ADD COLUMN `IK` int(9) DEFAULT NULL");
                 if (retVal) {
                     String meldung = "Die Tabelle " + tableName + "\n"
@@ -2356,17 +2418,71 @@ public class Reha implements RehaEventListener {
         return SqlInfo.sqlAusfuehren("UPDATE version SET version = '" + version + "' WHERE object LIKE '" + ofWhat + "';");
     }
 
-    static void testeVoTables() {
-        testeVoTableStruc ("lza");
-        testeVoTableStruc ("verordn");
-        setVersion("1.1.12", "DB");
-        testeVoTblStrucHMR2020 ("lza");
-        testeVoTblStrucHMR2020 ("verordn");
+    static void testeDBversion() {
+        if (!testeTableExists("version")) {
+            runExternSQL("version.sql");
+        }
+        if (!testeTableEntry("version","object","DB")) {
+            SqlInfo.sqlAusfuehren("INSERT INTO version SET version = '?', object = 'DB';");
+        }
+        if (!testeTableEntry("version","object","ICD-10")) {
+            SqlInfo.sqlAusfuehren("INSERT INTO version SET version = '?', object = 'ICD-10';");
+        }
+        if (!testeTableExists("adrgenehmigung")) {
+            runExternSQL("adrgenehmigung.sql");
+        }
+        // ik spalte in Rechnungstabellen (verkfaktura, rgaffaktura,faktura,rliste)
+        boolean ikspalte = true;
+        if(!testeTableColumn("verkfaktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("rgaffaktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("faktura", "IK")) { ikspalte = false; };
+        if(!testeTableColumn("rliste", "IK")) { ikspalte = false; };
+        
+        if(!ikspalte) {
+            runExternSQL("ikfaktura.sql");
+        }
+        // teste icd10_2 in verordn, lza wird dann implizit vorrausgesetzt
+        if(!testeTableColumn("verordn", "ICD10_2")) {
+            runExternSQL("icd102.sql");
+        }
+        setVersion("1.0", "DB");
+
+        testeVoTableStruc("lza");
+        testeVoTableStruc("verordn");
+        // = runExternSQL("pauschale.sql");
+        setVersion("1.1.6", "DB");
+
+        // verkaufstabellen double in dezi
+        if(!testeTableStructure("verkliste", "v_betrag", "decimal(10,2)")) {
+            runExternSQL("verkaufsmodul.sql");
+        }
+        setVersion("1.1.9", "DB");
+
+        testeVoTblStrucHMR2020("lza");
+        testeVoTblStrucHMR2020("verordn");
         testeFertigeHMR2020();
+        // = runExternSQL("verordn2021.sql");
+        if(!testeTableExists("hmr_diagnosegruppe")) {
+            runExternSQL("hmrdiagnosegruppe.sql");
+        }
+        
+        if (!testeTableEntry("hmrcheck", "indischluessel", "EX")) {
+            runExternSQL("HM-Pos_4_HMR2020.sql");        
+        }
+
+        //ICD-10 Tabelle 2021 importieren
+        runExternSQL("icd2021.sql");
         setVersion("1.1.13", "DB");
-        testeVoTableStrucIk ("verordn");
-        testeVoTableStrucIk ("lza");
-        testeVoTableStrucIk ("fertige");
+        setVersion("2021", "ICD-10");
+        // = runExternSQL("version.sql");
+
+        testeVoTableStrucIk("verordn", 81);
+        testeVoTableStrucIk("lza", 81);
+        testeVoTableStrucIk("fertige", 10);
+        // = runExternSQL("verordn2021.sql");
+        if(!testeTableExists("mandant")) {
+            runExternSQL("mandant.sql");
+        }
         setVersion("1.1.14", "DB");
     }
 
