@@ -3,6 +3,7 @@ package org.therapi.hmrCheck2021;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.jdom2.Document;
@@ -26,16 +27,7 @@ public class HmrCheck2021XML {
 	public static String cLO = "III. Maßnahmen der Stimm-, Sprech-, Sprach- und Schlucktherapie";
 	public static String cER = "IV. Maßnahmen der Ergotherapie";
 	public static String cEN = "V. Maßnahmen der Ernährungstherapie";
-	
-	/*
-	 * 0 = orientierende Menge.
-	 * 1 = VO Menge.
-	 * 2 = standard Menge
-	 * 3 = MassageMenge
-	 * 4 = hoechstalter.
-	 * 5 = behandlungsmenge hoechstalter.
-	 * 6 = hoechtsmenge icd.
-	 */
+    static HashMap<String,String> hmKapitel = new HashMap<>();
 	
 	public static int cORIMEN = 0;
 	public static int cVOMEN = 1;
@@ -48,8 +40,16 @@ public class HmrCheck2021XML {
 	public HmrCheck2021XML(File xml) {
 		this.xml = xml;
 		this.loadXML();
+        hmKapitel.put( "Physio", cKG );
+        hmKapitel.put( "Ergo", cER );
+        hmKapitel.put( "Logo", cLO );
+        hmKapitel.put( "Podo", cPO );
 	}
 	
+    public String getKapitelFromHMap(String disziKurz) {
+        return hmKapitel.get( disziKurz );
+    }
+
 	private void loadXML() {
 		try {
 			this.doc = new SAXBuilder().build(this.xml);
@@ -83,6 +83,12 @@ public class HmrCheck2021XML {
 			String positionsnr = c.getChild("positionsnr_liste", c.getNamespace()).getChild("positionsnr", c.getNamespace()).getAttributeValue("V");
 			rueckgabe.add(positionsnr);
 		}
+        e = diagnosegr.getChild("heilmittelverordnung", diagnosegr.getNamespace())
+                .getChild("standardisierte_heilmittel_kombination", diagnosegr.getNamespace());
+        if(e != null) {
+            String positionsnr = e.getChild("positionsnr_liste", e.getNamespace()).getChild("positionsnr", e.getNamespace()).getAttributeValue("V");
+            rueckgabe.add(positionsnr);
+        }
 		return rueckgabe;
 	}
 	
@@ -112,8 +118,16 @@ public class HmrCheck2021XML {
 		return rueckgabe;
 	}
 	
-	
 	public int[] getAnzahl(String diszi, String diagnosegruppe) {
+	    /*
+	     * 0 = orientierende Menge.
+	     * 1 = VO Menge.
+	     * 2 = standard Menge
+	     * 3 = MassageMenge
+	     * 4 = hoechstalter.
+	     * 5 = behandlungsmenge hoechstalter.
+	     * 6 = hoechtsmenge icd.
+	     */
 		int rueckgabe[] = {0, 0, 0, 0, 0, 0, 0};
 		Element kapitel = null;
 		for(Element c : this.sdhm.getChildren()) {
@@ -198,6 +212,4 @@ public class HmrCheck2021XML {
 		
 		return rueckgabe;
 	}
-
-
 }
