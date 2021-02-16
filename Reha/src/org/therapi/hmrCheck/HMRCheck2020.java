@@ -6,9 +6,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JOptionPane;
+
+import org.therapi.reha.patient.AktuelleRezepte;
 
 import CommonTools.DatFunk;
 import CommonTools.SqlInfo;
@@ -22,6 +25,7 @@ import systemEinstellungen.SystemConfig;
 
 public class HMRCheck2020 {
     private Vector<Integer> anzahl = null;
+    private static final int IDX_HM_ERG = 3;
     private Vector<String> positionenVorr = null;
     private Vector<String> positionenErg = null;
     private Vector<String> positionenAll = null;
@@ -50,9 +54,13 @@ public class HMRCheck2020 {
     VerordnungsArten voArten = new VerordnungsArten();
 
     int maxprorezept = 0;
+    int maxproStdVO = 0;
     int maxprofall = 0;
     int behFreqMax = 0;
     Disziplinen diszis = null;
+    String typeOfBedarf = null;
+    int idxArtDerVO = 0;
+    ArrayList<String> excludePos = null;
 
 // mal sehen, was bleibt:
 // - maxProFall (aka 'orientierende Behandlungsmenge') ist uninteressant
@@ -77,7 +85,7 @@ public class HMRCheck2020 {
             if (tmp != "") {
                 anzahl.add(i, rezept.getAnzBeh(i + 1));
                 if (i < 3) {
-                    positionenVorr.add(idxVorr++, tmp);                    
+                    positionenVorr.add(idxVorr++, tmp);
                 } else {
                     positionenErg.add(idxErg++, tmp);
                 }
@@ -102,6 +110,9 @@ public class HMRCheck2020 {
             neurezept = true;
         }
         fehlertext = new FehlerTxt();
+        String[] tmpArr = {"X4002", "X0204", "X3011", "X3010", "X3008" };
+        excludePos = new ArrayList(Arrays.asList(tmpArr));
+        idxArtDerVO = rezept.getRezArt();
     }
 
     /**
@@ -113,12 +124,12 @@ public class HMRCheck2020 {
      *
      */
     public boolean check() {
-        final int idxMaxProFall = 1;
-        final int idxMaxProVO = 2;
-        final int idxVorrHM = 3;
-        final int idxMaxVorr = 4;
-        final int idxErgHM = 5;
-        final int idxMaxErg = 6;
+        final int IDX_MAX_PRO_FALL = 1;
+        final int IDX_MAX_PRO_VO = 2;
+        final int IDX_VORR_HM = 3;
+        final int IDX_MAX_VORR = 4;
+        final int IDX_ERG_HM = 5;
+        final int IDX_MAX_ERG = 6;
         if (reznummer.startsWith("RS") || reznummer.startsWith("FT") || reznummer.startsWith("RH")
                 || diszis.currIsRsport() || diszis.currIsFtrain()) {
             return true;
@@ -133,48 +144,131 @@ public class HMRCheck2020 {
             return false;
         } else if (diagnosegruppe.equals("k.A.")) {
             JOptionPane.showMessageDialog(null,
-                    "Diagnosegruppe " + diagnosegruppe
-                            + " (keine Angaben) wurde gewählt, HMR-Check wird abgebrochen.\n"
+                    "Diagnosegruppe " + diagnosegruppe + " (keine Angaben) wurde gewählt, HMR-Check wird abgebrochen.\n"
                             + "Bitte stellen Sie selbst sicher daß alle übrigen Pflichtangaben vorhanden sind");
             return true;
         }
         Vector<String> vec = tmpVec.get(0);
-        // System.out.println(vec);
-        maxprorezept = Integer.parseInt(vec.get(idxMaxProVO));
-        maxprofall = Integer.parseInt(vec.get(idxMaxProFall));
-        String[] vorrangig = vec.get(idxVorrHM)
+        maxproStdVO = Integer.parseInt(vec.get(IDX_MAX_PRO_VO));
+        maxprofall = Integer.parseInt(vec.get(IDX_MAX_PRO_FALL));
+        String[] vorrangig = vec.get(IDX_VORR_HM)
                                 .split("@");
-        String[] ergaenzend = vec.get(idxErgHM)
+        String[] ergaenzend = vec.get(IDX_ERG_HM)
                                  .split("@");
-        for (int i = 0; i < vorrangig.length; i++) {
-            vorrangig[i] = diszis.getPrefix(disziIdx) + vorrangig[i];
-        }
-        for (int i = 0; i < ergaenzend.length; i++) {
-            ergaenzend[i] = diszis.getPrefix(disziIdx) + ergaenzend[i];
-        }
+        String prefix = diszis.getPrefix(disziIdx);
+        vorrangig = addPrefix(vorrangig, prefix);
+        ergaenzend = addPrefix(ergaenzend, prefix);
 
-        // hier erstmal testen, ob BVB / LHM (ändert maxprorezept je nach Behandlungsfrequenz)
-        System.out.println("max. Beh.-Frequenz: " + behFreqMax);
-        //icd10_1, icd10_2 
+        // Behandlungszahlen zum HM (mainly stolen^h^h^h borrowed from org.therapi.hmrCheck2021.HMRCheck2021.jar)
+        int[] erlaubte = null;
+        ArrayList<String> hmVorrPos = null;
+        ArrayList<String> hmErgPos = null;
+        boolean isLfBedarf = false;
         
-        // mögliche Höchstmenge pro Rezept wurde überschritten?
-        for (int i = 0; i < anzahl.size(); i++) {   // <== HMR2020: vorr HM aufsummieren!
-            if (anzahl.get(i) > maxprorezept) {
-                fehlertext.add("<b>Bei Diagnosegruppe " + diagnosegruppe
-                        + " sind maximal<br><font color='#ff0000'>" + Integer.toString(maxprorezept)
-                        + " Behandlungen</font> pro Rezept erlaubt!!<br><br></b>");
-                testok = false;
+        String kap = Reha.hmrXML.getKapitelFromHMap(disziKurz);
+        excludePos = matchPrefix (excludePos, prefix);
+        if (AktuelleRezepte.isDentist2020(this.diagnosegruppe)) {
+            // aus DB gelesene Werte gelten
+            maxprorezept = maxproStdVO;
+        } else {
+            erlaubte = Reha.hmrXML.getAnzahl(kap, this.diagnosegruppe);
+            maxproStdVO = erlaubte[Reha.hmrXML.cVOMEN];
+            hmVorrPos = Reha.hmrXML.getErlaubteVorrangigeHM(kap, this.diagnosegruppe);
+            hmVorrPos = matchPrefix (hmVorrPos, prefix);
+            hmErgPos = Reha.hmrXML.getErlaubteErgaenzendeHM(kap, this.diagnosegruppe);
+            hmErgPos = matchPrefix (hmErgPos, prefix);
+            
+            vorrangig = new String[hmVorrPos.size()];
+            hmVorrPos.toArray(vorrangig);
+            ergaenzend = new String[hmErgPos.size()];
+            hmErgPos.toArray(ergaenzend);
+
+            // testen, ob BVB / LHM (ändert maxprorezept je nach max. Behandlungsfrequenz)
+            kap = Reha.hmrLfBed.getKapitelFromHMap(disziKurz);
+            isLfBedarf = checkLfBedarf( kap, this.diagnosegruppe, icd10_1, icd10_2);
+            if (isLfBedarf) {
+                maxprorezept = behFreqMax * 12;
+                String art = Reha.hmrLfBed.getTypeOfVoBedarf();
+                switch (art) {
+                case "BVB":
+                    typeOfBedarf = VerordnungsArten.BES_VO_BEDARF;
+                case "LHM":
+                    typeOfBedarf = VerordnungsArten.LANGFRIST_VO;
+                }
+            } else {
+                maxprorezept = maxproStdVO;
+            }
+        }
+        System.out.println("max. Beh.-Frequenz: " + behFreqMax + "   langfrist: " + (isLfBedarf ? "ja" : "nein") + "   max/VO: " + maxprorezept);
+
+        // test auf erlaubte HM
+        int anzVorr = positionenVorr.size();
+        for (int i = 0; i < anzVorr; i++) {
+            String currPos = positionenVorr.get(i);
+            boolean isVorrHM = checkIsVorrHM(preisvec, currPos);
+            boolean vorrangigErlaubt = Arrays.asList(vorrangig)
+                                        .contains(currPos);
+            boolean ergaenzendErlaubt = Arrays.asList(ergaenzend)
+                                         .contains(currPos);
+            boolean isoliertErlaubt = checkIsoliertErlaubt(preisvec, currPos);
+
+            if (!vorrangigErlaubt) {
+                if (isVorrHM) {
+                    fehlertext.add(getDialogText(true, getHeilmittel(currPos), currPos, vorrangig));
+                    testok = false;
+                }
+                if (ergaenzendErlaubt) {
+                    if (isoliertErlaubt && (anzVorr == 1)) {
+                        // ergänzendes HM darf isoliert verordnet werden
+                        // (betrifft ET,EST,US)
+                    } else {
+                        fehlertext.add("<b>Das  <font color='#ff0000'>ergänzende Heilmittel</font> " + getHeilmittel(currPos)
+                                + "<br>wurde  <font color='#ff0000'>als vorrangiges Heilmittel eingetragen</font>.<br><br>");
+                        testok = false;
+                    }
+                }
             }
         }
 
+        // mögliche Höchstmenge pro Rezept wurde überschritten?
+        int anzBehVorr = 0;
+        int anzBehErg = anzahl.get(IDX_HM_ERG);
+        for (int i = 0; i < positionenVorr.size(); i++) {
+            anzBehVorr += anzahl.get(i);
+        }
+        if ((anzBehVorr > maxproStdVO) && (isLfBedarf)) {
+            if (VerordnungsArten.getTypeOfVo(idxArtDerVO) != typeOfBedarf) {
+                fehlertext.add("<b>Bei Diagnosegruppe " + diagnosegruppe + " sind für eine Standard-VO"
+                        + " <font color='#ff0000'>maximal " + Integer.toString(maxproStdVO)
+                        + "<br>Behandlungen</font> pro Rezept erlaubt!!<br>"
+                        + "Wechsel der Verordnungsart zu " + typeOfBedarf
+                        + " ist lt. ICD-Code(s) möglich und notwendig.<br><br></b>");
+                testok = false;
+            }
+        }
+        if ((anzBehErg > maxprorezept) || (anzBehVorr > maxprorezept)) {
+            fehlertext.add("<b>Bei Diagnosegruppe " + diagnosegruppe
+                    + " sind <font color='#ff0000'>maximal " + Integer.toString(maxprorezept)
+                    + "<br>Behandlungen</font> pro Rezept erlaubt!!<br>"
+                    + " Im Rezept angelegt: " +  Integer.max(anzBehErg, anzBehVorr) + " Behandlungen.<br><br></b>");
+            testok = false;
+        }
+
+        if (anzBehErg > anzBehVorr) {
+            fehlertext.add("<b>Es sind maximal so viele ergänzende wie "
+                    + "vorrangige Behandlungen pro Rezept erlaubt!!<br><br></b>");
+            testok = false;
+        }
+
         try {
+            // test auf Doppelbehandlung
             if (positionenAll.size() >= 2) {
                 if (positionenAll.get(0)
                               .equals(positionenAll.get(1))) { // sind auch pos2 + pos3 mögl.?
                     doppelbehandlung = true;
                     int doppelgesamt = anzahl.get(0) + anzahl.get(1);
                     if (doppelgesamt > maxprorezept) {
-                        fehlertext.add("<b>Die Doppelbehandlung bei Diagnosegruppe "
+                        fehlertext.add("<b>Die Doppelbehandlung bei Diagnosegruppe "    // und ICD??
                                 + diagnosegruppe
                                 + ", übersteigt<br>die maximal erlaubte Höchstverordnungsmenge pro Rezept von<br><font color='#ff0000'>"
                                 + Integer.toString(maxprorezept) + " Behandlungen</font>!!<br><br>");
@@ -183,43 +277,7 @@ public class HMRCheck2020 {
                 }
             }
 
-            int posGesamt = positionenAll.size();
-            for (int i = 0; i < posGesamt; i++) {
-                String currPos = positionenAll.get(i);
-                boolean isOptional = Arrays.asList(ergaenzend)
-                                           .contains(currPos);
-                if (i == 0) {
-                    if (!Arrays.asList(vorrangig)
-                               .contains(currPos)) {
-                        // kein vorrangiges HM -> Test, ob 'ergänzend, aber einzeln erlaubt'!
-                        boolean isoliertErlaubt = false;
-                        for (int j = 0; j < preisvec.size(); j++) {
-                            if (currPos == preisvec.get(j)
-                                                   .get(2)) {
-                                boolean[] vorrUisoliert = stammDatenTools.RezTools.isVorrangigAndExtra(preisvec.get(j)
-                                                                                                               .get(1),
-                                                                                                               diszis.getRezClass(disziIdx));
-                                isoliertErlaubt = vorrUisoliert[1];
-                            }
-                        }
-                        if (isOptional && isoliertErlaubt && (posGesamt == 1)) {
-                            // ergänzendes HM darf isoliert verordnet werden (betrifft ET,EST,US)
-                        } else {
-                            fehlertext.add(getDialogText(true, getHeilmittel(currPos), currPos, vorrangig));
-                            testok = false;
-                        }
-                    }
-                } else if (i == 1 && doppelbehandlung) {
-
-                } else {
-                    if (!isOptional) {
-                        fehlertext.add(getDialogText(false, getHeilmittel(currPos), currPos, ergaenzend));
-                        testok = false;
-                    }
-                }
-            }
-
-            // Jetzt auf Rezeptbeginn testen
+            // test Rezeptbeginn
             if (neurezept) {
                 long differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
                 if (differenz < 0) {
@@ -294,6 +352,62 @@ public class HMRCheck2020 {
             JOptionPane.showMessageDialog(null, fehlertext.getTxt());
         }
         return testok;
+    }
+
+    private boolean checkLfBedarf(String kap, String diagnosegruppe2, String icd10_1, String icd10_2) {
+        boolean isLfBedarf = false;
+        if (icd10_1 != null) {
+            isLfBedarf = isLfBedarf || Reha.hmrLfBed.isBesVoBedOrLangfristBed(icd10_1, kap, this.diagnosegruppe);            
+        }
+        if (icd10_2 != null) {
+            isLfBedarf = isLfBedarf || Reha.hmrLfBed.isBesVoBedOrLangfristBed(icd10_2, kap, this.diagnosegruppe);
+        }
+        return isLfBedarf;
+    }
+
+    private String[] addPrefix(String[] hmPos, String prefix) {
+        String[] tmpArr = new String[hmPos.length];
+        String tmpStr = null;
+        for (int i = 0; i < hmPos.length; i++) {
+            tmpStr = prefix + hmPos[i];
+            tmpArr[i] = tmpStr;
+        }
+        return tmpArr;
+    }
+
+    private ArrayList<String> matchPrefix(ArrayList<String> hmVorrPos, String prefix) {
+        ArrayList<String> tmpList = new ArrayList<String>();
+        String tmpStr = null;
+        for (int i = 0; i < hmVorrPos.size(); i++) {
+            tmpStr = hmVorrPos.get(i).replace("X", prefix);
+            if (!tmpList.contains(tmpStr)) {
+                tmpList.add(tmpStr);
+            }
+        }
+        return tmpList;
+    }
+
+    private boolean[] checkVorrErgInPl(Vector<Vector<String>> preisvec, String currPos) {
+        boolean[] vorrUisoliert = new boolean[]{false,false};
+        for (int j = 0; j < preisvec.size(); j++) {
+            Vector<String> currVec = preisvec.get(j);
+            if (currPos.equals(currVec.get(2))) {
+               vorrUisoliert = stammDatenTools.RezTools.isVorrangigAndExtra(currVec.get(1),
+                        diszis.getRezClass(disziIdx));
+                break;
+            }
+        }
+        return vorrUisoliert;
+    }
+    
+    private boolean checkIsoliertErlaubt(Vector<Vector<String>> preisvec, String currPos) {
+        boolean[] vorrUisoliert = checkVorrErgInPl( preisvec, currPos );
+        return vorrUisoliert[1];
+    }
+
+    private boolean checkIsVorrHM(Vector<Vector<String>> preisvec, String currPos) {
+        boolean[] vorrUisoliert = checkVorrErgInPl( preisvec, currPos );
+        return vorrUisoliert[0];
     }
 
     private String getDialogText(boolean vorrangig, String heilmittel, String hmpos, String[] positionen) {

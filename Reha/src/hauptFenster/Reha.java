@@ -54,6 +54,9 @@ import org.jdesktop.swingx.painter.MattePainter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.thera_pi.updater.Version;
+import org.thera_pi.updates.TestForUpdates;
+import org.therapi.hmrCheck.HMRlangfristBedarf;
+import org.therapi.hmrCheck2021.HmrCheck2021XML;
 import org.therapi.reha.patient.PatientHauptPanel;
 
 import com.jgoodies.forms.layout.CellConstraints;
@@ -283,6 +286,9 @@ public class Reha implements RehaEventListener {
     public static boolean bRGAFoffen;
     public static boolean bHatMerkmale;
 
+    public static HmrCheck2021XML hmrXML;
+    public static HMRlangfristBedarf hmrLfBed;
+
     public static Vector<Vector<List<String>>> terminLookup = new Vector<Vector<List<String>>>();
 
     private final static Mandant nullMandant = new Mandant("000000000", "Übungs-Mandant");
@@ -362,6 +368,11 @@ public class Reha implements RehaEventListener {
 
 
         String iniPath = Path.Instance.getProghome() + "ini/" + mandant().ikDigitString() + "/";
+        Reha.hmrXML = new HmrCheck2021XML(new File(Path.Instance.getProghome()+"\\tools\\hmk.xml"));
+        Reha.hmrLfBed = new HMRlangfristBedarf(new File(Path.Instance.getProghome()+"\\tools\\hmk_anl_lf-bed.xml"));
+
+        logger.info("Thera-Pi Version: " + new Version().number());
+        logger.info("Java Version:     " + System.getProperty("java.version"));
 
         INITool.init(iniPath);
         logger.info("Insgesamt sind " + INITool.anzahlInisInDB() + " INI-Dateien in der Tabelle inidatei abgelegt");
