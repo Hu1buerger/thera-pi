@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Vector;
 
+import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
@@ -2563,14 +2564,45 @@ public class RezTools {
                 // Die Variable j erhält jetzt den Wert der Anzahl der verbliebenen Objekte
                 j = hMPos.size();
 
+                // prüfen welche Behandlungsformen 'noch einen vertragen können'
+                int hMmitOffenenBehandlungen = 0;
+                int anzOffeneVorrHM = 0;
+                int ianzahl = hMPos.get(0).vOMenge;
+                int ioffen = hMPos.get(0).vORestMenge;
+                for (i = 0; i < j; i++) {
+                    BestaetigungsDaten currHmPos = hMPos.get(i);
+                    currHmPos.danachVoll();
+                    // wenn eine Behandlung noch frei ist 
+                    if (currHmPos.einerOk ) {
+                        hMmitOffenenBehandlungen++;
+                        if (currHmPos.vorrangig) {
+                            anzOffeneVorrHM++;
+                        }
+                    }
+                    if (ianzahl != currHmPos.vOMenge) {
+                        anzahlRezeptGleich = false;
+                    }
+                    if (ioffen != currHmPos.vORestMenge) {
+                        nochOffenGleich = false;
+                    }
+                }
+                // Keine Postition mehr frei
+                if (hMmitOffenenBehandlungen == 0) {
+                    retObj[0] = String.valueOf(termbuf.toString());
+                    retObj[1] = Integer.valueOf(RezTools.REZEPT_IST_BEREITS_VOLL);
+                    // if(debug){System.out.println("Rezept war bereits voll");}
+                    return retObj;
+                }
+
                 // Nur wenn nach HMR-geprüft werden muß
                 if (hmrtest) {
                     // 1. erst Prüfen ob das Rezept bereits voll ist
                     for (i = 0; i < j; i++) {
                         if (!hMPos.get(i).einerOk && hMPos.get(i).vorrangig) {
                             // ein vorrangiges Heilmittel ist voll
-                            // testen ob es sich um eine Doppelposition dreht
-                            if (((Object[]) ((ArrayList<?>) ((Vector<?>) termine).get(4)).get(i))[0] == Boolean.TRUE) {
+                            // testen ob es sich um eine Doppelposition dreht (ermittelt in holePosUndAnzahlAusTerminen())
+                            if (((Object[]) ((ArrayList<?>) ((Vector<?>) termine).get(4)).get(i))[0] == Boolean.valueOf(
+                                    true)) {
                                 // testen ob es die 1-te Pos der Doppelbehandlung ist
                                 if ((Integer) ((Object[]) ((ArrayList<?>) ((Vector<?>) termine).get(4)).get(
                                         i))[1] < (Integer) ((Object[]) ((ArrayList<?>) ((Vector<?>) termine).get(
@@ -2583,13 +2615,18 @@ public class RezTools {
                                     return retObj;
                                 }
                             } else {
-                                // nein keine Doppelposition also Ende-Gelände      // TODO HMR2020: kann noch weiter gehen (bis 3 vorr. HM)
-                                retObj[0] = String.valueOf(termbuf.toString());
-                                retObj[1] = Integer.valueOf(REZEPT_IST_BEREITS_VOLL);
-                                // if(debug){System.out.println("erste Position = voll und keine
-                                // Doppelbehandlung");}
-                                // if(debug){System.out.println(hMPos.get(i).hMPosNr+"-"+hMPos.get(i).vOMenge+"-"+hMPos.get(i).anzBBT);}
-                                return retObj;
+                                // nein keine Doppelposition
+                                boolean isHMR2021 = checkIsHMR2021 (swreznum);
+                                if ((isHMR2021) && (anzOffeneVorrHM > 0)) {
+                                    // HMR2020: kann noch weiter gehen (bis 3 vorr. HM sind möglich)
+                                } else {
+                                    // also Ende-Gelände      
+                                    retObj[0] = String.valueOf(termbuf.toString());
+                                    retObj[1] = Integer.valueOf(RezTools.REZEPT_IST_BEREITS_VOLL);
+                                    // if(debug){System.out.println("erste Position = voll und keine Doppelbehandlung");}
+                                    // if(debug){System.out.println(hMPos.get(i).hMPosNr+"-"+hMPos.get(i).vOMenge+"-"+hMPos.get(i).anzBBT);}
+                                    return retObj;
+                                }
                             }
                         } else if (!hMPos.get(i).einerOk && !hMPos.get(i).vorrangig && j == 1) {
                             // Falls eines der wenigen ergänzenden Heilmittel solo verordnet wurde
@@ -2614,35 +2651,6 @@ public class RezTools {
                     // Ende nur wenn Tarifgruppe HMR-Gruppe ist
                 }
 
-                // 2. dann prüfen welche Behandlungsformen noch einen vertragen können
-                int hMmitOffenenBehandlungen = 0;
-                int anzOffeneVorrHM = 0;
-                int ianzahl = hMPos.get(0).vOMenge;
-                int ioffen = hMPos.get(0).vORestMenge;
-                for (i = 0; i < j; i++) {
-                    BestaetigungsDaten currHmPos = hMPos.get(i);
-                    currHmPos.danachVoll();
-                    // wenn eine Behandlung noch frei ist 
-                    if (currHmPos.einerOk ) {
-                        hMmitOffenenBehandlungen++;
-                        if (currHmPos.vorrangig) {
-                            anzOffeneVorrHM++;
-                        }
-                    }
-                    if (ianzahl != currHmPos.vOMenge) {  // HMR2020: bis zu 3 vorr. u. 1 erg. HM (nur 1 vorr. pro Behandlg.!)
-                        anzahlRezeptGleich = false;
-                    }
-                    if (ioffen != currHmPos.vORestMenge) {
-                        nochOffenGleich = false;
-                    }
-                }
-                // Keine Postition mehr frei
-                if (hMmitOffenenBehandlungen == 0) {
-                    retObj[0] = String.valueOf(termbuf.toString());
-                    retObj[1] = Integer.valueOf(REZEPT_IST_BEREITS_VOLL);
-                    // if(debug){System.out.println("Rezept war bereits voll");}
-                    return retObj;
-                }
                 // Nur Wenn mehrere Behandlungen im Rezept vermerkt
                 boolean mustSelect = false;
                 if (j > 1) {
@@ -2674,13 +2682,16 @@ public class RezTools {
                         retObj[1] = Integer.valueOf(REZEPT_ABBRUCH);
                         return retObj;
                     }
-                    for (i = 0; i < j; i++) {
+                    for (i = 0; i < j; i++) { // ToDo HMR2020: prüfen, ob nur 1 vorr. HM gewählt (oder Doppelbehandlung)
                         BestaetigungsDaten currHmPos = hMPos.get(i);
                         if (currHmPos.best) {
                             currHmPos.anzBBT += 1;
                             // gleichzeitig prüfen ob voll
-                            if ((currHmPos.jetztVoll() && currHmPos.vorrangig) 
-                                    || (currHmPos.jetztVoll() && (!currHmPos.vorrangig) && j == 1)) {
+                            if (currHmPos.jetztVoll() && currHmPos.vorrangig) {
+                                if (--anzOffeneVorrHM == 0) {
+                                    jetztVoll = true;                                    
+                                }
+                            } else if (currHmPos.jetztVoll() && (!currHmPos.vorrangig) && j == 1) {
                                 jetztVoll = true;
                             }
                         }
@@ -2731,6 +2742,15 @@ public class RezTools {
             hMPos = null;
         }
         return retObj;
+    }
+
+    public static boolean checkIsHMR2021(String rezNum) {
+        boolean isHMR2021 = true;
+        String test = SqlInfo.holeEinzelFeld("select hmr2021 from verordn where rez_nr='" + rezNum + "' LIMIT 1");
+        if ("F".equals(test)) {
+            isHMR2021 = false;
+        }
+        return isHMR2021;
     }
 
     private static int welcheIstMaxInt(int i1, int i2) {

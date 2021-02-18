@@ -4482,10 +4482,17 @@ public class TerminFenster implements RehaTPEventListener, ActionListener, DropT
                         if ((Integer) objTerm[1] == RezTools.REZEPT_ABBRUCH) {
                             return null;
                         } else if ((Integer) objTerm[1] == RezTools.REZEPT_IST_BEREITS_VOLL) {
-                            String anzahl = "??????"; // TodDo
+                            int anzGeleistet = vec.get(0).split("\n").length;
+                            String anzahl = String.valueOf(anzGeleistet);
+                            int anzBehInVo = 0;
+                            if (RezTools.checkIsHMR2021(swreznum)) {
+                                anzBehInVo = sumUpBeh (vec);
+                            } else {
+                                anzBehInVo = Integer.parseInt(vec.get(11));
+                            }
                             String message = "<html><b><font size='5'>Auf dieses Rezept wurden bereits<font size='6' color='#ff0000'> "
                                     + anzahl + " </font>Behandlungen durchgeführt!"
-                                    + "<br>Verordnete Menge ist<font size='6' color='#ff0000'> " + vec.get(11)
+                                    + "<br>Verordnete Menge ist<font size='6' color='#ff0000'> " + anzBehInVo
                                     + "</font><br>Das Rezept ist somit bereits voll und darf für aktuelle Behandlung nicht mehr<br>"
                                     + "verwendet werden!!!!<br><br>"
                                     + "Gescannte Rezeptnummer =<font size='6' color='#ff0000'> " + swreznum
@@ -4606,6 +4613,18 @@ public class TerminFenster implements RehaTPEventListener, ActionListener, DropT
                     vec = null;
                 }
                 return null;
+            }
+
+            private int sumUpBeh(Vector<String> vec) {
+                final int IDX_HM_POS = 1;
+                final int IDX_HM_ANZ = 11;
+                int sumUp = 0;
+                for (int i = 0; i < 3; i++) {
+                    if (!"".equals(vec.get(i + IDX_HM_POS))) {
+                        sumUp += Integer.parseInt(vec.get(i + IDX_HM_ANZ));
+                    }
+                }
+                return sumUp;
             }
         }.execute();
     }

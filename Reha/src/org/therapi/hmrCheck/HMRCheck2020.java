@@ -177,8 +177,7 @@ public class HMRCheck2020 {
                         fehlertext.add("<b>Die Doppelbehandlung bei Diagnosegruppe "
                                 + diagnosegruppe
                                 + ", übersteigt<br>die maximal erlaubte Höchstverordnungsmenge pro Rezept von<br><font color='#ff0000'>"
-                                + Integer.toString(maxprorezept)
-                                + " Behandlungen</font>!!</b><br><br>Wechsel auf -> außerhalb des Regelfalles <- ist erforderlich<br><br>");
+                                + Integer.toString(maxprorezept) + " Behandlungen</font>!!<br><br>");
                         testok = false;
                     }
                 }
