@@ -47,6 +47,7 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.renderer.IconValues;
 import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
+import org.therapi.hmrCheck.HMRCheck2020;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -2057,7 +2058,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             String vglreznum = tabaktrez.getValueAt(currow, 0)
                                         .toString();
 
-            int dummypeisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
+//            int dummypeisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41)) - 1;
 
             if (Reha.instance.patpanel.patDaten.get(23)
                                                .trim()
@@ -2212,15 +2213,23 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
                 }
             }
+            boolean checkok = false;
+            Rezeptvector tmpRezept = new Rezeptvector();
+            tmpRezept.setVec_rez(Reha.instance.patpanel.vecaktrez);
+            Vector<Vector<String>> preisvec = SystemPreislisten.hmPreise.get(diszi)
+                                                                        .get(Integer.parseInt(preisgruppe) - 1);
             if (hmpositionen.size() > 0) {
-                boolean checkok = new HMRCheck(indi,
-                        disziSelect.getIndex(diszi), anzahlen, hmpositionen, Integer.parseInt(preisgruppe) - 1,
-                        SystemPreislisten.hmPreise.get(diszi)
-                                                  .get(Integer.parseInt(preisgruppe) - 1),
-                        Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(27)),
-                        (Reha.instance.patpanel.vecaktrez.get(1)),
-                        DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)),
-                        DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(40))).check();
+                if(!Reha.instance.patpanel.vecaktrez.get(cHMR2021).equals("T")) {
+                    checkok = new HMRCheck(indi,
+                            disziSelect.getIndex(diszi), anzahlen, hmpositionen, Integer.parseInt(preisgruppe) - 1,
+                            preisvec,
+                            Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(27)),
+                            (Reha.instance.patpanel.vecaktrez.get(1)),
+                            DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)),
+                            DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(40))).check();
+                } else {
+                    checkok = new HMRCheck2020(tmpRezept, disziSelect.getCurrDisziFromActRK(), preisvec).check();                    
+                }
                 if (!checkok) {
                     int anfrage = JOptionPane.showConfirmDialog(null,
                             "Das Rezept entspricht nicht den geltenden Heilmittelrichtlinien\nWollen Sie diesen Rezept trotzdem abschließen?",

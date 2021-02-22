@@ -31,6 +31,7 @@ public class HMRCheck2020 {
     private Vector<String> positionenAll = null;
     private Vector<Vector<String>> preisvec = null;
     private String diagnosegruppe = null;
+    private String diagnoseTxt = null;
     private int disziIdx;
     private String disziKurz = null;
     private String disziKapHMR = null;
@@ -75,14 +76,15 @@ public class HMRCheck2020 {
         positionenErg = new Vector<String>();
         positionenAll = new Vector<String>();
         diagnosegruppe = rezept.getIndiSchluessel();
+        diagnoseTxt = rezept.getDiagn();
         disziIdx = diszis.getCurrDisziIdx();
-        disziKurz = diszis.getDisziKurz(disziIdx);
+        disziKurz = diszis.getCurrDisziKurz();
         behFreqMax = rezept.getFrequenzMax();
         int idxVorr = 0;
         int idxErg = 0;
         for (int i = 0; i < 4; i++) {
             String tmp = rezept.getHmPos(i + 1);
-            if (tmp != "") {
+            if (!"".equals(tmp)) {
                 anzahl.add(i, rezept.getAnzBeh(i + 1));
                 if (i < 3) {
                     positionenVorr.add(idxVorr++, tmp);
@@ -147,6 +149,10 @@ public class HMRCheck2020 {
                     "Diagnosegruppe " + diagnosegruppe + " (keine Angaben) wurde gewählt, HMR-Check wird abgebrochen.\n"
                             + "Bitte stellen Sie selbst sicher daß alle übrigen Pflichtangaben vorhanden sind");
             return true;
+        }
+        if (icd10_1.equals("") && icd10_2.equals("") && diagnoseTxt.equals("")) {
+            fehlertext.add("<b>Es wurde <font color='#ff0000'>weder ein ICD10-Code noch ein Diagnosetext eingetragen</font> - so wird das nix!<br><br></b>");
+            testok = false;
         }
         Vector<String> vec = tmpVec.get(0);
         maxproStdVO = Integer.parseInt(vec.get(IDX_MAX_PRO_VO));

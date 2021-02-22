@@ -1210,10 +1210,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostenträger nicht erforderlich");
                 return;
             }
-
-            String meldung = "Achtung - HMRCheck für HMR2020 ist noch nicht komplett implementiert!\n\n"
-                    + "Bitte prüfen Sie die Verordnung (auch) manuell.";
-            JOptionPane.showMessageDialog(null, meldung);
             doHmrCheck();
  
             return;
