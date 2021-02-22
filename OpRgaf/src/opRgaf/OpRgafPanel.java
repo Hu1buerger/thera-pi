@@ -13,10 +13,14 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
@@ -37,6 +41,7 @@ import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 
 import org.jdesktop.swingworker.SwingWorker;
+import org.jdesktop.swingx.JXDatePicker;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTable;
 import org.jdesktop.swingx.decorator.HighlighterFactory;
@@ -44,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.jgoodies.forms.builder.PanelBuilder;
+import com.jgoodies.forms.debug.FormDebugPanel;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 
@@ -135,6 +141,9 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
     private JRtaTextField geldeingangTf;
 
     private Logger logger = LoggerFactory.getLogger(OpRgafPanel.class);
+    
+    private LocalDate gewaehltesBuchungsDatum = LocalDate.now();
+    private JXDatePicker pickBuchungsDatum = null;
 
     OpRgafPanel(OpRgafTab xeltern, OpRgaf opRgaf, IK ik) {
 
@@ -158,11 +167,12 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
 
     private JPanel getContent() {
         // 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19
-        String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,40dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p";
+        String xwerte = "10dlu,50dlu,2dlu,90dlu,10dlu,p,2dlu,70dlu:g,45dlu,5dlu,40dlu,5dlu,55dlu,5dlu,50dlu,5dlu,50dlu,10dlu,p";
         // 1 2 3 4 5 6 7 8 9 10 11
         String ywerte = "15dlu,p,15dlu,160dlu:g,8dlu,p,10dlu,2dlu,p,8dlu,0dlu";
         FormLayout lay = new FormLayout(xwerte, ywerte);
         PanelBuilder builder = new PanelBuilder(lay);
+        //PanelBuilder builder = new PanelBuilder(lay, new FormDebugPanel()); // debug mode
 
         builder.getPanel()
                .setOpaque(false);
@@ -255,8 +265,8 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
         colCnt = 4;
         kopieButton = ButtonTools.macheButton("Rechnungskopie", "kopie", al);
          builder.add(kopieButton, cc.xy(colCnt, rowCnt)); // 4,6
-        colCnt = 11;
-        builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt, CellConstraints.RIGHT, CellConstraints.TOP)); // 12,6
+        colCnt = 9;
+        builder.addLabel("Geldeingang:", cc.xy(colCnt, rowCnt, CellConstraints.RIGHT, CellConstraints.TOP)); // 9,6
 
         ++colCnt;
         geldeingangTf = new JRtaTextField("F", true, "6.2", "");
@@ -264,13 +274,21 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
         geldeingangTf.setText("0,00");
         geldeingangTf.setName("offen");
         geldeingangTf.addKeyListener(kl);
-        builder.add(geldeingangTf, cc.xy(++colCnt, rowCnt)); // 14,6
+        builder.add(geldeingangTf, cc.xy(++colCnt, rowCnt)); // 11,6
 
         ++colCnt;
         bar = (JRtaCheckBox) builder.add(new JRtaCheckBox("bar in Kasse"), cc.xy(++colCnt, rowCnt));
         if ("Kasse".equals(iniOpRgAf.getWohinBuchen())) {
             bar.setSelected(true);
         }
+        bar.setActionCommand("barInKasse");
+        bar.addActionListener(cBoxActionListener);
+        
+        ++colCnt;
+        java.util.Date selected = new java.util.Date();
+        pickBuchungsDatum = new JXDatePicker(selected, Locale.GERMAN);
+        pickBuchungsDatum.addActionListener(datePickActionListener);
+        builder.add(pickBuchungsDatum, cc.xy(++colCnt, rowCnt));    // 15,6
 
         ausbuchenBtn = ButtonTools.macheButton("ausbuchen", "ausbuchen", al);
         builder.add(ausbuchenBtn, cc.xy(17, 6));
@@ -287,6 +305,32 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
         calcGesamtOffen();
 
         return builder.getPanel();
+    }
+
+    private ActionListener datePickActionListener  = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setAktuellesBuchungsDatum(pickBuchungsDatum.getDate()
+                    .toInstant()
+                    .atZone(ZoneId.systemDefault())
+                    .toLocalDate());
+        }
+    };
+
+    private ActionListener cBoxActionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String cmd = e.getActionCommand();
+            if (cmd.equals("barInKasse")) {
+                if (bar.isSelected()) {
+                   pickBuchungsDatum.setDate(Calendar.getInstance().getTime());
+                }
+            }
+        }
+    };
+
+    private void setAktuellesBuchungsDatum(LocalDate localDate) {
+        this.gewaehltesBuchungsDatum = localDate;
     }
 
     /** Letzte Checkbox-Auswahl wiederherstellen. */
@@ -454,11 +498,11 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
             }
             cmd = "insert into kasse set einnahme='" + dcf.format(eingang)
                                                           .replace(",", ".")
-                    + "', datum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "', ktext='" + ktext + "'," + "rez_nr='"
-                    + rgaf_reznum + "'";
+                    + "', datum='" + gewaehltesBuchungsDatum.toString() + "', ktext='" + ktext + "',"
+                    + "rez_nr='" + rgaf_reznum + "'";
             SqlInfo.sqlAusfuehren(cmd);
         }
-        tabmod.setValueAt(new Date(), tab.convertRowIndexToModel(row), IdxCol.bez);
+        tabmod.setValueAt(DatFunk.sDatInDeutsch(gewaehltesBuchungsDatum.toString()), tab.convertRowIndexToModel(row), IdxCol.bez);
         tabmod.setValueAt(restbetrag.doubleValue(), tab.convertRowIndexToModel(row), IdxCol.Offen);
 
         if (rgaf_rechnum.startsWith("RGR-")) { // Rezept bezahlt setzen
@@ -473,12 +517,12 @@ class OpRgafPanel extends JXPanel implements TableModelListener, RgAfVk_IfCallBa
         if (rgaf_rechnum.startsWith("RGR-") || rgaf_rechnum.startsWith("AFR-")) { // aus rgaffaktura ausbuchen
             cmd = "update rgaffaktura set roffen='" + dcf.format(restbetrag)
                                                          .replace(",", ".")
-                    + "', rbezdatum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "' where id ='" + id + "' LIMIT 1";
+                    + "', rbezdatum='" + gewaehltesBuchungsDatum.toString() + "' where id ='" + id + "' LIMIT 1";
         }
         if (rgaf_rechnum.startsWith("VR-")) { // aus verkliste ausbuchen
             cmd = "update verkliste set v_offen='" + dcf.format(restbetrag)
                                                         .replace(",", ".")
-                    + "', v_bezahldatum='" + DatFunk.sDatInSQL(DatFunk.sHeute()) + "' where verklisteID ='" + id
+                    + "', v_bezahldatum='" + gewaehltesBuchungsDatum.toString() + "' where verklisteID ='" + id
                     + "' LIMIT 1";
         }
         SqlInfo.sqlAusfuehren(cmd);
