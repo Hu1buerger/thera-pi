@@ -26,6 +26,7 @@ import systemEinstellungen.SystemConfig;
 public class HMRCheck2020 {
     private Vector<Integer> anzahl = null;
     private static final int IDX_HM_ERG = 3;
+    private static final int FRIST_DRINGLICH_HMR2020 = 14;
     private Vector<String> positionenVorr = null;
     private Vector<String> positionenErg = null;
     private Vector<String> positionenAll = null;
@@ -44,6 +45,7 @@ public class HMRCheck2020 {
     private String reznummer = null;
     private String rezdatum = null;
     private String letztbeginn = null;
+    private boolean dringlich = false;
     private boolean neurezept = false;
     private boolean doppelbehandlung = false;
     private boolean unter18 = false;
@@ -106,6 +108,7 @@ public class HMRCheck2020 {
         unter18 = rezept.getUnter18();
         rezdatum = DatFunk.sDatInDeutsch(rezept.getRezeptDatum());
         letztbeginn = DatFunk.sDatInDeutsch(rezept.getLastDate());
+        dringlich = rezept.getDringlich();
         icd10_1 = rezept.getICD10();
         icd10_2 = rezept.getICD10_2();
         if (reznummer.equals("")) {
@@ -284,8 +287,15 @@ public class HMRCheck2020 {
             }
 
             // test Rezeptbeginn
+            long differenz = DatFunk.TageDifferenz(rezdatum, letztbeginn);
+            if (dringlich && (differenz > FRIST_DRINGLICH_HMR2020)) {
+                fehlertext.add("<br><b><font color='#ff0000'>Dringlicher Behandlungsbedarf</font> angegeben. <br><br>"
+                        + "Die <font color='#ff0000'>Spanne zwischen Verordnungsdatum und spätestem Behandlungsbeginn</font> <br>beträgt jedoch "
+                        + "<font color='#ff0000'>" + Long.toString(differenz) + " Tag(e) </font>!!<br><br>");
+                testok = false;
+            }
+            differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
             if (neurezept) {
-                long differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
                 if (differenz < 0) {
                     fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                             + Long.toString(differenz)
@@ -306,7 +316,6 @@ public class HMRCheck2020 {
                 if (termine.trim()
                            .equals("")) {
                     // LetzterBeginn abhandeln
-                    long differenz = DatFunk.TageDifferenz(rezdatum, DatFunk.sHeute());
                     if (differenz < 0) {
                         fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                                 + Long.toString(differenz)
@@ -324,7 +333,7 @@ public class HMRCheck2020 {
                     // LetzterBeginn abhandeln
                     String erstbehandlung = RezTools.holeEinzelTermineAusRezept(null, termine)
                                                     .get(0);
-                    long differenz = DatFunk.TageDifferenz(rezdatum, erstbehandlung);
+                    differenz = DatFunk.TageDifferenz(rezdatum, erstbehandlung);
                     if (differenz < 0) {
                         fehlertext.add("<br><b><font color='#ff0000'>Rezeptdatum ist absolut kritisch!</font><br>Spanne zwischen Behandlungsbeginn und Rezeptdatum beträgt <font color='#ff0000'>"
                                 + Long.toString(differenz)
@@ -514,6 +523,10 @@ public class HMRCheck2020 {
     private String pauseText (String rezNb, long pause) {
         return "Therapiepause <font color='#ff0000'>vor " + rezNb + "</font> beträgt <font color='#ff0000'>"
                 + pause + "</font> Tage.</b><br>";
+    }
+
+    public static int getFristDringlich() {
+        return FRIST_DRINGLICH_HMR2020;
     }
 
 }

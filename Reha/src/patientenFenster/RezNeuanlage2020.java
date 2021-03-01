@@ -2129,9 +2129,16 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                     String.valueOf(stest), false, Reha.instance.patpanel.vecaktrez);
             thisRezept.setRezeptDatum(DatFunk.sDatInSQL(stest));
             setRezDatInTable(stest);
-            String stest2 = chkLastBeginDat(stest, jtf[cBEGINDAT].getText()
-                                                                 .trim(),
-                    jtf[cPREISGR].getText(), aktuelleDisziplin);
+            thisRezept.setDringlich(jcb[cdringBehBedarf].isSelected());
+            String stest2 = "";
+            if (thisRezept.getDringlich()) {
+                String rezDat = DatFunk.sDatInDeutsch(thisRezept.getRezeptDatum());
+                stest2 = DatFunk.sDatPlusTage(rezDat, HMRCheck2020.getFristDringlich());
+            } else {
+                stest2 = chkLastBeginDat(stest, jtf[cBEGINDAT].getText()
+                                                              .trim(),
+                        jtf[cPREISGR].getText(), aktuelleDisziplin);
+            }
             setLastDatInTable(stest2);
             thisRezept.setLastDate(DatFunk.sDatInSQL(stest2));
             thisRezept.setLastEdDate(DatFunk.sDatInSQL(DatFunk.sHeute()));
@@ -2150,7 +2157,6 @@ public class RezNeuanlage2020 extends JXPanel implements ActionListener, KeyList
                 }
             }
             thisRezept.setArztBericht(jcb[cTBANGEF].isSelected());
-            thisRezept.setDringlich(jcb[cdringBehBedarf].isSelected());
             thisRezept.setAnzBeh(1, jtf[cANZ1].getText());
             thisRezept.setAnzBeh(2, jtf[cANZ2].getText());
             thisRezept.setAnzBeh(3, jtf[cANZ3].getText());
