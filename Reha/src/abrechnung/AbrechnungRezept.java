@@ -4069,14 +4069,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                 test = test + (aktRezept.getLeitSymIsX() ? "1" : "0");
                 edibuf.append("0000".equals(test) ? "9999" : test); // Leitsymptomatiken
                 test = aktRezept.getLeitSymText();
-                if (test.length() > 70) {
-                    test = test.substring(0, 69);
-                }
                 if (aktRezept.getLeitSymIsX() && test.length() == 0){   // besser schon im HMRCheck?
                     JOptionPane.showMessageDialog(null, "Individuelle Leitsymptomatik gewählt:  Freitext ist zwingend erforderlich!");
                     return false;
                 }
-                edibuf.append(plus + test); // Patientenindividuelle Leitsymptomatik
+                edibuf.append(plus + getEscapedMax(test,70)); // Patientenindividuelle Leitsymptomatik
                 edibuf.append(plus + (aktRezept.getDringlich() ? "1" : "0"));   // Dringlicher Behandlungsbedarf
                 edibuf.append(plus + getHmBereich (aktRezept.getRezClass()));   // Heilmittel-Bereich
                 edibuf.append(plus + aktRezept.getFrequenzMax());   // max. Therapiefrequenz
@@ -4086,14 +4083,21 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
 
         // an dieser Stelle muß der ICD-10 eingebaut werden, sofern vorhanden
         // DIA+....
+        boolean icdSet = false;
         if (aktRezept.getICD10()
                      .length() > 0) {
             edibuf.append("DIA+" + hochKomma(aktRezept.getICD10()) + EOL);  // Diagnoseschlüssel
+            icdSet = true;
         }
         if (aktRezept.getICD10_2()
                      .length() > 0) {
             edibuf.append("DIA+" + hochKomma(aktRezept.getICD10_2()) + EOL);    // Diagnoseschlüssel
-        }   // opt HMR2020: Diagnosetext (falls kein ICD10 angegeben)
+            icdSet = true;
+        }
+        if (!icdSet) {
+            test = aktRezept.getDiagn();    // HMR2020: Diagnosetext (falls kein ICD10 angegeben)
+            edibuf.append("DIA++" + getEscapedMax(test,70) + EOL);
+        }
 
         // an dieser Stelle müssen Daten zur Bewilligung eingebaut werden sofern
         // vorhanden
@@ -4208,6 +4212,14 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         edibuf.insert(0, kopfzeile);
 
         return ret;
+    }
+
+    private String getEscapedMax(String test, int i) {
+        String tmp = hochKomma(test);
+        if (tmp.length() > i) {
+            tmp = tmp.substring(0, i - 1);
+        }
+        return tmp;
     }
 
     private String getHmBereich(String rezClass) {
