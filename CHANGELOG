@@ -5,11 +5,31 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
 Datumsformat ist jjjj-mm-tt, also Jahr-Monat-Tag
 ## unveroeffentlicht
+### added
+- HMRCheck2020:
+    - max. HM-Anzahlen aus hmk.xml abfragen (Zahnarzt.VO weiter aus DB)
+    - Pruefung von Zahnarzt-VOs
+    - check Langfrist-Bedarf / bes. VO-Bedarf (aus XML abfragen)
+    - Pruefung auf erlaubte HM u. gueltige Mengen
+    - Auswertung dringl. Behandlungsbedarf
+    - auto-HMRCheck beim Abschließen von HMR2020-VOs
+- (SQL-)scriptrunner: DB-update ueber sql-Dateien (z.T. genutzt)
+- Podo-Indikationsschluessel NF u. QF, fixes #550
 
-- HMR2020 Formulare
+### changed
+- Abrechnung §302:
+	- Kassentree: benachbarte Knoten für alte (bis2020) u. neue (ab 2021) VOs
+    - DTA-Version automat. entsprechend der abzurechnenden VOs einstellen 
+- Anpassung RezTools, VO-ist-voll-Meldung an HMR2020 (bis zu 3 vorr. HM)
+- OpRgAf classic: Buchungsdatum auch hier per Date-Picker einstellbar
+- update DB-Struktur auf Stand 1.1.14 (DB kompatibel halten)
 
 ### fixed
-- BG / Privatrezepte rechnen nur die geleisteten Einheiten ab #230
+- Jahrhundert-Ergaenzung flexibler, fixes #621
+- pick: E-Mail smtps with protocols TLS1/1.1/1.2
+- Privatrechnung vorerst wieder zurück auf 'Anz. Behandlg. manuell ändern'
+- nur nach Pat. suchen, wenn VR eine PatID enth., fixes #470
+- fix OpRgAf Tabellendarstellung
 
 
 ## [1.1.11] - 2020-10-18
