@@ -36,6 +36,7 @@ Class-Path: Libraries/lib/sql/adsjdbc.jar
  Libraries/lib/mmscomputing/uk.co.mmscomputing.device.twain.jar 
  Libraries/lib/ocf/OpenCard.jar 
  Libraries/lib/jmf/jmf.jar 
+ Libraries/lib/jdom/jdom-2.0.6.jar
  Nebraska.jar 
  TheraPiUpdates.jar 
  RehaCommon.jar 

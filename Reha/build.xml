@@ -449,6 +449,8 @@
 		<path refid="datenbank.classpath" />
 		<path refid="RehaWissen.classpath" />
 		<path refid="CalcKilometer.classpath" />
+        <pathelement 
+			location="${Libraries.location}/lib/jdom/jdom-2.0.6.jar"/>
 	</path>
 	<import file="build-user.xml" />
 	<target name="init">
