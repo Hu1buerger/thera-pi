@@ -243,7 +243,9 @@ public class HMRCheck2020 {
         int anzBehVorr = 0;
         int anzBehErg = anzahl.get(IDX_HM_ERG);
         for (int i = 0; i < positionenVorr.size(); i++) {
-            anzBehVorr += anzahl.get(i);
+            if (!excludePos.contains(positionenVorr.get(i))) { // Funktions-, Bedarfsanalyse etc werden nicht mitgezählt
+                anzBehVorr += anzahl.get(i);
+            }
         }
         if ((anzBehVorr > maxproStdVO) && (isLfBedarf)) {
             if (VerordnungsArten.getTypeOfVo(idxArtDerVO) != typeOfBedarf) {
