@@ -1789,19 +1789,19 @@ TreeSelectionListener treeSelectionListener = new TreeSelectionListener() {
                 + dfx.format(preis31[2]) + EOL);
         unbBuf.append("GES" + plus + "51" + plus + dfx.format(preis51[0]) + plus + dfx.format(preis51[1]) + plus
                 + dfx.format(preis51[2]) + EOL);
-        unbBuf.append("NAM" + plus + (abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung")) // Name Absender (Firma), Ansprechpartner, Tel
+        unbBuf.append("NAM" + plus + (abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Ikbezeichnung")) // Name Absender (Firma), Ansprechpartner, Tel
                                             .length() > 30
-                                                    ? abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung"))
+                                                    ? abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Ikbezeichnung"))
                                                             .substring(0, 30)
-                                                    : abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Ikbezeichnung")))
-                + plus + abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Anrede"))
+                                                    : abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Ikbezeichnung")))
+                + plus + abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Anrede"))
                                .trim()
-                + " " + (abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Nachname"))
+                + " " + (abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Nachname"))
                                .trim()
-                               .length() > 25 ? abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Nachname"))
+                               .length() > 25 ? abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Nachname"))
                                                       .trim()
                                                       .substring(0, 25)
-                                       : abrRez.hochKomma(SystemConfig.hmFirmenDaten.get("Nachname"))
+                                       : abrRez.escTrennZeichen(SystemConfig.hmFirmenDaten.get("Nachname"))
                                                .trim())
                 + plus + SystemConfig.hmFirmenDaten.get("Telefon") + EOL);
         unbBuf.append("UNT+000010+00001" + EOL);    // Nachrichtentypendesegment, Anz. Segmente, Nachrichtenreferenznummer (wie UNH)

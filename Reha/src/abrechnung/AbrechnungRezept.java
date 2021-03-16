@@ -3916,11 +3916,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         }
         edibuf.append(test.trim() + plus + plus);   // Versichertenstatus + McM: sollte Beleginformation nicht auf '1' (= per Post) stehen?
         edibuf.append(aktRezept.getRezNb() + EOL);  // Belegnummer  McM: opt.: besondere Versorgungsform  u. URI-Segment (bei Korrektur)
-        edibuf.append("NAD+" + hochKomma(vec_pat.get(0) // Nachname
+        edibuf.append("NAD+" + escTrennZeichen(vec_pat.get(0) // Nachname
                                                 .get(0)
                                                 .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)  // Vorname
+        edibuf.append(escTrennZeichen(vec_pat.get(0)  // Vorname
                                        .get(1)
                                        .trim())
                 + plus);
@@ -3931,15 +3931,15 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
             return false;
         }
         edibuf.append(test + plus); // Geburtsdatum
-        edibuf.append(hochKomma(vec_pat.get(0)  // Straße Nr.
+        edibuf.append(escTrennZeichen(vec_pat.get(0)  // Straße Nr.
                                        .get(3)
                                        .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)  // PLZ
+        edibuf.append(escTrennZeichen(vec_pat.get(0)  // PLZ
                                        .get(4)
                                        .trim())
                 + plus);
-        edibuf.append(hochKomma(vec_pat.get(0)  // Wohnort
+        edibuf.append(escTrennZeichen(vec_pat.get(0)  // Wohnort
                                        .get(5)
                                        .trim())
                 + EOL); // McM: opt.: Länderkennzeichen
@@ -4086,12 +4086,12 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         boolean icdSet = false;
         if (aktRezept.getICD10()
                      .length() > 0) {
-            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10()) + EOL);  // Diagnoseschlüssel
+            edibuf.append("DIA+" + escTrennZeichen(aktRezept.getICD10()) + EOL);  // Diagnoseschlüssel
             icdSet = true;
         }
         if (aktRezept.getICD10_2()
                      .length() > 0) {
-            edibuf.append("DIA+" + hochKomma(aktRezept.getICD10_2()) + EOL);    // Diagnoseschlüssel
+            edibuf.append("DIA+" + escTrennZeichen(aktRezept.getICD10_2()) + EOL);    // Diagnoseschlüssel
             icdSet = true;
         }
         if (!icdSet) {
@@ -4122,18 +4122,18 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                         skz[3] = vec_pat.get(0)
                                         .get(6);
                     }
-                    edibuf.append("SKZ" + plus + hochKomma(skz[3]) + plus + DatFunk.sDatInSQL(skz[4])
+                    edibuf.append("SKZ" + plus + escTrennZeichen(skz[3]) + plus + DatFunk.sDatInSQL(skz[4])
                                                                                    .replace("-", "")
                             + plus + (disziplinGruppe.equals("61") ? "H1" : "I1") + EOL);
                 } catch (NullPointerException ex) {
-                    edibuf.append("SKZ" + plus + hochKomma(vec_pat.get(0)
+                    edibuf.append("SKZ" + plus + escTrennZeichen(vec_pat.get(0)
                                                                   .get(6))
                             + plus + ediDatumFromSql(aktRezept.getRezeptDatum()) + plus
                             + (disziplinGruppe.equals("61") ? "H1" : "I1") + EOL);
                     JOptionPane.showMessageDialog(null,
                             "Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
                 } catch (ArrayIndexOutOfBoundsException aex) {
-                    edibuf.append("SKZ" + plus + hochKomma(vec_pat.get(0)
+                    edibuf.append("SKZ" + plus + escTrennZeichen(vec_pat.get(0)
                                                                   .get(6))
                             + plus + ediDatumFromSql(aktRezept.getRezeptDatum()) + plus
                             + (disziplinGruppe.equals("61") ? "H1" : "I1") + EOL);
@@ -4168,19 +4168,19 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                         }
                     } catch (NullPointerException ex) {
                     }
-                    edibuf.append("SKZ+" + hochKomma(skz[3]) + plus + DatFunk.sDatInSQL(skz[4])
+                    edibuf.append("SKZ+" + escTrennZeichen(skz[3]) + plus + DatFunk.sDatInSQL(skz[4])
                                                                              .replace("-", "")
                             + plus + (genehmigungADR ? "B1" : "B2") + EOL);
                 } catch (NullPointerException ex) {
                     ex.printStackTrace();
-                    edibuf.append("SKZ" + plus + hochKomma(vec_pat.get(0)
+                    edibuf.append("SKZ" + plus + escTrennZeichen(vec_pat.get(0)
                                                                   .get(6))
                             + plus + ediDatumFromSql(aktRezept.getRezeptDatum()) + plus + "B2" + EOL);
                     JOptionPane.showMessageDialog(null,
                             "Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
                 } catch (ArrayIndexOutOfBoundsException aex) {
                     aex.printStackTrace();
-                    edibuf.append("SKZ" + plus + hochKomma(vec_pat.get(0)
+                    edibuf.append("SKZ" + plus + escTrennZeichen(vec_pat.get(0)
                                                                   .get(6))
                             + plus + ediDatumFromSql(aktRezept.getRezeptDatum()) + plus + "B2" + EOL);
                     JOptionPane.showMessageDialog(null,
@@ -4215,11 +4215,15 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     }
 
     private String getEscapedMax(String test, int i) {
-        String tmp = hochKomma(test);
-        if (tmp.length() > i) {
-            tmp = tmp.substring(0, i - 1);
+        String sTmp = test.replace("\n", "");
+        sTmp = escTrennZeichen(sTmp);
+        if (sTmp.length() > i) {
+            sTmp = sTmp.substring(0, i);
+            if (sTmp.endsWith("?") && !sTmp.endsWith("??")) {
+                sTmp = sTmp.substring(0, sTmp.length() - 1);   // kein einzelnes Trennzeichen am Stringende!
+            }
         }
-        return tmp;
+        return sTmp;
     }
 
     private String getHmBereich(String rezClass) {
@@ -4267,7 +4271,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         return deutschDat.substring(6) + "." + deutschDat.substring(4, 6) + "." + deutschDat.substring(0, 4);
     }
 
-    public String hochKomma(String string) {
+    public String escTrennZeichen(String string) {   // s. 20190408_TA_295_1b_SGB_V_Reg_zu_73b_c_140a_V6_0.pdf (TA Datenaustausch nach § 295 Abs. 1b)
         String str = string.replace("?", "??");
         str = string.replace("'", "?'");
         str = str.replace(":", "?:");
