@@ -4273,7 +4273,7 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
 
     public String escTrennZeichen(String string) {   // s. 20190408_TA_295_1b_SGB_V_Reg_zu_73b_c_140a_V6_0.pdf (TA Datenaustausch nach § 295 Abs. 1b)
         String str = string.replace("?", "??");
-        str = string.replace("'", "?'");
+        str = str.replace("'", "?'");
         str = str.replace(":", "?:");
         str = str.replace("+", "?+");
         str = str.replace(",", "?,");
