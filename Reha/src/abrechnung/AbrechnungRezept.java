@@ -4483,10 +4483,10 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         } else {
             patAktuellFrei = false;
         }
-        if (!vec_pat.get(0)
+        if (vec_pat.get(0)
                     .get(12)
                     .trim()
-                    .equals("")) {
+                    .equals(SystemConfig.vorJahr)) {
             patVorjahrFrei = true;
         } else {
             patVorjahrFrei = false;
