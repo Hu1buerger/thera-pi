@@ -213,8 +213,11 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
     StringBuffer buf3 = new StringBuffer();
 
     private UIFSplitPane jSplitOU = null;
-    private String[] voArt = { "Erstverordnung", "Folgeverordnung", "Folgeverordn. außerhalb d. Regelf." };
+    private String[] voArt = { "Erstverordnung", "Folgeverordnung", "Folgeverordn. außerhalb d. Regelf.", "Standard 2021", "Bes. VO Bedarf", "Langfrist" };
     private String[] voIndex = { "01", "02", "10" };
+    
+    private String[] voArt_2021 =  {"Standard","Bes. VoBedarf","Langfrist-VO","Blako-VO"};
+	private String[] voIndex_2021 = {"03","04","04","05"};
 
     private String[] voBreak = { "", "K", "F", "T", "A" };
     // private String[] voPreis = {"akt. Tarif","alter Tarif"};
@@ -790,33 +793,61 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
                         + SystemConfig.aktJahr + ")</b></html>");
                 return;
             }
-            if (macheEDIFACT()) {
-                jXTreeTable.setEditable(false);
-                rezeptFertig = true;
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        SqlInfo.sqlAusfuehren(
-                                "update fertige set ediok='T',edifact='" + StringTools.Escaped(edibuf.toString())
-                                        + "' where rez_nr='" + aktRezept.getRezNb() + "' LIMIT 1");
-                        eltern.setKassenUmsatzNeu();
-                        return null;
-                    }
-
-                }.execute();
-            } else {
-                jXTreeTable.setEditable(false);
-                rezeptFertig = false;
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        SqlInfo.sqlAusfuehren("update fertige set ediok='F',edifact='' where rez_nr='"
-                                + aktRezept.getRezNb() + "' LIMIT 1");
-                        return null;
-                    }
-
-                }.execute();
-            }
+            if(!AbrechnungGKV.hmr2021) {
+				if(macheEDIFACT()){
+					jXTreeTable.setEditable(false);
+					rezeptFertig = true;
+					new SwingWorker<Void,Void>(){
+						@Override
+						protected Void doInBackground()
+								throws Exception {
+							SqlInfo.sqlAusfuehren("update fertige set ediok='T',edifact='"+StringTools.Escaped(edibuf.toString())+"' where rez_nr='"+aktRezept.getRezNb()+"' LIMIT 1");
+							eltern.setKassenUmsatzNeu();
+							return null;
+						}
+						
+					}.execute();
+				}else{
+					jXTreeTable.setEditable(false);
+					rezeptFertig = false;
+					new SwingWorker<Void,Void>(){
+						@Override
+						protected Void doInBackground()
+								throws Exception {
+							SqlInfo.sqlAusfuehren("update fertige set ediok='F',edifact='' where rez_nr='"+aktRezept.getRezNb()+"' LIMIT 1");
+							return null;
+						}
+						
+					}.execute();
+				}
+			}else if(AbrechnungGKV.hmr2021) {
+				if(macheEDIFACT_2021(true)){
+					jXTreeTable.setEditable(false);
+					rezeptFertig = true;
+					new SwingWorker<Void,Void>(){
+						@Override
+						protected Void doInBackground()
+								throws Exception {
+							SqlInfo.sqlAusfuehren("update fertige set ediok='T',edifact='"+StringTools.Escaped(edibuf.toString())+"' where rez_nr='"+aktRezept.getRezNb()+"' LIMIT 1");
+							eltern.setKassenUmsatzNeu();
+							return null;
+						}
+						
+					}.execute();
+				}else{
+					jXTreeTable.setEditable(false);
+					rezeptFertig = false;
+					new SwingWorker<Void,Void>(){
+						@Override
+						protected Void doInBackground()
+								throws Exception {
+							SqlInfo.sqlAusfuehren("update fertige set ediok='F',edifact='' where rez_nr='"+aktRezept.getRezNb()+"' LIMIT 1");
+							return null;
+						}
+						
+					}.execute();
+				}
+			}
             // hier den Edifact einbauen
         }
         eltern.setRezeptOk(rezeptFertig);
@@ -3831,6 +3862,330 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
 
     /************************************************************************/
 
+    private boolean macheEDIFACT_2021(boolean normal){
+		boolean ret = true;
+		double gesamt = 0.00;
+		double rez = 0.00;
+		double pauschal = (mitPauschale ? 10.00 : 0.00);
+		edibuf.setLength(0);
+		edibuf.trimToSize();
+		if(this.notready){
+			JOptionPane.showMessageDialog(null,"Jetzt zeigt man Ihnen in fetter roter Schrift daß ein Preislistenfehler vorliegt,\nund Sie Armleuchter versuchen das Rezept trotzdem abzurechnen.\n\nLassen Sie den Alkohol weg - das schadet Ihnen!");
+			return false;
+		}
+		String test = vec_pat.get(0).get(6);
+		if( (test.trim().length()> 12) || (test.trim().length()==0) ){
+			//Versichertennummer falsch oder nicht angegeben
+			JOptionPane.showMessageDialog(null,"Versichertennummer nicht angegeben oder falsch");
+			return false;
+		}
+		edibuf.append("INV+"+test.trim()+plus);
+		test = vec_pat.get(0).get(7);
+		if(test.trim().equals("")){
+			//Status nicht angegeben
+			JOptionPane.showMessageDialog(null,"Status nicht angegeben oder falsch");
+			return false;			
+		}else if(test.trim().length() > 5){
+			test = test.substring(0,5);
+		}else{
+			test = test.substring(0,1)+"0001";
+		}
+		if(test.trim().length() != 5 || (test.trim().indexOf(" ") >= 0)){
+			JOptionPane.showMessageDialog(null,"Die Länge des Versichertenstatus ist falsch, oder es wurden Leerzeichen im Status angegeben!\nRezept kann nicht abgerechnet werden");
+			return false;			
+		}
+		edibuf.append(test.trim()+plus+plus);
+		edibuf.append(aktRezept.getRezNb().trim()+EOL);
+		edibuf.append("NAD+"+hochKomma(vec_pat.get(0).get(0).trim())+plus);
+		edibuf.append(hochKomma(vec_pat.get(0).get(1).trim())+plus);
+		test = ediDatumFromSql(vec_pat.get(0).get(2));
+		if(test.length()==0){
+			JOptionPane.showMessageDialog(null,"Geburtsdatum nicht angegeben");
+			return false;			
+		}
+		edibuf.append(test+plus);
+		edibuf.append(hochKomma(vec_pat.get(0).get(3).trim())+plus);
+		edibuf.append(hochKomma(vec_pat.get(0).get(4).trim())+plus);
+		edibuf.append(hochKomma(vec_pat.get(0).get(5).trim())+EOL);
+		JXTTreeTableNode node;
+		String spos = "";
+		for(int i = 0; i < getNodeCount();i++){
+			node = holeNode(i);
+			//Notwendig wg. BKK-Gesundheit Tarifwechsel
+			if(!node.abr.tarifwechsel){
+				edibuf.append(( disziplinGruppe.equals("61") || disziplinGruppe.equals("62") ? "ENF++" : "EHE+" )+disziplinGruppe+":"+SystemPreislisten.hmPreisBereich.get(aktDisziplin).get(Integer.parseInt(preisgruppe)-1)+
+						SystemPreislisten.hmPreisBesonderheit.get(aktDisziplin).get(Integer.parseInt(preisgruppe)-1)+plus);				
+			}else{
+				edibuf.append(( disziplinGruppe.equals("61") || disziplinGruppe.equals("62") ? "ENF++" : "EHE+" )+disziplinGruppe+":"+node.abr.tarifkennzeichen+"000"+plus);
+			}
+			spos = RezTools.getPosFromID(node.abr.preisid, preisgruppe, preisvec);
+			if(spos.startsWith("1") && disziplinIndex.equals("1")) {
+				spos = spos.replaceFirst("1", "2");
+			}
+			//System.out.println("Disziplinindex = "+disziplinIndex);
+			edibuf.append(spos+plus);
+			edibuf.append(dfx.format(node.abr.anzahl)+plus);
+			gesamt += BigDecimal.valueOf(node.abr.preis).multiply(BigDecimal.valueOf(node.abr.anzahl)).doubleValue();
+			edibuf.append(dfx.format(node.abr.preis)+plus);
+			edibuf.append(ediDatumFromDeutsch(node.abr.datum));
+			if(node.abr.rezgeb > 0){
+				rez += node.abr.rezgeb;
+				////System.out.println("1. Zuzahlmodus = "+(eltern.zuzahlModusDefault ? "Normal" : "Bayrisch"));
+				if(eltern.zuzahlModusDefault){
+					edibuf.append(plus+dfx.format(node.abr.rezgeb)+EOL);	
+				}else{ //bayrischer Modus
+					//Einstieg1 für Kilometer
+					//Herr Lehmann: nächste Zeile muß freigeschaltet werden für Einzelkilometer
+					edibuf.append(plus+dfx.format(node.abr.rezgeb/node.abr.anzahl)+EOL);
+				}
+				
+			}else{
+				edibuf.append(EOL);
+			}
+			if( (!node.abr.unterbrechung.trim().equals("")) && (!node.abr.unterbrechung.trim().equals("-")) ){
+				edibuf.append("TXT+"+node.abr.unterbrechung.trim()+EOL);
+			}
+			
+		}
+		if( disziplinGruppe.equals("61") || disziplinGruppe.equals("62") ){
+			edibuf.append("ZUV+");
+			test = vec_pat.get(0).get(14).trim();
+			if( test.length() != 9 ){
+				//Betriebsstätte
+				test = "999999999";
+			}
+			if(! testeZahl(test)){
+				test = "999999999";
+			}
+			edibuf.append(test+plus);
+			test = vec_pat.get(0).get(15).trim();
+			if( test.length() != 9 ){
+				//LANR
+				test = "999999999";
+			}
+			if(! testeZahl(test)){
+				test = "999999999";
+			}
+			edibuf.append(test+plus);	
+			edibuf.append(ediDatumFromSql(aktRezept.getRezeptDatum())+plus); 
+			edibuf.append(zuZahlungsPos+EOL);
+			
+		}else{
+			edibuf.append("ZHE+");
+			test = vec_pat.get(0).get(14).trim();
+			if( test.length() != 9 ){
+				//Betriebsstätte
+				test = "999999999";
+			}
+			if(! testeZahl(test)){
+				test = "999999999";
+			}
+			edibuf.append(test+plus);
+			test = vec_pat.get(0).get(15).trim();
+			if( test.length() != 9 ){
+				//LANR
+				test = "999999999";
+			}
+			if(! testeZahl(test)){
+				test = "999999999";
+			}
+			edibuf.append(test+plus);
+			edibuf.append(ediDatumFromSql(aktRezept.getRezeptDatum())+plus); //Rezeptdatum 
+			edibuf.append(zuZahlungsPos+plus); //Zuzahlungskennzeichen
+			test = aktRezept.getIndiSchluessel().trim();
+			boolean keineDiag = false;
+			if(test.startsWith("keine Diag")){
+				JOptionPane.showMessageDialog(null,"Kein Diagnosegruppe angegeben");
+				return false;			
+			}else if(test.equals("k.A.")){
+				keineDiag = true;
+				test = "9999";
+			}
+			
+			edibuf.append(test.replace(" ", "")+plus);
+			/************************************************/
+			boolean dentist = AktuelleRezepte.isDentist(test);
+			if(dentist){
+				edibuf.append(voIndex_2021[aktRezept.getRezArt()-3]+plus);
+				edibuf.append("1"+plus);
+				System.out.println("Zahnarztverordnung");
+			}else{
+				edibuf.append(voIndex_2021[aktRezept.getRezArt()-3]+plus+plus);	
+			}
+			/********************Unfallkeinzeichen**********/
+			edibuf.append(plus);
+			/********************Kennzeichen BVG************/
+			edibuf.append(plus);
+			/********************Behandlungsbeginn************/
+			edibuf.append(plus);
+			/********************Therapiebericht************/
+			edibuf.append( (aktRezept.getArztbericht() ? "1" : "")+plus);
+			/********************Hausbesuch****************/
+			edibuf.append( (aktRezept.getHausbesuch() ? "1" : "")+plus);
+			/********************Leitsymptomatik****************/
+			String sym = "";
+			sym = sym + (aktRezept.getSymA().equals("T") ? "1" : "0");
+			sym = sym + (aktRezept.getSymB().equals("T") ? "1" : "0");
+			sym = sym + (aktRezept.getSymC().equals("T") ? "1" : "0");
+			sym = sym + (aktRezept.getSymX().equals("T") ? "1" : "0");
+			if(dentist) {
+				edibuf.append("9999"+plus);
+			}else {
+				edibuf.append(sym+plus);
+			}
+			/*********************Freitext indiv. Leitsymptomatik***********************/
+			sym = hochKomma(aktRezept.getSymFrei().trim());
+			if(sym.length() > 70) {
+				sym = sym.substring(0,70);
+			}
+			if(dentist) {
+				if(sym.length() <= 5) {//Zeilenumbrüche oder Leerzeichen
+					String text = "Es wurde vom Zahnarzt kein Idikationsschlüssel angegeben, und kein Freitext angegeben\n"+"Eigentlich führt dies zu Rechnungsabsetzung\n\n"+
+							"Wollen Sie dieses Rezept trotzdem abrechnen";
+					int anfrage = JOptionPane.showConfirmDialog(null,text ,"Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+					if(anfrage==JOptionPane.NO_OPTION  ){
+						return false;	
+					}
+				}
+				edibuf.append((keineDiag ? sym+plus : plus ));
+			}else if(aktRezept.getSymX().equals("T")) {
+				if(sym.length() <= 5) {//Zeilenumbrüche oder Leerzeichen
+					String text = "Es wurde individuelle Leitsymptomatik gewählt, aber kein Freitext angegeben\n"+"Eigentlich führt dies zu Rechnungsabsetzung\n\n"+
+							"Wollen Sie dieses Rezept trotzdem abrechnen";
+					int anfrage = JOptionPane.showConfirmDialog(null,text ,"Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+					if(anfrage==JOptionPane.NO_OPTION  ){
+						return false;	
+					}
+				}
+				edibuf.append(sym+plus);
+			} else {
+				edibuf.append(plus);
+			}
+			/*****************************Dringlicher Behandlungsbedarf*************************/
+			edibuf.append( (aktRezept.getDringlich().equals("T") ? "1" : "0")+plus);
+			/*****************************Heilmittel-Bereich************************************/
+			edibuf.append( getHmIndex(aktRezept.getRezNb().substring(0, 2))+plus);
+			/*****************************Therapiefrequenz**************************************/
+			edibuf.append( getBehFrequenz(aktRezept.getFrequenz().replace("-"," ").replace("/"," ").trim())+EOL);
+			
+		}
+		
+		//an dieser Stelle muß der ICD-10 eingebaut werden, sofern vorhanden
+		//DIA+....
+		if(aktRezept.getICD10().trim().length() > 0){
+			edibuf.append( "DIA+" + hochKomma(aktRezept.getICD10().trim()) + EOL);
+		}
+		if(aktRezept.getICD10_2().trim().length() > 0){
+			edibuf.append( "DIA+" + hochKomma(aktRezept.getICD10_2().trim()) + EOL);
+		}
+		if(aktRezept.getICD10().trim().length() <= 0 && aktRezept.getICD10_2().trim().length() <= 0) {
+			String dia = aktRezept.getDiagn().trim();
+			if(dia.length() > 70) {
+				dia = dia.substring(0,70);
+			}
+			if(dia.length() <= 0) {
+				String text = "Es wurde kein ICD-10 Code angegeben und auch kein Diagnosetext angelegtn\n"+"Eigentlich führt dies zur Rechnungsabsetzung\n\n"+
+						"Wollen Sie dieses Rezept trotzdem abrechnen";
+				int anfrage = JOptionPane.showConfirmDialog(null,text ,"Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
+				if(anfrage==JOptionPane.NO_OPTION  ){
+					return false;	
+				}
+			}
+			edibuf.append("DIA++"+dia+EOL);				
+		}
+		
+		//an dieser Stelle müssen Daten zur Bewilligung eingebaut werden sofern vorhanden
+		//SKZ+....
+		
+		//Ramsch mit der Genehmigung von LFV und Rehasport/Funktionstraining
+
+		String[] genehmigung = RezNeuanlage.holeLFV("diagnose", "verordn", "rez_nr", aktRezept.getRezNb(), aktRezept.getRezNb().substring(0,2).toUpperCase());
+		String[] skz = {"","","","","","",""};
+		if( disziplinGruppe.equals("61") || disziplinGruppe.equals("62")){
+			//String genehmigung = SqlInfo.holeEinzelFeld("select diagnose from verordn wehere rez_nr = '"+vec_rez.get(0).get(1)+"' Limit 1").trim();
+			if(!genehmigung[0].equals("")){
+				try{
+					skz = genehmigung[0].split(Pattern.quote("$$"));
+					if(skz[3].trim().equals("")){
+						skz[3]= vec_pat.get(0).get(6);
+					}
+					edibuf.append("SKZ"+plus+hochKomma(skz[3])+plus+DatFunk.sDatInSQL(skz[4]).replace("-", "") +plus+(disziplinGruppe.equals("61") ? "H1" : "I1")+EOL );	
+				}catch(NullPointerException ex){
+					edibuf.append("SKZ"+plus+hochKomma(vec_pat.get(0).get(6))+plus+ediDatumFromSql(aktRezept.getRezeptDatum())+plus+(disziplinGruppe.equals("61") ? "H1" : "I1")+EOL );	
+					JOptionPane.showMessageDialog(null,"Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
+				}catch(ArrayIndexOutOfBoundsException aex){
+					edibuf.append("SKZ"+plus+hochKomma(vec_pat.get(0).get(6))+plus+ediDatumFromSql(aktRezept.getRezeptDatum())+plus+(disziplinGruppe.equals("61") ? "H1" : "I1")+EOL );
+					JOptionPane.showMessageDialog(null,"Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
+				}
+			}else{
+				JOptionPane.showMessageDialog(null,"Achtung für Rehasport und/oder Funktionstraining muß eine Genehmigung vermerkt sein.\nRezept bitte nicht abrechnen!!!!!");
+			}
+		}else{
+			if(!genehmigung[0].equals("")){
+				try{
+					skz = genehmigung[0].split(Pattern.quote("$$"));
+					if(skz[3].trim().equals("")){
+						skz[3]= vec_pat.get(0).get(6);
+					}
+					//System.out.println("SKZ[4]="+skz[4]);
+					//System.out.println("SKZ[3]="+skz[3]);
+					// Prüfen will Kasse normale VOAdR genehmigen ja/nein?
+					boolean genehmigungADR = false;
+					try{
+						String saftladen = SqlInfo.holeEinzelFeld("select id from adrgenehmigung where ik = '"+eltern.ik_kasse+"' LIMIT 1");
+						if(!saftladen.isEmpty()){
+							int anfrage = JOptionPane.showConfirmDialog(null,test , "Handelt es sich hier um eine Langfristverordnung außerhalb des Regelfalles?\n\nJa = Langfristverordnung außerhalb des Regelfalles\nNein = Einzelverordnung außerhalb des Regelfalles\n", JOptionPane.YES_NO_OPTION);
+							if(anfrage != JOptionPane.YES_OPTION){
+								genehmigungADR = true;
+							}
+						}
+					}catch(NullPointerException ex){
+					}
+					edibuf.append("SKZ+"+hochKomma(skz[3])+plus+DatFunk.sDatInSQL(skz[4]).replace("-", "") +plus+(genehmigungADR ? "B1" : "B2")+EOL );
+				}catch(NullPointerException ex){
+					ex.printStackTrace();
+					edibuf.append("SKZ"+plus+hochKomma(vec_pat.get(0).get(6))+plus+ediDatumFromSql(aktRezept.getRezeptDatum())+plus+"B2"+EOL );
+					JOptionPane.showMessageDialog(null,"Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
+				}catch(ArrayIndexOutOfBoundsException aex){
+					aex.printStackTrace();
+					edibuf.append("SKZ"+plus+hochKomma(vec_pat.get(0).get(6))+plus+ediDatumFromSql(aktRezept.getRezeptDatum())+plus+"B2"+EOL );
+					JOptionPane.showMessageDialog(null,"Fehler im Segment Kostenzusage, Verordnung bitte keinesfalls abrechnen!!");
+				}
+			}
+		}
+		edibuf.append("BES+");
+		edibuf.append(dfx.format(gesamt)+plus);
+		edibuf.append(dfx.format(rez+pauschal)+plus);
+		edibuf.append(dfx.format(rez)+plus);
+		edibuf.append(dfx.format(pauschal)+EOL);
+		
+		String kopfzeile = "PG="+preisgruppe+":PATINTERN="+aktRezept.getPatIntern().trim()+":REZNUM="+aktRezept.getRezNb()+
+			":GESAMT="+dfx.format(gesamt)+":REZGEB="+dfx.format(rez+pauschal)+
+			":REZANTEIL="+dfx.format(rez)+":REZPAUSCHL="+dfx.format(pauschal)+":KASSENID="+aktRezept.getKtraeger()+
+			":ARZTID="+aktRezept.getArztId()+":PATIENT="+vec_pat.get(0).get(0)+", "+vec_pat.get(0).get(1)+":STATUS="+vec_pat.get(0).get(7)+":HB="+hausbesuch+":ZZINDEX="+zuZahlungsIndex+"\n";
+		
+		/*
+		edibuf.append("BES+");
+		edibuf.append(dfx.format(gesamt)+plus);
+		edibuf.append(dfx.format(rez)+plus);
+		edibuf.append(dfx.format(rez)+plus);
+		edibuf.append("0,00"+EOL);
+
+		String kopfzeile = "PG="+preisgruppe+":PATINTERN="+vec_rez.get(0).get(0).trim()+":REZNUM="+vec_rez.get(0).get(1)+
+				":GESAMT="+dfx.format(gesamt)+":REZGEB="+dfx.format(rez)+
+				":REZANTEIL="+dfx.format(rez)+":REZPAUSCHL=0,00"+":KASSENID="+vec_rez.get(0).get(37)+
+				":ARZTID="+vec_rez.get(0).get(16)+":PATIENT="+vec_pat.get(0).get(0)+", "+vec_pat.get(0).get(1)+":STATUS="+vec_pat.get(0).get(7)+":HB="+hausbesuch+":ZZINDEX="+zuZahlungsIndex+"\n";
+		*/
+		
+
+		edibuf.insert(0,vec_poskuerzel.toString()+"\n");
+		edibuf.insert(0,vec_posanzahl.toString()+"\n");
+		edibuf.insert(0,vec_pospos.toString()+"\n");
+		edibuf.insert(0, kopfzeile);
+		//////System.out.println(edibuf.toString());
+		return ret;
+	}
+    
      boolean macheEDIFACT() {
          if (this.notready) {
              JOptionPane.showMessageDialog(null,
@@ -4437,6 +4792,40 @@ public class AbrechnungRezept extends JXPanel implements HyperlinkListener, Acti
         htmlPane.removeHyperlinkListener(this);
         writeTTS2ini();
     }
+    
+    private String getHmIndex(String reznr) {
+		if(reznr.equals("KG") || reznr.equals("MA")) {
+			return "1";
+		}else if(reznr.equals("PO")) {
+			return "2";
+		}else if(reznr.equals("LO")) {
+			return "3";
+		}else if(reznr.equals("ER")) {
+			return "4";
+		}else if(reznr.equals("EN")) {
+			return "5";
+		}
+		return "1";
+	}
+	public String getBehFrequenz(String string) {
+		if(string.length()==1) {
+			return string;
+		}else if(string.indexOf(" ") > 0) {
+			String[] zahlen = string.split(" ");
+			try {
+				if(zahlen.length == 2) {
+					if(Integer.parseInt(zahlen[1]) > Integer.parseInt(zahlen[0])) {
+						return zahlen[1];
+					}else if(Integer.parseInt(zahlen[0]) > Integer.parseInt(zahlen[1])) {
+						return zahlen[0];
+					}
+				}
+			}catch(NumberFormatException nx) {
+				nx.printStackTrace();
+			}
+		}
+		return "3";
+	}
 
     /*
      * TageTreeSize Werte in abrechnung.ini schreiben ? in eigene Klasse?
