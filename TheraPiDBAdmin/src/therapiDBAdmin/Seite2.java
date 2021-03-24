@@ -22,7 +22,7 @@ import com.jgoodies.forms.layout.FormLayout;
 public class Seite2 extends JXPanel {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
 
@@ -31,9 +31,9 @@ public class Seite2 extends JXPanel {
     JPasswordField pw2 = null;
     JCheckBox checkalt = null;
     JButton[] buts = { null, null };
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
 
-    Seite2(MySqlTab xeltern) {
+    Seite2(DatenbankTab xeltern) {
         eltern = xeltern;
         // 1 2 3 4 5
         String xwerte = "fill:0:grow(0.5),right:max(250;p),5dlu,150dlu,fill:0:grow(0.5)";
@@ -111,11 +111,9 @@ public class Seite2 extends JXPanel {
             e.printStackTrace();
         }
         try {
-            // jdbc:mysql://192.168.2.3:3306/rtadaten
-            String connection = "jdbc:mysql://" + MySqlTab.iPAdresse + ":" + MySqlTab.portAdresse + "/"
+            String connection = "jdbc:mysql://" + DatenbankTab.iPAdresse + ":" + DatenbankTab.portAdresse + "/"
                     + tfs[0].getText()
                             .trim();
-            // tfs[0].getText().trim()+":"+tfs[1].getText().trim()+"/"+tfs[4].getText().trim();
             TheraPiDbAdmin.conn_db = DriverManager.getConnection(connection, tfs[1].getText()
                                                                                    .trim(),
                     tfs[2].getText()

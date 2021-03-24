@@ -19,10 +19,10 @@ import org.jdesktop.swingx.JXTitledPanel;
 
 import com.jgoodies.looks.windows.WindowsTabbedPaneUI;
 
-public class MySqlTab extends JXPanel implements ChangeListener {
+public class DatenbankTab extends JXPanel implements ChangeListener {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 1L;
     JTabbedPane sqlTab = null;
@@ -43,7 +43,7 @@ public class MySqlTab extends JXPanel implements ChangeListener {
     private Vector<String> vecdescript = new Vector<String>();
     private Vector<ImageIcon> vecimg = new Vector<ImageIcon>();
 
-    MySqlTab() {
+    DatenbankTab() {
         super();
 
         setLayout(new BorderLayout());
@@ -52,7 +52,7 @@ public class MySqlTab extends JXPanel implements ChangeListener {
         sqlTab.setUI(new WindowsTabbedPaneUI());
         tab1 = new Seite1(this);
         tab1.setName("Seite1");
-        sqlTab.add("<html><font size='5' >&nbsp;1 - MySql-Zugang testen&nbsp;<img src='file:///"
+        sqlTab.add("<html><font size='5' >&nbsp;1 - Datenbank-Zugang testen&nbsp;<img src='file:///"
                 + TheraPiDbAdmin.proghome + "icons/application-exit.png' width='32' height='32'></font></html>", tab1);
         tab2 = new Seite2(this);
         tab2.setName("Seite2");
@@ -87,11 +87,11 @@ public class MySqlTab extends JXPanel implements ChangeListener {
 
     public void setSeite1Ok(boolean ok) {
         if (ok) {
-            sqlTab.setTitleAt(0, "<html><font size='5' >&nbsp;1 - MySql-Zugang testen&nbsp;<img src='file:///"
+            sqlTab.setTitleAt(0, "<html><font size='5' >&nbsp;1 - Datenbank-Zugang testen&nbsp;<img src='file:///"
                     + TheraPiDbAdmin.proghome + "icons/clean.png' width='32' height='32'></font></html>");
             TheraPiDbAdmin.seite1Ok = true;
         } else {
-            sqlTab.setTitleAt(0, "<html><font size='5' >&nbsp;1 - MySql-Zugang testen&nbsp;<img src='file:///"
+            sqlTab.setTitleAt(0, "<html><font size='5' >&nbsp;1 - Datenbank-Zugang testen&nbsp;<img src='file:///"
                     + TheraPiDbAdmin.proghome + "icons/application-exit.png' width='32' height='32'></font></html>");
             TheraPiDbAdmin.seite1Ok = false;
         }
@@ -154,14 +154,12 @@ public class MySqlTab extends JXPanel implements ChangeListener {
         int sel = pane.getSelectedIndex();
         if (sel > 0 && !TheraPiDbAdmin.seite1Ok) {
             JOptionPane.showMessageDialog(null,
-                    "Testen Sie zuerst die Verbindung zur MySql-Datenbank\nOhne erfolgreichen Test können keine Tabellen importiert werden!");
-//        	pane.setSelectedIndex(0);
+                    "Testen Sie zuerst die Verbindung zur Datenbank\nOhne erfolgreichen Test können keine Tabellen importiert werden!");
             return;
         }
         if (sel == 2 && !TheraPiDbAdmin.seite2Ok) {
             JOptionPane.showMessageDialog(null,
                     "Legen Sie zuerst die Datenbank und einen neuen Benutzer an\nTabellen können ansonsten nicht importiert werden");
-//        	pane.setSelectedIndex(1);
             return;
         }
         jxh.setTitle(vectitel.get(sel));
@@ -172,15 +170,13 @@ public class MySqlTab extends JXPanel implements ChangeListener {
 
     private void doHeader() {
         ImageIcon ico;
-        // String ss =
-        // System.getProperty("user.dir")+File.separator+"icons"+File.separator+"TPorg.png";
         String ss = TheraPiDbAdmin.proghome + "icons" + File.separator + "TPorg.png";
         ico = new ImageIcon(ss);
         vectitel.add(
                 "<html><font size='5'>Datenbank für <font color='e77817'>Thera-Pi</font> einrichten</font></html>");
         vecdescript.add("<html>Gehen Sie bitte Schritt für Schritt vor.<br>"
-                + "MySql muß bereits etweder lokal auf Ihrem Rechner oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. Der Benutzer 'root' muß für jeden Host zugelassen sein ('root'@'%')<br>"
-                + "Ist dies nicht der Fall, beenden Sie den Assistenten und installieren Sie zunächst MySql und weitere Server-Programme.<br>"
+                + "Eine Datenbank muß bereits etweder lokal auf Ihrem Rechner oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. Der Benutzer 'root' muß für jeden Host zugelassen sein ('root'@'%')<br>"
+                + "Ist dies nicht der Fall, beenden Sie den Assistenten und installieren Sie zunächst MariaDB und weitere Server-Programme.<br>"
                 + "Die einfachste Möglichkeit bietet das XAMPP-Paket ( Google -> Suchbegriff: 'xampp +download' )</html>");
         vecimg.add(ico);
 
@@ -199,7 +195,7 @@ public class MySqlTab extends JXPanel implements ChangeListener {
         vectitel.add(
                 "<html><font size='5'><font color='e77817'>Thera-Pi</font> für den erstmaligen Start einrichten</font></html>");
         vecdescript.add("<html>überprüfen Sie bitte ob alle u.g. Voraussetzungen auf Ihr System zutreffen.<br>"
-                + "1. <b>MySql</b> muß bereits lokal auf Ihrem Rechner, oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. <br>"
+                + "1. <b>Datenbank</b> muß bereits lokal auf Ihrem Rechner, oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. <br>"
                 + "2. Sie müssen bereits eine <b>neue Datenbank</b> erstellt haben<br>"
                 + "3. Für diese Datenbank muß ein <b>Datenbankbenutzer</b> erstellt worden sein der von überall erreichbar sein sollte (Host=<b>'%'</b>)<br>"
                 + "4. Für den Datenbankbenutzer muß ein <b>Paßwort</b> erstellt worden sein<br>"
@@ -215,7 +211,6 @@ public class MySqlTab extends JXPanel implements ChangeListener {
         jxh.setTitle(vectitel.get(header));
         jxh.setDescription(vecdescript.get(header));
         jxh.setIcon(vecimg.get(header));
-        // jxh.validate();
     }
 
 }
