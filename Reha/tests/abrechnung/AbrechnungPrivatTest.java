@@ -27,10 +27,7 @@ public class AbrechnungPrivatTest {
     private static final String libPath = "C:/RehaVerwaltung/Libraries/lib/openofficeorg";
     private static final String ooPath = "C:/Program Files (x86)/OpenOffice 4";
 
-    @Test
-    public void testName() throws Exception {
 
-    }
 
 
     public static void main(String[] args) throws SQLException, FileNotFoundException, OfficeApplicationException {
