@@ -82,7 +82,7 @@ public class RehaSql implements WindowListener {
     }
 
     private static void start(String path, final String aktik, RehaSql application) {
-        path = exchangebackslashes(path);
+        path = OOTools.exchangebackslashes(path);
         System.out.println("hole daten aus INI-Datei " + path);
 
         officeapplication = OOTools.initOffice(path, aktik);
@@ -119,14 +119,7 @@ public class RehaSql implements WindowListener {
         application.getJFrame();
     }
 
-     static String exchangebackslashes(String path) {
-        path = path.replaceAll("\\\\","/");
-        return path;
-    }
-
-
-
-    /********************/
+     /********************/
 
     private void getJFrame() {
         try {
