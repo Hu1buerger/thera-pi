@@ -34,6 +34,7 @@ class Verlaufgate {
 
             if (rs.next()) {
                 result = new Verlauf();
+                result.id = rs.getInt("id");
                 result.patientID = rs.getInt("patient_id");
                 result.therapist = rs.getString("therapist");
                 result.documentator = rs.getString("documentator");
@@ -71,10 +72,9 @@ class Verlaufgate {
     }
 
     private void insert(List<Verlauf> inserts) {
-        if (inserts == null)
+        if (inserts == null || inserts.isEmpty()) {
             return;
-        if (inserts.isEmpty())
-            return;
+        }
         String SQL = INSERT_PREFIX + " VALUES ";
         String[] strings = inserts.stream()
                                   .map(v -> sqlValuesExpression(v))
@@ -104,6 +104,7 @@ class Verlaufgate {
         try {
             if (rs.next()) {
                 result = new Verlauf();
+                result.id = rs.getInt("id");
                 result.patientID = rs.getInt("patient_id");
                 result.therapist = rs.getString("therapist");
                 result.documentator = rs.getString("documentator");
@@ -150,7 +151,7 @@ class Verlaufgate {
     }
 
     public int update(List<Verlauf> verlaeufe) {
-        if (verlaeufe == null)
+        if (verlaeufe == null || verlaeufe.isEmpty())
             return 0;
 
         try (Statement statement = ds.createConnection()
@@ -181,7 +182,7 @@ class Verlaufgate {
 
     public void save(List<Verlauf> verlaeufe) {
         Map<Boolean, List<Verlauf>> result = verlaeufe.stream()
-                                                      .collect(Collectors.groupingBy(verlauf -> verlauf.id == 0));
+                                                      .collect(Collectors.partitioningBy(verlauf -> verlauf.id == 0));
 
         List<Verlauf> inserts = result.get(Boolean.TRUE)
                                       .stream()
