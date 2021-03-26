@@ -2,7 +2,6 @@ package org.therapi.reha.patient.verlauf;
 
 import java.time.LocalDate;
 
-import hauptFenster.Reha;
 
 public class Verlauf {
 
@@ -38,6 +37,7 @@ public class Verlauf {
     }
 
     public Verlauf(Termin termin, String aktUser) {
+        
         this.documentator = aktUser;
         this.patientID = termin.patid;
         this.documentedDay = termin.date;
