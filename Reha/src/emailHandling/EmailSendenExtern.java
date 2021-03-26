@@ -89,6 +89,7 @@ public class EmailSendenExtern {
             MailSSLSocketFactory sf = new MailSSLSocketFactory();
             sf.setTrustAllHosts(true);
             properties.put("mail.smtp.ssl.enable", "true");
+            properties.put("mail.smtp.ssl.protocols", "TLSv1 TLSv1.1 TLSv1.2");
             properties.put("mail.smtp.ssl.socketFactory", sf);
 
             properties.put("mail.smtp.socketFactory.port", useport);

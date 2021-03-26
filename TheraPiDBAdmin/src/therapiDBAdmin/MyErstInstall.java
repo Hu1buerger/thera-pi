@@ -48,9 +48,9 @@ public class MyErstInstall extends JXPanel {
     private JFormattedTextField[] tfs = { null, null, null, null, null, null, null };
     JLabel lab1 = null, lab2 = null;
     ActionListener al = null;
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
 
-    MyErstInstall(MySqlTab xeltern) {
+    MyErstInstall(DatenbankTab xeltern) {
         super();
         eltern = xeltern;
         setLayout(new BorderLayout());
@@ -125,32 +125,6 @@ public class MyErstInstall extends JXPanel {
         tfs[1] = new JFormattedTextField("KG-Praxis Häberle");
         tfs[1].setToolTipText("hier bitte Ihren Firmennamen eingeben");
         pan.add(tfs[1], cc.xy(4, 6));
-        /*
-         * pan.add(new
-         * JLabel("IP-Adresse des MySql-Servers (oder localhost wenn gleicher Rechner)")
-         * ,cc.xy(2,8,CellConstraints.RIGHT,CellConstraints.DEFAULT)); tfs[2] = new
-         * JFormattedTextField("192.168.1.100");
-         * tfs[2].setToolTipText("hier bitte die Adresse des MySql-Servers eingeben");
-         * pan.add(tfs[2],cc.xy(4, 8));
-         *
-         * pan.add(new
-         * JLabel("Name der Datenbank"),cc.xy(2,10,CellConstraints.RIGHT,CellConstraints
-         * .DEFAULT)); tfs[3] = new JFormattedTextField("kgprax");
-         * tfs[3].setToolTipText("hier bitte den Datenbanknamen eingeben");
-         * pan.add(tfs[3],cc.xy(4, 10));
-         *
-         * pan.add(new
-         * JLabel("Name des Datenbank-Users"),cc.xy(2,12,CellConstraints.RIGHT,
-         * CellConstraints.DEFAULT)); tfs[4] = new JFormattedTextField("kgprax");
-         * tfs[4].setToolTipText("hier bitte den DB-Usernamens");
-         * pan.add(tfs[4],cc.xy(4, 12));
-         *
-         * pan.add(new
-         * JLabel("Passwort des Datenbank-Users"),cc.xy(2,14,CellConstraints.RIGHT,
-         * CellConstraints.DEFAULT)); tfs[5] = new JFormattedTextField("ganzgeheim");
-         * tfs[5].setToolTipText("Passwort des Datenbank-Users");
-         * pan.add(tfs[5],cc.xy(4, 14));
-         */
         pan.add(buts[0] = ButtonTools.macheButton("Parameter-Testen", "testen", al), cc.xy(4, 16));
         pan.add(buts[1] = ButtonTools.macheButton("auf eigenes IK umsetzen", "umsetzen", al), cc.xy(4, 18));
         pan.add(buts[2] = ButtonTools.macheButton("abbrechen/Exit", "abbrechen", al), cc.xy(4, 20));
@@ -170,14 +144,13 @@ public class MyErstInstall extends JXPanel {
 
     private void doHeader() {
         ImageIcon ico;
-        // String ss =
-        // System.getProperty("user.dir")+File.separator+"icons"+File.separator+"TPorg.png";
+
         String ss = TheraPiDbAdmin.proghome + "icons" + File.separator + "TPorg.png";
         ico = new ImageIcon(ss);
         vectitel.add(
                 "<html><font size='5'><font color='e77817'>Thera-Pi</font> für den erstmaligen Start einrichten</font></html>");
         vecdescript.add("<html>überprüfen Sie bitte ob alle u.g. Voraussetzungen auf Ihr System zutreffen.<br>"
-                + "1. <b>MySql</b> muß bereits lokal auf Ihrem Rechner, oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. <br>"
+                + "1. <b>Datenbank</b> muß bereits lokal auf Ihrem Rechner, oder aber auf dem zukünftigen Datenbankserver <b>vollständig und lauffähig</b> installiert sein. <br>"
                 + "2. Sie müssen bereits eine <b>neue Datenbank</b> erstellt haben<br>"
                 + "3. Für diese Datenbank muß ein <b>Datenbankbenutzer</b> erstellt worden sein der von überall erreichbar sein sollte (Host=<b>'%'</b>)<br>"
                 + "4. Für den Datenbankbenutzer muß ein <b>Paßwort</b> erstellt worden sein<br>"
@@ -239,12 +212,10 @@ public class MyErstInstall extends JXPanel {
             e.printStackTrace();
         }
         try {
-            // jdbc:mysql://192.168.2.3:3306/rtadaten
-            String connection = "jdbc:mysql://" + MySqlTab.iPAdresse + ":3306/" + MySqlTab.neuerDBName;
-            // tfs[0].getText().trim()+":"+tfs[1].getText().trim()+"/"+tfs[4].getText().trim();
+            String connection = "jdbc:mysql://" + DatenbankTab.iPAdresse + ":3306/" + DatenbankTab.neuerDBName;
             System.out.println(connection);
-            TheraPiDbAdmin.conn_root = DriverManager.getConnection(connection, MySqlTab.neuerUser,
-                    MySqlTab.neuesPasswort);
+            TheraPiDbAdmin.conn_root = DriverManager.getConnection(connection, DatenbankTab.neuerUser,
+                    DatenbankTab.neuesPasswort);
 
             return true;
         } catch (final SQLException ex) {
@@ -315,16 +286,16 @@ public class MyErstInstall extends JXPanel {
             System.out.println("*************************************************************************");
             System.out.println("Beginne mit der Umsetzung der rehajava.ini");
 
-            String decrypted = MySqlTab.neuesPasswort;
+            String decrypted = DatenbankTab.neuesPasswort;
             Verschluesseln man = Verschluesseln.getInstance();
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBPasswort1",
                     man.encrypt(decrypted));
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "AnzahlConnections", "1");
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBKontakt1",
-                    "jdbc:mysql://" + MySqlTab.iPAdresse + ":3306/" + MySqlTab.neuerDBName);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBName1", MySqlTab.neuerDBName);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBBenutzer1", MySqlTab.neuerUser);
-            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBServer1", MySqlTab.iPAdresse);
+                    "jdbc:mysql://" + DatenbankTab.iPAdresse + ":3306/" + DatenbankTab.neuerDBName);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBName1", DatenbankTab.neuerDBName);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBBenutzer1", DatenbankTab.neuerUser);
+            RWJedeIni.schreibeIniDatei(copyTarget[0] + "rehajava.ini", "DatenBank", "DBServer1", DatenbankTab.iPAdresse);
             // firmen.ini beschreiben
             RWJedeIni.schreibeIniDatei(copyTarget[0] + "firmen.ini", "Firma", "Ik", tfs[0].getText()
                                                                                           .trim());

@@ -33,13 +33,13 @@ public class Seite3 extends JXPanel {
      *
      */
     private static final long serialVersionUID = 1L;
-    MySqlTab eltern = null;
+    DatenbankTab eltern = null;
     JLabel sqlFile = null;
     JTextArea ta = null;
     JButton[] buts = { null, null, null, null };
     String pfad = TheraPiDbAdmin.proghome + "tableImport/";
 
-    Seite3(MySqlTab xeltern) {
+    Seite3(DatenbankTab xeltern) {
         super();
         eltern = xeltern;
         // 1 2 3 4 5
