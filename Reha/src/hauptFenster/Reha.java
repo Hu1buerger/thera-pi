@@ -117,6 +117,7 @@ import org.jdesktop.swingx.painter.CompoundPainter;
 import org.jdesktop.swingx.painter.MattePainter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.therapi.hmrCheck2021.BVBCheck2021TableCreate;
 import org.therapi.hmrCheck2021.HmrCheck2021XML;
 import org.therapi.reha.patient.PatientHauptPanel;
 import org.therapi.updater.HTTPRepository;
@@ -216,6 +217,7 @@ public class Reha implements RehaEventListener , Monitor{
     private JMenuItem exitMenuItem = null;
     JMenuItem aboutMenuItem = null;
     JMenuItem homepageMenuItem = null;
+    JMenuItem wickiMenuItem = null;
     private JMenuItem aboutF2RescueMenuItem = null;
     public JXStatusBar jXStatusBar = null;
     private int dividerLocLR = 0;
@@ -416,7 +418,9 @@ public class Reha implements RehaEventListener , Monitor{
 	        	Reha.loadBackground();
 	    	}
 		} catch (UnknownHostException e3) {
+			e3.printStackTrace();
 		} catch (IOException e) {
+			e.printStackTrace();
 		}
     	
     	
@@ -426,12 +430,15 @@ public class Reha implements RehaEventListener , Monitor{
         logger.info("Thera-Pi Version: " + new Version().number());
         logger.info("Java Version:     " + System.getProperty("java.version"));
 
+       
+        
         Feature.init(mandant);
         DueUpdates du = new DueUpdates(new DatenquellenFactory(Betriebsumfeld.getAktIK()));
         du.init();
         du.execute();
 
         String iniPath = Path.Instance.getProghome() + "ini/" + mandant.ikDigitString() + "/";
+        
 
         INITool.init(iniPath);
         logger.info("Insgesamt sind " + INITool.anzahlInisInDB() + " INI-Dateien in der Tabelle inidatei abgelegt");
@@ -1795,6 +1802,7 @@ public class Reha implements RehaEventListener , Monitor{
             helpMenu.add(getAboutMenuItem());
             helpMenu.addSeparator();
             helpMenu.add(getWebsiteMenuItem());
+            helpMenu.add(getWickiMenuItem());
         }
         return helpMenu;
     }
@@ -1859,6 +1867,16 @@ public class Reha implements RehaEventListener , Monitor{
         	homepageMenuItem.addActionListener(actionListener);
         }
         return homepageMenuItem;
+    }
+    
+    private JMenuItem getWickiMenuItem() {
+        if (wickiMenuItem == null) {
+        	wickiMenuItem = new JMenuItem();
+        	wickiMenuItem.setText("Thera-\u03C0 Wicki");
+        	wickiMenuItem.setActionCommand("wicki");
+        	wickiMenuItem.addActionListener(actionListener);
+        }
+        return wickiMenuItem;
     }
 
     private JMenuItem getF2RescueMenuItem() {
@@ -2351,10 +2369,14 @@ public class Reha implements RehaEventListener , Monitor{
     	
     	if(testeTableExists("version")) {
     		String version = SqlInfo.holeEinzelFeld("SELECT version FROM version WHERE object LIKE 'DB'");
-    		if(!version.equals("1.1.14")) {
+    		if(!version.equals("1.1.14") && !version.equals("1.2.0")) {
     			JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.1.14\n"
         				+ "Anpassungen werden jetzt durchgeführt.", "DB Version Check", JOptionPane.ERROR_MESSAGE);
     			checkForDB1114();
+    		} else if(!version.equals("1.2.0")) {
+    			JOptionPane.showMessageDialog(null, "Datenbank entspricht nicht Version 1.2.0\n"
+        				+ "Anpassungen werden jetzt durchgeführt.", "DB Version Check", JOptionPane.ERROR_MESSAGE);
+    			checkForDB12();
     		}
     		String sql = "SELECT * FROM mandant WHERE ik LIKE '"+Betriebsumfeld.getAktIK()+"';";
     		Vector<Vector<String>> iks = SqlInfo.holeFelder(sql);
@@ -2365,6 +2387,14 @@ public class Reha implements RehaEventListener , Monitor{
     		}
     		
     	}
+    }
+    
+    static void checkForDB12() {
+    	if(!testeTableExists("hmr_bvblhm")) {
+    		runExternSQL("bvblhm.sql");
+        	new BVBCheck2021TableCreate(new File("C:\\RehaVerwaltung\\Tools\\hmka.xml"));
+    	}
+    	SqlInfo.sqlAusfuehren("UPDATE version SET version = '1.2.0' WHERE object LIKE 'DB';");
     }
     
     static void checkForDB1114() {

@@ -47,7 +47,7 @@ public class HistorDaten extends JXPanel {
             null };
     public JTextArea rezdiag = null;
 
-    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. außerhalb d.R." };
+    public String[] rezart = { "Erstverordnung", "Folgeverordnung", "Folgev. außerhalb d.R.", "Standard 2021", "Bes.VO-Bedarf", "LHM" };
     /*
      * ImageIcon hgicon; int icx,icy; AlphaComposite xac1 = null; AlphaComposite
      * xac2 = null;
@@ -127,9 +127,6 @@ public class HistorDaten extends JXPanel {
 
                     int test = StringTools.ZahlTest(vecaktrez.get(27));
                     if (test >= 0) {
-                        if (test > 2) {
-                            test = 2;
-                        }
                         rezlabs[5].setText(rezart[test]);
                         if (test == 2) {
                             stest = StringTools.NullTest(vecaktrez.get(42));

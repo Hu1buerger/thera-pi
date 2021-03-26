@@ -1527,7 +1527,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         return true;
     }
     static final List<String> dentistIndikation = new ArrayList<String>(Arrays.asList(new String[] { "CD1 a", "CD1 b", "CD1 c", "CD1 d", "CD2 a", "CD2 b", "CD2 c", "CD2 d", "ZNSZ", "CSZ a",
-            "CSZ b", "CSZ c", "LYZ1", "LYZ2", "SPZ", "SCZ", "OFZ" }));
+            "CSZb", "CSZc", "LYZ1", "LYZ2", "SPZ", "SCZ", "OFZ",
+            "CD1a", "CD1b", "CD1c", "CD1d", "CD2a", "CD2b", "CD2c", "CD2d",}));
 
 
     public static boolean isDentist(String sindi) {

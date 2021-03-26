@@ -3,13 +3,16 @@ package org.therapi.hmrCheck2021;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 
+import CommonTools.SqlInfo;
 import hauptFenster.Reha;
 
 public class HMRCheck2021 {
 	
 	private String disziplin, diagnosegruppe, datum, hm1, hm2, hm3, hm4;
 	private int arztid, anzahl1, anzahl2, anzahl3, anzahl4;
+
 	
 	public HMRCheck2021(String diszi, String diagnosegr, int arztid, String datum, 
 			String hm1, String hm2, String hm3, String hm4, 
@@ -66,5 +69,6 @@ public class HMRCheck2021 {
 		// wie viele HM gab es schon im Verordnungsfall
 		return rueckgabe;
 	}
+	
 	
 }

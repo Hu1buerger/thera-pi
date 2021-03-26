@@ -43,6 +43,7 @@ final class MenuActionListener implements ActionListener {
     public void actionPerformed(ActionEvent arg0) {
         String cmd = arg0.getActionCommand();
         switch (cmd) {
+        
         case "ueberTheraPi":
             About dialog = new About();
             dialog.collectValues();
@@ -283,7 +284,16 @@ final class MenuActionListener implements ActionListener {
 				e.printStackTrace();
 			}
         	return;
+        case "wicki":
+        	try {
+				Desktop.getDesktop().browse(new URI("https://www.thera-pi-software.de/dokuwiki/doku.php"));
+			} catch (IOException | URISyntaxException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+        	break;
         }
+    	
 
     }
 }

@@ -12,6 +12,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Vector;
 import java.util.regex.Pattern;
@@ -29,6 +30,7 @@ import javax.swing.SwingWorker;
 import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.painter.MattePainter;
+import org.therapi.hmrCheck2021.BVBlhmCheck;
 import org.therapi.hmrCheck2021.HMRCheck2021;
 import org.therapi.reha.patient.AktuelleRezepte;
 
@@ -170,6 +172,8 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 	MattePainter mp = null;
 	LinearGradientPaint p = null;
 	private RehaTPEventClass rtp = null;
+	
+	private PanelBuilder datenPanel;
 	
 	JLabel kassenLab;
 	JLabel arztLab;
@@ -519,6 +523,7 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		PanelBuilder jpan = new PanelBuilder(lay);
 		jpan.setDefaultDialogBorder();
 		jpan.getPanel().setOpaque(false);
+		this.datenPanel = jpan;
 		JScrollPane jscr = null;
 		//String ywerte = "";
 	
@@ -831,6 +836,9 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		
 		jpan.addLabel("Behandlungsfrequenz",cc.xy(1, 46+yzugabe));		
 		jpan.add(jtf[cFREQ],cc.xy(3, 46+yzugabe));	
+		
+		jtf[cFREQ].addFocusListener(this);
+		jtf[cFREQ].setName("frequenz");
 
 		jpan.addLabel("Dauer der Behandl. in Min.",cc.xy(5, 46+yzugabe));
 		jpan.add(jtf[cDAUER],cc.xy(7, 46+yzugabe));
@@ -1088,7 +1096,9 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		/*********************/
 		//System.out.println("5 - "+e.getActionCommand());
 		if(e.getActionCommand().equals("hmrcheck") ){
-			doHmrCheck();
+			if(komplettTest()) {
+				doHmrCheck();
+			}
 			return;
 		}
 		
@@ -1304,6 +1314,9 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 		}
 	}
 	private void doHmrCheck(){
+		
+		
+		
 		if( SystemPreislisten.hmHMRAbrechnung.get(aktuelleDisziplin).get(preisgruppen[jcmb[cRKLASSE].getSelectedIndex()])==0  ){
 			this.hmrcheck.setEnabled(true);
 			JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostenträger nicht erforderlich");
@@ -1315,6 +1328,53 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			
 			String diagnosegruppe = this.jcmb[cINDI].getSelectedItem().toString();
 			
+			// Liegt BVB / LHM vor?
+			BVBlhmCheck checker = new BVBlhmCheck();
+			
+//			Alter berchnen
+			int gebJahr = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[0]);
+			int gebMon = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[1]);
+			int gebDay = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[2]);
+			
+			int aktJahr = LocalDate.now().getYear();
+			int aktMon = LocalDate.now().getMonthValue();
+			int aktDay = LocalDate.now().getDayOfMonth();
+			
+			
+			int alter = aktJahr - gebJahr;
+			
+			if(!(aktMon >= gebMon && aktDay >= gebDay)) {
+				alter--;
+			}
+			int rezJahr = Integer.parseInt(this.jtf[cREZDAT].getText().split("\\.")[2]);
+			int rezMonat = Integer.parseInt(this.jtf[cREZDAT].getText().split("\\.")[1]);
+			int rezTag = Integer.parseInt(this.jtf[cREZDAT].getText().split("\\.")[0]);
+			
+			LocalDate rezDatum = LocalDate.of(rezJahr, rezMonat, rezTag);
+			
+			
+			LocalDate akutDatum = null;;
+			
+			if(!this.jtf[cAKUTDATUM].getText().equals("  .  .    ") && !this.jtf[cAKUTDATUM].getText().equals("    ")) {
+				int akutJahr = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[2]);
+				int akutMonat = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[1]);
+				int akutTag = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[0]);
+				
+				akutDatum = LocalDate.of(akutJahr, akutMonat, akutTag);
+			}
+			
+			
+//			LHMbvbKurzCheck(String diag, String icd10_1, String icd10_2, int alter, LocalDate datum)
+			String bvbLHM = checker.LHMbvbKurzCheck(diagnosegruppe, jtf[cICD10].getText(),
+					jtf[cICD10_2].getText(), alter, rezDatum, akutDatum);
+			if (bvbLHM != null) {
+				if (bvbLHM.equals("!DAT!")) {
+					JOptionPane.showConfirmDialog(null, "Es liegt zwar ein BVB / LHM vor.\n Aber: das notwendige Akutereignis liegt zu weit in der Vergangenheit", "Zu lang...",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+			
+			int summe = 0;
 			
 			String hm1 = "";
 			String hm2 = "";
@@ -1324,19 +1384,42 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			int itest = jcmb[cLEIST1].getSelectedIndex();
 			if(itest > 0){
 				hm1 = preisvec.get(itest-1).get(2);
+				summe = summe + Integer.parseInt(jtf[cANZ1].getText());
 			}
 			itest = jcmb[cLEIST2].getSelectedIndex();
 			if(itest > 0){
 				hm2 = preisvec.get(itest-1).get(2);
+				summe = summe + Integer.parseInt(jtf[cANZ2].getText());
 			}
 			itest = jcmb[cLEIST3].getSelectedIndex();
 			if(itest > 0){
 				hm3 = preisvec.get(itest-1).get(2);
+				summe = summe + Integer.parseInt(jtf[cANZ3].getText());
 			}
 			itest = jcmb[cLEIST4].getSelectedIndex();
 			if(itest > 0){
 				hm4 = preisvec.get(itest-1).get(2);
 			}
+			int frequenz = 0;
+			if(jtf[cFREQ].getText().contains("-")) {
+				frequenz = Integer.parseInt(jtf[cFREQ].getText().split("-")[1]);
+			} else {
+				frequenz = Integer.parseInt(jtf[cFREQ].getText());
+			}
+			
+					
+			if(bvbLHM != null) {
+				if(bvbLHM.equals("BVB") || bvbLHM.equals("LHM")) {
+					if((double)(summe / frequenz) > 12) {
+						JOptionPane.showConfirmDialog(null, "Es liegt zwar ein BVB / LHM vor, aber die 12 Wochen Frist passt nicht", "Nö!", JOptionPane.ERROR_MESSAGE);
+					} else {
+						JOptionPane.showMessageDialog(null, "BVB / LHM \n - alles schick!", "HMR Okay", JOptionPane.INFORMATION_MESSAGE);
+						return;
+					}
+				}
+			}
+			
+			
 			String msg = "";
 			if(!jtf[cANZ1].getText().equals("") && !jtf[cANZ1].getText().equals("") &&
 					!jtf[cANZ1].getText().equals("") && !jtf[cANZ1].getText().equals("")) {
@@ -1352,6 +1435,58 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 				JOptionPane.showMessageDialog(null, msg, "HMR-Fehler", JOptionPane.ERROR_MESSAGE);
 			} else {
 				JOptionPane.showMessageDialog(null, "Tadaa - alles schick!", "HMR Okay", JOptionPane.INFORMATION_MESSAGE);
+			}
+		}
+	}
+	
+	private void doBVBlhmCheck() {
+		BVBlhmCheck checker = new BVBlhmCheck();
+		String icd10_2 = "na";
+		if(!jtf[cICD10_2].getText().equals("")) {
+			icd10_2 = jtf[cICD10_2].getText();
+		}
+		int gebJahr = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[0]);
+		int gebMon = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[1]);
+		int gebDay = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[2]);
+		
+		int aktJahr = LocalDate.now().getYear();
+		int aktMon = LocalDate.now().getMonthValue();
+		int aktDay = LocalDate.now().getDayOfMonth();
+		
+		
+		int alter = aktJahr - gebJahr;
+		
+		if(!(aktMon >= gebMon && aktDay >= gebDay)) {
+			alter--;
+		}
+		
+		String bvblhm = checker.LHMbvbCheck((String)jcmb[cINDI].getSelectedItem(), jtf[cICD10].getText(), icd10_2, alter);
+		if(bvblhm != null) {
+			if(bvblhm.equals("LHM")) {
+				String text = "Es wurde ein Langfristiger Heilmittelbedarf erkannt. \n"
+						+ "Soll die Rezeptart geangepasst werden?";
+				int answer = JOptionPane.showConfirmDialog(null, text, "LHM?", JOptionPane.YES_NO_OPTION);
+				if(answer == JOptionPane.YES_OPTION) {
+					jcmb[cBEDARF].setSelectedIndex(2);	
+				}
+			} else if(bvblhm.equals("BVB")) {
+				String text = "Es wurde ein besonderer Verordnungsbedarf erkannt. \n"
+						+ "Soll die Rezeptart geangepasst werden?";
+				int answer = JOptionPane.showConfirmDialog(null, text, "BVB?", JOptionPane.YES_NO_OPTION);
+				if(answer == JOptionPane.YES_OPTION) {
+					jcmb[cBEDARF].setSelectedIndex(1);
+				}
+			} else if(bvblhm.equals("BVB+DAT!")) {
+				String text = "Es wurde ein besonderer Verordnungsbedarf erkannt. \n"
+						+ "Allerdings ist die Angabe eines Akut Ereignisses erforderlich. \n"
+						+ "Ist ein Akut Ereigniss angegeben?";
+				int answer = JOptionPane.showConfirmDialog(null, text, "BVB?", JOptionPane.YES_NO_OPTION);
+				if(answer == JOptionPane.YES_OPTION) {
+					jcmb[cBEDARF].setSelectedIndex(1);
+					jtf[cAKUTDATUM].requestFocus();
+				}
+			} else {
+				JOptionPane.showConfirmDialog(null, bvblhm, "Kontakt zum Arzt?", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}
@@ -1616,6 +1751,8 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 	}
 	
 	
+	
+	
 //	static int x = 1;
 	
 	@Override
@@ -1814,6 +1951,11 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
                 icdTextInDiagnose();
                 return;
             }
+            if (((JComponent)arg0.getSource()).getName().equals("frequenz")) {
+                doBVBlhmCheck();
+                return;
+            }
+            
 			//Die ICD-10 Prüfung ist im HMR-Check wohl besser aufgehoben
 			/*
 			if( ((JComponent)arg0.getSource()).getName().equals("icd10") ){
