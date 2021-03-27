@@ -105,9 +105,9 @@
 		<pathelement
 			location="${Libraries.location}/lib/bouncycastle/base-core.jar" />
 		<pathelement
-			location="${Libraries.location}/lib/bouncycastle/bcmail-jdk16-145.jar" />
+			location="${Libraries.location}/lib/bouncycastle/bcpkix-jdk15on-167.jar" />
 		<pathelement
-			location="${Libraries.location}/lib/bouncycastle/bcprov-ext-jdk16-145.jar" />
+			location="${Libraries.location}/lib/bouncycastle/bcprov-jdk15on-167.jar" />
 		<pathelement
 			location="${Libraries.location}/lib/swingx/pdf-renderer-1.0.5.jar" />
 		<pathelement
