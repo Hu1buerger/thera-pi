@@ -410,8 +410,7 @@ public class NebraskaRequestDlg extends JDialog {
             PKCS10CertificationRequest request = keystore.getCertificateRequest();
             request.verify(request.getPublicKey(), NebraskaConstants.SECURITY_PROVIDER);
             CertificationRequestInfo info = request.getCertificationRequestInfo();
-            ASN1Object asno = (ASN1Object) info.getDERObject()
-                                               .toASN1Object();
+            ASN1Object asno = info.toASN1Primitive();
             ASN1Sequence aseq = ASN1Sequence.getInstance(asno);
             SubjectPublicKeyInfo spub = null;
             for (int i = 0; i < aseq.size(); i++) {
