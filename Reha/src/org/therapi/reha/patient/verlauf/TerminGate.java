@@ -12,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import sql.DatenquellenFactory;
 
 public class TerminGate {
+    private static final String REZEPT_NR_SPALTE = "REZ_NR";
+    private static final String TERMIN_SPALTE = "TERMINE";
     Logger logger = LoggerFactory.getLogger(TerminGate.class);
     private DatenquellenFactory ds;
 
@@ -30,8 +32,9 @@ public class TerminGate {
 
             while (rs.next()) {
 
-                String termine = rs.getString("TERMINE");
-                liste.addAll(new TerminMapper(termine, pat_id).termine());
+                String termine = rs.getString(TERMIN_SPALTE);
+                String rezeptNr = rs.getString(REZEPT_NR_SPALTE);
+                liste.addAll(new TerminMapper(termine, pat_id, rezeptNr).termine());
 
             }
         } catch (SQLException e) {

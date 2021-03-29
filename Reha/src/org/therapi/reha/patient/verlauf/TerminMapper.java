@@ -11,11 +11,13 @@ public class TerminMapper {
     private static final DateTimeFormatter DDMYYYY = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private String terminString;
     private List<Termin> termine;
+    private String rezept_nr;
     private int pat_id;
 
-    public TerminMapper(String terminString, int pat_id) {
+    public TerminMapper(String terminString, int pat_id, String rezeptNr) {
         this.terminString = terminString;
         this.pat_id = pat_id;
+        rezept_nr = rezeptNr;
         this.termine = termine();
 
     }
@@ -36,7 +38,7 @@ public class TerminMapper {
 
     private Termin parse(String line) {
         String[] data = line.split("@");
-        return new Termin(LocalDate.parse(data[0], DDMYYYY), data[1], pat_id);
+        return new Termin(LocalDate.parse(data[0], DDMYYYY), data[1], pat_id,rezept_nr);
     };
 
     String asString() {
