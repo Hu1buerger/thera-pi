@@ -3,7 +3,6 @@ package org.therapi.reha.patient.verlauf;
 import java.time.LocalDate;
 import java.util.Objects;
 
-
 public class Verlauf {
 
     public int patientID = 0;
@@ -31,7 +30,6 @@ public class Verlauf {
         this.text = orig.text;
     }
 
-
     @Override
     public String toString() {
         return "Verlauf [patientID=" + patientID + ", therapist=" + therapist + ", documentator=" + documentator
@@ -47,6 +45,7 @@ public class Verlauf {
         this.therapist = termin.behandler;
         this.rezeptNr = termin.rezept_nr;
     }
+
     @Override
     public int hashCode() {
         return Objects.hash(dayofDocumentation, documentator, documentedDay, id, patientID, rezeptNr, text, therapist);

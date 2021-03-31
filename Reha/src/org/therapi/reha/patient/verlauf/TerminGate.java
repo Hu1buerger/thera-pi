@@ -28,7 +28,7 @@ public class TerminGate {
 
         try (Statement statement = ds.createConnection()
                                      .createStatement();
-                ResultSet rs = statement.executeQuery(findSQL + pat_id);) {
+             ResultSet rs = statement.executeQuery(findSQL + pat_id);) {
 
             while (rs.next()) {
 

@@ -38,7 +38,7 @@ public class TerminMapper {
 
     private Termin parse(String line) {
         String[] data = line.split("@");
-        return new Termin(LocalDate.parse(data[0], DDMYYYY), data[1], pat_id,rezept_nr);
+        return new Termin(LocalDate.parse(data[0], DDMYYYY), data[1], pat_id, rezept_nr);
     };
 
     String asString() {

@@ -29,7 +29,7 @@ class Verlaufgate {
 
         try (Statement statement = ds.createConnection()
                                      .createStatement();
-                ResultSet rs = statement.executeQuery(findSQL + id);) {
+             ResultSet rs = statement.executeQuery(findSQL + id);) {
             Verlauf result = null;
 
             if (rs.next()) {
@@ -38,7 +38,7 @@ class Verlaufgate {
                 result.patientID = rs.getInt("patient_id");
                 result.therapist = rs.getString("therapist");
                 result.documentator = rs.getString("documentator");
-                result.rezeptNr =rs.getString("rezept_nr");
+                result.rezeptNr = rs.getString("rezept_nr");
                 result.documentedDay = rs.getDate("documentedday")
                                          .toLocalDate();
                 result.dayofDocumentation = rs.getDate("dayofdocumentation")
@@ -94,10 +94,8 @@ class Verlaufgate {
     }
 
     private String sqlValuesExpression(Verlauf verlauf) {
-        return "(" + verlauf.patientID + ",\""
-                   + verlauf.therapist + "\",\""
-                   + verlauf.documentator  + "\",\""
-                   + verlauf.rezeptNr+ "\",'"
+        return "(" + verlauf.patientID + ",\"" + verlauf.therapist + "\",\"" + verlauf.documentator + "\",\""
+                + verlauf.rezeptNr + "\",'"
 
                 + java.sql.Date.valueOf(verlauf.documentedDay) + "','"
                 + java.sql.Date.valueOf(verlauf.dayofDocumentation) + "',\"" + verlauf.text + "\")";
@@ -131,7 +129,7 @@ class Verlaufgate {
 
         try (Statement statement = ds.createConnection()
                                      .createStatement();
-                ResultSet rs = statement.executeQuery(findSQL + pat_id);) {
+             ResultSet rs = statement.executeQuery(findSQL + pat_id);) {
 
             while (rs.next()) {
                 Verlauf result = new Verlauf();

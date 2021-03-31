@@ -17,7 +17,6 @@ public class Termin {
         this.rezept_nr = rezept_nr;
     }
 
-
     @Override
     public int hashCode() {
         return Objects.hash(behandler, date, patid, rezept_nr);
