@@ -3,7 +3,7 @@ CREATE TABLE `verlauf` (
 	`patient_id` INT(11) NOT NULL,
 	`therapist` VARCHAR(50) NOT NULL,
 	`documentator` VARCHAR(50) NOT NULL,
-	`rezept_id` INT(11) NULL DEFAULT NULL,
+	`rezept_nr` VARCHAR(50) NOT NULL,
 	`documentedday` DATE NOT NULL,
 	`dayofdocumentation` DATE NOT NULL,
 	`text` TEXT NOT NULL,

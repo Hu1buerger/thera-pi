@@ -9,7 +9,7 @@ public class Verlauf {
     public int patientID = 0;
     public String therapist = "";
     public String documentator = "";
-    public int rezeptID = 0;
+    public String rezeptNr = "";
     public LocalDate documentedDay = LocalDate.now();
     public LocalDate dayofDocumentation = LocalDate.now();
     public String text = "";
@@ -25,7 +25,7 @@ public class Verlauf {
         this.patientID = orig.patientID;
         this.therapist = orig.therapist;
         this.documentator = orig.documentator;
-        this.rezeptID = orig.rezeptID;
+        this.rezeptNr = orig.rezeptNr;
         this.documentedDay = orig.documentedDay;
         this.dayofDocumentation = orig.dayofDocumentation;
         this.text = orig.text;
@@ -35,7 +35,7 @@ public class Verlauf {
     @Override
     public String toString() {
         return "Verlauf [patientID=" + patientID + ", therapist=" + therapist + ", documentator=" + documentator
-                + ", rezeptID=" + rezeptID + ", documentedDay=" + documentedDay + ", dayofDocumentation="
+                + ", rezeptNr=" + rezeptNr + ", documentedDay=" + documentedDay + ", dayofDocumentation="
                 + dayofDocumentation + ", text=" + text + ", id=" + id + "]";
     }
 
@@ -45,10 +45,11 @@ public class Verlauf {
         this.patientID = termin.patid;
         this.documentedDay = termin.date;
         this.therapist = termin.behandler;
+        this.rezeptNr = termin.rezept_nr;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(dayofDocumentation, documentator, documentedDay, id, patientID, rezeptID, text, therapist);
+        return Objects.hash(dayofDocumentation, documentator, documentedDay, id, patientID, rezeptNr, text, therapist);
     }
 
     @Override
@@ -61,7 +62,7 @@ public class Verlauf {
         return Objects.equals(dayofDocumentation, other.dayofDocumentation)
                 && Objects.equals(documentator, other.documentator)
                 && Objects.equals(documentedDay, other.documentedDay) && id == other.id && patientID == other.patientID
-                && rezeptID == other.rezeptID && Objects.equals(text, other.text)
+                && rezeptNr == other.rezeptNr && Objects.equals(text, other.text)
                 && Objects.equals(therapist, other.therapist);
     }
 

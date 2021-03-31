@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 import sql.DatenquellenFactory;
 
 class Verlaufgate {
-    private static final String INSERT_PREFIX = "INSERT INTO verlauf ( `patient_id`,  `therapist`,  `documentator`,  `documentedday`,  `dayofdocumentation`, `text`)";
+    private static final String INSERT_PREFIX = "INSERT INTO verlauf ( `patient_id`,  `therapist`,  `documentator`, `rezept_nr` , `documentedday`,  `dayofdocumentation`, `text`)";
     DatenquellenFactory ds;
     private Logger logger = LoggerFactory.getLogger(Verlaufgate.class);
 
@@ -38,6 +38,7 @@ class Verlaufgate {
                 result.patientID = rs.getInt("patient_id");
                 result.therapist = rs.getString("therapist");
                 result.documentator = rs.getString("documentator");
+                result.rezeptNr =rs.getString("rezept_nr");
                 result.documentedDay = rs.getDate("documentedday")
                                          .toLocalDate();
                 result.dayofDocumentation = rs.getDate("dayofdocumentation")
@@ -63,7 +64,7 @@ class Verlaufgate {
                                     .createStatement();
             statement.execute(SQL, Statement.RETURN_GENERATED_KEYS);
             ResultSet rs = statement.getGeneratedKeys();
-            key = rs.next() ? rs.getInt(1) : 0;
+            key = rs.next() ? rs.getInt("id") : 0;
         } catch (SQLException e) {
             logger.error("cannot write " + verlauf + " to database ");
         }
@@ -93,7 +94,10 @@ class Verlaufgate {
     }
 
     private String sqlValuesExpression(Verlauf verlauf) {
-        return "(" + verlauf.patientID + ",\"" + verlauf.therapist + "\",\"" + verlauf.documentator + "\",'"
+        return "(" + verlauf.patientID + ",\""
+                   + verlauf.therapist + "\",\""
+                   + verlauf.documentator  + "\",\""
+                   + verlauf.rezeptNr+ "\",'"
 
                 + java.sql.Date.valueOf(verlauf.documentedDay) + "','"
                 + java.sql.Date.valueOf(verlauf.dayofDocumentation) + "',\"" + verlauf.text + "\")";
