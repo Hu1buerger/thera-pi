@@ -265,16 +265,6 @@ public class NebraskaRequestDlg extends JDialog {
             }
         }
         Vector<String> dummy = new Vector<String>();
-        /*
-         * dummy.add( ini.getStringProperty("KeyStores",
-         * "KeyStoreFile"+Integer.toString(i+1)) ); dummy.add(
-         * man.decrypt(ini.getStringProperty("KeyStores",
-         * "KeyStorePw"+Integer.toString(i+1))) ); dummy.add(
-         * ini.getStringProperty("KeyStores", "KeyStoreAlias"+Integer.toString(i+1)) );
-         * dummy.add( man.decrypt(ini.getStringProperty("KeyStores",
-         * "KeyStoreKeyPw"+Integer.toString(i+1))) ); keyStoreParameter.add(
-         * (Vector<String>) dummy.clone() );
-         */
         int inipos = -1;
         if (neuerEintrag && eintragBei < 0) { // es gibt noch keinen Eintrag
             inipos = 1;

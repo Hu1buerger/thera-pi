@@ -63,7 +63,6 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
      */
     private static final long serialVersionUID = -8078665856424061730L;
     JRtaTextField[] tf = { null, null, null, null, null, null, null, null, null, null, null, null, null, null, null,
-//            null, null, null, null, null, null }; // 'Bemerkungen' fallen weg ...
             null, null };
     JRtaRadioButton[] jrb = { null, null, null, null, null, null, null };
 
@@ -109,8 +108,6 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
         pb.addSeparator("Rechnungsanschrift (nur notwendig sofern abweichend von der Adresse des Antragstellers)",
                 c1.xyw(2, 10, 1));
         pb.add(getAbschnitt3(), c1.xy(2, 12));
-//        pb.addSeparator("Bemerkungen (sofern erforderlich bzw. gewünscht)", c1.xyw(2, 14, 2));
-//        pb.add(getAbschnitt4(), c1.xy(2, 16));
 
         pb.getPanel()
           .validate();
@@ -282,7 +279,6 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
 
     private JPanel getAbschnitt1() {
         FormLayout lay2 = new FormLayout(
-                // "62dlu,right:max(30dlu;p),5dlu,100dlu,90dlu,right:max(30;p),5dlu,100dlu","p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p");
                 "62dlu,right:max(30dlu;p),5dlu,130dlu,60dlu,right:max(30;p),5dlu,100dlu",
                 "p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p,1dlu,p");
         PanelBuilder a1 = new PanelBuilder(lay2);
@@ -344,26 +340,17 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
         tf[9].setName("E-Mail");
         a1.add(tf[9], c2.xy(8, 7));
 
-//        jrb[0] = new JRtaRadioButton("Zertifizierungsantwort an diese E-Mail-Adresse");
-//        // jrb[0].setActionCommand("");
-//        jrb[0].setSelected(false);
-//        jrb[0].addActionListener(this);
-//        jrb[0].setName("Kontrollkaestchen1");
-//        a1.add(jrb[0], c2.xyw(6, 9, 3));
+       // FIXME JRtaRadioButtons jrb[0], jrb[1] u. jrb[4] und JRtaCheckBox jcb[0] sind entfallen
+//      jrb[0] = new JRtaRadioButton("Zertifizierungsantwort an diese E-Mail-Adresse");
+//      jrb[0].setName("Kontrollkaestchen1");
+//      jrb[1] =  new JRtaRadioButton("Zertifizierungsantwort per Diskette");
+//      jrb[1].setName("Kontrollkaestchen2");
         jcb[0] =  new JRtaCheckBox("Zertifizierungsantwort an diese E-Mail-Adresse");
         jcb[0].setSelected(true );
         jcb[0].addActionListener(this);
         jcb[0].setName("Kontrollkaestchen1");
         a1.add(jcb[0],c2.xyw(6,9,3));
 
-//      jrb[1] =  new JRtaRadioButton("Zertifizierungsantwort per Diskette");
-//      //jrb[0].setActionCommand("");
-//      jrb[1].setSelected(false);
-//      jrb[1].addActionListener(this);
-//      jrb[1].setName("Kontrollkaestchen2");
-//      a1.add(jrb[1],c2.xyw(6,11,3));
-//      bg1.add(jrb[0]);
-//      bg1.add(jrb[1]);
         return a1.getPanel();
     }
 
@@ -404,11 +391,7 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
         a2.add(jrb[3], c3.xy(3, 7));
 
 //        jrb[4] = new JRtaRadioButton("per Diskette (ITSG- Trust Center, Postfach 12 30, 49702 Meppen)");
-//        // jrb[0].setActionCommand("");
-//        jrb[4].setSelected(false);
-//        jrb[4].addActionListener(this);
 //        jrb[4].setName("Kontrollkaestchen5");
-//        a2.add(jrb[4], c3.xy(3, 9));
         bg2.add(jrb[2]);
         bg2.add(jrb[3]);
 //        bg2.add(jrb[4]);
@@ -421,11 +404,7 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
 
 //        jcb[0] = new JRtaCheckBox(
 //                "Eine Sperrung der Zertifikates soll auch ohne Angabe eines Kundenkennwortes möglich sein.");
-//        // jrb[0].setActionCommand("");
-//        jcb[0].setSelected(false);
-//        jcb[0].addActionListener(this);
 //        jcb[0].setName("Kontrollkaestchen6");
-//        a2.add(jcb[0], c3.xy(3, 13));
         return a2.getPanel();
     }
 
@@ -458,28 +437,6 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
         a3.add(tf[16], c4.xy(4, 7));
         return a3.getPanel();
     }
-
-//    private JPanel getAbschnitt4() {    // kann weg
-//        FormLayout lay5 = new FormLayout("164dlu,5dlu,350dlu", "p,1dlu,p,1dlu,p,1dlu,p");
-//        PanelBuilder a4 = new PanelBuilder(lay5);
-//        a4.getPanel()
-//          .setOpaque(false);
-//        CellConstraints c5 = new CellConstraints();
-//
-//        tf[17] = new JRtaTextField("Text", true);
-//        tf[17].setName("Bemerkung1");
-//        a4.add(tf[17], c5.xy(3, 1));
-//        tf[18] = new JRtaTextField("Text", true);
-//        tf[18].setName("Bemerkung2");
-//        a4.add(tf[18], c5.xy(3, 3));
-//        tf[19] = new JRtaTextField("Text", true);
-//        tf[19].setName("Bemerkung3");
-//        a4.add(tf[19], c5.xy(3, 5));
-//        tf[20] = new JRtaTextField("Text", true);
-//        tf[20].setName("Bemerkung4");
-//        a4.add(tf[20], c5.xy(3, 7));
-//        return a4.getPanel();
-//    }
 
     @Override
     public void valueChanged(ListSelectionEvent arg0) {
@@ -733,25 +690,11 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
                                             .trim());
         }
         int antwort = -1;
-//        if (jrb[0].isSelected() || jrb[1].isSelected()) {   // jetzt: jcb[0]
-//            if (jrb[0].isSelected()) {
-//                antwort = 0;
-//            } else {
-//                antwort = 1;
-//            }
-//            hmPdf.put(jrb[0].getName(), resultRadio2[antwort][0]);
-//            hmPdf.put(jrb[1].getName(), resultRadio2[antwort][1]);
-//        } else {
-//            JOptionPane.showMessageDialog(null,
-//                    "Bitte geben Sie an wie Sie die Zertifizierungsantwort erhalten wollen");
-//            return;
-//        }
         if (jcb[0].isSelected()) {
             antwort = 0;
         } else {
             antwort = 1;
         }
-//        if (jrb[2].isSelected() || jrb[3].isSelected() || jrb[4].isSelected()) {
         if (jrb[2].isSelected() || jrb[3].isSelected()) {
             if (jrb[2].isSelected()) {
                 antwort = 0;
@@ -762,7 +705,6 @@ public class NebraskaZertAntrag extends JXPanel implements ListSelectionListener
             }
             hmPdf.put(jrb[2].getName(), resultRadio1[antwort][0]);
             hmPdf.put(jrb[3].getName(), resultRadio1[antwort][1]);
-//            hmPdf.put(jrb[4].getName(), resultRadio1[antwort][2]);
         } else {
             JOptionPane.showMessageDialog(null,
                     "Bitte geben Sie an wie Sie die Datei (Zertifikatsanforderung) der ITSG übermitteln wollen");
