@@ -10,7 +10,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
 
-public class TextEditDialogue extends JDialog {
+class TextEditDialogue extends JDialog {
 
     private JButton save;
     private JButton abort;
@@ -52,7 +52,7 @@ public class TextEditDialogue extends JDialog {
         return area;
     }
 
-    public boolean setInitialContent(String text) {
+    private boolean setInitialContent(String text) {
         this.originalText = text;
         boolean wasempty = textArea.getText()
                                    .isEmpty();

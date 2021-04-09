@@ -6,7 +6,7 @@ import javax.swing.ImageIcon;
 
 import systemEinstellungen.SystemConfig;
 
-public class Icons {
+class Icons {
 
     private static final ImageIcon EMPTYICON = new ImageIcon(new byte[0]) {
         @Override
@@ -19,7 +19,7 @@ public class Icons {
         };
     };
 
-    public static ImageIcon forName(String name) {
+    static ImageIcon forName(String name) {
         return Optional.ofNullable(SystemConfig.hmSysIcons.get(name))
                        .orElse(EMPTYICON);
 

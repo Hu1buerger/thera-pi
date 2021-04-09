@@ -16,7 +16,7 @@ import sql.DatenquellenFactory;
 
 public class VerlaufModul {
 
-    VerlaufPanel panel = new VerlaufPanel();
+    private VerlaufPanel panel = new VerlaufPanel();
     private Verlaufgate verlaufgate;
     private int pat_id;
     private TerminGate termingate;

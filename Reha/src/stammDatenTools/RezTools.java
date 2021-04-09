@@ -3,6 +3,7 @@ package stammDatenTools;
 import java.awt.Point;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,20 +16,28 @@ import javax.swing.SwingWorker;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.therapi.reha.patient.PatientMapper;
+import org.therapi.reha.patient.verlauf.Termin;
+import org.therapi.reha.patient.verlauf.Verlauf;
+import org.therapi.reha.patient.verlauf.VerlaufDokumentationOpener;
 
 import CommonTools.DatFunk;
+import CommonTools.DateTimeFormatters;
 import CommonTools.SqlInfo;
 import CommonTools.StringTools;
 import abrechnung.Disziplinen;
 import commonData.Rezeptvector;
 import core.Disziplin;
+import core.Patient;
 import environment.Path;
 import hauptFenster.Reha;
+import mandant.IK;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
 import terminKalender.BestaetigungsDaten;
 import terminKalender.TerminBestaetigenAuswahlFenster;
 import terminKalender.TermineErfassen;
+import umfeld.Betriebsumfeld;
 import wecker.AePlayWave;
 
 public class RezTools {
@@ -127,7 +136,7 @@ public class RezTools {
         // String aktpos = "";
         for (int i = 1; i < 5; i++) {
             if (!("".equals(rezvec.get(i).trim()))) {
-            	positionen.add(String.valueOf(rezvec.get(i)));
+                positionen.add(String.valueOf(rezvec.get(i)));
                 bvorrangig = isVorrangigAndExtra(rezvec.get(i + 4), xreznr.substring(0, 2));
                 vorrangig.add(Boolean.valueOf(bvorrangig[0]));
                 einzelerlaubt.add(Boolean.valueOf(bvorrangig[1]));
@@ -141,11 +150,11 @@ public class RezTools {
                 }
             }
             else {
-            	positionen.add("./.");
-            	vorrangig.add(true);
-            	anzahl.add(0);
-            	einzelerlaubt.add(false);
-            	doppelpos.add(null);
+                positionen.add("./.");
+                vorrangig.add(true);
+                anzahl.add(0);
+                einzelerlaubt.add(false);
+                doppelpos.add(null);
             }
         }
 
@@ -2446,6 +2455,9 @@ public class RezTools {
                         "termine,pos1,pos2,pos3,pos4,hausbes,unter18,jahrfrei,pat_intern,preisgruppe,zzregel,anzahl1,anzahl2,anzahl3,anzahl4,preisgruppe",
                         "rez_nr='" + swreznum + "'", Arrays.asList(new String[] {}));
             }
+
+           final int INDEX_OF_PATINTERN = 8;
+            String pat_intern = vec.get(INDEX_OF_PATINTERN);
             preisgruppe = Integer.parseInt(vec.get(9));
             disziplin = getDisziplinFromRezNr(swreznum);
             hmrtest = SystemPreislisten.hmHMRAbrechnung.get(disziplin)
@@ -2587,6 +2599,9 @@ public class RezTools {
                     TerminBestaetigenAuswahlFenster termBestAusw = new TerminBestaetigenAuswahlFenster(
                             Reha.getThisFrame(), null, hMPos, swreznum, Integer.parseInt(vec.get(15)));
                     termBestAusw.pack();
+                    Patient patient =   new  PatientMapper(new IK(Betriebsumfeld.getAktIK())).findbyPat_intern(pat_intern, Betriebsumfeld.getAktIK()).get();
+                    Verlauf verlauf = new Verlauf(new Termin(LocalDate.parse(datum, DateTimeFormatters.ddMMYYYYmitPunkt) , xkollege, patient.db_id, swreznum), Reha.aktUser);
+                    termBestAusw.addWindowListener(new VerlaufDokumentationOpener(verlauf ));
                     if (pt != null) {
                         termBestAusw.setLocation(pt);
                     } else {
@@ -2637,7 +2652,7 @@ public class RezTools {
                 count = 0;
                 for (i = 0; i < j; i++) {
 
-                	
+
                     if (hMPos.get(i).best) {
                         params[i] = hMPos.get(i).hMPosNr;
                         count++;
@@ -2646,7 +2661,7 @@ public class RezTools {
                 if (count == 0) {
                     jetztVoll = true;
                 }
-                
+
                 termbuf.append(TermineErfassen.macheNeuTermin2(params[0] != null ? params[0] : "",
                         params[1] != null ? params[1] : "", params[2] != null ? params[2] : "",
                         params[3] != null ? params[3] : "", xkollege, datum));

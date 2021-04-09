@@ -18,7 +18,7 @@ public class Verlauf {
 
     }
 
-    public Verlauf(Verlauf orig) {
+    Verlauf(Verlauf orig) {
         super();
         this.id = orig.id;
         this.patientID = orig.patientID;

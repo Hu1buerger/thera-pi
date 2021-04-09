@@ -11,13 +11,13 @@ import org.slf4j.LoggerFactory;
 
 import sql.DatenquellenFactory;
 
-public class TerminGate {
+class TerminGate {
     private static final String REZEPT_NR_SPALTE = "REZ_NR";
     private static final String TERMIN_SPALTE = "TERMINE";
-    Logger logger = LoggerFactory.getLogger(TerminGate.class);
+    private static final Logger logger = LoggerFactory.getLogger(TerminGate.class);
     private DatenquellenFactory ds;
 
-    public TerminGate(DatenquellenFactory ds2) {
+    TerminGate(DatenquellenFactory ds2) {
         this.ds = ds2;
 
     }

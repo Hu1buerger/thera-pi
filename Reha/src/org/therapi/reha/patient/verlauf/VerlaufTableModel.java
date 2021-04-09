@@ -7,9 +7,9 @@ import java.util.stream.Collectors;
 
 import javax.swing.table.AbstractTableModel;
 
-public class VerlaufTableModel extends AbstractTableModel {
+class VerlaufTableModel extends AbstractTableModel {
 
-    List<Verlauf> verlaeufe = new ArrayList<Verlauf>();
+    private List<Verlauf> verlaeufe = new ArrayList<Verlauf>();
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
@@ -120,7 +120,7 @@ public class VerlaufTableModel extends AbstractTableModel {
      *
      * @return copied data
      */
-    public List<Verlauf> verlaeufe() {
+    List<Verlauf> verlaeufe() {
 
         return verlaeufe.stream()
                         .map(Verlauf::new)

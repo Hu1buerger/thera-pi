@@ -5,8 +5,9 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/en/1
 die Nummern #XXX beziehen sich auf die Ticketnummer im Gitlab
 Datumsformat ist jjjj-mm-tt, also Jahr-Monat-Tag
 ## unveroeffentlicht
+- VerlaufsDokumentation in Patientenfenster
+- Verlaufdokueditor oeffnen, wenn im Terminkalender mit Strg F11 bestätigt wurde.
 
-- HMR2020 Formulare
 
 ## [1.1.15] - 2020-02-05
 ### fixed

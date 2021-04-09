@@ -17,10 +17,10 @@ import sql.DatenquellenFactory;
 
 class Verlaufgate {
     private static final String INSERT_PREFIX = "INSERT INTO verlauf ( `patient_id`,  `therapist`,  `documentator`, `rezept_nr` , `documentedday`,  `dayofdocumentation`, `text`)";
-    DatenquellenFactory ds;
+    private DatenquellenFactory ds;
     private Logger logger = LoggerFactory.getLogger(Verlaufgate.class);
 
-    public Verlaufgate(DatenquellenFactory ds2) {
+    Verlaufgate(DatenquellenFactory ds2) {
         ds = ds2;
     }
 
@@ -55,7 +55,7 @@ class Verlaufgate {
         return Optional.<Verlauf>empty();
     }
 
-    public int insert(Verlauf verlauf) {
+    int insert(Verlauf verlauf) {
 
         String SQL = INSERT_PREFIX + " VALUES " + sqlValuesExpression(verlauf) + ";";
         int key = 0;
@@ -152,7 +152,7 @@ class Verlaufgate {
         return liste;
     }
 
-    public int update(List<Verlauf> verlaeufe) {
+    private int update(List<Verlauf> verlaeufe) {
         if (verlaeufe == null || verlaeufe.isEmpty())
             return 0;
 
@@ -182,7 +182,7 @@ class Verlaufgate {
                 + verlauf.dayofDocumentation + "' WHERE  `id`=" + verlauf.id + ";";
     }
 
-    public void save(List<Verlauf> verlaeufe) {
+    void save(List<Verlauf> verlaeufe) {
         Map<Boolean, List<Verlauf>> result = verlaeufe.stream()
                                                       .collect(Collectors.partitioningBy(verlauf -> verlauf.id == 0));
 

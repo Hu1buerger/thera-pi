@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TerminMapper {
+class TerminMapper {
 
     private static final DateTimeFormatter DDMYYYY = DateTimeFormatter.ofPattern("dd.MM.yyyy");
     private String terminString;
@@ -14,7 +14,7 @@ public class TerminMapper {
     private String rezept_nr;
     private int pat_id;
 
-    public TerminMapper(String terminString, int pat_id, String rezeptNr) {
+    TerminMapper(String terminString, int pat_id, String rezeptNr) {
         this.terminString = terminString;
         this.pat_id = pat_id;
         rezept_nr = rezeptNr;
@@ -22,7 +22,7 @@ public class TerminMapper {
 
     }
 
-    public List<Termin> termine() {
+    List<Termin> termine() {
         if (terminString == null)
             return Collections.emptyList();
 
