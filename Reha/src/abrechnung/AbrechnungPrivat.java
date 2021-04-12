@@ -68,8 +68,8 @@ import systemEinstellungen.SystemPreislisten;
 import umfeld.Betriebsumfeld;
 
 public class AbrechnungPrivat extends JXDialog {
-    public static final int OK = 0;
-    public static final int ABBRECHEN = -1;
+    private static final int OK = 0;
+    private static final int ABBRECHEN = -1;
     public static final int KORREKTUR = -2;
 
     public int rueckgabe;
@@ -96,12 +96,8 @@ public class AbrechnungPrivat extends JXDialog {
 
     private Vector<Vector<String>> preisliste;
 
-    boolean preisok;
-    boolean hausBesuch;
-    boolean hbEinzeln;
-    boolean hbPauschale;
-    boolean hbmitkm;
-
+    private boolean hausBesuch;
+    private boolean hbEinzeln;
     private Vector<String> originalPos = new Vector<>();
     private Vector<Integer> originalAnzahl = new Vector<>();
     private Vector<Double> einzelPreis = new Vector<>();
@@ -109,7 +105,7 @@ public class AbrechnungPrivat extends JXDialog {
     private Vector<String> originalLangtext = new Vector<>();
 
     private Vector<BigDecimal> zeilenGesamt = new Vector<>();
-    private BigDecimal rechnungGesamt = BigDecimal.valueOf(Double.parseDouble("0.00"));
+    private BigDecimal rechnungGesamt = BigDecimal.ZERO;
 
     private HashMap<String, String> hmAdresse = new HashMap<>();
     private String aktRechnung = "";
@@ -157,7 +153,7 @@ public class AbrechnungPrivat extends JXDialog {
                 SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung);
     }
 
-    public AbrechnungPrivat(JXFrame owner, String titel, int rueckgabe, int preisgruppe, JComponent glasspane,
+    AbrechnungPrivat(JXFrame owner, String titel, int rueckgabe, int preisgruppe, JComponent glasspane,
             String rezeptNr, Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID,
             Vector<String> aktuellesRezeptVector, Vector<String> aktuellerPatientDaten, String aktIk,
             String privatRgFormular, HashMap<String, String> hmAbrechnung) {
@@ -172,8 +168,6 @@ public class AbrechnungPrivat extends JXDialog {
         this.aktIk = aktIk;
         disziplin = RezTools.getDisziplinFromRezNr(rezeptNr);
         this.preisliste = preisliste;
-        preisok = true;
-
         this.rueckgabe = rueckgabe;
         this.preisgruppe = preisgruppe;
         setUndecorated(true);
@@ -194,7 +188,7 @@ public class AbrechnungPrivat extends JXDialog {
         setContentPane(jtp);
         setResizable(false);
         rtp = new RehaTPEventClass();
-        rtp.addRehaTPEventListener((e) -> FensterSchliessen());
+        rtp.addRehaTPEventListener(e -> FensterSchliessen());
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
@@ -232,7 +226,7 @@ public class AbrechnungPrivat extends JXDialog {
         jcmb.setSelectedIndex(this.preisgruppe - 1);
         this.aktGruppe = this.preisgruppe - 1;
         jcmb.setActionCommand("neuertarif");
-        jcmb.addActionListener(al);
+        jcmb.addActionListener(neuerTarifAL);
         pan.add(jcmb, cc.xy(3, 8));
         privatRechnungBtn = new JRtaRadioButton("Formular für Privatrechnung verwenden");
         privatRechnungBtn.addChangeListener(cl);
@@ -417,7 +411,7 @@ public class AbrechnungPrivat extends JXDialog {
             }
             aktRechnung = Integer.toString(SqlInfo.erzeugeNummer("rnr"));
             hmAdresse.put("<pri6>", aktRechnung);
-            
+
             System.out.println(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
             starteDokument(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
             starteErsetzen();
@@ -1012,7 +1006,6 @@ public class AbrechnungPrivat extends JXDialog {
                     einzelPreis.add(Double.parseDouble(preis));
                     originalLangtext.add("Wegegeldpauschale");
                     labs[5].setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
-                    hbPauschale = true;
                 }
             } else /*
                     * es wurden zwar Kilometer angegeben aber diese Preisgruppe kennt keine
@@ -1036,7 +1029,6 @@ public class AbrechnungPrivat extends JXDialog {
                 einzelPreis.add(Double.parseDouble(preis));
                 originalLangtext.add("Wegegeld / km");
                 labs[5].setText(hbanzahl * patKilometer + " * " + pos + " (Einzelpreis = " + preis + ")");
-                hbmitkm = true;
             }
         } else { /* Hausbesuch mehrere abrechnen */
             String pos = SystemPreislisten.hmHBRegeln.get(disziplin)
@@ -1308,7 +1300,6 @@ public class AbrechnungPrivat extends JXDialog {
                     einzelPreis.add(Double.parseDouble(preisAlt));
                     originalLangtext.add("Wegegeldpauschale");
                     labs[5].setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
-                    hbPauschale = true;
                     kmvec.add(originalPos.size() - 1);
                     if (splitpreise[0] < hbanzahl) {
                         neuhb = hbanzahl - splitpreise[0];
@@ -1340,7 +1331,6 @@ public class AbrechnungPrivat extends JXDialog {
                 einzelPreis.add(Double.parseDouble(preisAlt));
                 originalLangtext.add("Wegegeld / km");
                 labs[5].setText(althb * patKilometer + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
-                hbmitkm = true;
                 kmvec.add(originalPos.size() - 1);
                 if (splitpreise[0] < hbanzahl) {
                     neuhb = hbanzahl - splitpreise[0];
@@ -1404,7 +1394,17 @@ public class AbrechnungPrivat extends JXDialog {
                                         .trim()) ? " " : hmAdresse.get("<pri2>"));
     }
 
-    ActionListener al = new ActionListener() {
+    private ActionListener neuerTarifAL = new ActionListener() {
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            aktGruppe = jcmb.getSelectedIndex();
+            doNeuerTarif();
+
+        }
+    };
+
+    private ActionListener al = new ActionListener() {
 
         @Override
         public void actionPerformed(ActionEvent arg0) {
@@ -1439,7 +1439,7 @@ public class AbrechnungPrivat extends JXDialog {
         }
     };
 
-    KeyListener kl = new KeyAdapter() {
+    private KeyListener kl = new KeyAdapter() {
 
         @Override
         public void keyPressed(KeyEvent arg0) {
@@ -1461,19 +1461,9 @@ public class AbrechnungPrivat extends JXDialog {
             }
         }
 
-        @Override
-        public void keyReleased(KeyEvent arg0) {
-        }
-
-        @Override
-        public void keyTyped(KeyEvent arg0) {
-        }
-    };
-
-
+          };
 
     private void FensterSchliessen() {
-
         setVisible(false);
         dispose();
     }
@@ -1616,11 +1606,10 @@ public class AbrechnungPrivat extends JXDialog {
                 exemplare = Integer.parseInt(hmAbrechnung.get("hmbgeexemplare"));
             }
             OOTools.printAndClose(textDocument, exemplare);
-
         }
     }
 
-    ChangeListener cl = new ChangeListener() {
+    private ChangeListener cl = new ChangeListener() {
 
         @Override
         public void stateChanged(ChangeEvent arg0) {
