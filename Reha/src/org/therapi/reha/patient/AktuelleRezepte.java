@@ -127,10 +127,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     public String[] indlogo = null;
     public String[] indpodo = null;
 
-	public String[] diagphysio = null;
-	public String[] diagergo = null;
-	public String[] diaglogo = null;
-	public String[] diagpodo = null;
+    public String[] diagphysio = null;
+    public String[] diagergo = null;
+    public String[] diaglogo = null;
+    public String[] diagpodo = null;
     public RezeptDaten rezDatenPanel = null;
 
     public boolean suchePatUeberRez = false;
@@ -148,13 +148,13 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     int idInTable = 8;
     int termineInTable = 9;
-    
+
     public final static int cREZEPTART = 27;
-	public final static int cHMR2021 = 81;
-	public final static int cINDISCHLUESSEL = 44;
-	public final static int cDIAGGRUPPE = 44;
-	public final static int cDRINGLICH = 79;
-	public final static int cAKUTEREIGNIS = 25;
+    public final static int cHMR2021 = 81;
+    public final static int cINDISCHLUESSEL = 44;
+    public final static int cDIAGGRUPPE = 44;
+    public final static int cDRINGLICH = 79;
+    public final static int cAKUTEREIGNIS = 25;
 
     AbrechnungRezept abrRez = null;
 
@@ -176,7 +176,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private JButton behandlungstageinclipboardBtn = new JButton();
     private JButton rezeptinhistorietransferierenBtn = new JButton();
     private JButton do301FallSteuerungBtn = new JButton();
-    
+
     private int frage2021;
 
     public AktuelleRezepte(PatientHauptPanel eltern, Connection connection) {
@@ -465,7 +465,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         neuButton.addActionListener(this);
 
         jtb.add(neuButton);
-        
+
         editButton = new JButton();
         editButton.setIcon(SystemConfig.hmSysIcons.get("edit"));
         editButton.setToolTipText("aktuelles Rezept ändern/editieren");
@@ -1559,45 +1559,45 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 
     }
     public void diagSchluessel() {
-		diagphysio = new String[] {
-				"keine DiagGr.",
-				"AT","CS","EX",
-				"GE","LY","PN",
-				"WS","ZN","SO1",
-				"SO2","SO3","SO4",
-				"SO5",
-				"CD1 a","CD1 b","CD1 c","CD1 d",
-				"CD2 a","CD2 b","CD2 c","CD2 d",
-				"ZNSZ",
-				"CSZ a","CSZ b","CSZ c",
-				"LYZ1","LYZ2",
-				"k.A."
-		};
-		diagergo =  new String[] {
-				"keine DiagGr.",
-				"EN1","EN2","EN3",
-				"SB1","SB2","SB3", 
-				"PS1","PS2","PS3","PS4","k.A."
-		};
-		diaglogo = new String[] {
-				"keine DiagGr.",
-				"RE1","RE2",
-				"SC",
-				"SF",
-				"SP1","SP2","SP3","SP4","SP5","SP6",
-				"ST1","ST2","ST3","ST4",
-				"SPZ",
-				"SCZ",
-				"OFZ",
-				"k.A."
-		};
-		diagpodo = new String[] {
-				"keine DiagGr.",
-				"DF","k.A."
-		};
+        diagphysio = new String[] {
+                "keine DiagGr.",
+                "AT","CS","EX",
+                "GE","LY","PN",
+                "WS","ZN","SO1",
+                "SO2","SO3","SO4",
+                "SO5",
+                "CD1 a","CD1 b","CD1 c","CD1 d",
+                "CD2 a","CD2 b","CD2 c","CD2 d",
+                "ZNSZ",
+                "CSZ a","CSZ b","CSZ c",
+                "LYZ1","LYZ2",
+                "k.A."
+        };
+        diagergo =  new String[] {
+                "keine DiagGr.",
+                "EN1","EN2","EN3",
+                "SB1","SB2","SB3",
+                "PS1","PS2","PS3","PS4","k.A."
+        };
+        diaglogo = new String[] {
+                "keine DiagGr.",
+                "RE1","RE2",
+                "SC",
+                "SF",
+                "SP1","SP2","SP3","SP4","SP5","SP6",
+                "ST1","ST2","ST3","ST4",
+                "SPZ",
+                "SCZ",
+                "OFZ",
+                "k.A."
+        };
+        diagpodo = new String[] {
+                "keine DiagGr.",
+                "DF","k.A."
+        };
 
-		
-	}
+
+    }
 
     @Override
     public void columnPropertyChange(PropertyChangeEvent arg0) {
@@ -1650,7 +1650,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     public void actionPerformed(ActionEvent arg0) {
 
         String cmd = arg0.getActionCommand();
-        
+
         switch (cmd) {
         case "terminplus":
             if (!rezGeschlossen()) {
@@ -1762,26 +1762,26 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             }
             break;
         case "rezneu":
-        	if(!Rechte.hatRecht(Rechte.Rezept_anlegen, true)){
-				return;
-			}
-        	boolean bCtrlPressed = ( (arg0.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK );
-			boolean bShiftPressed = ( (arg0.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK );
-			boolean bAltPressed = ( (arg0.getModifiers() & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK );
-			String strModus = "";
-			if ( bCtrlPressed ) strModus = "KopiereLetztes";
-			else if ( bShiftPressed ) strModus = "KopiereAngewaehltes";
-			else if ( bAltPressed ) strModus = "KopiereHistorienRezept";
-			
-			
-			frage2021 = JOptionPane.showConfirmDialog(null, "<html><b>Wollen Sie ein Rezept nach den <font color='#ff0000'>neuen HMR 2021</font> anlegen</b></html>", "Alt oder neu ?",JOptionPane.YES_NO_CANCEL_OPTION);
-			if(frage2021 == JOptionPane.YES_OPTION) {
-					neuanlageRezept2021(true,"", strModus);	
-			
-			}else if(frage2021 == JOptionPane.NO_OPTION) {
-				neuanlageRezept(true,"", strModus);
-			}
-        	
+            if(!Rechte.hatRecht(Rechte.Rezept_anlegen, true)){
+                return;
+            }
+            boolean bCtrlPressed = ( (arg0.getModifiers() & KeyEvent.CTRL_MASK) == KeyEvent.CTRL_MASK );
+            boolean bShiftPressed = ( (arg0.getModifiers() & KeyEvent.SHIFT_MASK) == KeyEvent.SHIFT_MASK );
+            boolean bAltPressed = ( (arg0.getModifiers() & KeyEvent.ALT_MASK) == KeyEvent.ALT_MASK );
+            String strModus = "";
+            if ( bCtrlPressed ) strModus = "KopiereLetztes";
+            else if ( bShiftPressed ) strModus = "KopiereAngewaehltes";
+            else if ( bAltPressed ) strModus = "KopiereHistorienRezept";
+
+
+            frage2021 = JOptionPane.showConfirmDialog(null, "<html><b>Wollen Sie ein Rezept nach den <font color='#ff0000'>neuen HMR 2021</font> anlegen</b></html>", "Alt oder neu ?",JOptionPane.YES_NO_CANCEL_OPTION);
+            if(frage2021 == JOptionPane.YES_OPTION) {
+                    neuanlageRezept2021(true,"", strModus);
+
+            }else if(frage2021 == JOptionPane.NO_OPTION) {
+                neuanlageRezept(true,"", strModus);
+            }
+
            break;
         case "rezedit":
             if (aktPanel.equals("leerPanel")) {
@@ -2051,25 +2051,25 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     private void editrezept() {
-    	if(aktPanel.equals("leerPanel")){
-			JOptionPane.showMessageDialog(null,"Oh Herr laß halten...\n\n"+
-					"....und welches der nicht vorhandenen Rezepte möchten Sie bitteschön ändern....");
-			return;
-		}
-		if(rezGeschlossen()){return;}
-		/*
-		if(DatFunk.TageDifferenz(Reha.neueHMRab,DatFunk.sDatInDeutsch(Reha.thisClass.patpanel.vecaktrez.get(2))) >= 0) {
-			System.out.println("Starte neuanlageRezept2021");
-			neuanlageRezept2021(false,"", "");	
-		}else {
-			neuanlageRezept(false,"", "");									
-		}
-		*/
-		if(Reha.instance.patpanel.vecaktrez.get(81).equals("F")) {
-			neuanlageRezept(false,"","");	
-		}else {
-			neuanlageRezept2021(false,"","");
-		}
+        if(aktPanel.equals("leerPanel")){
+            JOptionPane.showMessageDialog(null,"Oh Herr laß halten...\n\n"+
+                    "....und welches der nicht vorhandenen Rezepte möchten Sie bitteschön ändern....");
+            return;
+        }
+        if(rezGeschlossen()){return;}
+        /*
+        if(DatFunk.TageDifferenz(Reha.neueHMRab,DatFunk.sDatInDeutsch(Reha.thisClass.patpanel.vecaktrez.get(2))) >= 0) {
+            System.out.println("Starte neuanlageRezept2021");
+            neuanlageRezept2021(false,"", "");
+        }else {
+            neuanlageRezept(false,"", "");
+        }
+        */
+        if(Reha.instance.patpanel.vecaktrez.get(81).equals("F")) {
+            neuanlageRezept(false,"","");
+        }else {
+            neuanlageRezept2021(false,"","");
+        }
     }
 
     private void neuanlageRezept(ActionEvent arg0) {
@@ -2440,8 +2440,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
             }
             if (hmpositionen.size() > 0) {
-            	if(!Reha.instance.patpanel.vecaktrez.get(cHMR2021).equals("T")) {
-            		boolean checkok = new HMRCheck(
+                if(!Reha.instance.patpanel.vecaktrez.get(cHMR2021).equals("T")) {
+                    boolean checkok = new HMRCheck(
                             indi, disziSelect.getIndex(diszi), anzahlen, hmpositionen, Integer.parseInt(preisgruppe) - 1,
                             SystemPreislisten.hmPreise.get(diszi)
                                                       .get(Integer.parseInt(preisgruppe) - 1),
@@ -2457,11 +2457,11 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             return;
                         }
                     }
-            	}
-            	else {
-            		System.out.println("HMR Check 2021");
-            	}
-                
+                }
+                else {
+                    System.out.println("HMR Check 2021");
+                }
+
             } else {
                 JOptionPane.showMessageDialog(null,
                         "Keine Behandlungspositionen angegeben, HMR-Check nicht möglich!!!");
@@ -2716,17 +2716,10 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 JOptionPane.showMessageDialog(null, "Fehler in Preisgruppe " + ex.getMessage());
                 ex.printStackTrace();
             }
-            Point pt = getLocationOnScreen();
-            pt.x = pt.x - 75;
-            pt.y = pt.y + 30;
-
             AbrechnungPrivat abrechnungPrivat = new AbrechnungPrivat(Reha.getThisFrame(),
                     "Privat-/BG-/Nachsorge-Rechnung erstellen", -1, preisgruppe);
-            abrechnungPrivat.setLocation(pt);
-            abrechnungPrivat.pack();
-            abrechnungPrivat.setModal(true);
-            abrechnungPrivat.setVisible(true);
-            int rueckgabe = abrechnungPrivat.rueckgabe;
+
+            int rueckgabe = abrechnungPrivat.showAndWait(getLocationOnScreen());
             if (rueckgabe == AbrechnungPrivat.KORREKTUR) {
                 editrezept();
             }
@@ -3045,7 +3038,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                     Vector<String> vecKopiervorlage = new Vector<String>();
                     switch (strModus) {
                     case "KopiereLetztes":
-                    	
+
                         RezeptVorlage vorlage = new RezeptVorlage(neuButton.getLocationOnScreen());
                         if (!vorlage.bHasSelfDisposed) { // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog
                                                          // bereits selbst disposed !
@@ -3077,22 +3070,22 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                         }
                         break;
                     }
-                    
+
                     if(frage2021 == JOptionPane.NO_OPTION) {
-                    	RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecKopiervorlage.clone(), lneu,
+                        RezNeuanlage rezNeuAn = new RezNeuanlage((Vector<String>) vecKopiervorlage.clone(), lneu,
                                 connection);
-                    	neuRez.getSmartTitledPanel()
+                        neuRez.getSmartTitledPanel()
                         .setContentContainer(rezNeuAn);
                     } else {
-                    	//public RezNeuanlage2021(Vector<String> vec,boolean neu,String sfeldname){
-                    	RezNeuanlage2021 rezNeuAn = new RezNeuanlage2021((Vector<String>) vecKopiervorlage.clone(), lneu,
+                        //public RezNeuanlage2021(Vector<String> vec,boolean neu,String sfeldname){
+                        RezNeuanlage2021 rezNeuAn = new RezNeuanlage2021((Vector<String>) vecKopiervorlage.clone(), lneu,
                                 "KopiereHistorienRezept");
-                    	neuRez.getSmartTitledPanel()
+                        neuRez.getSmartTitledPanel()
                         .setContentContainer(rezNeuAn);
                     }
 
-                    
-                    
+
+
                     if (vecKopiervorlage.size() < 1)
                         neuRez.getSmartTitledPanel()
                               .setTitle("Rezept Neuanlage");
@@ -3177,146 +3170,146 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     }
 
     public void neuanlageRezept2021( boolean lneu, String feldname, String strModus ){
-		try{
-			if(Reha.instance.patpanel.aid < 0 || Reha.instance.patpanel.kid < 0){
-				String meldung = "Hausarzt und/oder Krankenkasse im Patientenstamm sind nicht verwertbar.\n"+
-				"Die jeweils ungültigen Angaben sind -> kursiv <- dargestellt.\n\n"+
-				"Bitte korrigieren Sie die entsprechenden Angaben";
-				JOptionPane.showMessageDialog(null, meldung);
-				return;	
-			}		
-			if(neuDlgOffen){
-				JOptionPane.showMessageDialog(null, "neuDlgOffen hat den wert true");
-				return;
-			}
-			try{
-			neuDlgOffen = true;
-			RezNeuDlg neuRez = new RezNeuDlg();
-			PinPanel pinPanel = new PinPanel();
-			pinPanel.setName("RezeptNeuanlage");
-			pinPanel.getGruen().setVisible(false);
-			if(lneu){
-				neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage");
-			}
-			neuRez.setSize(500,800);
-			neuRez.setPreferredSize(new Dimension(490+Reha.zugabex,690+Reha.zugabey+50));
-			neuRez.getSmartTitledPanel().setPreferredSize(new Dimension (490,800)); //Original 630
-			neuRez.setPinPanel(pinPanel);
-			if(lneu){
-				// vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
-				Vector<String> vecKopiervorlage = new Vector<String>();
-				if ( strModus.equals("KopiereLetztes") ) {
-					RezeptVorlage vorlage = new RezeptVorlage(neuButton.getLocationOnScreen());
-					if ( !vorlage.bHasSelfDisposed ) {  // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog bereits selbst disposed !
-						vorlage.setModal(true);
-						vorlage.toFront();
-						vorlage.setVisible(true);
-					}
-					//String strKopierDiszi = vorlage.strSelectedDiszi;
-					// Die Rezept-Kopiervorlage steht jetzt in vorlage.vecResult oder es wurde nichts gefunden !
-					vecKopiervorlage = vorlage.vecResult;
-					
-					if ( !vorlage.bHasSelfDisposed ) {  // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog bereits selbst disposed !
-						vorlage.dispose();
-					}
-					vorlage= null;
-				}
-				if ( strModus.equals("KopiereAngewaehltes") ) {  // Vorschlag von J. Steinhilber integriert: Kopiere das angewählte Rezept
-					String rezToCopy = AktuelleRezepte.getActiveRezNr();
-					vecKopiervorlage = ((Vector<String>)SqlInfo.holeSatz( "verordn", " * ", "REZ_NR = '" +
-										rezToCopy + "'", Arrays.asList(new String[] {}) ));
+        try{
+            if(Reha.instance.patpanel.aid < 0 || Reha.instance.patpanel.kid < 0){
+                String meldung = "Hausarzt und/oder Krankenkasse im Patientenstamm sind nicht verwertbar.\n"+
+                "Die jeweils ungültigen Angaben sind -> kursiv <- dargestellt.\n\n"+
+                "Bitte korrigieren Sie die entsprechenden Angaben";
+                JOptionPane.showMessageDialog(null, meldung);
+                return;
+            }
+            if(neuDlgOffen){
+                JOptionPane.showMessageDialog(null, "neuDlgOffen hat den wert true");
+                return;
+            }
+            try{
+            neuDlgOffen = true;
+            RezNeuDlg neuRez = new RezNeuDlg();
+            PinPanel pinPanel = new PinPanel();
+            pinPanel.setName("RezeptNeuanlage");
+            pinPanel.getGruen().setVisible(false);
+            if(lneu){
+                neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage");
+            }
+            neuRez.setSize(500,800);
+            neuRez.setPreferredSize(new Dimension(490+Reha.zugabex,690+Reha.zugabey+50));
+            neuRez.getSmartTitledPanel().setPreferredSize(new Dimension (490,800)); //Original 630
+            neuRez.setPinPanel(pinPanel);
+            if(lneu){
+                // vvv Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
+                Vector<String> vecKopiervorlage = new Vector<String>();
+                if ( strModus.equals("KopiereLetztes") ) {
+                    RezeptVorlage vorlage = new RezeptVorlage(neuButton.getLocationOnScreen());
+                    if ( !vorlage.bHasSelfDisposed ) {  // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog bereits selbst disposed !
+                        vorlage.setModal(true);
+                        vorlage.toFront();
+                        vorlage.setVisible(true);
+                    }
+                    //String strKopierDiszi = vorlage.strSelectedDiszi;
+                    // Die Rezept-Kopiervorlage steht jetzt in vorlage.vecResult oder es wurde nichts gefunden !
+                    vecKopiervorlage = vorlage.vecResult;
 
-				}
-				if ( strModus.equals("KopiereHistorienRezept") ) { 
-					String rezToCopy = null;
-					if( (rezToCopy = Historie.getActiveRezNr()) != null){
-						vecKopiervorlage = ((Vector<String>)SqlInfo.holeSatz( "lza", " * ", "REZ_NR = '" +
-								rezToCopy + "'", Arrays.asList(new String[] {}) ));
-						
-					}else{
-						JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgewählt");
-					}
-				}
-				// ^^^ Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
-				@SuppressWarnings("unchecked")
-				RezNeuanlage2021 rezNeuAn = new RezNeuanlage2021((Vector<String>)vecKopiervorlage.clone(),lneu,feldname);
-				neuRez.getSmartTitledPanel().setContentContainer( rezNeuAn );
-				//if ( rezNeuAn.strKopiervorlage.isEmpty() )
-				if ( vecKopiervorlage.size() < 1 )
-					neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage");
-				else 			// Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
-					neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage als Kopie von <-- " + vecKopiervorlage.get(1) );
-				
-			}else{  // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geöffnet:
-				neuRez.getSmartTitledPanel().setContentContainer(new RezNeuanlage2021(Reha.instance.patpanel.vecaktrez,lneu,feldname));
-				neuRez.getSmartTitledPanel().setTitle("editieren Rezept ---> "+Reha.instance.patpanel.vecaktrez.get(1));
-			}
-			neuRez.getSmartTitledPanel().getContentContainer().setName("RezeptNeuanlage");
-			neuRez.setName("RezeptNeuanlage");
-			neuRez.setModal(true);
-			neuRez.setLocationRelativeTo(null);
-			neuRez.pack();
-			neuRez.setVisible(true);
-			
-			neuRez.dispose();
-			neuRez = null;
-			pinPanel = null;
-			if(!lneu){
-				if(tabelleaktrez.getRowCount()>0){
-					try{
-						boolean hmr2021 =  Reha.instance.patpanel.vecaktrez.get(81).equals("T");
-						RezeptDaten.feddisch = false;
-						//System.out.println("rufe Rezeptnummer "+(String)tabaktrez.getValueAt(tabaktrez.getSelectedRow(), 7));
-						aktualisiereVector((String)tabelleaktrez.getValueAt(tabelleaktrez.getSelectedRow(), idInTable));
+                    if ( !vorlage.bHasSelfDisposed ) {  // wenn es nur eine Disziplin gibt, hat sich der Auswahl-Dialog bereits selbst disposed !
+                        vorlage.dispose();
+                    }
+                    vorlage= null;
+                }
+                if ( strModus.equals("KopiereAngewaehltes") ) {  // Vorschlag von J. Steinhilber integriert: Kopiere das angewählte Rezept
+                    String rezToCopy = AktuelleRezepte.getActiveRezNr();
+                    vecKopiervorlage = ((Vector<String>)SqlInfo.holeSatz( "verordn", " * ", "REZ_NR = '" +
+                                        rezToCopy + "'", Arrays.asList(new String[] {}) ));
 
-						//Icon	
-//						dtblm.setValueAt(Reha.thisClass.patpanel.imgzuzahl[Integer.parseInt((String)Reha.thisClass.patpanel.vecaktrez.get(39))], 
+                }
+                if ( strModus.equals("KopiereHistorienRezept") ) {
+                    String rezToCopy = null;
+                    if( (rezToCopy = Historie.getActiveRezNr()) != null){
+                        vecKopiervorlage = ((Vector<String>)SqlInfo.holeSatz( "lza", " * ", "REZ_NR = '" +
+                                rezToCopy + "'", Arrays.asList(new String[] {}) ));
+
+                    }else{
+                        JOptionPane.showMessageDialog(null, "Kein Rezept in der Historie ausgewählt");
+                    }
+                }
+                // ^^^ Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
+                @SuppressWarnings("unchecked")
+                RezNeuanlage2021 rezNeuAn = new RezNeuanlage2021((Vector<String>)vecKopiervorlage.clone(),lneu,feldname);
+                neuRez.getSmartTitledPanel().setContentContainer( rezNeuAn );
+                //if ( rezNeuAn.strKopiervorlage.isEmpty() )
+                if ( vecKopiervorlage.size() < 1 )
+                    neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage");
+                else 			// Lemmi 20110101: Kopieren des letzten Rezepts des selben Patienten bei Rezept-Neuanlage
+                    neuRez.getSmartTitledPanel().setTitle("Rezept Neuanlage als Kopie von <-- " + vecKopiervorlage.get(1) );
+
+            }else{  // Lemmi Doku: Hier wird ein existierendes Rezept mittels Doppelklick geöffnet:
+                neuRez.getSmartTitledPanel().setContentContainer(new RezNeuanlage2021(Reha.instance.patpanel.vecaktrez,lneu,feldname));
+                neuRez.getSmartTitledPanel().setTitle("editieren Rezept ---> "+Reha.instance.patpanel.vecaktrez.get(1));
+            }
+            neuRez.getSmartTitledPanel().getContentContainer().setName("RezeptNeuanlage");
+            neuRez.setName("RezeptNeuanlage");
+            neuRez.setModal(true);
+            neuRez.setLocationRelativeTo(null);
+            neuRez.pack();
+            neuRez.setVisible(true);
+
+            neuRez.dispose();
+            neuRez = null;
+            pinPanel = null;
+            if(!lneu){
+                if(tabelleaktrez.getRowCount()>0){
+                    try{
+                        boolean hmr2021 =  Reha.instance.patpanel.vecaktrez.get(81).equals("T");
+                        RezeptDaten.feddisch = false;
+                        //System.out.println("rufe Rezeptnummer "+(String)tabaktrez.getValueAt(tabaktrez.getSelectedRow(), 7));
+                        aktualisiereVector((String)tabelleaktrez.getValueAt(tabelleaktrez.getSelectedRow(), idInTable));
+
+                        //Icon
+//						dtblm.setValueAt(Reha.thisClass.patpanel.imgzuzahl[Integer.parseInt((String)Reha.thisClass.patpanel.vecaktrez.get(39))],
 //											tabaktrez.getSelectedRow(),1);
-						int iZzStat = Integer.parseInt((String)Reha.instance.patpanel.vecaktrez.get(39));
-						String sRezNr = (String)Reha.instance.patpanel.vecaktrez.get(1);
-						ZZStat iconKey =  stammDatenTools.ZuzahlTools.getIconKey (iZzStat, sRezNr);
-						setZuzahlImageActRow(iconKey,sRezNr);
+                        int iZzStat = Integer.parseInt((String)Reha.instance.patpanel.vecaktrez.get(39));
+                        String sRezNr = (String)Reha.instance.patpanel.vecaktrez.get(1);
+                        ZZStat iconKey =  stammDatenTools.ZuzahlTools.getIconKey (iZzStat, sRezNr);
+                        setZuzahlImageActRow(iconKey,sRezNr);
 
-						//IndiSchlüssel
-							dtblm.setValueAt(Reha.instance.patpanel.vecaktrez.get(44), tabelleaktrez.getSelectedRow(), 7);
-						
-						tabelleaktrez.validate();
-						tabelleaktrez.repaint();
-					}catch(Exception ex){
-						JOptionPane.showMessageDialog(null,"Fehler in der Darstellung eines abgespeicherten Rezeptes");
-						ex.printStackTrace();
-					}
-				}
-			}else{
-				if(aktPanel.equals("leerPanel")){
-					try{
-						holeRezepte(Reha.instance.patpanel.patDaten.get(29),"");
-					}catch(Exception ex){
-						ex.printStackTrace();
-						JOptionPane.showMessageDialog(null,"Fehler in holeRezepte\n"+ex.getMessage());
-					}
-				}else{
-					try{
-						holeRezepte(Reha.instance.patpanel.patDaten.get(29),this.sRezNumNeu);
-					}catch(Exception ex){
-						ex.printStackTrace();
-						JOptionPane.showMessageDialog(null,"Fehler in holeRezepte\n"+ex.getMessage());
-					}
-				}
-			}
-			}catch(Exception ex){
-				ex.printStackTrace();
-				JOptionPane.showMessageDialog(null, "Fehler beim Öffnen des Rezeptfensters");
-			}
-			////System.out.println("Pat Neu/Andern ist disposed");
-			neuDlgOffen = false;
-			
-		}catch(Exception ex){
-			JOptionPane.showMessageDialog(null,"Fehler bei der Rezeptneuanlage\n"+ex.getMessage().toString());
-		}
+                        //IndiSchlüssel
+                            dtblm.setValueAt(Reha.instance.patpanel.vecaktrez.get(44), tabelleaktrez.getSelectedRow(), 7);
 
-	}
-    
+                        tabelleaktrez.validate();
+                        tabelleaktrez.repaint();
+                    }catch(Exception ex){
+                        JOptionPane.showMessageDialog(null,"Fehler in der Darstellung eines abgespeicherten Rezeptes");
+                        ex.printStackTrace();
+                    }
+                }
+            }else{
+                if(aktPanel.equals("leerPanel")){
+                    try{
+                        holeRezepte(Reha.instance.patpanel.patDaten.get(29),"");
+                    }catch(Exception ex){
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null,"Fehler in holeRezepte\n"+ex.getMessage());
+                    }
+                }else{
+                    try{
+                        holeRezepte(Reha.instance.patpanel.patDaten.get(29),this.sRezNumNeu);
+                    }catch(Exception ex){
+                        ex.printStackTrace();
+                        JOptionPane.showMessageDialog(null,"Fehler in holeRezepte\n"+ex.getMessage());
+                    }
+                }
+            }
+            }catch(Exception ex){
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Fehler beim Öffnen des Rezeptfensters");
+            }
+            ////System.out.println("Pat Neu/Andern ist disposed");
+            neuDlgOffen = false;
+
+        }catch(Exception ex){
+            JOptionPane.showMessageDialog(null,"Fehler bei der Rezeptneuanlage\n"+ex.getMessage().toString());
+        }
+
+    }
+
     public Vector<String> getModelTermine() {
         return (Vector<String>) dtermm.getDataVector()
                                       .clone();
@@ -3418,8 +3411,8 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
         Reha.instance.progLoader.Dta301Fenster(1, Reha.instance.patpanel.vecaktrez.get(1));
         // Hier der Aufruf der Fallsteuerungs .JAR
     }
-    
-    
+
+
 
     // Lemmi 20101218: kopiert aus AbrechnungRezept.java und die
     // Datenherkunfts-Variablen verändert bzw. angepasst.

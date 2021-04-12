@@ -2,6 +2,7 @@ package abrechnung;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -188,7 +189,7 @@ public class AbrechnungPrivat extends JXDialog {
         setContentPane(jtp);
         setResizable(false);
         rtp = new RehaTPEventClass();
-        rtp.addRehaTPEventListener(e -> FensterSchliessen());
+        rtp.addRehaTPEventListener(e -> fensterSchliessen());
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
@@ -322,26 +323,22 @@ public class AbrechnungPrivat extends JXDialog {
     }
 
     private void doRgRechnungPrepare() {
-        // boolean privat = true;
         if (privatRechnungBtn.isSelected()) {
             doPrivat();
         } else {
             doBGE();
         }
         posteAktualisierung(patDaten.get(29));
-        FensterSchliessen();
+        fensterSchliessen();
     }
 
-    private void posteAktualisierung(String patid) {
-        final String xpatid = patid;
+    private void posteAktualisierung(final String patid) {
         new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground() throws Exception {
-                String s1 = "#PATSUCHEN";
-                String s2 = xpatid;
                 PatStammEvent pEvt = new PatStammEvent(this);
                 pEvt.setPatStammEvent("PatSuchen");
-                pEvt.setDetails(s1, s2, "");
+                pEvt.setDetails("#PATSUCHEN", patid, "");
                 PatStammEventClass.firePatStammEvent(pEvt);
                 return null;
             }
@@ -1425,12 +1422,12 @@ public class AbrechnungPrivat extends JXDialog {
             if ("korrektur".equals(cmd)) {
                 rueckgabe = KORREKTUR;
                 // doKorrektur();
-                FensterSchliessen();
+                fensterSchliessen();
                 return;
             }
             if ("abbrechen".equals(cmd)) {
                 rueckgabe = ABBRECHEN;
-                FensterSchliessen();
+                fensterSchliessen();
             }
             if ("ok".equals(cmd)) {
                 rueckgabe = OK;
@@ -1445,13 +1442,13 @@ public class AbrechnungPrivat extends JXDialog {
         public void keyPressed(KeyEvent arg0) {
             if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
                 rueckgabe = ABBRECHEN;
-                FensterSchliessen();
+                fensterSchliessen();
                 return;
             }
             if (arg0.getKeyCode() == KeyEvent.VK_ENTER && (JComponent) arg0.getSource() instanceof JButton) {
                 if ("abbrechen".equals(((JComponent) arg0.getSource()).getName())) {
                     rueckgabe = ABBRECHEN;
-                    FensterSchliessen();
+                    fensterSchliessen();
                 } else if ("korrektur".equals(((JComponent) arg0.getSource()).getName())) {
                     doKorrektur();
                 } else if ("ok".equals(((JComponent) arg0.getSource()).getName())) {
@@ -1463,7 +1460,7 @@ public class AbrechnungPrivat extends JXDialog {
 
           };
 
-    private void FensterSchliessen() {
+    private void fensterSchliessen() {
         setVisible(false);
         dispose();
     }
@@ -1607,6 +1604,14 @@ public class AbrechnungPrivat extends JXDialog {
             }
             OOTools.printAndClose(textDocument, exemplare);
         }
+    }
+
+    public int showAndWait(Point pt) {
+        pt.move(-75, 30);
+        pack();
+        setModal(true);
+        setVisible(true);
+        return rueckgabe;
     }
 
     private ChangeListener cl = new ChangeListener() {
