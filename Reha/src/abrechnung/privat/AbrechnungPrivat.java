@@ -1,4 +1,4 @@
-package abrechnung;
+package abrechnung.privat;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -143,21 +143,21 @@ public class AbrechnungPrivat extends JXDialog {
 
     private JRtaRadioButton privatRechnungBtn;
 
-    public AbrechnungPrivat(JXFrame owner, String titel, int rueckgabe, int preisgruppe) {
-        this(owner, titel, rueckgabe, preisgruppe, (JComponent) Reha.getThisFrame()
-                                                                    .getGlassPane(),
-                Reha.instance.patpanel.vecaktrez.get(1),
+    public AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe) {
+        this(owner, titel, preisgruppe, (JComponent) Reha.getThisFrame()
+                                                                    .getGlassPane(), Reha.instance.patpanel.vecaktrez.get(1),
                 SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1)))
                                           .get(preisgruppe - 1),
-                Reha.instance.patpanel.patDaten.get(5), Reha.instance.patpanel.patDaten.get(66),
-                Reha.instance.patpanel.vecaktrez, Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(),
-                SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung);
+                Reha.instance.patpanel.patDaten.get(5),
+                Reha.instance.patpanel.patDaten.get(66), Reha.instance.patpanel.vecaktrez,
+                Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(), SystemConfig.hmAbrechnung.get("hmpriformular"),
+                SystemConfig.hmAbrechnung, SystemPreislisten.hmPreisGruppen.get(StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))));
     }
 
-    AbrechnungPrivat(JXFrame owner, String titel, int rueckgabe, int preisgruppe, JComponent glasspane,
-            String rezeptNr, Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID,
-            Vector<String> aktuellesRezeptVector, Vector<String> aktuellerPatientDaten, String aktIk,
-            String privatRgFormular, HashMap<String, String> hmAbrechnung) {
+    AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe, JComponent glasspane, String rezeptNr,
+            Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID, Vector<String> aktuellesRezeptVector,
+            Vector<String> aktuellerPatientDaten, String aktIk, String privatRgFormular,
+            HashMap<String, String> hmAbrechnung,  Vector<String> preisgruppenFuerDiszi) {
         super(owner, glasspane);
         this.hmAbrechnung = hmAbrechnung;
         this.privatRgFormular = privatRgFormular;
@@ -169,7 +169,6 @@ public class AbrechnungPrivat extends JXDialog {
         this.aktIk = aktIk;
         disziplin = RezTools.getDisziplinFromRezNr(rezeptNr);
         this.preisliste = preisliste;
-        this.rueckgabe = rueckgabe;
         this.preisgruppe = preisgruppe;
         setUndecorated(true);
         setName("Privatrechnung");
@@ -178,7 +177,7 @@ public class AbrechnungPrivat extends JXDialog {
         mymouse = new DragWin(this);
         jtp.addMouseListener(mymouse);
         jtp.addMouseMotionListener(mymouse);
-        jtp.setContentContainer(getContent());
+        jtp.setContentContainer(getContent(preisgruppenFuerDiszi));
         jtp.setTitleForeground(Color.WHITE);
         jtp.setTitle(titel);
         pinPanel = new PinPanel();
@@ -193,15 +192,15 @@ public class AbrechnungPrivat extends JXDialog {
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
     }
 
-    private JXPanel getContent() {
+    private JXPanel getContent(Vector<String> preisgruppenFuerDiszi) {
         content = new JXPanel(new BorderLayout());
-        content.add(getFields(), BorderLayout.CENTER);
+        content.add(getFields(preisgruppenFuerDiszi), BorderLayout.CENTER);
         content.add(getButtons(), BorderLayout.SOUTH);
         content.addKeyListener(kl);
         return content;
     }
 
-    private JXPanel getFields() {
+    private JXPanel getFields(Vector<String> preisgruppenFuerDiszi) {
         JXPanel pan = new JXPanel();
         // 1 2 3 4 5 6 7
         FormLayout lay = new FormLayout("20dlu,fill:0:grow(0.5),p,fill:0:grow(0.5),20dlu",
@@ -223,7 +222,7 @@ public class AbrechnungPrivat extends JXDialog {
         lab = new JLabel("Preisgruppe wählen:");
         pan.add(lab, cc.xy(3, 6));
 
-        jcmb = new JRtaComboBox(SystemPreislisten.hmPreisGruppen.get(StringTools.getDisziplin(rezeptNummer)));
+        jcmb = new JRtaComboBox(preisgruppenFuerDiszi);
         jcmb.setSelectedIndex(this.preisgruppe - 1);
         this.aktGruppe = this.preisgruppe - 1;
         jcmb.setActionCommand("neuertarif");
@@ -667,7 +666,7 @@ public class AbrechnungPrivat extends JXDialog {
     }
 
     protected void doUebertrag() {
-        String rez_nr = String.valueOf(rezeptNummer);
+        String rez_nr = rezeptNummer;
         boolean wasSuccessfullyMoved = SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
                 Arrays.asList(new String[] { "id" }));
         if (wasSuccessfullyMoved) {
@@ -722,7 +721,7 @@ public class AbrechnungPrivat extends JXDialog {
         try {
             preisdatum = SystemPreislisten.hmNeuePreiseAb.get(this.disziplin)
                                                          .get(this.aktGruppe);
-            if ("".equals(preisdatum)) {
+            if (preisdatum ==null || "".equals(preisdatum)) {
                 preisregel = 0;
                 wechselcheck = false;
             } else {
@@ -1385,10 +1384,10 @@ public class AbrechnungPrivat extends JXDialog {
 
     private void reglePrivat() {
         holePrivat();
-        adr1.setText("".equals(hmAdresse.get("<pri1>")
-                                        .trim()) ? " " : hmAdresse.get("<pri1>"));
-        adr2.setText("".equals(hmAdresse.get("<pri2>")
-                                        .trim()) ? " " : hmAdresse.get("<pri2>"));
+        adr1.setText(hmAdresse.get("<pri1>")
+                                        .trim().isEmpty() ? " " : hmAdresse.get("<pri1>"));
+        adr2.setText(hmAdresse.get("<pri2>")
+                                        .trim().isEmpty() ? " " : hmAdresse.get("<pri2>"));
     }
 
     private ActionListener neuerTarifAL = new ActionListener() {

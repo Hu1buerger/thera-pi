@@ -1,4 +1,4 @@
-package abrechnung;
+package abrechnung.privat;
 
 import java.io.FileNotFoundException;
 import java.sql.SQLException;
@@ -14,12 +14,15 @@ import org.junit.Test;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import CommonTools.SqlInfo;
+import CommonTools.StringTools;
 import ag.ion.bion.officelayer.application.OfficeApplicationException;
+import mandant.Mandant;
 import office.OOService;
 import sql.DatenquellenFactory;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
+import umfeld.Betriebsumfeld;
 
 public class AbrechnungPrivatTest {
 
@@ -36,37 +39,35 @@ public class AbrechnungPrivatTest {
 
         new SqlInfo().setConnection(new DatenquellenFactory(aktik).createConnection());
 
-        OOService.setLibpath(libPath, ooPath);
+       OOService.setLibpath(libPath, ooPath);
+       new OOService().start();
+
 
         AktuelleRezepte.tabelleaktrez = new JXTable();
         Data data1 = new Data(2, "1728", "ER1516", "260", "T");
     //   data = HM0000;
         Data data = new Data(10, "1704", "ER1411", "30", "T");
-        Vector<String> rezeptVector = (SqlInfo.holeSatz("verordn", " * ", "id = '" + data.rezeptDBId + "'",
-                Arrays.asList(new String[] {})));
+        Vector<String> rezeptVector = SqlInfo.holeSatz("verordn", " * ", "id = '" + data.rezeptDBId + "'");
 
-        Vector<String> patientenDatenVector = SqlInfo.holeSatz("pat5", " * ", "id ='" + data.patDBId + "'",
-                Arrays.asList(new String[] {}));
+        Vector<String> patientenDatenVector = SqlInfo.holeSatz("pat5", " * ", "id ='" + data.patDBId + "'");
 
         String disziplinFromRezNr = RezTools.getDisziplinFromRezNr(data.rezeptNummer);
-        int rueckgabeIN = 0;
 
         SystemPreislisten.ladepreise(disziplinFromRezNr, aktik);
         Vector<Vector<String>> preisliste = SystemPreislisten.hmPreise.get(disziplinFromRezNr)
                                                                       .get(data.preisgruppe - 1);
-
+new Betriebsumfeld(new Mandant("123456789", "testmandant"));
         SystemConfig.AbrechnungParameter();
         HashMap<String, String> hmAbrechnung = SystemConfig.hmAbrechnung;
         hmAbrechnung.put("hmallinoffice", "1");
 
-        AbrechnungPrivat rg = new AbrechnungPrivat(frame, "privateabrechnung", rueckgabeIN, data.preisgruppe,
-                (JComponent) frame.getGlassPane(), data.rezeptNummer, preisliste, data.hatAbweichendeAdresse,
-                data.patDBId, rezeptVector, patientenDatenVector, "123456789", "HMRechnungPrivat.ott", hmAbrechnung) {
+        HashMap<String, Vector<String>> hmPreisGruppen = SystemPreislisten.hmPreisGruppen;
+        AbrechnungPrivat rg = new AbrechnungPrivat(frame, "privateabrechnung", data.preisgruppe, (JComponent) frame.getGlassPane(),
+                data.rezeptNummer, preisliste, data.hatAbweichendeAdresse, data.patDBId,
+                rezeptVector, patientenDatenVector, "123456789", "HMRechnungPrivat.ott", hmAbrechnung, hmPreisGruppen.get(StringTools.getDisziplin(data.rezeptNummer))) {
         protected void doUebertrag() {};
 
-        }
-
-                ;
+        };
 
         rg.setLocationRelativeTo(null);
         rg.pack();

@@ -66,10 +66,10 @@ import CommonTools.StringTools;
 import CommonTools.ini.INITool;
 import CommonTools.ini.Settings;
 import Suchen.ICDrahmen;
-import abrechnung.AbrechnungPrivat;
 import abrechnung.AbrechnungRezept;
 import abrechnung.Disziplinen;
 import abrechnung.RezeptGebuehrRechnung;
+import abrechnung.privat.AbrechnungPrivat;
 import commonData.Rezeptvector;
 import dialoge.InfoDialog;
 import dialoge.InfoDialogTerminInfo;
@@ -2708,16 +2708,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
     private void privatRechnung() {
         try {
             // Preisgruppe ermitteln
-            int preisgruppe = 0;
-            KasseTools.constructKasseHMap(Reha.instance.patpanel.vecaktrez.get(37));
-            try {
-                preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41));
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(null, "Fehler in Preisgruppe " + ex.getMessage());
-                ex.printStackTrace();
-            }
+            int preisgruppe = preisgruppeErmitteln();
             AbrechnungPrivat abrechnungPrivat = new AbrechnungPrivat(Reha.getThisFrame(),
-                    "Privat-/BG-/Nachsorge-Rechnung erstellen", -1, preisgruppe);
+                    "Privat-/BG-/Nachsorge-Rechnung erstellen", preisgruppe);
 
             int rueckgabe = abrechnungPrivat.showAndWait(getLocationOnScreen());
             if (rueckgabe == AbrechnungPrivat.KORREKTUR) {
@@ -2729,6 +2722,18 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
             ex.printStackTrace();
         }
 
+    }
+
+    private int preisgruppeErmitteln() {
+        int preisgruppe = 0;
+        KasseTools.constructKasseHMap(Reha.instance.patpanel.vecaktrez.get(37));
+        try {
+            preisgruppe = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(41));
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Fehler in Preisgruppe " + ex.getMessage());
+            ex.printStackTrace();
+        }
+        return preisgruppe;
     }
 
     /*****************************************************/

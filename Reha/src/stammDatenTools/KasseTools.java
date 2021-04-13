@@ -1,6 +1,7 @@
 package stammDatenTools;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Vector;
 
@@ -24,9 +25,8 @@ public class KasseTools {
                 return;
             }
 
-            List<String> nichtlesen = Arrays.asList(new String[] { "" });
             Vector<String> vec = SqlInfo.holeSatz("kass_adr",
-                    "kassen_nam1,kassen_nam2,strasse,plz,ort,telefon,fax,email1", "id='" + xid + "'", nichtlesen);
+                    "kassen_nam1,kassen_nam2,strasse,plz,ort,telefon,fax,email1", "id='" + xid + "'", Collections.<String>emptyList());
             SystemConfig.hmAdrKDaten.put("<Kadr1>", vec.get(0)
                                                        .trim());
             SystemConfig.hmAdrKDaten.put("<Kadr2>", vec.get(1)

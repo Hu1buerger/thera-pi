@@ -11,6 +11,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Vector;
@@ -137,6 +139,10 @@ public class SqlInfo {
             logger.error("holesimpleID", e);
         }
         return retid;
+    }
+
+    public static Vector<String> holeSatz(String string, String string2, String string3) {
+        return holeSatz(string, string2, string3,Collections.<String>emptyList());
     }
 
     public static Vector<String> holeSatz(String tabelle, String felder, String kriterium, List<?> ausschliessen) {
@@ -648,4 +654,6 @@ public class SqlInfo {
 
         return true;
     }
+
+
 }
