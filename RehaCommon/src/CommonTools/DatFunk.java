@@ -61,6 +61,16 @@ public class DatFunk {
 
     }
 
+    /** calculates the number of days between sdatum1 and sdatum2.
+     * @param sdatum1 string of the form "d.M.yyyy"
+     * @param sdatum2 string of the form "d.M.yyyy"
+     * @return positiv number if sdatum1 is before sdatum2.<P>
+     *  0 if sdatum1 and sdatum2 are the same date.<P>
+     * negativ number, if sdatum1 is after sdatum2.
+     *
+     * @throws NumberformatException
+     *
+     */
     public static long TageDifferenz(String sdatum1, String sdatum2) {
         LocalDate datum1 = LocalDate.parse(sdatum1, inFormatter);
         LocalDate datum2 = LocalDate.parse(sdatum2, inFormatter);
@@ -91,7 +101,7 @@ public class DatFunk {
      * converts a given date into its long value (milliseconds since 01011970)
      *
      * if the date is separated with hyphons it needs to be in format yyyy-M-d
-     * 
+     *
      * @param sdatum
      * @return
      */
