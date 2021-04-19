@@ -67,8 +67,10 @@ import office.OOTools;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
+import systemEinstellungen.TerminListe;
 import umfeld.Betriebsumfeld;
 
+import static abrechnung.privat.PreisanwendenStrategie.*;
 public class AbrechnungPrivat extends JXDialog {
     private final class AbrechnungHausbesuch {
         final boolean mitHausBesuch;
@@ -426,7 +428,7 @@ public class AbrechnungPrivat extends JXDialog {
             aktRechnung = Integer.toString(SqlInfo.erzeugeNummer("rnr"));
             hmAdresse.put("<pri6>", aktRechnung);
 
-            System.out.println(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
+            LOGGER.info(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
             ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
             starteErsetzen( textDocument );
             startePositionen(textDocument);
@@ -761,12 +763,12 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleAlt;
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleNeu;
                 }
             } else if (preisregel == 2 && wechselcheck) {
                 // Rezeptdatum
@@ -774,25 +776,25 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleAlt;
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleNeu;
                 }
             } else if (preisregel == 3 && wechselcheck) {
                 // beliebige Behandlung
                 preisanwenden[0] = true;
                 preisanwenden[1] = false;
                 preisanwenden[2] = false;
-                preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                preisstrategie=alleAlt;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) >= 0) {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
                         preisanwenden[2] = false;
-                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                        preisstrategie=alleNeu;
                         break;
                     }
                 }
@@ -802,7 +804,7 @@ public class AbrechnungPrivat extends JXDialog {
                 preisanwenden[0] = false;
                 preisanwenden[1] = false;
                 preisanwenden[2] = true;
-                preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                preisstrategie=splitten;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) < 0) {
                         splitpreise[0] += 1;
@@ -814,12 +816,12 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleAlt;
                 } else if (splitpreise[1] == max) {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                    preisstrategie=alleNeu;
                 } else if ((splitpreise[0] != 0 && splitpreise[1] != 0) || wechselcheck) {
                     doNeuerTarifMitSplitting();
                     if (abrechnungHausbesuch.mitHausBesuch) {
@@ -843,12 +845,12 @@ public class AbrechnungPrivat extends JXDialog {
                         preisanwenden[0] = true;
                         preisanwenden[1] = false;
                         preisanwenden[2] = false;
-                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                        preisstrategie=alleAlt;
                     } else {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
                         preisanwenden[2] = false;
-                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
+                        preisstrategie=alleNeu;
                     }
 
                 }
