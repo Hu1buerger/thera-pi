@@ -127,7 +127,7 @@ public class RezTools {
         // String aktpos = "";
         for (int i = 1; i < 5; i++) {
             if (!("".equals(rezvec.get(i).trim()))) {
-            	positionen.add(String.valueOf(rezvec.get(i)));
+                positionen.add(String.valueOf(rezvec.get(i)));
                 bvorrangig = isVorrangigAndExtra(rezvec.get(i + 4), xreznr.substring(0, 2));
                 vorrangig.add(Boolean.valueOf(bvorrangig[0]));
                 einzelerlaubt.add(Boolean.valueOf(bvorrangig[1]));
@@ -141,11 +141,11 @@ public class RezTools {
                 }
             }
             else {
-            	positionen.add("./.");
-            	vorrangig.add(true);
-            	anzahl.add(0);
-            	einzelerlaubt.add(false);
-            	doppelpos.add(null);
+                positionen.add("./.");
+                vorrangig.add(true);
+                anzahl.add(0);
+                einzelerlaubt.add(false);
+                doppelpos.add(null);
             }
         }
 
@@ -508,7 +508,7 @@ public class RezTools {
             };
             Collections.sort(tagevec, comparator);
         }
-        return (Vector<Vector<String>>) tagevec.clone();
+        return  tagevec;
     }
 
     public static boolean zweiPositionenBeiHB(String disziplin, String preisgruppe) {
@@ -2637,7 +2637,7 @@ public class RezTools {
                 count = 0;
                 for (i = 0; i < j; i++) {
 
-                	
+
                     if (hMPos.get(i).best) {
                         params[i] = hMPos.get(i).hMPosNr;
                         count++;
@@ -2646,7 +2646,7 @@ public class RezTools {
                 if (count == 0) {
                     jetztVoll = true;
                 }
-                
+
                 termbuf.append(TermineErfassen.macheNeuTermin2(params[0] != null ? params[0] : "",
                         params[1] != null ? params[1] : "", params[2] != null ? params[2] : "",
                         params[3] != null ? params[3] : "", xkollege, datum));
