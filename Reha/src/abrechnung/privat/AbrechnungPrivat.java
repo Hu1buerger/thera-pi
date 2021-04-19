@@ -13,8 +13,7 @@ import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Vector;
 
@@ -33,6 +32,8 @@ import org.jdesktop.swingx.JXDialog;
 import org.jdesktop.swingx.JXFrame;
 import org.jdesktop.swingx.JXPanel;
 import org.jdesktop.swingx.JXTitledPanel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.therapi.reha.patient.AktuelleRezepte;
 
 import com.jgoodies.forms.layout.CellConstraints;
@@ -69,6 +70,16 @@ import systemEinstellungen.SystemPreislisten;
 import umfeld.Betriebsumfeld;
 
 public class AbrechnungPrivat extends JXDialog {
+    private final class AbrechnungHausbesuch {
+        final boolean mitHausBesuch;
+        final boolean einzelnAbrechenbar;
+        public AbrechnungHausbesuch(boolean mitHausBesuch, boolean einzelnabrechenbar) {
+            this.mitHausBesuch = mitHausBesuch;
+            this.einzelnAbrechenbar = einzelnabrechenbar;
+        }
+    }
+
+    private static final int PREISGRUPPE_BG = 4;
     private static final int OK = 0;
     private static final int ABBRECHEN = -1;
     public static final int KORREKTUR = -2;
@@ -85,7 +96,7 @@ public class AbrechnungPrivat extends JXDialog {
     private JXPanel content;
     private RehaTPEventClass rtp;
     private int preisgruppe;
-    private JRtaComboBox jcmb;
+    private JRtaComboBox preisgruppenfuerDisziCmbBox;
     private JLabel[] labs = { null, null, null, null, null, null, null };
     private JLabel adr1;
     private JLabel adr2;
@@ -97,8 +108,6 @@ public class AbrechnungPrivat extends JXDialog {
 
     private Vector<Vector<String>> preisliste;
 
-    private boolean hausBesuch;
-    private boolean hbEinzeln;
     private Vector<String> originalPos = new Vector<>();
     private Vector<Integer> originalAnzahl = new Vector<>();
     private Vector<Double> einzelPreis = new Vector<>();
@@ -110,9 +119,7 @@ public class AbrechnungPrivat extends JXDialog {
 
     private HashMap<String, String> hmAdresse = new HashMap<>();
     private String aktRechnung = "";
-    private ITextTable textTable;
-    private ITextTable textEndbetrag;
-    private ITextDocument textDocument;
+
     private int aktuellePosition;
     private int patKilometer;
 
@@ -123,8 +130,15 @@ public class AbrechnungPrivat extends JXDialog {
     private boolean wechselcheck;
 
     private int[] splitpreise = { 0, 0 };
-    /** Alle alt, alle neu, splitten. */
+    /** contains information on splitting price strategy.
+     * array of size 3.<p>
+     * [0]  all old prices<p>
+     * [1]  all new prices<p>
+     * [2]  splitting must be applied.
+     */
     private boolean[] preisanwenden = { false, false, false };
+    private PreisanwendenStrategie preisstrategie = PreisanwendenStrategie.examine(preisanwenden);
+
     private Vector<Integer> hbvec = new Vector<>();
     private Vector<Integer> kmvec = new Vector<>();
 
@@ -142,6 +156,9 @@ public class AbrechnungPrivat extends JXDialog {
     private HashMap<String, String> hmAbrechnung;
 
     private JRtaRadioButton privatRechnungBtn;
+    private AbrechnungHausbesuch abrechnungHausbesuch;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbrechnungPrivat.class);
 
     public AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe) {
         this(owner, titel, preisgruppe, (JComponent) Reha.getThisFrame()
@@ -222,12 +239,13 @@ public class AbrechnungPrivat extends JXDialog {
         lab = new JLabel("Preisgruppe wählen:");
         pan.add(lab, cc.xy(3, 6));
 
-        jcmb = new JRtaComboBox(preisgruppenFuerDiszi);
-        jcmb.setSelectedIndex(this.preisgruppe - 1);
         this.aktGruppe = this.preisgruppe - 1;
-        jcmb.setActionCommand("neuertarif");
-        jcmb.addActionListener(neuerTarifAL);
-        pan.add(jcmb, cc.xy(3, 8));
+
+        preisgruppenfuerDisziCmbBox = new JRtaComboBox(preisgruppenFuerDiszi);
+        preisgruppenfuerDisziCmbBox.setSelectedIndex(this.aktGruppe);
+        preisgruppenfuerDisziCmbBox.setActionCommand("neuertarif");
+        preisgruppenfuerDisziCmbBox.addActionListener(neuerTarifAL);
+        pan.add(preisgruppenfuerDisziCmbBox, cc.xy(3, 8));
         privatRechnungBtn = new JRtaRadioButton("Formular für Privatrechnung verwenden");
         privatRechnungBtn.addChangeListener(cl);
         pan.add(privatRechnungBtn, cc.xy(3, 10));
@@ -237,7 +255,7 @@ public class AbrechnungPrivat extends JXDialog {
         bg.add(privatRechnungBtn);
         bg.add(kostentraegerBtn);
 
-        if (preisgruppe == 4) {
+        if (preisgruppe == PREISGRUPPE_BG) {
             kostentraegerBtn.setSelected(true);
             regleBGE();
         } else {
@@ -266,12 +284,12 @@ public class AbrechnungPrivat extends JXDialog {
             pan.add(labs[3], cc.xy(3, 20));
         }
         // Mit Hausbesuch
-        if ("T".equals(vecaktrez.get(43))) {
-            // Hausbesuch voll (Einzeln) abrechnen
-            hausBesuch = true;
-            if ("T".equals(vecaktrez.get(61))) {
-                hbEinzeln = true;
-            }
+
+        abrechnungHausbesuch = new AbrechnungHausbesuch("T".equals(vecaktrez.get(43)),"T".equals(vecaktrez.get(61)));
+
+
+        if (abrechnungHausbesuch.mitHausBesuch) {
+
             labs[4] = new JLabel();
             labs[4].setForeground(Color.RED);
             pan.add(labs[4], cc.xy(3, 22));
@@ -298,26 +316,26 @@ public class AbrechnungPrivat extends JXDialog {
 
         CellConstraints cc = new CellConstraints();
 
-        JButton okBtn = macheBut("Ok", "ok");
+        JButton okBtn = macheBut("Ok", "ok", al);
         pan.add(okBtn, cc.xy(3, 3));
         okBtn.addKeyListener(kl);
 
-        JButton korrekturBtn = macheBut("Korrektur", "korrektur");
+        JButton korrekturBtn = macheBut("Korrektur", "korrektur", al);
         pan.add(korrekturBtn, cc.xy(5, 3));
         korrekturBtn.addKeyListener(kl);
 
-        JButton abbrechnenBtn = macheBut("abbrechen", "abbrechen");
+        JButton abbrechnenBtn = macheBut("abbrechen", "abbrechen", al);
         pan.add(abbrechnenBtn, cc.xy(7, 3));
         abbrechnenBtn.addKeyListener(kl);
 
         return pan;
     }
 
-    private JButton macheBut(String titel, String cmd) {
+    private JButton macheBut(String titel, String cmd, ActionListener actionListener) {
         JButton but = new JButton(titel);
         but.setName(cmd);
         but.setActionCommand(cmd);
-        but.addActionListener(al);
+        but.addActionListener(actionListener);
         return but;
     }
 
@@ -378,7 +396,14 @@ public class AbrechnungPrivat extends JXDialog {
         try {
             Thread.sleep(50);
 
-            if (!hatPatientAbweichendeAdresse()) {
+            if (hatPatientAbweichendeAdresse()) {
+                String[] adressParams = AdressTools.holeAbweichendeAdresse(patDaten.get(66));
+                hmAdresse.put("<pri1>", adressParams[0]);
+                hmAdresse.put("<pri2>", adressParams[1]);
+                hmAdresse.put("<pri3>", adressParams[2]);
+                hmAdresse.put("<pri4>", adressParams[3]);
+                hmAdresse.put("<pri5>", adressParams[4]);
+            } else {
                 hmAdresse.put("<pri1>", SystemConfig.hmAdrPDaten.get("<Panrede>"));
                 hmAdresse.put("<pri2>", SystemConfig.hmAdrPDaten.get("<Padr1>"));
                 hmAdresse.put("<pri3>", SystemConfig.hmAdrPDaten.get("<Padr2>"));
@@ -397,23 +422,16 @@ public class AbrechnungPrivat extends JXDialog {
                     JOptionPane.showMessageDialog(null, meldung);
                     return;
                 }
-            } else {
-                String[] adressParams = AdressTools.holeAbweichendeAdresse(patDaten.get(66));
-                hmAdresse.put("<pri1>", adressParams[0]);
-                hmAdresse.put("<pri2>", adressParams[1]);
-                hmAdresse.put("<pri3>", adressParams[2]);
-                hmAdresse.put("<pri4>", adressParams[3]);
-                hmAdresse.put("<pri5>", adressParams[4]);
             }
             aktRechnung = Integer.toString(SqlInfo.erzeugeNummer("rnr"));
             hmAdresse.put("<pri6>", aktRechnung);
 
             System.out.println(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
-            starteDokument(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
-            starteErsetzen();
-            startePositionen();
+            ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
+            starteErsetzen( textDocument );
+            startePositionen(textDocument);
 
-            starteDrucken();
+            starteDrucken(textDocument);
 
             if (Reha.vollbetrieb) {
                 doFaktura("privat");
@@ -424,7 +442,7 @@ public class AbrechnungPrivat extends JXDialog {
             }
             doTabelle();
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("Something bad happens here", e);
         }
     }
 
@@ -439,12 +457,12 @@ public class AbrechnungPrivat extends JXDialog {
             aktRechnung = Integer.toString(SqlInfo.erzeugeNummer("rnr"));
             hmAdresse.put("<pri6>", aktRechnung);
 
-            starteDokument(Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/"
+            ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/"
                     + SystemConfig.hmAbrechnung.get("hmbgeformular"));
-            starteErsetzen();
-            startePositionen();
+            starteErsetzen(textDocument);
+            startePositionen(textDocument);
 
-            starteDrucken();
+            starteDrucken(textDocument);
 
             if (Reha.vollbetrieb) {
                 doFaktura("bge");
@@ -455,7 +473,7 @@ public class AbrechnungPrivat extends JXDialog {
             }
             doTabelle();
         } catch (Exception e) {
-            e.printStackTrace();
+             LOGGER.error("Something bad happens here", e);
         }
     }
 
@@ -716,6 +734,8 @@ public class AbrechnungPrivat extends JXDialog {
         preisanwenden[0] = false;
         preisanwenden[1] = true;
         preisanwenden[2] = false;
+
+        preisstrategie = PreisanwendenStrategie.alleNeu;
         preisliste = SystemPreislisten.hmPreise.get(this.disziplin)
                                                .get(this.aktGruppe);
         try {
@@ -740,31 +760,39 @@ public class AbrechnungPrivat extends JXDialog {
                 if (DatFunk.TageDifferenz(preisdatum, tage.get(0)) < 0) {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
+                    preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
+                    preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 }
-                preisanwenden[2] = false;
             } else if (preisregel == 2 && wechselcheck) {
                 // Rezeptdatum
                 if (DatFunk.TageDifferenz(preisdatum, DatFunk.sDatInDeutsch(vecaktrez.get(2))) < 0) {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
+                    preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
+                    preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 }
-                preisanwenden[2] = false;
             } else if (preisregel == 3 && wechselcheck) {
                 // beliebige Behandlung
                 preisanwenden[0] = true;
                 preisanwenden[1] = false;
                 preisanwenden[2] = false;
+                preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) >= 0) {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
                         preisanwenden[2] = false;
+                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                         break;
                     }
                 }
@@ -774,6 +802,7 @@ public class AbrechnungPrivat extends JXDialog {
                 preisanwenden[0] = false;
                 preisanwenden[1] = false;
                 preisanwenden[2] = true;
+                preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) < 0) {
                         splitpreise[0] += 1;
@@ -785,13 +814,15 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 } else if (splitpreise[1] == max) {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
+                    preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                 } else if ((splitpreise[0] != 0 && splitpreise[1] != 0) || wechselcheck) {
                     doNeuerTarifMitSplitting();
-                    if (hausBesuch) {
+                    if (abrechnungHausbesuch.mitHausBesuch) {
                         analysiereHausbesuchMitSplitting();
                     }
                     for (int i = 0; i < originalAnzahl.size(); i++) {
@@ -811,11 +842,15 @@ public class AbrechnungPrivat extends JXDialog {
                     if (splitpreise[0] > 0) {
                         preisanwenden[0] = true;
                         preisanwenden[1] = false;
+                        preisanwenden[2] = false;
+                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                     } else {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
+                        preisanwenden[2] = false;
+                        preisstrategie=PreisanwendenStrategie.examine(preisanwenden);
                     }
-                    preisanwenden[2] = false;
+
                 }
             }
         } catch (Exception ex) {
@@ -940,7 +975,7 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[3].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
-        if (hausBesuch) {
+        if (abrechnungHausbesuch.mitHausBesuch) {
             analysiereHausbesuch();
         }
 
@@ -959,12 +994,12 @@ public class AbrechnungPrivat extends JXDialog {
     }
 
     private void analysiereHausbesuch() {
-        this.aktGruppe = jcmb.getSelectedIndex();
+        this.aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
         labs[5].setText("");
         /* Hausbesuch voll abrechnen */
         int hbanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(vecaktrez.get(34))[0];
 
-        if (this.hbEinzeln) {
+        if (abrechnungHausbesuch.einzelnAbrechenbar) {
             String preis = "";
             String pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                      .get(this.aktGruppe)
@@ -1244,7 +1279,7 @@ public class AbrechnungPrivat extends JXDialog {
     }
 
     private void analysiereHausbesuchMitSplitting() {
-        this.aktGruppe = jcmb.getSelectedIndex();
+        this.aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
         labs[5].setText("");
 
         /* Hausbesuch voll abrechnen */
@@ -1254,7 +1289,7 @@ public class AbrechnungPrivat extends JXDialog {
         String preisAlt = "";
         String preisNeu = "";
 
-        if (this.hbEinzeln) {
+        if (abrechnungHausbesuch.einzelnAbrechenbar) {
             althb = splitpreise[0] > hbanzahl ? hbanzahl : splitpreise[0];
             String pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                      .get(this.aktGruppe)
@@ -1371,7 +1406,9 @@ public class AbrechnungPrivat extends JXDialog {
         }
     }
 
-    private void doKorrektur() {
+    private void korrekturReaktion() {
+        rueckgabe = KORREKTUR;
+        fensterSchliessen();
     }
 
     private void regleBGE() {
@@ -1394,7 +1431,7 @@ public class AbrechnungPrivat extends JXDialog {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            aktGruppe = jcmb.getSelectedIndex();
+            aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
             doNeuerTarif();
 
         }
@@ -1405,32 +1442,30 @@ public class AbrechnungPrivat extends JXDialog {
         @Override
         public void actionPerformed(ActionEvent arg0) {
             String cmd = arg0.getActionCommand();
-            if ("privatadresse".equals(cmd)) {
-                reglePrivat();
-                return;
-            }
-            if ("kassendresse".equals(cmd)) {
-                regleBGE();
-                return;
-            }
-            if ("neuertarif".equals(cmd)) {
-                aktGruppe = jcmb.getSelectedIndex();
-                doNeuerTarif();
-                return;
-            }
-            if ("korrektur".equals(cmd)) {
-                rueckgabe = KORREKTUR;
-                // doKorrektur();
-                fensterSchliessen();
-                return;
-            }
-            if ("abbrechen".equals(cmd)) {
-                rueckgabe = ABBRECHEN;
-                fensterSchliessen();
-            }
-            if ("ok".equals(cmd)) {
-                rueckgabe = OK;
-                doRgRechnungPrepare();
+            if (cmd != null) {
+                switch (cmd) {
+
+
+                case "privatadresse":
+                    reglePrivat();
+                    break;
+                case "kassendresse":
+                    regleBGE();
+                    break;
+                case "neuertarif":
+                    aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
+                    doNeuerTarif();
+                    break;
+                case "korrektur":
+                    korrekturReaktion();
+                    break;
+                case "abbrechen":
+                    abbrechenReaktion();
+                    break;
+                case "ok":
+                    okReaktion();
+                    break;
+                }
             }
         }
     };
@@ -1440,58 +1475,62 @@ public class AbrechnungPrivat extends JXDialog {
         @Override
         public void keyPressed(KeyEvent arg0) {
             if (arg0.getKeyCode() == KeyEvent.VK_ESCAPE) {
-                rueckgabe = ABBRECHEN;
-                fensterSchliessen();
+                abbrechenReaktion();
                 return;
             }
             if (arg0.getKeyCode() == KeyEvent.VK_ENTER && (JComponent) arg0.getSource() instanceof JButton) {
                 if ("abbrechen".equals(((JComponent) arg0.getSource()).getName())) {
-                    rueckgabe = ABBRECHEN;
-                    fensterSchliessen();
+                    abbrechenReaktion();
                 } else if ("korrektur".equals(((JComponent) arg0.getSource()).getName())) {
-                    doKorrektur();
+                    AbrechnungPrivat.this.korrekturReaktion();
                 } else if ("ok".equals(((JComponent) arg0.getSource()).getName())) {
-                    rueckgabe = OK;
-                    doRgRechnungPrepare();
+                    okReaktion();
                 }
             }
         }
 
+
           };
+  private void okReaktion() {
+      rueckgabe = OK;
+      doRgRechnungPrepare();
+  }
+
+  private void abbrechenReaktion() {
+      rueckgabe = ABBRECHEN;
+      fensterSchliessen();
+  }
 
     private void fensterSchliessen() {
         setVisible(false);
-        dispose();
+
     }
 
-    private void starteDokument(String url) throws Exception {
-        IDocumentService documentService;
-        documentService = new OOService().getOfficeapplication()
+    private ITextDocument starteDokument(String url) throws Exception {
+        IDocumentService documentService = new OOService().getOfficeapplication()
                                          .getDocumentService();
         IDocumentDescriptor docdescript = new DocumentDescriptor();
         docdescript.setHidden(true);
         docdescript.setAsTemplate(true);
-        IDocument document;
-        document = documentService.loadDocument(url, docdescript);
-        textDocument = (ITextDocument) document;
+        IDocument document = documentService.loadDocument(url, docdescript);
+       ITextDocument textDocument = (ITextDocument) document;
         if (privatRechnungBtn.isSelected()) {
             OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmpridrucker"));
         } else {
             OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmbgedrucker"));
         }
-        textTable = textDocument.getTextTableService()
-                                .getTextTable("Tabelle1");
-        textEndbetrag = textDocument.getTextTableService()
-                                    .getTextTable("Tabelle2");
+
+
+        return textDocument;
     }
 
-    private void starteErsetzen() {
+    private void starteErsetzen(ITextDocument textDocument ) {
         ITextFieldService textFieldService = textDocument.getTextFieldService();
         ITextField[] placeholders = null;
         try {
             placeholders = textFieldService.getPlaceholderFields();
         } catch (TextException e) {
-            e.printStackTrace();
+             LOGGER.error("Something bad happens here", e);
         }
 
         for (ITextField placeholder : placeholders) {
@@ -1538,10 +1577,9 @@ public class AbrechnungPrivat extends JXDialog {
                            .setText(SystemConfig.hmAdrPDaten.get("<Panrede>"));
                 break;
             default:
-                Set<?> entries = SystemConfig.hmAdrRDaten.entrySet();
-                Iterator<?> it = entries.iterator();
-                while (it.hasNext()) {
-                    Map.Entry<?, ?> entry = (Map.Entry<?, ?>) it.next();
+                Set<Entry<String, String>>  entries = SystemConfig.hmAdrRDaten.entrySet();
+
+                for ( Entry<String, String> entry : entries) {
                     try {
                         if (((String) entry.getKey()).equalsIgnoreCase(placeholder.getDisplayText())) {
                             placeholder.getTextRange()
@@ -1558,8 +1596,12 @@ public class AbrechnungPrivat extends JXDialog {
         }
     }
 
-    private void startePositionen() throws TextException {
+    private void startePositionen( ITextDocument textDocument ) throws TextException {
         aktuellePosition++;
+        ITextTable textTable = textDocument.getTextTableService()
+                .getTextTable("Tabelle1");
+        ITextTable textEndbetrag = textDocument.getTextTableService()
+                .getTextTable("Tabelle2");
         for (int i = 0; i < originalAnzahl.size(); i++) {
             textTable.getCell(0, aktuellePosition)
                      .getTextService()
@@ -1588,7 +1630,7 @@ public class AbrechnungPrivat extends JXDialog {
                      .setText(dcf.format(rechnungGesamt.doubleValue()) + " EUR");
     }
 
-    private synchronized void starteDrucken() {
+    private synchronized void starteDrucken(ITextDocument textDocument ) {
         if ("1".equals(hmAbrechnung.get("hmallinoffice"))) {
             textDocument.getFrame()
                         .getXFrame()
@@ -1624,4 +1666,5 @@ public class AbrechnungPrivat extends JXDialog {
             }
         }
     };
+
 }
