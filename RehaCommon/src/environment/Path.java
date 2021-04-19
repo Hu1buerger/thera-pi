@@ -26,6 +26,9 @@ public enum Path {
     String proghome = "";
     OS currentOS = OS.WIN;
 
+    /**
+     * @return the path to the programs execution path ending with a slash.
+     */
     public String getProghome() {
         return proghome;
     }
