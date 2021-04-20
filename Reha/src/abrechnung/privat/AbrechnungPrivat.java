@@ -67,14 +67,15 @@ import office.OOTools;
 import stammDatenTools.RezTools;
 import systemEinstellungen.SystemConfig;
 import systemEinstellungen.SystemPreislisten;
-import systemEinstellungen.TerminListe;
 import umfeld.Betriebsumfeld;
 
 import static abrechnung.privat.PreisanwendenStrategie.*;
+
 public class AbrechnungPrivat extends JXDialog {
     private final class AbrechnungHausbesuch {
         final boolean mitHausBesuch;
         final boolean einzelnAbrechenbar;
+
         public AbrechnungHausbesuch(boolean mitHausBesuch, boolean einzelnabrechenbar) {
             this.mitHausBesuch = mitHausBesuch;
             this.einzelnAbrechenbar = einzelnabrechenbar;
@@ -132,11 +133,14 @@ public class AbrechnungPrivat extends JXDialog {
     private boolean wechselcheck;
 
     private int[] splitpreise = { 0, 0 };
-    /** contains information on splitting price strategy.
-     * array of size 3.<p>
-     * [0]  all old prices<p>
-     * [1]  all new prices<p>
-     * [2]  splitting must be applied.
+    /**
+     * contains information on splitting price strategy. array of size 3.
+     * <p>
+     * [0] all old prices
+     * <p>
+     * [1] all new prices
+     * <p>
+     * [2] splitting must be applied.
      */
     private boolean[] preisanwenden = { false, false, false };
     private PreisanwendenStrategie preisstrategie = PreisanwendenStrategie.examine(preisanwenden);
@@ -148,7 +152,7 @@ public class AbrechnungPrivat extends JXDialog {
 
     private String patid;
 
-    private Vector<String> vecaktrez;
+    private Rezept aktuellesRezept;
     private Vector<String> patDaten;
 
     private String aktIk;
@@ -164,24 +168,26 @@ public class AbrechnungPrivat extends JXDialog {
 
     public AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe) {
         this(owner, titel, preisgruppe, (JComponent) Reha.getThisFrame()
-                                                                    .getGlassPane(), Reha.instance.patpanel.vecaktrez.get(1),
+                                                         .getGlassPane(),
+                Reha.instance.patpanel.vecaktrez.get(1),
                 SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1)))
                                           .get(preisgruppe - 1),
-                Reha.instance.patpanel.patDaten.get(5),
-                Reha.instance.patpanel.patDaten.get(66), Reha.instance.patpanel.vecaktrez,
-                Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(), SystemConfig.hmAbrechnung.get("hmpriformular"),
-                SystemConfig.hmAbrechnung, SystemPreislisten.hmPreisGruppen.get(StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))));
+                Reha.instance.patpanel.patDaten.get(5), Reha.instance.patpanel.patDaten.get(66),
+                Reha.instance.patpanel.vecaktrez, Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(),
+                SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung,
+                SystemPreislisten.hmPreisGruppen.get(
+                        StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))));
     }
 
     AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe, JComponent glasspane, String rezeptNr,
-            Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID, Vector<String> aktuellesRezeptVector,
-            Vector<String> aktuellerPatientDaten, String aktIk, String privatRgFormular,
-            HashMap<String, String> hmAbrechnung,  Vector<String> preisgruppenFuerDiszi) {
+            Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID,
+            Vector<String> aktuellesRezeptVector, Vector<String> aktuellerPatientDaten, String aktIk,
+            String privatRgFormular, HashMap<String, String> hmAbrechnung, Vector<String> preisgruppenFuerDiszi) {
         super(owner, glasspane);
         this.hmAbrechnung = hmAbrechnung;
         this.privatRgFormular = privatRgFormular;
         patDaten = aktuellerPatientDaten;
-        vecaktrez = aktuellesRezeptVector;
+        aktuellesRezept = new Rezept(aktuellesRezeptVector);
         this.hatAbweichendeAdresse = hatAbweichendeAdresse;
         patid = patientenDbID;
         this.rezeptNummer = rezeptNr;
@@ -265,30 +271,30 @@ public class AbrechnungPrivat extends JXDialog {
             reglePrivat();
         }
 
-        if (!"0".equals(vecaktrez.get(8))) {
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_8_artderbeh1())) {
             labs[0] = new JLabel();
             labs[0].setForeground(Color.BLUE);
             pan.add(labs[0], cc.xy(3, 14));
         }
-        if (!"0".equals(vecaktrez.get(9))) {
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
             labs[1] = new JLabel();
             labs[1].setForeground(Color.BLUE);
             pan.add(labs[1], cc.xy(3, 16));
         }
-        if (!"0".equals(vecaktrez.get(10))) {
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_10_artderbeh3())) {
             labs[2] = new JLabel();
             labs[2].setForeground(Color.BLUE);
             pan.add(labs[2], cc.xy(3, 18));
         }
-        if (!"0".equals(vecaktrez.get(11))) {
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_11_artderbeh4())) {
             labs[3] = new JLabel();
             labs[3].setForeground(Color.BLUE);
             pan.add(labs[3], cc.xy(3, 20));
         }
         // Mit Hausbesuch
 
-        abrechnungHausbesuch = new AbrechnungHausbesuch("T".equals(vecaktrez.get(43)),"T".equals(vecaktrez.get(61)));
-
+        abrechnungHausbesuch = new AbrechnungHausbesuch("T".equals(aktuellesRezept.aktuellesRezept_43_hausbesuch()),
+                "T".equals(aktuellesRezept.aktuellesRezept_61_einzelnabrechenbar()));
 
         if (abrechnungHausbesuch.mitHausBesuch) {
 
@@ -429,8 +435,9 @@ public class AbrechnungPrivat extends JXDialog {
             hmAdresse.put("<pri6>", aktRechnung);
 
             LOGGER.info(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
-            ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
-            starteErsetzen( textDocument );
+            ITextDocument textDocument = starteDokument(
+                    Path.Instance.getProghome() + "vorlagen\\" + aktIk + "\\" + privatRgFormular);
+            starteErsetzen(textDocument);
             startePositionen(textDocument);
 
             starteDrucken(textDocument);
@@ -459,8 +466,8 @@ public class AbrechnungPrivat extends JXDialog {
             aktRechnung = Integer.toString(SqlInfo.erzeugeNummer("rnr"));
             hmAdresse.put("<pri6>", aktRechnung);
 
-            ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen/" + Betriebsumfeld.getAktIK() + "/"
-                    + SystemConfig.hmAbrechnung.get("hmbgeformular"));
+            ITextDocument textDocument = starteDokument(Path.Instance.getProghome() + "vorlagen/"
+                    + Betriebsumfeld.getAktIK() + "/" + SystemConfig.hmAbrechnung.get("hmbgeformular"));
             starteErsetzen(textDocument);
             startePositionen(textDocument);
 
@@ -475,7 +482,7 @@ public class AbrechnungPrivat extends JXDialog {
             }
             doTabelle();
         } catch (Exception e) {
-             LOGGER.error("Something bad happens here", e);
+            LOGGER.error("Something bad happens here", e);
         }
     }
 
@@ -616,13 +623,13 @@ public class AbrechnungPrivat extends JXDialog {
                     .append(aktRechnung)
                     .append("', ");
             writeBuf.append("pat_intern='")
-                    .append(vecaktrez.get(0))
+                    .append(aktuellesRezept.aktuellesRezept_0_patintern())
                     .append("', ");
             writeBuf.append("kassid='")
-                    .append(vecaktrez.get(37))
+                    .append(aktuellesRezept.aktuellesRezept_37_kassenId())
                     .append("', ");
             writeBuf.append("arztid='")
-                    .append(vecaktrez.get(16))
+                    .append(aktuellesRezept.aktuellesRezept_16_arztID())
                     .append("', ");
             writeBuf.append("disziplin='")
                     .append(rezeptNummer.trim(), 0, 2)
@@ -674,10 +681,10 @@ public class AbrechnungPrivat extends JXDialog {
                    .append("', ");
         rechnungBuf.append("r_zuzahl='0.00', ");
         rechnungBuf.append("ikktraeger='")
-                   .append(vecaktrez.get(37))
+                   .append(aktuellesRezept.aktuellesRezept_37_kassenId())
                    .append("',");
         rechnungBuf.append("pat_intern='")
-                   .append(vecaktrez.get(0))
+                   .append(aktuellesRezept.aktuellesRezept_0_patintern())
                    .append("',");
         rechnungBuf.append("ik='")
                    .append(Betriebsumfeld.getAktIK())
@@ -685,13 +692,13 @@ public class AbrechnungPrivat extends JXDialog {
         SqlInfo.sqlAusfuehren(rechnungBuf.toString());
     }
 
+
     protected void doUebertrag() {
         String rez_nr = rezeptNummer;
         boolean wasSuccessfullyMoved = SqlInfo.transferRowToAnotherDB("verordn", "lza", "rez_nr", rez_nr, true,
                 Arrays.asList(new String[] { "id" }));
         if (wasSuccessfullyMoved) {
-            if ("T".equals(vecaktrez.get(62)
-                                    .trim())) {
+            if ("T".equals(aktuellesRezept.aktuellesRezept_62_abschluss())) {
                 SqlInfo.sqlAusfuehren("delete from fertige where rez_nr='" + rez_nr + "' LIMIT 1");
             }
             SqlInfo.sqlAusfuehren("delete from verordn where rez_nr='" + rez_nr + "'");
@@ -743,14 +750,14 @@ public class AbrechnungPrivat extends JXDialog {
         try {
             preisdatum = SystemPreislisten.hmNeuePreiseAb.get(this.disziplin)
                                                          .get(this.aktGruppe);
-            if (preisdatum ==null || "".equals(preisdatum)) {
+            if (preisdatum == null || "".equals(preisdatum)) {
                 preisregel = 0;
                 wechselcheck = false;
             } else {
                 preisregel = SystemPreislisten.hmNeuePreiseRegel.get(this.disziplin)
                                                                 .get(this.aktGruppe);
             }
-            tage = RezTools.holeEinzelTermineAusRezept(null, vecaktrez.get(34));
+            tage = RezTools.holeEinzelTermineAusRezept(null, aktuellesRezept.aktuellesRezept_34_termine());
             if (tage.isEmpty() || preisregel == 0) {
                 wechselcheck = false;
             } else {
@@ -763,48 +770,49 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=alleAlt;
+                    preisstrategie = alleAlt;
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=alleNeu;
+                    preisstrategie = alleNeu;
                 }
             } else if (preisregel == 2 && wechselcheck) {
                 // Rezeptdatum
-                if (DatFunk.TageDifferenz(preisdatum, DatFunk.sDatInDeutsch(vecaktrez.get(2))) < 0) {
+                if (DatFunk.TageDifferenz(preisdatum,
+                        DatFunk.sDatInDeutsch(aktuellesRezept.aktuellesRezept_2_Rezeptdatum())) < 0) {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=alleAlt;
+                    preisstrategie = alleAlt;
                 } else {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=alleNeu;
+                    preisstrategie = alleNeu;
                 }
             } else if (preisregel == 3 && wechselcheck) {
                 // beliebige Behandlung
                 preisanwenden[0] = true;
                 preisanwenden[1] = false;
                 preisanwenden[2] = false;
-                preisstrategie=alleAlt;
+                preisstrategie = alleAlt;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) >= 0) {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
                         preisanwenden[2] = false;
-                        preisstrategie=alleNeu;
+                        preisstrategie = alleNeu;
                         break;
                     }
                 }
             } else if (preisregel == 4 && wechselcheck) {
-                int max = Integer.parseInt(vecaktrez.get(3));
+                int max = Integer.parseInt(aktuellesRezept.aktuellesRezept_3_anzahl1());
                 // splitten
                 preisanwenden[0] = false;
                 preisanwenden[1] = false;
                 preisanwenden[2] = true;
-                preisstrategie=splitten;
+                preisstrategie = splitten;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) < 0) {
                         splitpreise[0] += 1;
@@ -816,12 +824,12 @@ public class AbrechnungPrivat extends JXDialog {
                     preisanwenden[0] = true;
                     preisanwenden[1] = false;
                     preisanwenden[2] = false;
-                    preisstrategie=alleAlt;
+                    preisstrategie = alleAlt;
                 } else if (splitpreise[1] == max) {
                     preisanwenden[0] = false;
                     preisanwenden[1] = true;
                     preisanwenden[2] = false;
-                    preisstrategie=alleNeu;
+                    preisstrategie = alleNeu;
                 } else if ((splitpreise[0] != 0 && splitpreise[1] != 0) || wechselcheck) {
                     doNeuerTarifMitSplitting();
                     if (abrechnungHausbesuch.mitHausBesuch) {
@@ -845,12 +853,12 @@ public class AbrechnungPrivat extends JXDialog {
                         preisanwenden[0] = true;
                         preisanwenden[1] = false;
                         preisanwenden[2] = false;
-                        preisstrategie=alleAlt;
+                        preisstrategie = alleAlt;
                     } else {
                         preisanwenden[0] = false;
                         preisanwenden[1] = true;
                         preisanwenden[2] = false;
-                        preisstrategie=alleNeu;
+                        preisstrategie = alleNeu;
                     }
 
                 }
@@ -862,25 +870,27 @@ public class AbrechnungPrivat extends JXDialog {
         }
 
         // Änderungen in Preis
-        Integer aktanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(vecaktrez.get(34))[0];
-        if (!"0".equals(vecaktrez.get(8))) {
-            anzahl = vecaktrez.get(3);
+        Integer aktanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(
+                aktuellesRezept.aktuellesRezept_34_termine())[0];
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_8_artderbeh1())) {
+            anzahl = aktuellesRezept.aktuellesRezept_3_anzahl1();
             if (Integer.parseInt(anzahl) > 1) {
                 anzahl = Integer.toString(aktanzahl);
             }
 
-            originalPos.add(vecaktrez.get(48));
-            originalId.add(vecaktrez.get(8));
+            originalPos.add(aktuellesRezept.aktuellesRezept_48_pos1());
+            originalId.add(aktuellesRezept.aktuellesRezept_8_artderbeh1());
             originalAnzahl.add(Integer.parseInt(anzahl));
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(8), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(8), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             if (preisanwenden[0]) {
-                preis = RezTools.getPreisAltFromID(vecaktrez.get(8), "", preisliste);
+                preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
             } else {
-                preis = RezTools.getPreisAktFromID(vecaktrez.get(8), "", preisliste);
+                preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
             }
 
             if (!"".equals(pos.trim())) {
@@ -891,25 +901,26 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[0].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
-        if (!"0".equals(vecaktrez.get(9))) {
-            anzahl = vecaktrez.get(4);
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
+            anzahl = aktuellesRezept.aktuellesRezept_4_anzahl2();
             if (Integer.parseInt(anzahl) > 1) {
                 anzahl = Integer.toString(aktanzahl);
             }
 
-            originalPos.add(vecaktrez.get(49));
-            originalId.add(vecaktrez.get(9));
+            originalPos.add(aktuellesRezept.aktuellesRezept_49_pos2());
+            originalId.add(aktuellesRezept.aktuellesRezept_9_artderbeh2());
             originalAnzahl.add(Integer.parseInt(anzahl));
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(9), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(9), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
 
             if (preisanwenden[0]) {
-                preis = RezTools.getPreisAltFromID(vecaktrez.get(9), "", preisliste);
+                preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
             } else {
-                preis = RezTools.getPreisAktFromID(vecaktrez.get(9), "", preisliste);
+                preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
             }
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preis));
@@ -919,25 +930,26 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[1].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
-        if (!"0".equals(vecaktrez.get(10))) {
-            anzahl = vecaktrez.get(5);
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_10_artderbeh3())) {
+            anzahl = aktuellesRezept.aktuellesRezept_5_anzahl3();
             if (Integer.parseInt(anzahl) > 1) {
                 anzahl = Integer.toString(aktanzahl);
             }
 
-            originalPos.add(vecaktrez.get(50));
-            originalId.add(vecaktrez.get(10));
+            originalPos.add(aktuellesRezept.aktuellesRezept_50_pos3());
+            originalId.add(aktuellesRezept.aktuellesRezept_10_artderbeh3());
             originalAnzahl.add(Integer.parseInt(anzahl));
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(10), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(10), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
 
             if (preisanwenden[0]) {
-                preis = RezTools.getPreisAltFromID(vecaktrez.get(10), "", preisliste);
+                preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
             } else {
-                preis = RezTools.getPreisAktFromID(vecaktrez.get(10), "", preisliste);
+                preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
             }
 
             if (!"".equals(pos.trim())) {
@@ -948,25 +960,26 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[2].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
-        if (!"0".equals(vecaktrez.get(11))) {
-            anzahl = vecaktrez.get(6);
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_11_artderbeh4())) {
+            anzahl = aktuellesRezept.aktuellesRezept_6_Anzahl4();
             if (Integer.parseInt(anzahl) > 1) {
                 anzahl = Integer.toString(aktanzahl);
             }
 
-            originalPos.add(vecaktrez.get(51));
-            originalId.add(vecaktrez.get(11));
+            originalPos.add(aktuellesRezept.aktuellesRezept_51_pos4());
+            originalId.add(aktuellesRezept.aktuellesRezept_11_artderbeh4());
             originalAnzahl.add(Integer.parseInt(anzahl));
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(11), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(11), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
 
             if (preisanwenden[0]) {
-                preis = RezTools.getPreisAltFromID(vecaktrez.get(11), "", preisliste);
+                preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
             } else {
-                preis = RezTools.getPreisAktFromID(vecaktrez.get(11), "", preisliste);
+                preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
             }
 
             if (!"".equals(pos.trim())) {
@@ -999,7 +1012,7 @@ public class AbrechnungPrivat extends JXDialog {
         this.aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
         labs[5].setText("");
         /* Hausbesuch voll abrechnen */
-        int hbanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(vecaktrez.get(34))[0];
+        int hbanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(aktuellesRezept.aktuellesRezept_34_termine())[0];
 
         if (abrechnungHausbesuch.einzelnAbrechenbar) {
             String preis = "";
@@ -1103,7 +1116,7 @@ public class AbrechnungPrivat extends JXDialog {
         String anzahlAlt = "", anzahlNeu = "";
         String preisAlt = "", preisNeu = "";
         int test = 0;
-        int testanzahl = Integer.parseInt(vecaktrez.get(3));
+        int testanzahl = Integer.parseInt(aktuellesRezept.aktuellesRezept_3_anzahl1());
         if (testanzahl != splitpreise[0] + splitpreise[1]) {
             JOptionPane.showMessageDialog(null,
                     "Die Anwendungsregel dieser Tarifgruppe ist Splitting!!!\nBei dieser Regel müssen die Behandlungstage mit der Anzahl der Behandlungen im Rezept übereinstimmen!");
@@ -1112,19 +1125,20 @@ public class AbrechnungPrivat extends JXDialog {
         // Änderungen in Preis und ggfls. in Anzahl
         // Benötigt werde: Anzahlen auf dem Rezept, Anzahl alter Preis, Anzahl neuer
         // Preis.
-        if (!"0".equals(vecaktrez.get(8))) {
-            originalPos.add(vecaktrez.get(48));
-            originalId.add(vecaktrez.get(8));
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_8_artderbeh1())) {
+            originalPos.add(aktuellesRezept.aktuellesRezept_48_pos1());
+            originalId.add(aktuellesRezept.aktuellesRezept_8_artderbeh1());
             // jetzt Anzahlen für alter Preis
             originalAnzahl.add(splitpreise[0]);
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(8), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(8), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             anzahlAlt = Integer.toString(splitpreise[0]);
 
-            preisAlt = RezTools.getPreisAltFromID(vecaktrez.get(8), "", preisliste);
+            preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
@@ -1134,15 +1148,16 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[0].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             // jetzt Anzahlen für neuer Preis
-            originalPos.add(vecaktrez.get(48));
-            originalId.add(vecaktrez.get(8));
+            originalPos.add(aktuellesRezept.aktuellesRezept_48_pos1());
+            originalId.add(aktuellesRezept.aktuellesRezept_8_artderbeh1());
             originalAnzahl.add(splitpreise[1]);
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(8), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
-            pos = RezTools.getKurzformFromID(vecaktrez.get(8), preisliste);
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             anzahlNeu = Integer.toString(splitpreise[1]);
-            preisNeu = RezTools.getPreisAktFromID(vecaktrez.get(8), "", preisliste);
+            preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisNeu));
@@ -1153,18 +1168,19 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[0].setText(labs[0].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
-        if (!"0".equals(vecaktrez.get(9))) {
-            originalPos.add(vecaktrez.get(49));
-            originalId.add(vecaktrez.get(9));
-            test = Integer.parseInt(vecaktrez.get(4));
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
+            originalPos.add(aktuellesRezept.aktuellesRezept_49_pos2());
+            originalId.add(aktuellesRezept.aktuellesRezept_9_artderbeh2());
+            test = Integer.parseInt(aktuellesRezept.aktuellesRezept_4_anzahl2());
             originalAnzahl.add(splitpreise[0] > test ? test : splitpreise[0]);
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(9), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(9), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
             anzahlAlt = Integer.toString(splitpreise[0] > test ? test : splitpreise[0]);
-            preisAlt = RezTools.getPreisAltFromID(vecaktrez.get(9), "", preisliste);
+            preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
@@ -1175,16 +1191,17 @@ public class AbrechnungPrivat extends JXDialog {
             }
             // nur wenn die angegebene Anzahl < ist als Anzahl Tage im Rezeptblatt
             if (splitpreise[0] < test) {
-                originalPos.add(vecaktrez.get(49));
-                originalId.add(vecaktrez.get(9));
+                originalPos.add(aktuellesRezept.aktuellesRezept_49_pos2());
+                originalId.add(aktuellesRezept.aktuellesRezept_9_artderbeh2());
 
                 originalAnzahl.add(test - splitpreise[0]);
-                originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(9), "", preisliste)
-                                             .replace("30Min.", "")
-                                             .replace("45Min.", ""));
-                pos = RezTools.getKurzformFromID(vecaktrez.get(9), preisliste);
+                originalLangtext.add(
+                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
+                                .replace("30Min.", "")
+                                .replace("45Min.", ""));
+                pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
                 anzahlNeu = Integer.toString(test - splitpreise[0]);
-                preisNeu = RezTools.getPreisAktFromID(vecaktrez.get(9), "", preisliste);
+                preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
 
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
@@ -1197,19 +1214,20 @@ public class AbrechnungPrivat extends JXDialog {
                 }
             }
         }
-        if (!"0".equals(vecaktrez.get(10))) {
-            originalPos.add(vecaktrez.get(50));
-            originalId.add(vecaktrez.get(10));
-            test = Integer.parseInt(vecaktrez.get(5));
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_10_artderbeh3())) {
+            originalPos.add(aktuellesRezept.aktuellesRezept_50_pos3());
+            originalId.add(aktuellesRezept.aktuellesRezept_10_artderbeh3());
+            test = Integer.parseInt(aktuellesRezept.aktuellesRezept_5_anzahl3());
             originalAnzahl.add(splitpreise[0] > test ? test : splitpreise[0]);
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(10), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(10), preisliste);
-            test = Integer.parseInt(vecaktrez.get(5));
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
+            test = Integer.parseInt(aktuellesRezept.aktuellesRezept_5_anzahl3());
             anzahlAlt = Integer.toString(splitpreise[0] > test ? test : splitpreise[0]);
-            preisAlt = RezTools.getPreisAltFromID(vecaktrez.get(10), "", preisliste);
+            preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
@@ -1219,14 +1237,15 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[2].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             if (splitpreise[0] < test) {
-                originalPos.add(vecaktrez.get(50));
-                originalId.add(vecaktrez.get(10));
+                originalPos.add(aktuellesRezept.aktuellesRezept_50_pos3());
+                originalId.add(aktuellesRezept.aktuellesRezept_10_artderbeh3());
                 originalAnzahl.add(test - splitpreise[0]);
-                originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(10), "", preisliste)
-                                             .replace("30Min.", "")
-                                             .replace("45Min.", ""));
+                originalLangtext.add(
+                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
+                                .replace("30Min.", "")
+                                .replace("45Min.", ""));
                 anzahlNeu = Integer.toString(test - splitpreise[0]);
-                preisNeu = RezTools.getPreisAktFromID(vecaktrez.get(10), "", preisliste);
+                preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
                     labs[2].setText(
@@ -1238,18 +1257,19 @@ public class AbrechnungPrivat extends JXDialog {
                 }
             }
         }
-        if (!"0".equals(vecaktrez.get(11))) {
-            originalPos.add(vecaktrez.get(51));
-            originalId.add(vecaktrez.get(11));
-            test = Integer.parseInt(vecaktrez.get(6));
+        if (!"0".equals(aktuellesRezept.aktuellesRezept_11_artderbeh4())) {
+            originalPos.add(aktuellesRezept.aktuellesRezept_51_pos4());
+            originalId.add(aktuellesRezept.aktuellesRezept_11_artderbeh4());
+            test = Integer.parseInt(aktuellesRezept.aktuellesRezept_6_Anzahl4());
             originalAnzahl.add(splitpreise[0] > test ? test : splitpreise[0]);
-            originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(11), "", preisliste)
-                                         .replace("30Min.", "")
-                                         .replace("45Min.", ""));
+            originalLangtext.add(
+                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
+                            .replace("30Min.", "")
+                            .replace("45Min.", ""));
 
-            pos = RezTools.getKurzformFromID(vecaktrez.get(11), preisliste);
+            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
             anzahlAlt = Integer.toString(splitpreise[0] > test ? test : splitpreise[0]);
-            preisAlt = RezTools.getPreisAltFromID(vecaktrez.get(11), "", preisliste);
+            preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
@@ -1259,14 +1279,15 @@ public class AbrechnungPrivat extends JXDialog {
                 labs[3].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             if (splitpreise[0] < test) {
-                originalPos.add(vecaktrez.get(51));
-                originalId.add(vecaktrez.get(11));
+                originalPos.add(aktuellesRezept.aktuellesRezept_51_pos4());
+                originalId.add(aktuellesRezept.aktuellesRezept_11_artderbeh4());
                 originalAnzahl.add(test - splitpreise[0]);
-                originalLangtext.add(RezTools.getLangtextFromID(vecaktrez.get(11), "", preisliste)
-                                             .replace("30Min.", "")
-                                             .replace("45Min.", ""));
+                originalLangtext.add(
+                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
+                                .replace("30Min.", "")
+                                .replace("45Min.", ""));
                 anzahlNeu = Integer.toString(test - splitpreise[0]);
-                preisNeu = RezTools.getPreisAktFromID(vecaktrez.get(11), "", preisliste);
+                preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
                     labs[3].setText(
@@ -1285,7 +1306,7 @@ public class AbrechnungPrivat extends JXDialog {
         labs[5].setText("");
 
         /* Hausbesuch voll abrechnen */
-        int hbanzahl = Integer.parseInt(vecaktrez.get(64));
+        int hbanzahl = Integer.parseInt(aktuellesRezept.aktuellesRezept_64_hbAnzahl());
         int althb = -1;
         int neuhb = -1;
         String preisAlt = "";
@@ -1424,9 +1445,11 @@ public class AbrechnungPrivat extends JXDialog {
     private void reglePrivat() {
         holePrivat();
         adr1.setText(hmAdresse.get("<pri1>")
-                                        .trim().isEmpty() ? " " : hmAdresse.get("<pri1>"));
+                              .trim()
+                              .isEmpty() ? " " : hmAdresse.get("<pri1>"));
         adr2.setText(hmAdresse.get("<pri2>")
-                                        .trim().isEmpty() ? " " : hmAdresse.get("<pri2>"));
+                              .trim()
+                              .isEmpty() ? " " : hmAdresse.get("<pri2>"));
     }
 
     private ActionListener neuerTarifAL = new ActionListener() {
@@ -1446,7 +1469,6 @@ public class AbrechnungPrivat extends JXDialog {
             String cmd = arg0.getActionCommand();
             if (cmd != null) {
                 switch (cmd) {
-
 
                 case "privatadresse":
                     reglePrivat();
@@ -1491,17 +1513,17 @@ public class AbrechnungPrivat extends JXDialog {
             }
         }
 
+    };
 
-          };
-  private void okReaktion() {
-      rueckgabe = OK;
-      doRgRechnungPrepare();
-  }
+    private void okReaktion() {
+        rueckgabe = OK;
+        doRgRechnungPrepare();
+    }
 
-  private void abbrechenReaktion() {
-      rueckgabe = ABBRECHEN;
-      fensterSchliessen();
-  }
+    private void abbrechenReaktion() {
+        rueckgabe = ABBRECHEN;
+        fensterSchliessen();
+    }
 
     private void fensterSchliessen() {
         setVisible(false);
@@ -1510,29 +1532,28 @@ public class AbrechnungPrivat extends JXDialog {
 
     private ITextDocument starteDokument(String url) throws Exception {
         IDocumentService documentService = new OOService().getOfficeapplication()
-                                         .getDocumentService();
+                                                          .getDocumentService();
         IDocumentDescriptor docdescript = new DocumentDescriptor();
         docdescript.setHidden(true);
         docdescript.setAsTemplate(true);
         IDocument document = documentService.loadDocument(url, docdescript);
-       ITextDocument textDocument = (ITextDocument) document;
+        ITextDocument textDocument = (ITextDocument) document;
         if (privatRechnungBtn.isSelected()) {
             OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmpridrucker"));
         } else {
             OOTools.druckerSetzen(textDocument, SystemConfig.hmAbrechnung.get("hmbgedrucker"));
         }
 
-
         return textDocument;
     }
 
-    private void starteErsetzen(ITextDocument textDocument ) {
+    private void starteErsetzen(ITextDocument textDocument) {
         ITextFieldService textFieldService = textDocument.getTextFieldService();
         ITextField[] placeholders = null;
         try {
             placeholders = textFieldService.getPlaceholderFields();
         } catch (TextException e) {
-             LOGGER.error("Something bad happens here", e);
+            LOGGER.error("Something bad happens here", e);
         }
 
         for (ITextField placeholder : placeholders) {
@@ -1579,9 +1600,9 @@ public class AbrechnungPrivat extends JXDialog {
                            .setText(SystemConfig.hmAdrPDaten.get("<Panrede>"));
                 break;
             default:
-                Set<Entry<String, String>>  entries = SystemConfig.hmAdrRDaten.entrySet();
+                Set<Entry<String, String>> entries = SystemConfig.hmAdrRDaten.entrySet();
 
-                for ( Entry<String, String> entry : entries) {
+                for (Entry<String, String> entry : entries) {
                     try {
                         if (((String) entry.getKey()).equalsIgnoreCase(placeholder.getDisplayText())) {
                             placeholder.getTextRange()
@@ -1598,12 +1619,12 @@ public class AbrechnungPrivat extends JXDialog {
         }
     }
 
-    private void startePositionen( ITextDocument textDocument ) throws TextException {
+    private void startePositionen(ITextDocument textDocument) throws TextException {
         aktuellePosition++;
         ITextTable textTable = textDocument.getTextTableService()
-                .getTextTable("Tabelle1");
+                                           .getTextTable("Tabelle1");
         ITextTable textEndbetrag = textDocument.getTextTableService()
-                .getTextTable("Tabelle2");
+                                               .getTextTable("Tabelle2");
         for (int i = 0; i < originalAnzahl.size(); i++) {
             textTable.getCell(0, aktuellePosition)
                      .getTextService()
@@ -1632,7 +1653,7 @@ public class AbrechnungPrivat extends JXDialog {
                      .setText(dcf.format(rechnungGesamt.doubleValue()) + " EUR");
     }
 
-    private synchronized void starteDrucken(ITextDocument textDocument ) {
+    private synchronized void starteDrucken(ITextDocument textDocument) {
         if ("1".equals(hmAbrechnung.get("hmallinoffice"))) {
             textDocument.getFrame()
                         .getXFrame()
