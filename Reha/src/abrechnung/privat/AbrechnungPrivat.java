@@ -135,18 +135,13 @@ public class AbrechnungPrivat extends JXDialog {
 //    private int[] splitpreise = { 0, 0 };
    int anzahlalterpreis;
    int anzahlneuerpreis;
-    /**
-     * contains information on splitting price strategy. array of size 3.
-     * <p>
-     * [0] all old prices
-     * <p>
-     * [1] all new prices
-     * <p>
-     * [2] splitting must be applied.
-     */
-    private boolean[] preisanwenden = { false, false, false };
 
-    private PreisanwendenStrategie preisstrategie = PreisanwendenStrategie.examine(preisanwenden);
+    boolean allesaltepreise;
+
+    boolean allesNeuePreise;
+    boolean mitSplitting;
+
+    private PreisanwendenStrategie preisstrategie = PreisanwendenStrategie.alleNeu;
 
     private Vector<Integer> hbvec = new Vector<>();
     private Vector<Integer> kmvec = new Vector<>();
@@ -497,10 +492,10 @@ public class AbrechnungPrivat extends JXDialog {
         int hbpos = ABBRECHEN;
         int wgpos = ABBRECHEN;
         int diff = originalPos.size() - originalId.size();
-        if (diff == 2 && !preisanwenden[2]) {
+        if (diff == 2 && !mitSplitting) {
             hbpos = originalId.size() + 1;
             wgpos = originalId.size() + 2;
-        } else if (diff == 1 && !preisanwenden[2]) {
+        } else if (diff == 1 && !mitSplitting) {
             hbpos = originalId.size() + 1;
         }
         try {
@@ -743,11 +738,11 @@ public class AbrechnungPrivat extends JXDialog {
         anzahlalterpreis = 0;
         anzahlneuerpreis = 0;
         // alle alt, alle neu, splitten
-        preisanwenden[0] = false;
-        preisanwenden[1] = true;
-        preisanwenden[2] = false;
+        allesaltepreise = false;
+        allesNeuePreise = true;
+        mitSplitting = false;
 
-        preisstrategie = PreisanwendenStrategie.alleNeu;
+        preisstrategie = alleNeu;
         preisliste = SystemPreislisten.hmPreise.get(this.disziplin)
                                                .get(this.aktGruppe);
         try {
@@ -770,41 +765,41 @@ public class AbrechnungPrivat extends JXDialog {
             if (preisregel == 1 && wechselcheck) {
                 // Behandlungsbeginn
                 if (DatFunk.TageDifferenz(preisdatum, tage.get(0)) < 0) {
-                    preisanwenden[0] = true;
-                    preisanwenden[1] = false;
-                    preisanwenden[2] = false;
+                    allesaltepreise = true;
+                    allesNeuePreise = false;
+                    mitSplitting = false;
                     preisstrategie = alleAlt;
                 } else {
-                    preisanwenden[0] = false;
-                    preisanwenden[1] = true;
-                    preisanwenden[2] = false;
+                    allesaltepreise = false;
+                    allesNeuePreise = true;
+                    mitSplitting = false;
                     preisstrategie = alleNeu;
                 }
             } else if (preisregel == 2 && wechselcheck) {
                 // Rezeptdatum
                 if (DatFunk.TageDifferenz(preisdatum,
                         DatFunk.sDatInDeutsch(aktuellesRezept.aktuellesRezept_2_Rezeptdatum())) < 0) {
-                    preisanwenden[0] = true;
-                    preisanwenden[1] = false;
-                    preisanwenden[2] = false;
+                    allesaltepreise = true;
+                    allesNeuePreise = false;
+                    mitSplitting = false;
                     preisstrategie = alleAlt;
                 } else {
-                    preisanwenden[0] = false;
-                    preisanwenden[1] = true;
-                    preisanwenden[2] = false;
+                    allesaltepreise = false;
+                    allesNeuePreise = true;
+                    mitSplitting = false;
                     preisstrategie = alleNeu;
                 }
             } else if (preisregel == 3 && wechselcheck) {
                 // beliebige Behandlung
-                preisanwenden[0] = true;
-                preisanwenden[1] = false;
-                preisanwenden[2] = false;
+                allesaltepreise = true;
+                allesNeuePreise = false;
+                mitSplitting = false;
                 preisstrategie = alleAlt;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) >= 0) {
-                        preisanwenden[0] = false;
-                        preisanwenden[1] = true;
-                        preisanwenden[2] = false;
+                        allesaltepreise = false;
+                        allesNeuePreise = true;
+                        mitSplitting = false;
                         preisstrategie = alleNeu;
                         break;
                     }
@@ -812,9 +807,9 @@ public class AbrechnungPrivat extends JXDialog {
             } else if (preisregel == 4 && wechselcheck) {
                 int max = Integer.parseInt(aktuellesRezept.aktuellesRezept_3_anzahl1());
                 // splitten
-                preisanwenden[0] = false;
-                preisanwenden[1] = false;
-                preisanwenden[2] = true;
+                allesaltepreise = false;
+                allesNeuePreise = false;
+                mitSplitting = true;
                 preisstrategie = splitten;
                 for (int i = 0; i < tage.size(); i++) {
                     if (DatFunk.TageDifferenz(preisdatum, tage.get(i)) < 0) {
@@ -824,14 +819,14 @@ public class AbrechnungPrivat extends JXDialog {
                     }
                 }
                 if (anzahlalterpreis == max) {
-                    preisanwenden[0] = true;
-                    preisanwenden[1] = false;
-                    preisanwenden[2] = false;
+                    allesaltepreise = true;
+                    allesNeuePreise = false;
+                    mitSplitting = false;
                     preisstrategie = alleAlt;
                 } else if (anzahlneuerpreis == max) {
-                    preisanwenden[0] = false;
-                    preisanwenden[1] = true;
-                    preisanwenden[2] = false;
+                    allesaltepreise = false;
+                    allesNeuePreise = true;
+                    mitSplitting = false;
                     preisstrategie = alleNeu;
                 } else if ((anzahlalterpreis != 0 && anzahlneuerpreis != 0) || wechselcheck) {
                     doNeuerTarifMitSplitting();
@@ -853,14 +848,14 @@ public class AbrechnungPrivat extends JXDialog {
                     return;
                 } else {
                     if (anzahlalterpreis > 0) {
-                        preisanwenden[0] = true;
-                        preisanwenden[1] = false;
-                        preisanwenden[2] = false;
+                        allesaltepreise = true;
+                        allesNeuePreise = false;
+                        mitSplitting = false;
                         preisstrategie = alleAlt;
                     } else {
-                        preisanwenden[0] = false;
-                        preisanwenden[1] = true;
-                        preisanwenden[2] = false;
+                        allesaltepreise = false;
+                        allesNeuePreise = true;
+                        mitSplitting = false;
                         preisstrategie = alleNeu;
                     }
 
@@ -890,7 +885,7 @@ public class AbrechnungPrivat extends JXDialog {
                             .replace("45Min.", ""));
 
             pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
-            if (preisanwenden[0]) {
+            if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
             } else {
                 preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
@@ -920,7 +915,7 @@ public class AbrechnungPrivat extends JXDialog {
 
             pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
 
-            if (preisanwenden[0]) {
+            if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
             } else {
                 preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
@@ -949,7 +944,7 @@ public class AbrechnungPrivat extends JXDialog {
 
             pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
 
-            if (preisanwenden[0]) {
+            if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
             } else {
                 preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
@@ -979,7 +974,7 @@ public class AbrechnungPrivat extends JXDialog {
 
             pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
 
-            if (preisanwenden[0]) {
+            if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
             } else {
                 preis = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
@@ -1022,7 +1017,7 @@ public class AbrechnungPrivat extends JXDialog {
             String pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                      .get(this.aktGruppe)
                                                      .get(0);
-            if (preisanwenden[0]) {
+            if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromPosNeu(pos, "", preisliste);
             } else {
                 preis = RezTools.getPreisAktFromPos(pos, "", preisliste);
@@ -1036,48 +1031,49 @@ public class AbrechnungPrivat extends JXDialog {
             patKilometer = StringTools.ZahlTest(patDaten.get(48));
             if (patKilometer <= 0) {
                 // Keine Kilometer Im Patientenstamm hinterlegt
-                if ("".equals((pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+
+                String wegepauschale = pos = SystemPreislisten.hmHBRegeln.get(disziplin)
                                                                  .get(this.aktGruppe)
-                                                                 .get(3)).trim())) {
+                                                                 .get(3).trim();
+                if ("".equals(wegepauschale)) {
                     // Wegegeldpauschale ist nicht vorgesehen und Kilometer sind null - ganz schön
                     // blöd....
                     JOptionPane.showMessageDialog(null,
                             "Im Patientenstamm sind keine Kilometer hinterlegt und eine pauschale\n"
                                     + "Wegegeldberechnung ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht abgerechnet!");
                 } else {
-                    if (preisanwenden[0]) {
-                        preis = RezTools.getPreisAltFromPosNeu(pos, "", preisliste);
+                    if (allesaltepreise) {
+                        preis = RezTools.getPreisAltFromPosNeu(wegepauschale, "", preisliste);
                     } else {
-                        preis = RezTools.getPreisAktFromPos(pos, "", preisliste);
+                        preis = RezTools.getPreisAktFromPos(wegepauschale, "", preisliste);
                     }
                     originalAnzahl.add(hbanzahl);
-                    originalPos.add(pos);
+                    originalPos.add(wegepauschale);
                     einzelPreis.add(Double.parseDouble(preis));
                     originalLangtext.add("Wegegeldpauschale");
-                    labs[5].setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                    labs[5].setText(hbanzahl + " * " + wegepauschale + " (Einzelpreis = " + preis + ")");
                 }
-            } else /*
-                    * es wurden zwar Kilometer angegeben aber diese Preisgruppe kennt keine
-                    * Wegegebühr
-                    */
-            if ("".equals((pos = SystemPreislisten.hmHBRegeln.get(disziplin)
-                                                             .get(this.aktGruppe)
-                                                             .get(2)).trim())) {
-                JOptionPane.showMessageDialog(null,
-                        "Im Patientenstamm sind zwar " + patKilometer
-                                + " Kilometer hinterlegt aber Wegegeldberechnung\n"
-                                + "ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
             } else {
-                if (preisanwenden[0]) {
-                    preis = RezTools.getPreisAltFromPosNeu(pos, "", preisliste);
+                String wegegebuehr = pos = SystemPreislisten.hmHBRegeln.get(disziplin)
+                                                                 .get(this.aktGruppe)
+                                                                 .get(2).trim();
+                if ("".equals(wegegebuehr)) {
+                    JOptionPane.showMessageDialog(null,
+                            "Im Patientenstamm sind zwar " + patKilometer
+                                    + " Kilometer hinterlegt aber Wegegeldberechnung\n"
+                                    + "ist für diese Tarifgruppe nicht vorgesehen.\nWegegeld wird nicht aberechnet!");
                 } else {
-                    preis = RezTools.getPreisAktFromPos(pos, "", preisliste);
+                    if (allesaltepreise) {
+                        preis = RezTools.getPreisAltFromPosNeu(wegegebuehr, "", preisliste);
+                    } else {
+                        preis = RezTools.getPreisAktFromPos(wegegebuehr, "", preisliste);
+                    }
+                    originalAnzahl.add(hbanzahl * patKilometer);
+                    originalPos.add(wegegebuehr);
+                    einzelPreis.add(Double.parseDouble(preis));
+                    originalLangtext.add("Wegegeld / km");
+                    labs[5].setText(hbanzahl * patKilometer + " * " + wegegebuehr + " (Einzelpreis = " + preis + ")");
                 }
-                originalAnzahl.add(hbanzahl * patKilometer);
-                originalPos.add(pos);
-                einzelPreis.add(Double.parseDouble(preis));
-                originalLangtext.add("Wegegeld / km");
-                labs[5].setText(hbanzahl * patKilometer + " * " + pos + " (Einzelpreis = " + preis + ")");
             }
         } else { /* Hausbesuch mehrere abrechnen */
             String pos = SystemPreislisten.hmHBRegeln.get(disziplin)
@@ -1088,7 +1084,7 @@ public class AbrechnungPrivat extends JXDialog {
                         "In dieser Tarifgruppe ist die Ziffer Hausbesuche - mehrere Patienten - nicht vorgeshen!\n");
             } else {
                 String preis = "";
-                if (preisanwenden[0]) {
+                if (allesaltepreise) {
                     preis = RezTools.getPreisAltFromPosNeu(pos, "", preisliste);
                 } else {
                     preis = RezTools.getPreisAktFromPos(pos, "", preisliste);
@@ -1175,7 +1171,7 @@ public class AbrechnungPrivat extends JXDialog {
             originalPos.add(aktuellesRezept.aktuellesRezept_49_pos2());
             originalId.add(aktuellesRezept.aktuellesRezept_9_artderbeh2());
             test = Integer.parseInt(aktuellesRezept.aktuellesRezept_4_anzahl2());
-            originalAnzahl.add(anzahlalterpreis > test ? test : anzahlalterpreis);
+            originalAnzahl.add(Math.min(test , anzahlalterpreis));
             originalLangtext.add(
                     RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
                             .replace("30Min.", "")
