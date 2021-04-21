@@ -126,8 +126,8 @@ public class AbrechnungPrivat extends JXDialog {
     private int aktuellePosition;
     private int patKilometer;
 
-    private StringBuffer writeBuf = new StringBuffer();
-    private StringBuffer rechnungBuf = new StringBuffer();
+   
+
 
     private int preisregel;
     private boolean wechselcheck;
@@ -166,20 +166,19 @@ public class AbrechnungPrivat extends JXDialog {
     public AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe) {
         this(owner, titel, preisgruppe, (JComponent) Reha.getThisFrame()
                                                          .getGlassPane(),
-                Reha.instance.patpanel.vecaktrez.get(1),
                 SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1)))
                                           .get(preisgruppe - 1),
-                Reha.instance.patpanel.patDaten.get(5), Reha.instance.patpanel.patDaten.get(66),
-                Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(), SystemConfig.hmAbrechnung.get("hmpriformular"),
-                SystemConfig.hmAbrechnung, SystemPreislisten.hmPreisGruppen.get(
-                        StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))),
-                new Rezept(Reha.instance.patpanel.vecaktrez));
+                Reha.instance.patpanel.patDaten.get(5),
+                Reha.instance.patpanel.patDaten.get(66), Reha.instance.patpanel.patDaten,
+                Betriebsumfeld.getAktIK(), SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung,
+                SystemPreislisten.hmPreisGruppen.get(
+                        StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))), new Rezept(Reha.instance.patpanel.vecaktrez));
     }
 
-    AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe, JComponent glasspane, String rezeptNr,
-            Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID,
-            Vector<String> aktuellerPatientDaten, String aktIk, String privatRgFormular,
-            HashMap<String, String> hmAbrechnung, Vector<String> preisgruppenFuerDiszi, Rezept rezept) {
+    AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe, JComponent glasspane, Vector<Vector<String>> preisliste,
+            String hatAbweichendeAdresse, String patientenDbID, Vector<String> aktuellerPatientDaten,
+            String aktIk, String privatRgFormular, HashMap<String, String> hmAbrechnung,
+            Vector<String> preisgruppenFuerDiszi, Rezept rezept) {
         super(owner, glasspane);
         this.aktIk = aktIk;
         this.preisliste = preisliste;
@@ -189,8 +188,8 @@ public class AbrechnungPrivat extends JXDialog {
 
 
         aktuellesRezept = rezept;
-        this.rezeptNummer = rezeptNr;
-        disziplin = extractDisziplin(rezeptNr);
+        this.rezeptNummer = rezept.aktuellesRezept_1_rezNr();
+        disziplin = extractDisziplin(rezeptNummer);
 
         patDaten = aktuellerPatientDaten;
         patid = patientenDbID;
@@ -516,6 +515,7 @@ public class AbrechnungPrivat extends JXDialog {
                            .trim();
         } catch (Exception ex) {
         }
+         StringBuffer writeBuf = new StringBuffer();
         for (int i = 0; i < originalPos.size(); i++) {
             writeBuf.setLength(0);
             writeBuf.trimToSize();
@@ -650,8 +650,13 @@ public class AbrechnungPrivat extends JXDialog {
     }
 
     private void doOffenePosten(String kostentraeger) {
-        rechnungBuf.setLength(0);
-        rechnungBuf.trimToSize();
+         StringBuffer rechnungBuf = createRechnungsSQL(kostentraeger);
+        SqlInfo.sqlAusfuehren(rechnungBuf.toString());
+    }
+
+    private StringBuffer createRechnungsSQL(String kostentraeger) {
+        StringBuffer rechnungBuf = new StringBuffer();
+
         rechnungBuf.append("insert into rliste set ");
         rechnungBuf.append("r_nummer='")
                    .append(aktRechnung)
@@ -694,7 +699,7 @@ public class AbrechnungPrivat extends JXDialog {
         rechnungBuf.append("ik='")
                    .append(Betriebsumfeld.getAktIK())
                    .append("'");
-        SqlInfo.sqlAusfuehren(rechnungBuf.toString());
+        return rechnungBuf;
     }
 
 
