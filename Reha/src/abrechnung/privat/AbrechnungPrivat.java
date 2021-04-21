@@ -880,11 +880,11 @@ public class AbrechnungPrivat extends JXDialog {
             originalId.add(aktuellesRezept.aktuellesRezept_8_artderbeh1());
             originalAnzahl.add(Integer.parseInt(anzahl));
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste)
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
+                           );
+
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
             } else {
@@ -909,11 +909,11 @@ public class AbrechnungPrivat extends JXDialog {
             originalId.add(aktuellesRezept.aktuellesRezept_9_artderbeh2());
             originalAnzahl.add(Integer.parseInt(anzahl));
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste)
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
+                           );
+
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
 
             if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
@@ -938,11 +938,11 @@ public class AbrechnungPrivat extends JXDialog {
             originalId.add(aktuellesRezept.aktuellesRezept_10_artderbeh3());
             originalAnzahl.add(Integer.parseInt(anzahl));
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(),  preisliste)
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
+                           );
+
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
 
             if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
@@ -968,11 +968,9 @@ public class AbrechnungPrivat extends JXDialog {
             originalId.add(aktuellesRezept.aktuellesRezept_11_artderbeh4());
             originalAnzahl.add(Integer.parseInt(anzahl));
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste));
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
 
             if (allesaltepreise) {
                 preis = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
@@ -1004,6 +1002,17 @@ public class AbrechnungPrivat extends JXDialog {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
+    }
+
+    private String getKurzformFromID(String artderbeh, Vector<Vector<String>> preisliste) {
+        return getKurzformFromID(artderbeh, preisliste);
+
+    }
+
+    private String getLangtextFromID(String artderbeh, Vector<Vector<String>> preisliste) {
+        return RezTools.getLangtextFromID(artderbeh, "", preisliste)
+                .replace("30Min.", "")
+                .replace("45Min.", "");
     }
 
     private void analysiereHausbesuch() {
@@ -1130,11 +1139,9 @@ public class AbrechnungPrivat extends JXDialog {
             // jetzt Anzahlen für alter Preis
             originalAnzahl.add(anzahlalterpreis);
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(),  preisliste));
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             anzahlAlt = Integer.toString(anzahlalterpreis);
 
             preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
@@ -1151,10 +1158,9 @@ public class AbrechnungPrivat extends JXDialog {
             originalId.add(aktuellesRezept.aktuellesRezept_8_artderbeh1());
             originalAnzahl.add(anzahlneuerpreis);
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(),  preisliste)
+                         );
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), preisliste);
             anzahlNeu = Integer.toString(anzahlneuerpreis);
             preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_8_artderbeh1(), "", preisliste);
 
@@ -1173,11 +1179,11 @@ public class AbrechnungPrivat extends JXDialog {
             test = Integer.parseInt(aktuellesRezept.aktuellesRezept_4_anzahl2());
             originalAnzahl.add(Math.min(test , anzahlalterpreis));
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(),  preisliste)
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
+                           );
+
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
             anzahlAlt = Integer.toString(anzahlalterpreis > test ? test : anzahlalterpreis);
             preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
 
@@ -1195,10 +1201,10 @@ public class AbrechnungPrivat extends JXDialog {
 
                 originalAnzahl.add(test - anzahlalterpreis);
                 originalLangtext.add(
-                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste)
-                                .replace("30Min.", "")
-                                .replace("45Min.", ""));
-                pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
+                        getLangtextFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(),  preisliste)
+
+                               );
+                pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), preisliste);
                 anzahlNeu = Integer.toString(test - anzahlalterpreis);
                 preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_9_artderbeh2(), "", preisliste);
 
@@ -1219,11 +1225,11 @@ public class AbrechnungPrivat extends JXDialog {
             test = Integer.parseInt(aktuellesRezept.aktuellesRezept_5_anzahl3());
             originalAnzahl.add(anzahlalterpreis > test ? test : anzahlalterpreis);
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(),  preisliste)
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
+                           );
+
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), preisliste);
             test = Integer.parseInt(aktuellesRezept.aktuellesRezept_5_anzahl3());
             anzahlAlt = Integer.toString(anzahlalterpreis > test ? test : anzahlalterpreis);
             preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
@@ -1240,9 +1246,9 @@ public class AbrechnungPrivat extends JXDialog {
                 originalId.add(aktuellesRezept.aktuellesRezept_10_artderbeh3());
                 originalAnzahl.add(test - anzahlalterpreis);
                 originalLangtext.add(
-                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste)
-                                .replace("30Min.", "")
-                                .replace("45Min.", ""));
+                        getLangtextFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(),  preisliste)
+
+                               );
                 anzahlNeu = Integer.toString(test - anzahlalterpreis);
                 preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
                 if (!"".equals(pos.trim())) {
@@ -1262,11 +1268,9 @@ public class AbrechnungPrivat extends JXDialog {
             test = Integer.parseInt(aktuellesRezept.aktuellesRezept_6_Anzahl4());
             originalAnzahl.add(anzahlalterpreis > test ? test : anzahlalterpreis);
             originalLangtext.add(
-                    RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
-                            .replace("30Min.", "")
-                            .replace("45Min.", ""));
+                    getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste));
 
-            pos = RezTools.getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
+            pos = getKurzformFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste);
             anzahlAlt = Integer.toString(anzahlalterpreis > test ? test : anzahlalterpreis);
             preisAlt = RezTools.getPreisAltFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
 
@@ -1282,9 +1286,7 @@ public class AbrechnungPrivat extends JXDialog {
                 originalId.add(aktuellesRezept.aktuellesRezept_11_artderbeh4());
                 originalAnzahl.add(test - anzahlalterpreis);
                 originalLangtext.add(
-                        RezTools.getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste)
-                                .replace("30Min.", "")
-                                .replace("45Min.", ""));
+                        getLangtextFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), preisliste));
                 anzahlNeu = Integer.toString(test - anzahlalterpreis);
                 preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
                 if (!"".equals(pos.trim())) {
