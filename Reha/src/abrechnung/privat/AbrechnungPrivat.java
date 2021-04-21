@@ -171,24 +171,24 @@ public class AbrechnungPrivat extends JXDialog {
                 SystemPreislisten.hmPreise.get(RezTools.getDisziplinFromRezNr(Reha.instance.patpanel.vecaktrez.get(1)))
                                           .get(preisgruppe - 1),
                 Reha.instance.patpanel.patDaten.get(5), Reha.instance.patpanel.patDaten.get(66),
-                Reha.instance.patpanel.vecaktrez, Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(),
-                SystemConfig.hmAbrechnung.get("hmpriformular"), SystemConfig.hmAbrechnung,
-                SystemPreislisten.hmPreisGruppen.get(
-                        StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))));
+                Reha.instance.patpanel.patDaten, Betriebsumfeld.getAktIK(), SystemConfig.hmAbrechnung.get("hmpriformular"),
+                SystemConfig.hmAbrechnung, SystemPreislisten.hmPreisGruppen.get(
+                        StringTools.getDisziplin(Reha.instance.patpanel.vecaktrez.get(1))),
+                new Rezept(Reha.instance.patpanel.vecaktrez));
     }
 
     AbrechnungPrivat(JXFrame owner, String titel, int preisgruppe, JComponent glasspane, String rezeptNr,
             Vector<Vector<String>> preisliste, String hatAbweichendeAdresse, String patientenDbID,
-            Vector<String> aktuellesRezeptVector, Vector<String> aktuellerPatientDaten, String aktIk,
-            String privatRgFormular, HashMap<String, String> hmAbrechnung, Vector<String> preisgruppenFuerDiszi) {
+            Vector<String> aktuellerPatientDaten, String aktIk, String privatRgFormular,
+            HashMap<String, String> hmAbrechnung, Vector<String> preisgruppenFuerDiszi, Rezept rezept) {
         super(owner, glasspane);
         this.hmAbrechnung = hmAbrechnung;
         this.privatRgFormular = privatRgFormular;
         patDaten = aktuellerPatientDaten;
-        aktuellesRezept = new Rezept(aktuellesRezeptVector);
+        aktuellesRezept = rezept;
+        this.rezeptNummer = rezeptNr;
         this.hatAbweichendeAdresse = hatAbweichendeAdresse;
         patid = patientenDbID;
-        this.rezeptNummer = rezeptNr;
         this.aktIk = aktIk;
         disziplin = RezTools.getDisziplinFromRezNr(rezeptNr);
         this.preisliste = preisliste;
