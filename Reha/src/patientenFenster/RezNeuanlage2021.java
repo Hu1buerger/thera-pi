@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
@@ -1017,13 +1018,16 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
     }
 	
 	private String chkIcdFormat(String string) {
-        int posDot = string.indexOf(".");
-        string = macheIcdString(string);
-        if ((string.length() > 3) && (posDot < 0)) {
-            String tmp1 = string.substring(0, 3);
-            String tmp2 = string.substring(3);
-            return tmp1 + "." + tmp2;
-        }
+		if(string.length() > 0) {
+			int posDot = string.indexOf(".");
+	        string = macheIcdString(string);
+	        if ((string.length() > 3) && (posDot < 0)) {
+	            String tmp1 = string.substring(0, 3);
+	            String tmp2 = string.substring(3);
+	            return tmp1 + "." + tmp2;
+	        }
+		}
+        
         return string;
     }
 	
@@ -1321,17 +1325,13 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			this.hmrcheck.setEnabled(true);
 			JOptionPane.showMessageDialog(null, "HMR-Check ist bei diesem Kostenträger nicht erforderlich");
 			return;
-		} else {
-			//public void HMRCheck2021Neu(String diszi, String diagnosegr, int arztid, String datum, 
-			//String hm1, String hm2, String hm3, String hm4, 
-			//int anzahl1, int anzahl2, int anzahl3, int anzahl4, int patid)
-			
+		} else {			
+						
 			String diagnosegruppe = this.jcmb[cINDI].getSelectedItem().toString();
 			
-			// Liegt BVB / LHM vor?
-			BVBlhmCheck checker = new BVBlhmCheck();
 			
-//			Alter berchnen
+			
+//			Alter berechnen
 			int gebJahr = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[0]);
 			int gebMon = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[1]);
 			int gebDay = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[2]);
@@ -1355,7 +1355,7 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 			
 			LocalDate akutDatum = null;;
 			
-			if(!this.jtf[cAKUTDATUM].getText().equals("  .  .    ") && !this.jtf[cAKUTDATUM].getText().equals("    ")) {
+			if(!this.jtf[cAKUTDATUM].getText().contains(" ")) {
 				int akutJahr = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[2]);
 				int akutMonat = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[1]);
 				int akutTag = Integer.parseInt(this.jtf[cAKUTDATUM].getText().split("\\.")[0]);
@@ -1363,16 +1363,6 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 				akutDatum = LocalDate.of(akutJahr, akutMonat, akutTag);
 			}
 			
-			
-//			LHMbvbKurzCheck(String diag, String icd10_1, String icd10_2, int alter, LocalDate datum)
-			String bvbLHM = checker.LHMbvbKurzCheck(diagnosegruppe, jtf[cICD10].getText(),
-					jtf[cICD10_2].getText(), alter, rezDatum, akutDatum);
-			if (bvbLHM != null) {
-				if (bvbLHM.equals("!DAT!")) {
-					JOptionPane.showConfirmDialog(null, "Es liegt zwar ein BVB / LHM vor.\n Aber: das notwendige Akutereignis liegt zu weit in der Vergangenheit", "Zu lang...",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
 			
 			int summe = 0;
 			
@@ -1407,27 +1397,28 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 				frequenz = Integer.parseInt(jtf[cFREQ].getText());
 			}
 			
-					
-			if(bvbLHM != null) {
-				if(bvbLHM.equals("BVB") || bvbLHM.equals("LHM")) {
-					if((double)(summe / frequenz) > 12) {
-						JOptionPane.showConfirmDialog(null, "Es liegt zwar ein BVB / LHM vor, aber die 12 Wochen Frist passt nicht", "Nö!", JOptionPane.ERROR_MESSAGE);
-					} else {
-						JOptionPane.showMessageDialog(null, "BVB / LHM \n - alles schick!", "HMR Okay", JOptionPane.INFORMATION_MESSAGE);
-						return;
-					}
-				}
-			}
-			
 			
 			String msg = "";
 			if(!jtf[cANZ1].getText().equals("") && !jtf[cANZ1].getText().equals("") &&
 					!jtf[cANZ1].getText().equals("") && !jtf[cANZ1].getText().equals("")) {
-				HMRCheck2021 hmr = new HMRCheck2021(aktuelleDisziplin, diagnosegruppe, -1, "-1", 
+				int behBeginn = 28;
+				if(jcb[cDRINGLICH].isSelected()) {
+					behBeginn = 14;
+				}
+				
+				String voart = this.jcmb[cBEDARF].getSelectedItem().toString();
+				
+				String reznrhmr = "";
+				if(!this.neu) {
+					reznrhmr =  this.vec.get(1);
+				}
+				
+				HMRCheck2021 hmr = new HMRCheck2021(aktuelleDisziplin, diagnosegruppe,
+						jtf[cICD10].getText(), jtf[cICD10_2].getText(), voart, reznrhmr, 
 						hm1, hm2, hm3, hm4,
 						Integer.valueOf(jtf[cANZ1].getText()), Integer.valueOf(jtf[cANZ2].getText()),
 						Integer.valueOf(jtf[cANZ3].getText()), Integer.valueOf(jtf[cANZ4].getText()),
-						1);
+						alter, behBeginn, akutDatum, rezDatum, frequenz);
 				msg = hmr.isOkay();
 			}
 			
@@ -1486,7 +1477,9 @@ public class RezNeuanlage2021 extends JXPanel implements ActionListener, KeyList
 					jtf[cAKUTDATUM].requestFocus();
 				}
 			} else {
-				JOptionPane.showConfirmDialog(null, bvblhm, "Kontakt zum Arzt?", JOptionPane.WARNING_MESSAGE);
+				JLabel pane = new JLabel();
+				pane.setText(bvblhm);
+				JOptionPane.showConfirmDialog(null, new JScrollPane(pane), "Kontakt zum Arzt?", JOptionPane.WARNING_MESSAGE);
 			}
 		}
 	}

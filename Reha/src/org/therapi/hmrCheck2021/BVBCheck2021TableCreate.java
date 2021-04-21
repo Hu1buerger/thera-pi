@@ -60,14 +60,6 @@ public class BVBCheck2021TableCreate {
 		this.lhms = new ArrayList<LHM>();
 		
 		this.loadEntry();
-		SqlInfo.sqlAusfuehren("UPDATE hmr_bvblhm\r\n"
-    			+ "     , icd10 \r\n"
-    			+ "    SET hmr_bvblhm.icd10_1_titel = icd10.titelzeile\r\n"
-    			+ " WHERE hmr_bvblhm.icd10_1 = icd10.schluessel1;");
-    	SqlInfo.sqlAusfuehren("UPDATE hmr_bvblhm\r\n"
-    			+ "     , icd10 \r\n"
-    			+ "    SET hmr_bvblhm.icd10_2_titel = icd10.titelzeile\r\n"
-    			+ " WHERE hmr_bvblhm.icd10_2 = icd10.schluessel1;");
 		System.out.println("BVBS: " + this.bvbs.size() + " LHMs: "+ this.lhms.size());
 	}
 	

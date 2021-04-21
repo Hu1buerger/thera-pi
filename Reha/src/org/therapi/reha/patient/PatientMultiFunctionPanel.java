@@ -68,6 +68,8 @@ public class PatientMultiFunctionPanel extends JXPanel {
         patientHauptPanel.gutachten = new Gutachten();
         patientHauptPanel.multiTab.addTab(patientHauptPanel.tabTitel[4] + " - 0", patientHauptPanel.gutachten);
         patientHauptPanel.multiTab.setMnemonicAt(4, KeyEvent.VK_G);
+        
+        
 
         rechts.add(patientHauptPanel.multiTab, BorderLayout.CENTER);
         rechts.revalidate();
@@ -77,5 +79,6 @@ public class PatientMultiFunctionPanel extends JXPanel {
     public AktuelleRezepte getAktRez() {
         return patientHauptPanel.aktRezept;
     }
+    
 
 }

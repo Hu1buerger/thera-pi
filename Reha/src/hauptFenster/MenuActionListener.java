@@ -292,6 +292,9 @@ final class MenuActionListener implements ActionListener {
 				e.printStackTrace();
 			}
         	break;
+        case "versionAnzeigen":
+        	new VersionInformer();
+        	break;
         }
     	
 

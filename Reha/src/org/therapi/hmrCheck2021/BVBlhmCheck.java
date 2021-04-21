@@ -54,7 +54,6 @@ public class BVBlhmCheck {
 		if(result.size() == 1) {
 			Vector<String>  row = result.get(0);
 			String art = row.get(2);
-			System.out.println(art);
 			int untereGrenze = Integer.parseInt(row.get(8));
 			int obereGrenze = Integer.parseInt(row.get(7));
 			int akut = Integer.parseInt(row.get(6));
@@ -95,14 +94,13 @@ public class BVBlhmCheck {
 				+ "   AND unteresAlter <= "+alter+");";
 		
 		
-		System.out.println(sql);
 		
 		result = SqlInfo.holeFelder(sql);
 		if(result.size() >= 1) {
 			StringBuffer rWert = new StringBuffer();
 			rWert.append("<html>");
-			rWert.append("Es liegt zwar kein BVB / LHM vor.<br />");
-			rWert.append("Aber vielleicht ist eine Anpassung auf folgende Kombination denkbar:<br />");
+			rWert.append("<h1>Es liegt zwar kein BVB / LHM vor.<br />");
+			rWert.append("Aber vielleicht ist eine Anpassung auf folgende Kombination denkbar:<br /></h1>");
 			for(Vector<String> pos : result) {
 				
 				String art = pos.get(0); 
@@ -123,8 +121,8 @@ public class BVBlhmCheck {
 				rWert.append(icd10_1_result);
 				rWert.append(" (");
 				rWert.append(icd10_1_titel);
-				rWert.append(")");
-				rWert.append(" 2. ICD10: ");
+				rWert.append(") \n");
+				rWert.append("   2. ICD10: ");
 				String icd2 = pos.get(4);
 				if(icd10_2_result.equals("na")) {
 					icd2 = "nicht notwendig";
@@ -136,11 +134,11 @@ public class BVBlhmCheck {
 				}
 				
 				if(!akutMonat.equals("-1")) {
-					rWert.append(" Akutereignis innerhalb der letzten "+akutMonat+" Monate.");
+					rWert.append("\n   Akutereignis innerhalb der letzten "+akutMonat+" Monate.");
 				}
 				
 				if(!oberesAlter.equals("200") || !unteresAlter.equals("0")) {
-					rWert.append(" Alter muss zwischen "+unteresAlter+" und "+oberesAlter+" liegen.");
+					rWert.append("\n    Alter muss zwischen "+unteresAlter+" und "+oberesAlter+" liegen.");
 				}
 				
 				if(marker) {

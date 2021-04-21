@@ -117,6 +117,7 @@ public class HmrCheck2021XML {
 		int rueckgabe[] = {0, 0, 0, 0, 0, 0, 0};
 		Element kapitel = null;
 		for(Element c : this.sdhm.getChildren()) {
+			
 			if(c.getAttribute("V").getValue().equals(diszi)) {
 				kapitel = c;
 			}

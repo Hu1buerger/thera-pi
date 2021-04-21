@@ -218,6 +218,7 @@ public class Reha implements RehaEventListener , Monitor{
     JMenuItem aboutMenuItem = null;
     JMenuItem homepageMenuItem = null;
     JMenuItem wickiMenuItem = null;
+    JMenuItem versionMenuItem = null;
     private JMenuItem aboutF2RescueMenuItem = null;
     public JXStatusBar jXStatusBar = null;
     private int dividerLocLR = 0;
@@ -1286,13 +1287,15 @@ public class Reha implements RehaEventListener , Monitor{
                 	UpdateFile uf = new UpdateFile(f);
                 	if(uf.getFrom() != null) {
                 		if(uf.getFrom().equals(new Version())) {
-                    		updateFound = true;
-                    	} else {
+                			updateFound = true;
+                    	}/* else {
                     		Version v = new Version();
-                    		if(v.getMajor() < uf.getTo().getMajor()) { updateFound = true; };
-                    		if(v.getMinor() < uf.getTo().getMinor()) { updateFound = true; };
-                    		if(v.getRevision() < uf.getTo().getRevision()) { updateFound = true; };
-                    	}
+                    		if(v.getMajor() < uf.getTo().getMajor()) { updateFound = true; }
+                    		else if(v.getMinor() < uf.getTo().getMinor()) { updateFound = true; }
+                    		else if(v.getRevision() < uf.getTo().getRevision()) { updateFound = true; };
+                    		
+                    		if(updateFound) { System.out.println("Update 2:" + uf.getFrom().toString());};
+                    	}*/
                 	}
                 }
                 if(updateFound) {
@@ -1803,6 +1806,8 @@ public class Reha implements RehaEventListener , Monitor{
             helpMenu.addSeparator();
             helpMenu.add(getWebsiteMenuItem());
             helpMenu.add(getWickiMenuItem());
+            helpMenu.addSeparator();
+            helpMenu.add(getVersionMenuItem());
         }
         return helpMenu;
     }
@@ -1877,6 +1882,16 @@ public class Reha implements RehaEventListener , Monitor{
         	wickiMenuItem.addActionListener(actionListener);
         }
         return wickiMenuItem;
+    }
+    
+    private JMenuItem getVersionMenuItem() {
+        if (versionMenuItem == null) {
+        	versionMenuItem = new JMenuItem();
+        	versionMenuItem.setText("Versionsnummern anzeigen");
+        	versionMenuItem.setActionCommand("versionAnzeigen");
+        	versionMenuItem.addActionListener(actionListener);
+        }
+        return versionMenuItem;
     }
 
     private JMenuItem getF2RescueMenuItem() {
@@ -2393,7 +2408,9 @@ public class Reha implements RehaEventListener , Monitor{
     	if(!testeTableExists("hmr_bvblhm")) {
     		runExternSQL("bvblhm.sql");
         	new BVBCheck2021TableCreate(new File("C:\\RehaVerwaltung\\Tools\\hmka.xml"));
+        	runExternSQL("bvblhmICD10Update.sql");
     	}
+    	runExternSQL("icd2021.sql");
     	SqlInfo.sqlAusfuehren("UPDATE version SET version = '1.2.0' WHERE object LIKE 'DB';");
     }
     

@@ -18,6 +18,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.sql.Connection;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,7 +29,19 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JToolBar;
+import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -48,8 +61,7 @@ import org.jdesktop.swingx.renderer.DefaultTableRenderer;
 import org.jdesktop.swingx.renderer.IconValues;
 import org.jdesktop.swingx.renderer.MappedValue;
 import org.jdesktop.swingx.renderer.StringValues;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.therapi.hmrCheck2021.HMRCheck2021;
 
 import com.jgoodies.forms.builder.PanelBuilder;
 import com.jgoodies.forms.layout.CellConstraints;
@@ -1593,7 +1605,7 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
 		};
 		diagpodo = new String[] {
 				"keine DiagGr.",
-				"DF","k.A."
+				"DF","NF","QF","k.A."
 		};
 
 		
@@ -2440,8 +2452,9 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                 }
             }
             if (hmpositionen.size() > 0) {
+            	boolean checkok = false;
             	if(!Reha.instance.patpanel.vecaktrez.get(cHMR2021).equals("T")) {
-            		boolean checkok = new HMRCheck(
+            		checkok = new HMRCheck(
                             indi, disziSelect.getIndex(diszi), anzahlen, hmpositionen, Integer.parseInt(preisgruppe) - 1,
                             SystemPreislisten.hmPreise.get(diszi)
                                                       .get(Integer.parseInt(preisgruppe) - 1),
@@ -2449,18 +2462,117 @@ public class AktuelleRezepte extends JXPanel implements ListSelectionListener, T
                             (Reha.instance.patpanel.vecaktrez.get(1)),
                             DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(2)),
                             DatFunk.sDatInDeutsch(Reha.instance.patpanel.vecaktrez.get(40))).check();
-                    if (!checkok) {
+            	} else {
+            		
+            		int gebJahr = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[0]);
+        			int gebMon = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[1]);
+        			int gebDay = Integer.parseInt(Reha.instance.patpanel.patDaten.get(4).split("-")[2]);
+        			
+        			int aktJahr = LocalDate.now().getYear();
+        			int aktMon = LocalDate.now().getMonthValue();
+        			int aktDay = LocalDate.now().getDayOfMonth();
+        			
+        			
+        			int alter = aktJahr - gebJahr;
+        			
+        			if(!(aktMon >= gebMon && aktDay >= gebDay)) {
+        				alter--;
+        			}
+        			
+        			int rezJahr = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(2).split("-")[0]);
+        			int rezMonat = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(2).split("-")[1]);
+        			int rezTag = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(2).split("-")[2]);
+        			
+        			LocalDate rezDatum = LocalDate.of(rezJahr, rezMonat, rezTag);
+            		
+        			int akutJahr = 0;
+        			int akutMonat = 1;
+        			int akutTag = 1;
+        			if(!Reha.instance.patpanel.vecaktrez.get(25).equals("")) {
+        				akutJahr = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(25).split("-")[0]);
+            			akutMonat = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(25).split("-")[1]);
+            			akutTag = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(25).split("-")[2]);
+        			}
+        		
+            		LocalDate akutDatum = LocalDate.of(akutJahr, akutMonat, akutTag);
+            		
+            		int anzahl1 = anzahlen.get(0);
+            		String hm1 = hmpositionen.get(0);
+            		
+            		int anzahl2 = 0;
+            		int anzahl3 = 0;
+            		int anzahl4 = 0;
+            		
+            		String hm2 = "";
+            		String hm3 = "";
+            		String hm4 = "";
+            		
+            		if(anzahlen.size() > 1) {
+                		anzahl2 = anzahlen.get(1);
+                		hm2 = hmpositionen.get(1);
+            		}
+            		if(anzahlen.size() > 2) {
+                		anzahl3 = anzahlen.get(2);
+                		hm3 = hmpositionen.get(2);
+            		}
+            		if(anzahlen.size() > 3) {
+                		anzahl4 = anzahlen.get(3);
+                		hm4 = hmpositionen.get(3);
+            		}           		
+            		
+            		
+            		int behBeginn = 28;
+            		if(Reha.instance.patpanel.vecaktrez.get(79).equals("T")) {
+            			behBeginn = 14;
+            		}
+            		
+            		
+            		
+            		String reznr = Reha.instance.patpanel.vecaktrez.get(1);
+            		
+            		String voArt = null;            		
+            		if(Reha.instance.patpanel.vecaktrez.get(27).equals("3")) { voArt = "Standard";}
+            		if(Reha.instance.patpanel.vecaktrez.get(27).equals("4")) { voArt = "Bes.VO";}
+            		if(Reha.instance.patpanel.vecaktrez.get(27).equals("5")) { voArt = "Langfrist-VO";}
+            		
+            		String icd10 = Reha.instance.patpanel.vecaktrez.get(71);
+            		String icd10_2 = Reha.instance.patpanel.vecaktrez.get(72);
+            	
+            		String disziplin = null;
+            		if(reznr.contains("KG")) { disziplin = "Physio"; };
+            		if(reznr.contains("ER")) { disziplin = "Ergo"; };
+            		if(reznr.contains("LO")) { disziplin = "Logo"; };
+            		if(reznr.contains("PO")) { disziplin = "Podo"; };
+            		
+            		String indikation = Reha.instance.patpanel.vecaktrez.get(44);
+            		
+            		int frequenz = 0;
+        			if(Reha.instance.patpanel.vecaktrez.get(52).contains("-")) {
+        				frequenz = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(52).split("-")[1]);
+        			} else {
+        				frequenz = Integer.parseInt(Reha.instance.patpanel.vecaktrez.get(52));
+        			}
+            		
+            		HMRCheck2021 hmr = new HMRCheck2021(disziplin, indikation, icd10, icd10_2, voArt, reznr,
+            				hm1, hm2, hm3, hm4, anzahl1, anzahl2, anzahl3, anzahl4, alter, behBeginn, akutDatum, rezDatum, frequenz);
+            		
+            		String msg = hmr.isOkay();
+            		if(msg.equals("")) {
+            			checkok = true;
+            		} else {
+            			JOptionPane.showConfirmDialog(null, msg, "HMR-Check Fehler", JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+            		}
+            		
+            	}
+            	
+                if (!checkok) {
                         int anfrage = JOptionPane.showConfirmDialog(null,
                                 "Das Rezept entspricht nicht den geltenden Heilmittelrichtlinien\nWollen Sie diesen Rezept trotzdem abschließen?",
                                 "Achtung wichtige Benutzeranfrage", JOptionPane.YES_NO_OPTION);
                         if (anfrage != JOptionPane.YES_OPTION) {
                             return;
                         }
-                    }
-            	}
-            	else {
-            		System.out.println("HMR Check 2021");
-            	}
+                }
                 
             } else {
                 JOptionPane.showMessageDialog(null,
