@@ -45,6 +45,9 @@ public class Rezept {
     String aktuellesRezept_0_patintern() {
         return vecaktrez.get(0);
     }
+    String aktuellesRezept_1_rezNr() {
+        return vecaktrez.get(1);
+    }
 
     String aktuellesRezept_51_pos4() {
         return vecaktrez.get(51);

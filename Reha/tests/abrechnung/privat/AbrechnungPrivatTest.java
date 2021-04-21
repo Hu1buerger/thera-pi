@@ -63,8 +63,8 @@ new Betriebsumfeld(new Mandant("123456789", "testmandant"));
 
         HashMap<String, Vector<String>> hmPreisGruppen = SystemPreislisten.hmPreisGruppen;
         AbrechnungPrivat rg = new AbrechnungPrivat(frame, "privateabrechnung", data.preisgruppe, (JComponent) frame.getGlassPane(),
-                data.rezeptNummer, preisliste, data.hatAbweichendeAdresse, data.patDBId,
-                patientenDatenVector, "123456789", "HMRechnungPrivat.ott", hmAbrechnung, hmPreisGruppen.get(StringTools.getDisziplin(data.rezeptNummer)), new Rezept(rezeptVector)) {
+                preisliste, data.hatAbweichendeAdresse, data.patDBId, patientenDatenVector,
+                "123456789", "HMRechnungPrivat.ott", hmAbrechnung, hmPreisGruppen.get(StringTools.getDisziplin(data.rezeptNummer)), new Rezept(rezeptVector)) {
         protected void doUebertrag() {};
 
         };

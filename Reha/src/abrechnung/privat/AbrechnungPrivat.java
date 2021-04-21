@@ -132,7 +132,6 @@ public class AbrechnungPrivat extends JXDialog {
     private int preisregel;
     private boolean wechselcheck;
 
-//    private int[] splitpreise = { 0, 0 };
    int anzahlalterpreis;
    int anzahlneuerpreis;
 
@@ -182,17 +181,21 @@ public class AbrechnungPrivat extends JXDialog {
             Vector<String> aktuellerPatientDaten, String aktIk, String privatRgFormular,
             HashMap<String, String> hmAbrechnung, Vector<String> preisgruppenFuerDiszi, Rezept rezept) {
         super(owner, glasspane);
-        this.hmAbrechnung = hmAbrechnung;
-        this.privatRgFormular = privatRgFormular;
-        patDaten = aktuellerPatientDaten;
-        aktuellesRezept = rezept;
-        this.rezeptNummer = rezeptNr;
-        this.hatAbweichendeAdresse = hatAbweichendeAdresse;
-        patid = patientenDbID;
         this.aktIk = aktIk;
-        disziplin = RezTools.getDisziplinFromRezNr(rezeptNr);
         this.preisliste = preisliste;
         this.preisgruppe = preisgruppe;
+        this.hmAbrechnung = hmAbrechnung;
+        this.privatRgFormular = privatRgFormular;
+
+
+        aktuellesRezept = rezept;
+        this.rezeptNummer = rezeptNr;
+        disziplin = extractDisziplin(rezeptNr);
+
+        patDaten = aktuellerPatientDaten;
+        patid = patientenDbID;
+        this.hatAbweichendeAdresse = hatAbweichendeAdresse;
+
         setUndecorated(true);
         setName("Privatrechnung");
         jtp = new JXTitledPanel();
@@ -213,6 +216,10 @@ public class AbrechnungPrivat extends JXDialog {
         rtp = new RehaTPEventClass();
         rtp.addRehaTPEventListener(e -> fensterSchliessen());
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+    }
+
+    private String extractDisziplin(String rezeptNr) {
+        return RezTools.getDisziplinFromRezNr(rezeptNr);
     }
 
     private JXPanel getContent(Vector<String> preisgruppenFuerDiszi) {
