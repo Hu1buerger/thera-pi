@@ -100,7 +100,15 @@ public class AbrechnungPrivat extends JXDialog {
     private RehaTPEventClass rtp;
     private int preisgruppe;
     private JRtaComboBox preisgruppenfuerDisziCmbBox;
-    private JLabel[] labs = { null, null, null, null, null, null, null };
+//    private JLabel[] labs = { null, null, null, null, null, null, null };
+    JLabel lblArtDerBeh1;
+    JLabel lblArtDerBeh2;
+    JLabel lblArtDerBeh3;
+    JLabel lblArtDerBeh4;
+    JLabel lbl1Hausbesuch;
+    JLabel lbl2Hausbesuch;
+    JLabel labs6;
+
     private JLabel adr1;
     private JLabel adr2;
     private DecimalFormat dcf = new DecimalFormat("#########0.00");
@@ -126,7 +134,7 @@ public class AbrechnungPrivat extends JXDialog {
     private int aktuellePosition;
     private int patKilometer;
 
-   
+
 
 
     private int preisregel;
@@ -160,6 +168,7 @@ public class AbrechnungPrivat extends JXDialog {
 
     private JRtaRadioButton privatRechnungBtn;
     private AbrechnungHausbesuch abrechnungHausbesuch;
+
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbrechnungPrivat.class);
 
@@ -276,24 +285,24 @@ public class AbrechnungPrivat extends JXDialog {
         }
 
         if (!"0".equals(aktuellesRezept.aktuellesRezept_8_artderbeh1())) {
-            labs[0] = new JLabel();
-            labs[0].setForeground(Color.BLUE);
-            pan.add(labs[0], cc.xy(3, 14));
+            lblArtDerBeh1 = new JLabel();
+            lblArtDerBeh1.setForeground(Color.BLUE);
+            pan.add(lblArtDerBeh1, cc.xy(3, 14));
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
-            labs[1] = new JLabel();
-            labs[1].setForeground(Color.BLUE);
-            pan.add(labs[1], cc.xy(3, 16));
+            lblArtDerBeh2 = new JLabel();
+            lblArtDerBeh2.setForeground(Color.BLUE);
+            pan.add(lblArtDerBeh2, cc.xy(3, 16));
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_10_artderbeh3())) {
-            labs[2] = new JLabel();
-            labs[2].setForeground(Color.BLUE);
-            pan.add(labs[2], cc.xy(3, 18));
+            lblArtDerBeh3 = new JLabel();
+            lblArtDerBeh3.setForeground(Color.BLUE);
+            pan.add(lblArtDerBeh3, cc.xy(3, 18));
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_11_artderbeh4())) {
-            labs[3] = new JLabel();
-            labs[3].setForeground(Color.BLUE);
-            pan.add(labs[3], cc.xy(3, 20));
+            lblArtDerBeh4 = new JLabel();
+            lblArtDerBeh4.setForeground(Color.BLUE);
+            pan.add(lblArtDerBeh4, cc.xy(3, 20));
         }
         // Mit Hausbesuch
 
@@ -302,16 +311,16 @@ public class AbrechnungPrivat extends JXDialog {
 
         if (abrechnungHausbesuch.mitHausBesuch) {
 
-            labs[4] = new JLabel();
-            labs[4].setForeground(Color.RED);
-            pan.add(labs[4], cc.xy(3, 22));
-            labs[5] = new JLabel();
-            labs[5].setForeground(Color.RED);
-            pan.add(labs[5], cc.xy(3, 24));
+            lbl1Hausbesuch = new JLabel();
+            lbl1Hausbesuch.setForeground(Color.RED);
+            pan.add(lbl1Hausbesuch, cc.xy(3, 22));
+            lbl2Hausbesuch = new JLabel();
+            lbl2Hausbesuch.setForeground(Color.RED);
+            pan.add(lbl2Hausbesuch, cc.xy(3, 24));
         }
-        labs[6] = new JLabel();
-        labs[6].setForeground(Color.BLUE);
-        pan.add(labs[6], cc.xy(3, 26));
+        labs6 = new JLabel();
+        labs6.setForeground(Color.BLUE);
+        pan.add(labs6, cc.xy(3, 26));
 
         doNeuerTarif();
         pan.validate();
@@ -853,7 +862,7 @@ public class AbrechnungPrivat extends JXDialog {
                         rechnungGesamt = rechnungGesamt.add(BigDecimal.valueOf(zeilengesamt.doubleValue()));
                     }
                     try {
-                        labs[6].setText("Rezeptwert = " + dcf.format(rechnungGesamt.doubleValue()) + " EUR");
+                        labs6.setText("Rezeptwert = " + dcf.format(rechnungGesamt.doubleValue()) + " EUR");
                     } catch (Exception ex) {
                         ex.printStackTrace();
                     }
@@ -905,10 +914,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preis));
-                labs[0].setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                lblArtDerBeh1.setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[0].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh1.setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
@@ -934,10 +943,10 @@ public class AbrechnungPrivat extends JXDialog {
             }
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preis));
-                labs[1].setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                lblArtDerBeh2.setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[1].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh2.setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_10_artderbeh3())) {
@@ -964,10 +973,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preis));
-                labs[2].setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                lblArtDerBeh3.setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[2].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh3.setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_11_artderbeh4())) {
@@ -992,10 +1001,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preis));
-                labs[3].setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                lblArtDerBeh4.setText(anzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[3].setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh4.setText(anzahl + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
         if (abrechnungHausbesuch.mitHausBesuch) {
@@ -1010,7 +1019,7 @@ public class AbrechnungPrivat extends JXDialog {
             rechnungGesamt = rechnungGesamt.add(BigDecimal.valueOf(zeilengesamt.doubleValue()));
         }
         try {
-            labs[6].setText("Rezeptwert = " + dcf.format(rechnungGesamt.doubleValue()) + " EUR");
+            labs6.setText("Rezeptwert = " + dcf.format(rechnungGesamt.doubleValue()) + " EUR");
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -1029,7 +1038,7 @@ public class AbrechnungPrivat extends JXDialog {
 
     private void analysiereHausbesuch() {
         this.aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
-        labs[5].setText("");
+        lbl2Hausbesuch.setText("");
         /* Hausbesuch voll abrechnen */
         int hbanzahl = (Integer) RezTools.holeTermineAnzahlUndLetzter(aktuellesRezept.aktuellesRezept_34_termine())[0];
 
@@ -1048,7 +1057,7 @@ public class AbrechnungPrivat extends JXDialog {
             originalPos.add(pos);
             einzelPreis.add(Double.parseDouble(preis));
             originalLangtext.add("Hausbesuchspauschale");
-            labs[4].setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+            lbl1Hausbesuch.setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             patKilometer = StringTools.ZahlTest(patDaten.get(48));
             if (patKilometer <= 0) {
                 // Keine Kilometer Im Patientenstamm hinterlegt
@@ -1072,7 +1081,7 @@ public class AbrechnungPrivat extends JXDialog {
                     originalPos.add(wegepauschale);
                     einzelPreis.add(Double.parseDouble(preis));
                     originalLangtext.add("Wegegeldpauschale");
-                    labs[5].setText(hbanzahl + " * " + wegepauschale + " (Einzelpreis = " + preis + ")");
+                    lbl2Hausbesuch.setText(hbanzahl + " * " + wegepauschale + " (Einzelpreis = " + preis + ")");
                 }
             } else {
                 String wegegebuehr = pos = SystemPreislisten.hmHBRegeln.get(disziplin)
@@ -1093,7 +1102,7 @@ public class AbrechnungPrivat extends JXDialog {
                     originalPos.add(wegegebuehr);
                     einzelPreis.add(Double.parseDouble(preis));
                     originalLangtext.add("Wegegeld / km");
-                    labs[5].setText(hbanzahl * patKilometer + " * " + wegegebuehr + " (Einzelpreis = " + preis + ")");
+                    lbl2Hausbesuch.setText(hbanzahl * patKilometer + " * " + wegegebuehr + " (Einzelpreis = " + preis + ")");
                 }
             }
         } else { /* Hausbesuch mehrere abrechnen */
@@ -1114,7 +1123,7 @@ public class AbrechnungPrivat extends JXDialog {
                 originalPos.add(pos);
                 einzelPreis.add(Double.parseDouble(preis));
                 originalLangtext.add("Hausbesuchspauschale (mehrere Patienten)");
-                labs[5].setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
+                lbl2Hausbesuch.setText(hbanzahl + " * " + pos + " (Einzelpreis = " + preis + ")");
             }
         }
     }
@@ -1160,10 +1169,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
-                labs[0].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lblArtDerBeh1.setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[0].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh1.setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             // jetzt Anzahlen für neuer Preis
             originalPos.add(aktuellesRezept.aktuellesRezept_48_pos1());
@@ -1178,11 +1187,11 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisNeu));
-                labs[0].setText(
-                        labs[0].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                lblArtDerBeh1.setText(
+                        lblArtDerBeh1.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[0].setText(labs[0].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh1.setText(lblArtDerBeh1.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
             }
         }
         if (!"0".equals(aktuellesRezept.aktuellesRezept_9_artderbeh2())) {
@@ -1201,10 +1210,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
-                labs[1].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lblArtDerBeh2.setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[1].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh2.setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             // nur wenn die angegebene Anzahl < ist als Anzahl Tage im Rezeptblatt
             if (anzahlalterpreis < test) {
@@ -1222,12 +1231,12 @@ public class AbrechnungPrivat extends JXDialog {
 
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
-                    labs[1].setText(
-                            labs[1].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                    lblArtDerBeh2.setText(
+                            lblArtDerBeh2.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                    labs[1].setText(labs[1].getText() + "/ " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                    lblArtDerBeh2.setText(lblArtDerBeh2.getText() + "/ " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
                 }
             }
         }
@@ -1248,10 +1257,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
-                labs[2].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lblArtDerBeh3.setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[2].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh3.setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             if (anzahlalterpreis < test) {
                 originalPos.add(aktuellesRezept.aktuellesRezept_50_pos3());
@@ -1265,12 +1274,12 @@ public class AbrechnungPrivat extends JXDialog {
                 preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_10_artderbeh3(), "", preisliste);
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
-                    labs[2].setText(
-                            labs[2].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                    lblArtDerBeh3.setText(
+                            lblArtDerBeh3.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                    labs[2].setText(labs[2].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                    lblArtDerBeh3.setText(lblArtDerBeh3.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
                 }
             }
         }
@@ -1288,10 +1297,10 @@ public class AbrechnungPrivat extends JXDialog {
 
             if (!"".equals(pos.trim())) {
                 einzelPreis.add(Double.parseDouble(preisAlt));
-                labs[3].setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lblArtDerBeh4.setText(anzahlAlt + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
             } else {
                 JOptionPane.showMessageDialog(null, "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                labs[3].setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
+                lblArtDerBeh4.setText(anzahlAlt + " * " + pos + " (Einzelpreis = 0.00)");
             }
             if (anzahlalterpreis < test) {
                 originalPos.add(aktuellesRezept.aktuellesRezept_51_pos4());
@@ -1303,12 +1312,12 @@ public class AbrechnungPrivat extends JXDialog {
                 preisNeu = RezTools.getPreisAktFromID(aktuellesRezept.aktuellesRezept_11_artderbeh4(), "", preisliste);
                 if (!"".equals(pos.trim())) {
                     einzelPreis.add(Double.parseDouble(preisNeu));
-                    labs[3].setText(
-                            labs[3].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                    lblArtDerBeh4.setText(
+                            lblArtDerBeh4.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "Die Rezeptpositionen sind in dieser preisgruppe nicht vorhanden");
-                    labs[3].setText(labs[3].getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
+                    lblArtDerBeh4.setText(lblArtDerBeh4.getText() + " / " + anzahlNeu + " * " + pos + " (Einzelpreis = 0.00)");
                 }
             }
         }
@@ -1316,7 +1325,7 @@ public class AbrechnungPrivat extends JXDialog {
 
     private void analysiereHausbesuchMitSplitting() {
         this.aktGruppe = preisgruppenfuerDisziCmbBox.getSelectedIndex();
-        labs[5].setText("");
+        lbl2Hausbesuch.setText("");
 
         /* Hausbesuch voll abrechnen */
         int hbanzahl = Integer.parseInt(aktuellesRezept.aktuellesRezept_64_hbAnzahl());
@@ -1335,7 +1344,7 @@ public class AbrechnungPrivat extends JXDialog {
             originalPos.add(pos);
             einzelPreis.add(Double.parseDouble(preisAlt));
             originalLangtext.add("Hausbesuchspauschale");
-            labs[4].setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+            lbl1Hausbesuch.setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
             hbvec.add(originalPos.size() - 1);
             if (anzahlalterpreis < hbanzahl) {
                 neuhb = hbanzahl - anzahlalterpreis;
@@ -1344,7 +1353,7 @@ public class AbrechnungPrivat extends JXDialog {
                 preisNeu = RezTools.getPreisAktFromPos(pos, "", preisliste);
                 einzelPreis.add(Double.parseDouble(preisNeu));
                 originalLangtext.add("Hausbesuchspauschale");
-                labs[4].setText(labs[4].getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                lbl1Hausbesuch.setText(lbl1Hausbesuch.getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                 hbvec.add(originalPos.size() - 1);
             }
 
@@ -1366,7 +1375,7 @@ public class AbrechnungPrivat extends JXDialog {
                     originalPos.add(pos);
                     einzelPreis.add(Double.parseDouble(preisAlt));
                     originalLangtext.add("Wegegeldpauschale");
-                    labs[5].setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                    lbl2Hausbesuch.setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
                     kmvec.add(originalPos.size() - 1);
                     if (anzahlalterpreis < hbanzahl) {
                         neuhb = hbanzahl - anzahlalterpreis;
@@ -1375,8 +1384,8 @@ public class AbrechnungPrivat extends JXDialog {
                         preisNeu = RezTools.getPreisAktFromPos(pos, "", preisliste);
                         einzelPreis.add(Double.parseDouble(preisNeu));
                         originalLangtext.add("Wegegeldpauschale");
-                        labs[5].setText(
-                                labs[5].getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                        lbl2Hausbesuch.setText(
+                                lbl2Hausbesuch.getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                         kmvec.add(originalPos.size() - 1);
                     }
                 }
@@ -1397,7 +1406,7 @@ public class AbrechnungPrivat extends JXDialog {
                 originalPos.add(pos);
                 einzelPreis.add(Double.parseDouble(preisAlt));
                 originalLangtext.add("Wegegeld / km");
-                labs[5].setText(althb * patKilometer + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lbl2Hausbesuch.setText(althb * patKilometer + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
                 kmvec.add(originalPos.size() - 1);
                 if (anzahlalterpreis < hbanzahl) {
                     neuhb = hbanzahl - anzahlalterpreis;
@@ -1406,7 +1415,7 @@ public class AbrechnungPrivat extends JXDialog {
                     preisNeu = RezTools.getPreisAktFromPos(pos, "", preisliste);
                     einzelPreis.add(Double.parseDouble(preisNeu));
                     originalLangtext.add("Wegegeld / km");
-                    labs[5].setText(labs[5].getText() + " / " + neuhb * patKilometer + " * " + pos + " (Einzelpreis = "
+                    lbl2Hausbesuch.setText(lbl2Hausbesuch.getText() + " / " + neuhb * patKilometer + " * " + pos + " (Einzelpreis = "
                             + preisNeu + ")");
                     kmvec.add(originalPos.size() - 1);
                 }
@@ -1425,7 +1434,7 @@ public class AbrechnungPrivat extends JXDialog {
                 originalPos.add(pos);
                 einzelPreis.add(Double.parseDouble(preisAlt));
                 originalLangtext.add("Hausbesuchspauschale (mehrere Patienten)");
-                labs[5].setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
+                lbl2Hausbesuch.setText(althb + " * " + pos + " (Einzelpreis = " + preisAlt + ")");
                 hbvec.add(originalPos.size() - 1);
                 if (anzahlalterpreis < hbanzahl) {
                     neuhb = hbanzahl - anzahlalterpreis;
@@ -1434,8 +1443,8 @@ public class AbrechnungPrivat extends JXDialog {
                     preisNeu = RezTools.getPreisAktFromPos(pos, "", preisliste);
                     einzelPreis.add(Double.parseDouble(preisNeu));
                     originalLangtext.add("Hausbesuchspauschale (mehrere Patienten)");
-                    labs[5].setText(
-                            labs[5].getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
+                    lbl2Hausbesuch.setText(
+                            lbl2Hausbesuch.getText() + " / " + neuhb + " * " + pos + " (Einzelpreis = " + preisNeu + ")");
                     hbvec.add(originalPos.size() - 1);
                 }
             }
