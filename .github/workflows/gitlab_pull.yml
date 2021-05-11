@@ -27,4 +27,4 @@ jobs:
       - name: Run a multi-line script
         run: |
           git remote add gitlab https://gitlab.com/thera-pi/thera-pi.git
-          git pull
+          git pull gitlab
