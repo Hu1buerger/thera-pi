@@ -26,4 +26,8 @@ jobs:
       # Runs a set of commands using the runners shell
       - name: fetch and push
         run: |
-            ls -la
+            git clone --mirror https://gitlab.com/thera-pi/thera-pi
+            cd thera-pi.git/
+            git remote add --mirror=push github https://github.com/Hu1buerger/thera-pi.git
+            git fetch 
+            git push github
